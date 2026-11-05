@@ -1,0 +1,686 @@
+{
+  "character-female-a": {
+    "clips": {
+      "crouch": {
+        "end": 3.3333,
+        "start": 3.1667
+      },
+      "emote-no": {
+        "end": 7.25,
+        "start": 6.5833
+      },
+      "emote-yes": {
+        "end": 6.5,
+        "start": 5.8333
+      },
+      "holding-both": {
+        "end": 5.3333,
+        "start": 5.1667
+      },
+      "holding-right": {
+        "end": 5.0833,
+        "start": 4.9167
+      },
+      "idle": {
+        "end": 1.5,
+        "start": 0.1667
+      },
+      "interact-left": {
+        "end": 4.8333,
+        "start": 4.1667
+      },
+      "interact-right": {
+        "end": 4.0833,
+        "start": 3.4167
+      },
+      "pick-up": {
+        "end": 5.75,
+        "start": 5.4167
+      },
+      "sit": {
+        "end": 3.0833,
+        "start": 2.9167
+      },
+      "sprint": {
+        "end": 2.8333,
+        "start": 2.3333
+      },
+      "static": {
+        "end": 0.0833,
+        "start": 0.0
+      },
+      "walk": {
+        "end": 2.25,
+        "start": 1.5833
+      }
+    },
+    "fps": 24.0
+  },
+  "character-female-b": {
+    "clips": {
+      "crouch": {
+        "end": 3.3333,
+        "start": 3.1667
+      },
+      "emote-no": {
+        "end": 7.25,
+        "start": 6.5833
+      },
+      "emote-yes": {
+        "end": 6.5,
+        "start": 5.8333
+      },
+      "holding-both": {
+        "end": 5.3333,
+        "start": 5.1667
+      },
+      "holding-right": {
+        "end": 5.0833,
+        "start": 4.9167
+      },
+      "idle": {
+        "end": 1.5,
+        "start": 0.1667
+      },
+      "interact-left": {
+        "end": 4.8333,
+        "start": 4.1667
+      },
+      "interact-right": {
+        "end": 4.0833,
+        "start": 3.4167
+      },
+      "pick-up": {
+        "end": 5.75,
+        "start": 5.4167
+      },
+      "sit": {
+        "end": 3.0833,
+        "start": 2.9167
+      },
+      "sprint": {
+        "end": 2.8333,
+        "start": 2.3333
+      },
+      "static": {
+        "end": 0.0833,
+        "start": 0.0
+      },
+      "walk": {
+        "end": 2.25,
+        "start": 1.5833
+      }
+    },
+    "fps": 24.0
+  },
+  "character-female-c": {
+    "clips": {
+      "crouch": {
+        "end": 3.3333,
+        "start": 3.1667
+      },
+      "emote-no": {
+        "end": 7.25,
+        "start": 6.5833
+      },
+      "emote-yes": {
+        "end": 6.5,
+        "start": 5.8333
+      },
+      "holding-both": {
+        "end": 5.3333,
+        "start": 5.1667
+      },
+      "holding-right": {
+        "end": 5.0833,
+        "start": 4.9167
+      },
+      "idle": {
+        "end": 1.5,
+        "start": 0.1667
+      },
+      "interact-left": {
+        "end": 4.8333,
+        "start": 4.1667
+      },
+      "interact-right": {
+        "end": 4.0833,
+        "start": 3.4167
+      },
+      "pick-up": {
+        "end": 5.75,
+        "start": 5.4167
+      },
+      "sit": {
+        "end": 3.0833,
+        "start": 2.9167
+      },
+      "sprint": {
+        "end": 2.8333,
+        "start": 2.3333
+      },
+      "static": {
+        "end": 0.0833,
+        "start": 0.0
+      },
+      "walk": {
+        "end": 2.25,
+        "start": 1.5833
+      }
+    },
+    "fps": 24.0
+  },
+  "character-female-d": {
+    "clips": {
+      "crouch": {
+        "end": 3.3333,
+        "start": 3.1667
+      },
+      "emote-no": {
+        "end": 7.25,
+        "start": 6.5833
+      },
+      "emote-yes": {
+        "end": 6.5,
+        "start": 5.8333
+      },
+      "holding-both": {
+        "end": 5.3333,
+        "start": 5.1667
+      },
+      "holding-right": {
+        "end": 5.0833,
+        "start": 4.9167
+      },
+      "idle": {
+        "end": 1.5,
+        "start": 0.1667
+      },
+      "interact-left": {
+        "end": 4.8333,
+        "start": 4.1667
+      },
+      "interact-right": {
+        "end": 4.0833,
+        "start": 3.4167
+      },
+      "pick-up": {
+        "end": 5.75,
+        "start": 5.4167
+      },
+      "sit": {
+        "end": 3.0833,
+        "start": 2.9167
+      },
+      "sprint": {
+        "end": 2.8333,
+        "start": 2.3333
+      },
+      "static": {
+        "end": 0.0833,
+        "start": 0.0
+      },
+      "walk": {
+        "end": 2.25,
+        "start": 1.5833
+      }
+    },
+    "fps": 24.0
+  },
+  "character-female-e": {
+    "clips": {
+      "crouch": {
+        "end": 3.3333,
+        "start": 3.1667
+      },
+      "emote-no": {
+        "end": 7.25,
+        "start": 6.5833
+      },
+      "emote-yes": {
+        "end": 6.5,
+        "start": 5.8333
+      },
+      "holding-both": {
+        "end": 5.3333,
+        "start": 5.1667
+      },
+      "holding-right": {
+        "end": 5.0833,
+        "start": 4.9167
+      },
+      "idle": {
+        "end": 1.5,
+        "start": 0.1667
+      },
+      "interact-left": {
+        "end": 4.8333,
+        "start": 4.1667
+      },
+      "interact-right": {
+        "end": 4.0833,
+        "start": 3.4167
+      },
+      "pick-up": {
+        "end": 5.75,
+        "start": 5.4167
+      },
+      "sit": {
+        "end": 3.0833,
+        "start": 2.9167
+      },
+      "sprint": {
+        "end": 2.8333,
+        "start": 2.3333
+      },
+      "static": {
+        "end": 0.0833,
+        "start": 0.0
+      },
+      "walk": {
+        "end": 2.25,
+        "start": 1.5833
+      }
+    },
+    "fps": 24.0
+  },
+  "character-female-f": {
+    "clips": {
+      "crouch": {
+        "end": 3.3333,
+        "start": 3.1667
+      },
+      "emote-no": {
+        "end": 7.25,
+        "start": 6.5833
+      },
+      "emote-yes": {
+        "end": 6.5,
+        "start": 5.8333
+      },
+      "holding-both": {
+        "end": 5.3333,
+        "start": 5.1667
+      },
+      "holding-right": {
+        "end": 5.0833,
+        "start": 4.9167
+      },
+      "idle": {
+        "end": 1.5,
+        "start": 0.1667
+      },
+      "interact-left": {
+        "end": 4.8333,
+        "start": 4.1667
+      },
+      "interact-right": {
+        "end": 4.0833,
+        "start": 3.4167
+      },
+      "pick-up": {
+        "end": 5.75,
+        "start": 5.4167
+      },
+      "sit": {
+        "end": 3.0833,
+        "start": 2.9167
+      },
+      "sprint": {
+        "end": 2.8333,
+        "start": 2.3333
+      },
+      "static": {
+        "end": 0.0833,
+        "start": 0.0
+      },
+      "walk": {
+        "end": 2.25,
+        "start": 1.5833
+      }
+    },
+    "fps": 24.0
+  },
+  "character-male-a": {
+    "clips": {
+      "crouch": {
+        "end": 3.3333,
+        "start": 3.1667
+      },
+      "emote-no": {
+        "end": 7.25,
+        "start": 6.5833
+      },
+      "emote-yes": {
+        "end": 6.5,
+        "start": 5.8333
+      },
+      "holding-both": {
+        "end": 5.3333,
+        "start": 5.1667
+      },
+      "holding-right": {
+        "end": 5.0833,
+        "start": 4.9167
+      },
+      "idle": {
+        "end": 1.5,
+        "start": 0.1667
+      },
+      "interact-left": {
+        "end": 4.8333,
+        "start": 4.1667
+      },
+      "interact-right": {
+        "end": 4.0833,
+        "start": 3.4167
+      },
+      "pick-up": {
+        "end": 5.75,
+        "start": 5.4167
+      },
+      "sit": {
+        "end": 3.0833,
+        "start": 2.9167
+      },
+      "sprint": {
+        "end": 2.8333,
+        "start": 2.3333
+      },
+      "static": {
+        "end": 0.0833,
+        "start": 0.0
+      },
+      "walk": {
+        "end": 2.25,
+        "start": 1.5833
+      }
+    },
+    "fps": 24.0
+  },
+  "character-male-b": {
+    "clips": {
+      "crouch": {
+        "end": 3.3333,
+        "start": 3.1667
+      },
+      "emote-no": {
+        "end": 7.25,
+        "start": 6.5833
+      },
+      "emote-yes": {
+        "end": 6.5,
+        "start": 5.8333
+      },
+      "holding-both": {
+        "end": 5.3333,
+        "start": 5.1667
+      },
+      "holding-right": {
+        "end": 5.0833,
+        "start": 4.9167
+      },
+      "idle": {
+        "end": 1.5,
+        "start": 0.1667
+      },
+      "interact-left": {
+        "end": 4.8333,
+        "start": 4.1667
+      },
+      "interact-right": {
+        "end": 4.0833,
+        "start": 3.4167
+      },
+      "pick-up": {
+        "end": 5.75,
+        "start": 5.4167
+      },
+      "sit": {
+        "end": 3.0833,
+        "start": 2.9167
+      },
+      "sprint": {
+        "end": 2.8333,
+        "start": 2.3333
+      },
+      "static": {
+        "end": 0.0833,
+        "start": 0.0
+      },
+      "walk": {
+        "end": 2.25,
+        "start": 1.5833
+      }
+    },
+    "fps": 24.0
+  },
+  "character-male-c": {
+    "clips": {
+      "crouch": {
+        "end": 3.3333,
+        "start": 3.1667
+      },
+      "emote-no": {
+        "end": 7.25,
+        "start": 6.5833
+      },
+      "emote-yes": {
+        "end": 6.5,
+        "start": 5.8333
+      },
+      "holding-both": {
+        "end": 5.3333,
+        "start": 5.1667
+      },
+      "holding-right": {
+        "end": 5.0833,
+        "start": 4.9167
+      },
+      "idle": {
+        "end": 1.5,
+        "start": 0.1667
+      },
+      "interact-left": {
+        "end": 4.8333,
+        "start": 4.1667
+      },
+      "interact-right": {
+        "end": 4.0833,
+        "start": 3.4167
+      },
+      "pick-up": {
+        "end": 5.75,
+        "start": 5.4167
+      },
+      "sit": {
+        "end": 3.0833,
+        "start": 2.9167
+      },
+      "sprint": {
+        "end": 2.8333,
+        "start": 2.3333
+      },
+      "static": {
+        "end": 0.0833,
+        "start": 0.0
+      },
+      "walk": {
+        "end": 2.25,
+        "start": 1.5833
+      }
+    },
+    "fps": 24.0
+  },
+  "character-male-d": {
+    "clips": {
+      "crouch": {
+        "end": 3.3333,
+        "start": 3.1667
+      },
+      "emote-no": {
+        "end": 7.25,
+        "start": 6.5833
+      },
+      "emote-yes": {
+        "end": 6.5,
+        "start": 5.8333
+      },
+      "holding-both": {
+        "end": 5.3333,
+        "start": 5.1667
+      },
+      "holding-right": {
+        "end": 5.0833,
+        "start": 4.9167
+      },
+      "idle": {
+        "end": 1.5,
+        "start": 0.1667
+      },
+      "interact-left": {
+        "end": 4.8333,
+        "start": 4.1667
+      },
+      "interact-right": {
+        "end": 4.0833,
+        "start": 3.4167
+      },
+      "pick-up": {
+        "end": 5.75,
+        "start": 5.4167
+      },
+      "sit": {
+        "end": 3.0833,
+        "start": 2.9167
+      },
+      "sprint": {
+        "end": 2.8333,
+        "start": 2.3333
+      },
+      "static": {
+        "end": 0.0833,
+        "start": 0.0
+      },
+      "walk": {
+        "end": 2.25,
+        "start": 1.5833
+      }
+    },
+    "fps": 24.0
+  },
+  "character-male-e": {
+    "clips": {
+      "crouch": {
+        "end": 3.3333,
+        "start": 3.1667
+      },
+      "emote-no": {
+        "end": 7.25,
+        "start": 6.5833
+      },
+      "emote-yes": {
+        "end": 6.5,
+        "start": 5.8333
+      },
+      "holding-both": {
+        "end": 5.3333,
+        "start": 5.1667
+      },
+      "holding-right": {
+        "end": 5.0833,
+        "start": 4.9167
+      },
+      "idle": {
+        "end": 1.5,
+        "start": 0.1667
+      },
+      "interact-left": {
+        "end": 4.8333,
+        "start": 4.1667
+      },
+      "interact-right": {
+        "end": 4.0833,
+        "start": 3.4167
+      },
+      "pick-up": {
+        "end": 5.75,
+        "start": 5.4167
+      },
+      "sit": {
+        "end": 3.0833,
+        "start": 2.9167
+      },
+      "sprint": {
+        "end": 2.8333,
+        "start": 2.3333
+      },
+      "static": {
+        "end": 0.0833,
+        "start": 0.0
+      },
+      "walk": {
+        "end": 2.25,
+        "start": 1.5833
+      }
+    },
+    "fps": 24.0
+  },
+  "character-male-f": {
+    "clips": {
+      "crouch": {
+        "end": 3.3333,
+        "start": 3.1667
+      },
+      "emote-no": {
+        "end": 7.25,
+        "start": 6.5833
+      },
+      "emote-yes": {
+        "end": 6.5,
+        "start": 5.8333
+      },
+      "holding-both": {
+        "end": 5.3333,
+        "start": 5.1667
+      },
+      "holding-right": {
+        "end": 5.0833,
+        "start": 4.9167
+      },
+      "idle": {
+        "end": 1.5,
+        "start": 0.1667
+      },
+      "interact-left": {
+        "end": 4.8333,
+        "start": 4.1667
+      },
+      "interact-right": {
+        "end": 4.0833,
+        "start": 3.4167
+      },
+      "pick-up": {
+        "end": 5.75,
+        "start": 5.4167
+      },
+      "sit": {
+        "end": 3.0833,
+        "start": 2.9167
+      },
+      "sprint": {
+        "end": 2.8333,
+        "start": 2.3333
+      },
+      "static": {
+        "end": 0.0833,
+        "start": 0.0
+      },
+      "walk": {
+        "end": 2.25,
+        "start": 1.5833
+      }
+    },
+    "fps": 24.0
+  }
+}
