@@ -1,0 +1,7 @@
+{
+  "name": "town-recorder",
+  "version": "0.1.0",
+  "author": { "name": "Samson Chen" },
+  "license": "Apache-2.0",
+  "description": "Phase 0 recorder for claude-town: logs the Claude Code events claude-town uses to a JSONL file, and probes loopback HTTP and classification."
+}

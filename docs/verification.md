@@ -26,6 +26,9 @@ These answers come from the mod API types that Claude Code 2.1.318 writes (`clau
 
 ## Other facts
 
+- **Plugin name:** `claude plugin validate` refuses names that start with `claude-` (also `anthropic-`, `cc-plugin-`, and a few others). The plugin cannot be called `claude-town`. It needs a new name, and `distribution.md` must change with it. The app and the repository are not checked by this rule.
+- Gating hooks (`prompt.submit`, `tool.call`, `tool.check`, `agent.spawn`, `session.send`, `session.receive`, `classic.*`) should end with `.catch(...)` that passes the event on, so a bug in claude-town never blocks Claude Code.
+
 - Background task IDs: `Bash` → `result.backgroundTaskId`; `Monitor` → `result.taskId`; `Workflow` → `result.taskId` and `runId`. A background `Agent` is staff, keyed by its `agentId`.
 - `$.fs.read` takes any absolute path, up to 4 MiB. `~` is not expanded: build paths from `await $.env.get('HOME')`. `$.fs.write` replaces a file; there is no append.
 - `$.store` is one JSON file per plugin, shared by all sessions on the machine.
