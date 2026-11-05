@@ -224,6 +224,39 @@ Desk work only. No clinical roles.
 |---|---|---|
 | `generalist` | Generalist | 通才專員 |
 
+## Background roles
+
+Operators stand for background tasks, not agents: shell commands running in the background, monitors, and workflow runs. They work in each floor's machine room. A background subagent is still a staff member, not an operator.
+
+Roles are chosen by rule where possible (see [architecture.md](architecture.md)), otherwise by Haiku using only the IDs below. Each row lists its rule words in `catalog/roles.json`.
+
+### Background operations 背景作業
+
+| ID | English | 繁體中文 | Covers | Prop and looping animation |
+|---|---|---|---|---|
+| `build-operator` | Build Operator | 建置作業員 | Compiles, bundles, image builds | Hard hat; watching a progress bar on a console |
+| `test-runner` | Test Runner | 測試執行員 | Long test suites | Stopwatch; ticking off a checklist |
+| `server-operator` | Server Operator | 伺服器值班員 | Dev servers, watchers, long-running processes | Headset; keeping watch at a server rack, with a lamp on while the server runs |
+| `log-monitor` | Log Monitor | 監控員 | `Monitor` tool, tailing logs, polling | Binoculars; watching a wall of screens |
+| `install-operator` | Installer | 安裝作業員 | Package installs, downloads | Box cart; unpacking boxes |
+| `batch-operator` | Batch Job Operator | 批次作業員 | Scripts, data jobs, migrations | Stack of punch cards; feeding a machine |
+| `deploy-operator` | Deployment Operator | 部署作業員 | Deploys, releases, publishing | Clipboard; pulling a lever, then watching a launch light |
+| `workflow-coordinator` | Workflow Coordinator | 流程協調員 | `Workflow` runs that orchestrate several agents | Conductor's baton; directing at a whiteboard |
+| `background-worker` | Background Worker | 背景作業員 | Fallback | Laptop; typing |
+
+Operators wear a shared outfit, an operator vest. The prop tells the roles apart. The subagents of a workflow run appear as staff, and they report to the workflow coordinator instead of the Chief of Staff (Phase 0 item 16).
+
+## Fixed characters
+
+These are not in the catalog and are not classified.
+
+| Character | English | 繁體中文 | Where |
+|---|---|---|---|
+| CEO | CEO | 執行長 | CEO's office, executive floor |
+| Chief of Staff | Chief of Staff | 幕僚長 | A desk on the project floor |
+| Dispatcher | Dispatcher | 調度員 | Dispatcher's room, executive floor |
+| Inspector | Inspector | 稽核員 | Reception desk, executive floor |
+
 ## Sprites
 
 Characters are built from layers, so a role is mostly a combination of existing parts:

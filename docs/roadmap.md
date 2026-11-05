@@ -16,13 +16,20 @@ These points come from the mods documentation and the type declarations, but wer
 | 8 | Do mods load the same way in the Desktop app's Code tab? | Supported surfaces | Document the CLI as the supported surface |
 | 9 | When a background subagent is still running after the main turn ends, what events arrive? | Scene 7 and 8 order | Keep staff working on the floor after the report trip |
 | 10 | `claude plugin marketplace add` from the shell | One-click install from the app | Show the `/plugin` commands to copy |
-| 11 | Format of `result.usage.model` in `turn.step`, and whether it is present for every request | Model badges | `$.session.model()` for the Chief of Staff, the `agent.spawn` model (or its parent's) for staff |
+| 11 | Is `turn.step` a generator hook (`yield* next(e)`)? Format of `result.usage.model`, and is it present for every request? | Model badges; correct pass-through | `$.session.model()` for the Chief of Staff, the `agent.spawn` model (or its parent's) for staff |
+| 12 | Do `$.model.classify` calls go through `turn.step`? If so, can the mod tell them apart from the session's own requests? | Keeping claude-town's Haiku calls off the badges | Take the Chief of Staff's model only from `$.session.model()` on `prompt.submit` and `turn.complete`; use `turn.step` for staff only |
+| 13 | When a main-agent turn starts without `prompt.submit`, which event marks the start, and can the mod read its input (a task notification or a scheduled prompt)? | Turn origin for follow-up and scheduled tickets | Infer the origin from timing: a task that just ended means `task`; a schedule due within a few seconds means `schedule`; otherwise `unknown` |
+| 14 | Is there an event when a background task ends, with its ID and exit status? | `task.done` without waiting for the next turn | Read the end from the task notification at the start of the next main turn; poll a task list on the heartbeat, if the mod API offers one |
+| 15 | Can the mod see a Stop hook block the end of the main turn? Does `turn.complete` fire once per stop attempt or once per real end? | Scene 15 and correct `ticket.done` timing | Send `ticket.done` at each `turn.complete`. A continuation then shows as a new ticket with `origin: unknown`, and there is no Inspector scene. |
+| 16 | Do agents started by a `Workflow` run appear as `agent.spawn`, and can they be linked to the run? | Workflow staff reporting to the coordinator | Show them as ordinary staff of the Chief of Staff |
+| 17 | Which tools create and delete schedules in the installed version (`CronCreate`, `CronDelete`, `ScheduleWakeup`), and what do their inputs and results contain? | Dispatcher board | Show a scheduled ticket when it fires, without a card on the board |
+| 18 | Are agent-to-agent messages (`SendMessage`, agent-team messages) visible as `tool.call` with the sender's `agentId`, and does the input name the receiver in a form the mod can match to an `agent.spawn`? | Scene 16 | Show a speech bubble over the sender only |
 
 Record the answers in `docs/verification.md`.
 
 ## Phase 1: protocol and mod
 
-- `catalog/roles.json`, `catalog/task-types.json` from [roles.md](roles.md)
+- `catalog/roles.json`, `catalog/task-types.json` from [roles.md](roles.md); `catalog/models.json`
 - `protocol/schema/` and a few recorded streams in `protocol/fixtures/`
 - The mod: event mapping, outbox, endpoint file, `/town`, classification
 - Mod tests with `claude plugin test`
@@ -38,9 +45,12 @@ Record the answers in `docs/verification.md`.
 
 ## Phase 3: staff
 
-- Staff hire, roles, desks, report back, failure (scenes 4, 7)
+- Resource bench: idle animations, calling from the bench, return to the bench (scenes 4, 7)
+- Staff roles, desks, report back, failure (scenes 4, 7)
+- Agent-to-agent messages (scene 16)
 - Activities (scene 5)
 - Approval trip and approval sound (scene 6)
+- Operators: background tasks, machine room, follow-up tickets, background roles by rule (scenes 11, 12)
 
 ## Phase 4: the building
 
@@ -48,10 +58,12 @@ Record the answers in `docs/verification.md`.
 - Several sessions on one floor
 - Stale-session cleanup, empty-floor removal
 - Window and floor size settings
+- Executive floor rooms: Dispatcher's room and board, scheduled tickets (scenes 13, 14); reception desk and Inspector (scene 15)
 
 ## Phase 5: polish
 
 - Hats (scene 3)
+- Model badges, with the show/hide setting (default hidden)
 - English and Traditional Chinese, Cubic 11 font
 - Ticket text setting, all other settings, launch at login
 - Menu bar toggle
@@ -72,3 +84,6 @@ Record the answers in `docs/verification.md`.
 | Pin the executive floor at the top while scrolling? | Pinned, or scrolls with the rest |
 | How long an empty floor stays | A fixed default (for example 10 minutes), or until the app restarts |
 | Sound files | Pick from CC0 libraries, or commission original ones |
+| Default bench size, and whether the bench is per floor (current spec) or one shared bench on a lower floor | Per floor keeps calls fast; a shared bench means elevator trips |
+| Where the report for a scheduled ticket goes | The Dispatcher's room (current spec), or the CEO's office like every other report |
+| Long-lived operators (dev servers) | Stay in the machine room until killed or the session ends (current spec), or move to a smaller "on duty" spot after a few minutes |
