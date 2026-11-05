@@ -80,53 +80,53 @@ Family names are product names and are not translated.
 
 ## Event mapping (mod side)
 
+Event and field names are checked against Claude Code 2.1.318. See [verification.md](verification.md).
+
 | Claude Code event | Mod action | Protocol event |
 |---|---|---|
 | `session.start` | Read the endpoint file, register `/town`, start the outbox and heartbeat timers, work out the project | `session.open` |
 | `session.end` | Flush the outbox | `session.close` |
-| `prompt.submit` | Start task-type classification in the background; pass the prompt on unchanged | `ticket.submit`, later `chief.hat` |
-| `turn.complete` without `agentId` | Read `durationMs`, `isAborted` | `ticket.done` |
-| `agent.spawn` | Pass on unchanged; read `agentId` from the result; start role classification in the background | `staff.hire`, later `staff.role` |
-| `turn.complete` with `agentId` | | `staff.done` |
+| `prompt.submit` with `turnId` absent and `origin.kind` `composer` | Start task-type classification in the background; pass the prompt on unchanged | `ticket.submit` (`origin: user`), later `chief.hat` |
+| `prompt.submit` with `turnId` absent and `origin.kind` `task-notification` | Parse the task IDs and statuses from the text | `task.done` for each task, then `ticket.submit` (`origin: task`) |
+| `prompt.submit` with `turnId` absent and `origin.kind` `scheduled-trigger` | | `ticket.submit` (`origin: schedule`) |
+| `prompt.submit` with `turnId` absent and any other `origin.kind` | | `ticket.submit` (`origin: unknown`) |
+| `prompt.submit` with `turnId` set (delivered into a running turn) | A `task-notification` still ends its tasks; no new ticket | `task.done` when it is a task notification |
+| `turn.complete` without `agentId` | Read `durationMs`, `isAborted`, `usage?.model` | `ticket.done`; `model.update` when the model changed |
+| `classic.Stop` whose `await next(e)` has `block` set | Keep the ticket open; diff `background_tasks` against known tasks | `ticket.return`; `task.done` for tasks no longer listed |
+| `agent.spawn` | `await next(e)`; read `agentId` and `model` from the result; start role classification in the background | `staff.hire` (with `model`), later `staff.role` |
+| `turn.complete` with a known `agentId` | Read `usage?.model` | `staff.done`; `model.update` when the model changed |
 | `tool.call` | Map the tool to an activity; send it before the tool runs | `activity` |
-| `tool.check` returning `ask` | | `approval.wait` |
-| `tool.call` result after an `ask` | | `approval.end` |
-| `turn.step` | `yield* next(e)` and return its result unchanged; skip steps from claude-town's own classification calls (see "Model badge source"); read `result.usage.model`; compare with the last model sent for that `agentId` (or the main agent) | `model.update` when it changed |
-| `tool.call` for a background task (`Bash` with `run_in_background`, `Monitor`, `Workflow`) | Pass on unchanged; read the task ID from the result; decide the role by rule or start classification in the background | `task.start`, later `task.role` |
-| Background task ends (see "Turn origin") | | `task.done` |
-| `tool.call` for a schedule tool (`CronCreate`, `ScheduleWakeup`) | Pass on unchanged; read the schedule ID from the result | `schedule.create` |
-| `tool.call` for `CronDelete`, or `ScheduleWakeup` with `stop` | | `schedule.delete` |
-| Main-agent turn starts with no open ticket | Work out the origin (see "Turn origin") | `ticket.submit` with `origin` |
-| A Stop hook blocks the end of the main turn | Keep the ticket open | `ticket.return` |
-| `tool.call` for `SendMessage` (or the agent-team message tool) | Pass on unchanged; resolve the receiver's name to an `agentId` from the names seen in `agent.spawn` | `message.send` |
+| `tool.check` returning `ask` with `approver === 'person'` | | `approval.wait` |
+| That `tool.call`'s `next` settles | Result means allowed; `deny` or `isError` means refused | `approval.end` |
+| `tool.call` for `Bash` with `run_in_background`, `Monitor`, `Workflow` | `await next(e)`; task ID from `backgroundTaskId` (Bash) or `taskId` (Monitor, Workflow); role by rule or classification | `task.start`, later `task.role` |
+| `tool.call` for `CronCreate` | `await next(e)`; `scheduleId` is the result's `id` | `schedule.create` |
+| `tool.call` for `ScheduleWakeup` | `scheduleId` is the call's `tool_use_id`; `stop: true` deletes the session's wakeups | `schedule.create` or `schedule.delete` |
+| `tool.call` for `CronDelete` | | `schedule.delete` |
+| `session.send` / `session.receive` | Sender from `session.send.agentId`, receiver from `session.receive.agentId`; fall back to matching `to` against `agent.spawn` names | `message.send` |
 | `$.clock.every` timer | | `heartbeat` |
 
 Rules for every hook:
 
 - Pass every event on unchanged. The mod only observes.
   - Ordinary hooks return `next(e)`, or the result of `await next(e)`.
-  - Generator hooks such as `turn.step` use `const result = yield* next(e)` and then `return result`. They never yield values of their own. (Phase 0 item 11 confirms that `turn.step` is a generator hook.)
+  - The mod does not hook `turn.step`. If a later version needs it: it is a generator hook, so use `const result = yield* next(e)` and then `return result`, and never yield values of its own.
+- Ignore any `agentId` that was never seen in `agent.spawn` (engine forks such as compaction carry such IDs).
 - Never `await` a network call or a classification inside a hook. Push the event into an outbox and return.
 - An outbox timer (`$.clock.every`, about every 250 ms) sends queued events in one POST. If the app is not running, drop the batch and try the endpoint file again later. Do not retry old events.
 - Wrap everything in `try`/`catch`. A failure in claude-town must never affect the Claude Code session.
 
 ### Model badge source
 
-- **Chief of Staff:** `session.open` carries `$.session.model()`. After that, `turn.step` events with no `agentId` update it.
-- **Staff:** `staff.hire` carries the requested model when one was set. After that, `turn.step` events with that `agentId` update it.
-- **claude-town's own calls:** the Haiku calls made by `$.model.classify` must not change any badge. If those calls also go through `turn.step`, the mod has to recognize and skip them (Phase 0 item 12). If they cannot be told apart, the mod reads the Chief of Staff's model only from `$.session.model()`, checked on `prompt.submit` and `turn.complete`, and uses `turn.step` for staff only.
+- **Chief of Staff:** `session.open` carries `$.session.model()`. After that, each main `turn.complete` carries `usage?.model`, the model that answered last in that turn.
+- **Staff:** `staff.hire` carries the resolved `model` from `agent.spawn`'s result. After that, the staff member's `turn.complete` updates it.
+- **claude-town's own calls:** `$.model.classify` is a separate operation and does not raise `turn.step` or `turn.complete`, so it never touches a badge (Phase 0 item 12).
 
 ### Turn origin
 
-A main-agent turn that does not start from `prompt.submit` still gets a ticket. The mod works out who issued it:
+Every turn on the main loop that starts while the session is idle goes through `prompt.submit`. Its `origin.kind` names the issuer (see the event mapping). A prompt that carries `turnId` was delivered into a turn already running, so it adds to the open ticket instead of opening a new one.
 
-1. **Task:** the turn's input is a background task notification. Read the task IDs and statuses from it, send `task.done` for each one, then send `ticket.submit` with `origin: task`, `taskIds`, and `parentTicketId` (the ticket that was open when the first of those tasks started).
-2. **Schedule:** the turn's input is a scheduled prompt, or a schedule from this session was due within the last few seconds. Send `ticket.submit` with `origin: schedule`.
-3. **Otherwise:** `origin: unknown`.
-
-How the mod sees the start of such a turn and its input is Phase 0 item 13. If a task ends and no new turn follows, `task.done` is still sent as soon as the mod learns of it (Phase 0 item 14).
-
-A Stop-hook continuation is not a new ticket. If the mod sees the main turn end and then continue on the same ticket, it sends `ticket.return` and does not send `ticket.done` until the turn really ends (Phase 0 item 15).
+- **Task:** the notification text names the finished tasks. `parentTicketId` is the ticket that was open when the first of those tasks started. The text format is not part of the typed API, so the parser is tested against recorded notifications. As a backup, each `classic.Stop` lists the session's `background_tasks`, and a task that disappears from that list has ended.
+- **Stop-hook continuation:** not a new ticket. `classic.Stop` with `block` set sends `ticket.return`. A block raised by a managed hook, or by a module that runs before ours, is not seen. Then the work simply continues on the open ticket, with no Inspector scene.
 
 ### Background roles by rule
 
@@ -149,14 +149,14 @@ The word lists live in `catalog/roles.json` with each background role, so they c
 
 The floor is keyed by the project:
 
-1. `$.session.repo()`, when it returns a repository: use its remote identity.
-2. Otherwise `$.session.root()`: use the absolute path.
+1. `$.session.repo()`, when it returns a repository with a `remote`: use the remote URL, normalized (no scheme, no credentials, no `.git`).
+2. Otherwise the repository `root`, or `$.session.root()` when there is no repository: use the absolute path.
 
-`projectId` is a hash of that value. The display name is the repository name or the folder name. The full path is not sent.
+`projectId` is a hash of that value. The display name is the last path part of the remote, or the folder name of the root. (`repo().name` is only filled for some internal repositories, so it is not used.) The full path is not sent.
 
 ### Classification
 
-Both use `$.model.classify(text, labels, options)`.
+Both use `$.model.classify(text, labels, { model: 'haiku' })`. It needs two or more labels, returns the label or `undefined`, and rejects on failure.
 
 - **Role** (on `agent.spawn`): text is `subagentType`, `name`, `description`, and the first part of `prompt`. Labels are the role IDs from `catalog/roles.json`. If `subagentType` is exactly a role ID (a custom agent named after a role), use it without a model call. If classification fails or returns nothing, use `generalist`. Cache by `agentId`.
 - **Task type** (on `prompt.submit`): text is the first part of the prompt. Labels are the IDs from `catalog/task-types.json`. Fallback `general`.

@@ -26,7 +26,7 @@ These points come from the mods documentation and the type declarations, but wer
 | 18 | Are agent-to-agent messages (`SendMessage`, agent-team messages) visible as `tool.call` with the sender's `agentId`, and does the input name the receiver in a form the mod can match to an `agent.spawn`? | Scene 16 | Show a speech bubble over the sender only |
 | 19 | Can RealityKit on macOS load the converted USDZ, play the skeletal animation, cut it into clips by time, and swap a character's texture at run time? Is an orthographic camera available in `RealityView`? | The whole scene | SceneKit with the same USDZ files; or pre-render clips to 2D sprite sheets in Blender and use SpriteKit |
 
-Record the answers in `docs/verification.md`.
+Answers: [verification.md](verification.md). Most items are answered by the API types. The rest need the recorder mod in a real session.
 
 ## Phase 1: protocol and mod
 

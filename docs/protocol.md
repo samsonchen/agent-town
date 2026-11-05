@@ -132,7 +132,7 @@ A hook stopped the main agent from ending its turn and sent it back to work (spe
 | `description` | string | First 200 characters |
 | `teammate` | boolean | `true` for an agent-team teammate |
 | `background` | boolean | |
-| `model` | string, optional | The model requested for the subagent. Absent when the subagent inherits its model; the receiver then uses the parent's current model (`parentAgentId`, or the main agent). |
+| `model` | string, optional | The model the subagent runs on, as `agent.spawn` resolved it. When absent, the receiver uses the parent's current model (`parentAgentId`, or the main agent). |
 
 ### `staff.role`
 
