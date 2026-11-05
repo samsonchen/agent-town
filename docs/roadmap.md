@@ -24,6 +24,7 @@ These points come from the mods documentation and the type declarations, but wer
 | 16 | Do agents started by a `Workflow` run appear as `agent.spawn`, and can they be linked to the run? | Workflow staff reporting to the coordinator | Show them as ordinary staff of the Chief of Staff |
 | 17 | Which tools create and delete schedules in the installed version (`CronCreate`, `CronDelete`, `ScheduleWakeup`), and what do their inputs and results contain? | Dispatcher board | Show a scheduled ticket when it fires, without a card on the board |
 | 18 | Are agent-to-agent messages (`SendMessage`, agent-team messages) visible as `tool.call` with the sender's `agentId`, and does the input name the receiver in a form the mod can match to an `agent.spawn`? | Scene 16 | Show a speech bubble over the sender only |
+| 19 | Can RealityKit on macOS load the converted USDZ, play the skeletal animation, cut it into clips by time, and swap a character's texture at run time? Is an orthographic camera available in `RealityView`? | The whole scene | SceneKit with the same USDZ files; or pre-render clips to 2D sprite sheets in Blender and use SpriteKit |
 
 Record the answers in `docs/verification.md`.
 

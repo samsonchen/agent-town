@@ -24,7 +24,7 @@ Every piece of work starts with a ticket, and every ticket has an issuer. The re
 
 ## The building
 
-- The view is a building with stacked floors, drawn in a 2.5D (isometric) pixel-art style. The reference for the feel is Gather Town; no Gather Town assets are used.
+- The view is a building with stacked floors, drawn in low-poly 3D seen from a fixed isometric angle (an orthographic camera). Characters and furniture come from Kenney's CC0 packs (Mini Characters, Furniture Kit); see [roles.md](roles.md) and [distribution.md](distribution.md). The reference for the feel is Gather Town; no Gather Town assets are used.
 - **One floor per project.** All sessions in the same project share that floor.
 - **Several sessions in one project** put several Chiefs of Staff on the same floor. Each one has its own desk and its own staff.
 - **The executive floor** is its own floor at the top. It has three rooms:
@@ -71,7 +71,7 @@ The resource bench is a lounge on each project floor. Every session on the floor
 
 **Who is on the bench**
 
-- A new floor starts with a mixed bench: a few characters in common outfits (engineering hoodie, operator vest) and a few in a neutral outfit. The bench size setting sets how many.
+- A new floor starts with a mixed bench: a few characters in common outfit colors (engineering, operator orange) and a few in neutral gray. The bench size setting sets how many.
 - Characters who finish a job come back to the bench in their role outfit, with a faint name tag. Over time, a project's bench shows the kinds of roles that project uses.
 - When the bench has more characters than its size, the ones who have waited longest leave by the elevator.
 

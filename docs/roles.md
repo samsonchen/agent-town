@@ -13,7 +13,7 @@ This document lists the job titles a staff member can have, and the task types a
 
 A role belongs in the catalog when the work can be done with a computer: reading, writing, analyzing, coding, drafting, reviewing, researching. A role does not belong when the job needs a body or a license to act in the physical world, for example pilot, driver, nurse, surgeon, chef, electrician, warehouse worker, security guard.
 
-The list is drawn from how large companies in software, banking, legal, consulting, and finance organize their departments (front, middle, and back office in banking; engineering, product, legal, finance, people, operations in tech companies). It is meant to grow. To add a role: add a row here, add it to `catalog/roles.json` with labels for every locale, and add a sprite layer.
+The list is drawn from how large companies in software, banking, legal, consulting, and finance organize their departments (front, middle, and back office in banking; engineering, product, legal, finance, people, operations in tech companies). It is meant to grow. To add a role: add a row here, add it to `catalog/roles.json` with labels for every locale, and pick its department color and prop.
 
 ## Role catalog
 
@@ -244,7 +244,7 @@ Roles are chosen by rule where possible (see [architecture.md](architecture.md))
 | `workflow-coordinator` | Workflow Coordinator | 流程協調員 | `Workflow` runs that orchestrate several agents | Conductor's baton; directing at a whiteboard |
 | `background-worker` | Background Worker | 背景作業員 | Fallback | Laptop; typing |
 
-Operators wear a shared outfit, an operator vest. The prop tells the roles apart. The subagents of a workflow run appear as staff, and they report to the workflow coordinator instead of the Chief of Staff (Phase 0 item 16).
+Operators share one outfit color, safety orange. The prop tells the roles apart. The subagents of a workflow run appear as staff, and they report to the workflow coordinator instead of the Chief of Staff (Phase 0 item 16).
 
 ## Fixed characters
 
@@ -257,19 +257,43 @@ These are not in the catalog and are not classified.
 | Dispatcher | Dispatcher | 調度員 | Dispatcher's room, executive floor |
 | Inspector | Inspector | 稽核員 | Reception desk, executive floor |
 
-## Sprites
+## Character looks
 
-Characters are built from layers, so a role is mostly a combination of existing parts:
+Characters are Kenney Mini Characters (CC0, 3D). A character's look is a combination of parts:
 
-| Layer | Examples |
+| Part | Source |
 |---|---|
-| Body | A few body and skin-tone variants, picked at random per character |
-| Outfit | By department: hoodie (engineering), suit (legal, banking), blazer (consulting), and so on |
-| Prop | Laptop, law book, calculator, clipboard, megaphone, magnifier |
-| Name tag | The localized role label |
+| Base character | One of the 12 Kenney characters (`male-a` … `female-f`), picked at random for staff and operators |
+| Outfit color | The department color, applied to the base character's shirt swatch (see [architecture.md](architecture.md)) |
+| Prop | A small model in the hand: from Kenney Furniture Kit where one exists (`laptop`, `books`, `cardboardBoxClosed`), otherwise a simple shape (clipboard, calculator, stopwatch) |
+| Name tag | The localized role label, drawn as a 2D overlay |
 | Model badge | Model family name, shown when the setting is on (see [spec.md](spec.md)) |
 
-Each role in `catalog/roles.json` names its department (outfit) and its prop.
+Each role in `catalog/roles.json` names its department (outfit color) and its prop. Operators share one color, safety orange, and their prop tells them apart. A neutral character on the bench wears light gray.
+
+Fixed characters use set base characters so they are easy to spot:
+
+| Character | Base character | Look |
+|---|---|---|
+| CEO | `male-d` | Black suit, red tie |
+| Chief of Staff | Any base character except `male-d`, `male-c`, `female-e` | Charcoal gray outfit and a clipboard. Several Chiefs of Staff on one floor have different base characters. |
+| Dispatcher | `female-e` | White, with a headset |
+| Inspector | `male-c` | Uniform with a cap, and a stamp |
+
+### Animations
+
+The Kenney characters come with these clips, which the scenes use:
+
+| Scene action | Clip |
+|---|---|
+| Walking | `walk` (`sprint` when a trip is late) |
+| Idle on the bench | `idle`, `sit`, `crouch`, `emote-yes` (chatting) |
+| Working at a desk or console | `sit` with `interact-right` / `interact-left` |
+| Carrying a ticket or report | `holding-right` |
+| Handing over or taking a ticket | `pick-up` |
+| Waiting for approval | `idle` with a raised hand |
+| Inspector returns a report | `emote-no` |
+| CEO accepts a report | `emote-yes` |
 
 ## Task types (Chief of Staff hats)
 

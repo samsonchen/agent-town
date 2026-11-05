@@ -56,6 +56,6 @@ Code signing and notarization:
 
 - Code: Apache-2.0 (already in the repo).
 - Font: 俐方體11號 (Cubic 11), SIL Open Font License. Bundle the license file. Do not sell the font on its own.
-- Sprites and sounds: CC0 (Kenney) or original work contributed under a license that allows redistribution. Paid asset packs whose terms forbid redistributing the raw files cannot go in this public repo.
+- Models and sounds: CC0 (Kenney Mini Characters and Furniture Kit are used now) or original work contributed under a license that allows redistribution. Paid asset packs whose terms forbid redistributing the raw files cannot go in this public repo.
 - `assets/LICENSES.md` lists every asset, its source, and its license.
-- `CONTRIBUTING.md` explains how to add a role (catalog row, labels for every locale, sprite layer) and how to add a language.
+- `CONTRIBUTING.md` explains how to add a role (catalog row, labels for every locale, department color and prop) and how to add a language.
