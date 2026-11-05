@@ -16,6 +16,7 @@ These points come from the mods documentation and the type declarations, but wer
 | 8 | Do mods load the same way in the Desktop app's Code tab? | Supported surfaces | Document the CLI as the supported surface |
 | 9 | When a background subagent is still running after the main turn ends, what events arrive? | Scene 7 and 8 order | Keep staff working on the floor after the report trip |
 | 10 | `claude plugin marketplace add` from the shell | One-click install from the app | Show the `/plugin` commands to copy |
+| 11 | Format of `result.usage.model` in `turn.step`, and whether it is present for every request | Model badges | `$.session.model()` for the Chief of Staff, the `agent.spawn` model (or its parent's) for staff |
 
 Record the answers in `docs/verification.md`.
 

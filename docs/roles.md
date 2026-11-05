@@ -234,6 +234,7 @@ Characters are built from layers, so a role is mostly a combination of existing 
 | Outfit | By department: hoodie (engineering), suit (legal, banking), blazer (consulting), and so on |
 | Prop | Laptop, law book, calculator, clipboard, megaphone, magnifier |
 | Name tag | The localized role label |
+| Model badge | Model family name, shown when the setting is on (see [spec.md](spec.md)) |
 
 Each role in `catalog/roles.json` names its department (outfit) and its prop.
 

@@ -70,6 +70,7 @@ Every event has these fields:
 | `surface` | string | `terminal`, `desktop`, `vscode`, `headless` |
 | `ccVersion` | string | Claude Code version |
 | `locale` | string, optional | If the mod can read it |
+| `model` | string, optional | The session's model at start, from `$.session.model()` |
 
 ### `session.close`
 
@@ -116,6 +117,7 @@ Sent after task-type classification finishes.
 | `description` | string | First 200 characters |
 | `teammate` | boolean | `true` for an agent-team teammate |
 | `background` | boolean | |
+| `model` | string, optional | The model requested for the subagent, if set |
 
 ### `staff.role`
 
@@ -133,6 +135,15 @@ Sent after role classification finishes.
 | `agentId` | string | |
 | `status` | string | `completed`, `failed`, `killed`, `aborted` |
 | `durationMs` | integer, optional | |
+
+### `model.update`
+
+Sent when the model that answered a character's request differs from the last one sent for that character. Not sent for every request.
+
+| Field | Type | Notes |
+|---|---|---|
+| `agentId` | string, optional | Absent for the main agent (the Chief of Staff) |
+| `model` | string | Model ID as Claude Code reports it. The app maps it to a family name. |
 
 ### `activity`
 

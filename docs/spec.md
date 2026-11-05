@@ -47,6 +47,16 @@ Each scene below is triggered by a Claude Code event. The event mapping is in [a
 | 9 | The user interrupts the task | The Chief of Staff stops working. No report trip, no sound. |
 | 10 | Session ends | The Chief of Staff and any remaining staff leave the floor. An empty floor stays for a configurable time, then is removed. |
 
+### Model badge
+
+Each Chief of Staff and staff member can show a small badge with the model it is running on, such as Haiku, Sonnet, Opus, or Fable. The CEO has no badge.
+
+- The badge shows the model family name. A model ID the app does not recognize is shown as a short form of the raw ID.
+- The badge shows the model that actually answered the character's latest request. If the user switches models with `/model`, or a subagent runs on a different model from its parent, the badge follows.
+- Until the first request is answered, the badge shows the requested model, if known.
+- The Haiku calls claude-town itself makes for role and task-type classification are not shown.
+- An app setting shows or hides all badges. Default: hidden.
+
 ### Activities
 
 | Tool | Animation |
@@ -109,6 +119,7 @@ The default is to be decided (see [roadmap.md](roadmap.md)).
 - Approval sound: on/off, sound file
 - Master volume, mute
 - Ticket text: full, or task type only
+- Model badges: show or hide
 - How long an empty floor stays before removal
 - Pause (same as the menu bar toggle)
 - Launch at login

@@ -70,6 +70,7 @@ claude-town/
 | `tool.call` | Map the tool to an activity; send it before the tool runs | `activity` |
 | `tool.check` returning `ask` | | `approval.wait` |
 | `tool.call` result after an `ask` | | `approval.end` |
+| `turn.step` | `yield* next(e)` unchanged; read `result.usage.model`; compare with the last model sent for that `agentId` (or the main agent) | `model.update` when it changed |
 | `$.clock.every` timer | | `heartbeat` |
 
 Rules for every hook:
