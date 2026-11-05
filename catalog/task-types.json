@@ -1,0 +1,174 @@
+{
+  "version": 1,
+  "fallback": "general",
+  "taskTypes": [
+    {
+      "id": "coding",
+      "labels": {
+        "en": "Coding",
+        "zh-TW": "寫程式"
+      },
+      "covers": "New features, new code"
+    },
+    {
+      "id": "debugging",
+      "labels": {
+        "en": "Debug",
+        "zh-TW": "除錯"
+      },
+      "covers": "Fixing bugs and errors"
+    },
+    {
+      "id": "refactoring",
+      "labels": {
+        "en": "Refactor",
+        "zh-TW": "重構"
+      },
+      "covers": "Restructuring existing code"
+    },
+    {
+      "id": "testing",
+      "labels": {
+        "en": "Testing",
+        "zh-TW": "測試"
+      },
+      "covers": "Writing or running tests"
+    },
+    {
+      "id": "code-review",
+      "labels": {
+        "en": "Review",
+        "zh-TW": "審查"
+      },
+      "covers": "Reviewing code or a PR"
+    },
+    {
+      "id": "devops",
+      "labels": {
+        "en": "DevOps",
+        "zh-TW": "部署"
+      },
+      "covers": "Builds, CI, deploys, infrastructure"
+    },
+    {
+      "id": "security",
+      "labels": {
+        "en": "Security",
+        "zh-TW": "資安"
+      },
+      "covers": "Security review, vulnerability fixes"
+    },
+    {
+      "id": "data",
+      "labels": {
+        "en": "Data",
+        "zh-TW": "資料"
+      },
+      "covers": "Data analysis, queries, charts"
+    },
+    {
+      "id": "research",
+      "labels": {
+        "en": "Research",
+        "zh-TW": "研究"
+      },
+      "covers": "Looking things up, comparing options"
+    },
+    {
+      "id": "writing",
+      "labels": {
+        "en": "Writing",
+        "zh-TW": "撰寫"
+      },
+      "covers": "Documents, emails, reports"
+    },
+    {
+      "id": "docs",
+      "labels": {
+        "en": "Docs",
+        "zh-TW": "文件"
+      },
+      "covers": "Code documentation, READMEs"
+    },
+    {
+      "id": "translation",
+      "labels": {
+        "en": "Translate",
+        "zh-TW": "翻譯"
+      },
+      "covers": "Translation and localization"
+    },
+    {
+      "id": "design",
+      "labels": {
+        "en": "Design",
+        "zh-TW": "設計"
+      },
+      "covers": "UI, visuals, mockups"
+    },
+    {
+      "id": "planning",
+      "labels": {
+        "en": "Planning",
+        "zh-TW": "規劃"
+      },
+      "covers": "Plans, specs, task breakdowns"
+    },
+    {
+      "id": "slides",
+      "labels": {
+        "en": "Slides",
+        "zh-TW": "簡報"
+      },
+      "covers": "Presentations"
+    },
+    {
+      "id": "spreadsheet",
+      "labels": {
+        "en": "Sheets",
+        "zh-TW": "試算表"
+      },
+      "covers": "Spreadsheets, financial models"
+    },
+    {
+      "id": "legal",
+      "labels": {
+        "en": "Legal",
+        "zh-TW": "法務"
+      },
+      "covers": "Contracts, policies, legal questions"
+    },
+    {
+      "id": "finance",
+      "labels": {
+        "en": "Finance",
+        "zh-TW": "財務"
+      },
+      "covers": "Accounting, budgets, financial analysis"
+    },
+    {
+      "id": "marketing",
+      "labels": {
+        "en": "Marketing",
+        "zh-TW": "行銷"
+      },
+      "covers": "Marketing copy, campaigns"
+    },
+    {
+      "id": "question",
+      "labels": {
+        "en": "Q&A",
+        "zh-TW": "問答"
+      },
+      "covers": "Answering a question"
+    },
+    {
+      "id": "general",
+      "labels": {
+        "en": "Working",
+        "zh-TW": "處理中"
+      },
+      "covers": "Fallback"
+    }
+  ]
+}

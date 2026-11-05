@@ -1,0 +1,199 @@
+{
+ "protocol": 1,
+ "events": [
+  {
+   "type": "session.open",
+   "sessionId": "s1",
+   "seq": 1,
+   "ts": 1762353000000,
+   "projectId": "p9f2",
+   "projectName": "claude-town",
+   "surface": "terminal",
+   "ccVersion": "2.1.318",
+   "model": "claude-opus-5-5"
+  },
+  {
+   "type": "session.open",
+   "sessionId": "s2",
+   "seq": 1,
+   "ts": 1762353001000,
+   "projectId": "p9f2",
+   "projectName": "claude-town",
+   "surface": "desktop",
+   "ccVersion": "2.1.318"
+  },
+  {
+   "type": "session.open",
+   "sessionId": "s3",
+   "seq": 1,
+   "ts": 1762353002000,
+   "projectId": "p7c1",
+   "projectName": "care-portal",
+   "surface": "terminal",
+   "ccVersion": "2.1.318",
+   "model": "claude-sonnet-5-5"
+  },
+  {
+   "type": "ticket.submit",
+   "sessionId": "s1",
+   "seq": 2,
+   "ts": 1762353005000,
+   "projectId": "p9f2",
+   "ticketId": "t1",
+   "text": "Review the protocol schema with a team",
+   "origin": "user"
+  },
+  {
+   "type": "ticket.submit",
+   "sessionId": "s3",
+   "seq": 2,
+   "ts": 1762353005200,
+   "projectId": "p7c1",
+   "ticketId": "t1",
+   "text": "修正登入頁面的錯誤",
+   "origin": "user"
+  },
+  {
+   "type": "chief.hat",
+   "sessionId": "s1",
+   "seq": 3,
+   "ts": 1762353006000,
+   "projectId": "p9f2",
+   "ticketId": "t1",
+   "taskType": "code-review"
+  },
+  {
+   "type": "chief.hat",
+   "sessionId": "s3",
+   "seq": 3,
+   "ts": 1762353006300,
+   "projectId": "p7c1",
+   "ticketId": "t1",
+   "taskType": "debugging"
+  },
+  {
+   "type": "staff.hire",
+   "sessionId": "s1",
+   "seq": 4,
+   "ts": 1762353008000,
+   "projectId": "p9f2",
+   "agentId": "tm1",
+   "subagentType": "teammate",
+   "name": "reviewer",
+   "description": "Review schema for missing fields",
+   "teammate": true,
+   "background": true
+  },
+  {
+   "type": "staff.hire",
+   "sessionId": "s1",
+   "seq": 5,
+   "ts": 1762353008100,
+   "projectId": "p9f2",
+   "agentId": "tm2",
+   "subagentType": "teammate",
+   "name": "tester",
+   "description": "Write fixture tests",
+   "teammate": true,
+   "background": true
+  },
+  {
+   "type": "staff.role",
+   "sessionId": "s1",
+   "seq": 6,
+   "ts": 1762353009000,
+   "projectId": "p9f2",
+   "agentId": "tm1",
+   "role": "code-reviewer"
+  },
+  {
+   "type": "staff.role",
+   "sessionId": "s1",
+   "seq": 7,
+   "ts": 1762353009100,
+   "projectId": "p9f2",
+   "agentId": "tm2",
+   "role": "qa-engineer"
+  },
+  {
+   "type": "message.send",
+   "sessionId": "s1",
+   "seq": 8,
+   "ts": 1762353020000,
+   "projectId": "p9f2",
+   "fromAgentId": "tm1",
+   "toAgentId": "tm2"
+  },
+  {
+   "type": "message.send",
+   "sessionId": "s1",
+   "seq": 9,
+   "ts": 1762353025000,
+   "projectId": "p9f2",
+   "fromAgentId": "tm2",
+   "toName": "reviewer"
+  },
+  {
+   "type": "message.send",
+   "sessionId": "s1",
+   "seq": 10,
+   "ts": 1762353026000,
+   "projectId": "p9f2",
+   "toAgentId": "tm1"
+  },
+  {
+   "type": "activity",
+   "sessionId": "s3",
+   "seq": 4,
+   "ts": 1762353030000,
+   "projectId": "p7c1",
+   "kind": "edit",
+   "tool": "Edit"
+  },
+  {
+   "type": "ticket.done",
+   "sessionId": "s3",
+   "seq": 5,
+   "ts": 1762353045000,
+   "projectId": "p7c1",
+   "ticketId": "t1",
+   "durationMs": 39800,
+   "aborted": true
+  },
+  {
+   "type": "staff.done",
+   "sessionId": "s1",
+   "seq": 11,
+   "ts": 1762353060000,
+   "projectId": "p9f2",
+   "agentId": "tm1",
+   "status": "completed"
+  },
+  {
+   "type": "staff.done",
+   "sessionId": "s1",
+   "seq": 12,
+   "ts": 1762353061000,
+   "projectId": "p9f2",
+   "agentId": "tm2",
+   "status": "completed"
+  },
+  {
+   "type": "ticket.done",
+   "sessionId": "s1",
+   "seq": 13,
+   "ts": 1762353070000,
+   "projectId": "p9f2",
+   "ticketId": "t1",
+   "durationMs": 65000,
+   "aborted": false
+  },
+  {
+   "type": "heartbeat",
+   "sessionId": "s2",
+   "seq": 2,
+   "ts": 1762353080000,
+   "projectId": "p9f2"
+  }
+ ]
+}

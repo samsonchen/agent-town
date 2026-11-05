@@ -1,0 +1,175 @@
+{
+ "protocol": 1,
+ "events": [
+  {
+   "type": "session.open",
+   "sessionId": "s1",
+   "seq": 1,
+   "ts": 1762353000000,
+   "projectId": "p9f2",
+   "projectName": "claude-town",
+   "surface": "terminal",
+   "ccVersion": "2.1.318",
+   "model": "claude-opus-5-5"
+  },
+  {
+   "type": "ticket.submit",
+   "sessionId": "s1",
+   "seq": 2,
+   "ts": 1762353005000,
+   "projectId": "p9f2",
+   "ticketId": "t1",
+   "text": "Add a settings screen with a sound threshold slider",
+   "origin": "user"
+  },
+  {
+   "type": "chief.hat",
+   "sessionId": "s1",
+   "seq": 3,
+   "ts": 1762353006100,
+   "projectId": "p9f2",
+   "ticketId": "t1",
+   "taskType": "coding"
+  },
+  {
+   "type": "staff.hire",
+   "sessionId": "s1",
+   "seq": 4,
+   "ts": 1762353012000,
+   "projectId": "p9f2",
+   "agentId": "a1",
+   "subagentType": "general-purpose",
+   "description": "Build the SwiftUI settings view",
+   "teammate": false,
+   "background": false
+  },
+  {
+   "type": "staff.hire",
+   "sessionId": "s1",
+   "seq": 5,
+   "ts": 1762353012050,
+   "projectId": "p9f2",
+   "agentId": "a2",
+   "subagentType": "Explore",
+   "description": "Find where settings are stored",
+   "teammate": false,
+   "background": false,
+   "model": "haiku"
+  },
+  {
+   "type": "staff.role",
+   "sessionId": "s1",
+   "seq": 6,
+   "ts": 1762353012900,
+   "projectId": "p9f2",
+   "agentId": "a2",
+   "role": "swift-engineer"
+  },
+  {
+   "type": "staff.role",
+   "sessionId": "s1",
+   "seq": 7,
+   "ts": 1762353013200,
+   "projectId": "p9f2",
+   "agentId": "a1",
+   "role": "swift-engineer"
+  },
+  {
+   "type": "model.update",
+   "sessionId": "s1",
+   "seq": 8,
+   "ts": 1762353013500,
+   "projectId": "p9f2",
+   "agentId": "a2",
+   "model": "claude-haiku-5-5"
+  },
+  {
+   "type": "model.update",
+   "sessionId": "s1",
+   "seq": 9,
+   "ts": 1762353013600,
+   "projectId": "p9f2",
+   "agentId": "a1",
+   "model": "claude-opus-5-5"
+  },
+  {
+   "type": "activity",
+   "sessionId": "s1",
+   "seq": 10,
+   "ts": 1762353014000,
+   "projectId": "p9f2",
+   "agentId": "a1",
+   "kind": "edit",
+   "tool": "Write"
+  },
+  {
+   "type": "activity",
+   "sessionId": "s1",
+   "seq": 11,
+   "ts": 1762353014500,
+   "projectId": "p9f2",
+   "agentId": "a2",
+   "kind": "read",
+   "tool": "Grep"
+  },
+  {
+   "type": "staff.done",
+   "sessionId": "s1",
+   "seq": 12,
+   "ts": 1762353030000,
+   "projectId": "p9f2",
+   "agentId": "a2",
+   "status": "completed",
+   "durationMs": 18000
+  },
+  {
+   "type": "approval.wait",
+   "sessionId": "s1",
+   "seq": 13,
+   "ts": 1762353040000,
+   "projectId": "p9f2",
+   "approvalId": "toolu_01",
+   "agentId": "a1",
+   "tool": "Bash"
+  },
+  {
+   "type": "approval.end",
+   "sessionId": "s1",
+   "seq": 14,
+   "ts": 1762353052000,
+   "projectId": "p9f2",
+   "approvalId": "toolu_01",
+   "outcome": "allowed"
+  },
+  {
+   "type": "activity",
+   "sessionId": "s1",
+   "seq": 15,
+   "ts": 1762353053000,
+   "projectId": "p9f2",
+   "agentId": "a1",
+   "kind": "shell",
+   "tool": "Bash"
+  },
+  {
+   "type": "staff.done",
+   "sessionId": "s1",
+   "seq": 16,
+   "ts": 1762353080000,
+   "projectId": "p9f2",
+   "agentId": "a1",
+   "status": "completed",
+   "durationMs": 68000
+  },
+  {
+   "type": "ticket.done",
+   "sessionId": "s1",
+   "seq": 17,
+   "ts": 1762353095000,
+   "projectId": "p9f2",
+   "ticketId": "t1",
+   "durationMs": 90000,
+   "aborted": false
+  }
+ ]
+}

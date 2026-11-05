@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "families": [
+    {
+      "match": "fable",
+      "family": "Fable"
+    },
+    {
+      "match": "opus",
+      "family": "Opus"
+    },
+    {
+      "match": "sonnet",
+      "family": "Sonnet"
+    },
+    {
+      "match": "haiku",
+      "family": "Haiku"
+    }
+  ]
+}

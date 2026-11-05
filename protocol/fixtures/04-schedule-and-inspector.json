@@ -1,0 +1,112 @@
+{
+ "protocol": 1,
+ "events": [
+  {
+   "type": "session.open",
+   "sessionId": "s1",
+   "seq": 1,
+   "ts": 1762353000000,
+   "projectId": "p9f2",
+   "projectName": "claude-town",
+   "surface": "terminal",
+   "ccVersion": "2.1.318",
+   "model": "claude-opus-5-5"
+  },
+  {
+   "type": "ticket.submit",
+   "sessionId": "s1",
+   "seq": 2,
+   "ts": 1762353005000,
+   "projectId": "p9f2",
+   "ticketId": "t1",
+   "text": "/loop check the CI run every 10 minutes",
+   "origin": "user"
+  },
+  {
+   "type": "chief.hat",
+   "sessionId": "s1",
+   "seq": 3,
+   "ts": 1762353006000,
+   "projectId": "p9f2",
+   "ticketId": "t1",
+   "taskType": "devops"
+  },
+  {
+   "type": "schedule.create",
+   "sessionId": "s1",
+   "seq": 4,
+   "ts": 1762353008000,
+   "projectId": "p9f2",
+   "scheduleId": "cron_1",
+   "text": "check the CI run",
+   "recurring": true,
+   "nextRunTs": 1762353608000
+  },
+  {
+   "type": "ticket.done",
+   "sessionId": "s1",
+   "seq": 5,
+   "ts": 1762353009000,
+   "projectId": "p9f2",
+   "ticketId": "t1",
+   "durationMs": 4000,
+   "aborted": false
+  },
+  {
+   "type": "ticket.submit",
+   "sessionId": "s1",
+   "seq": 6,
+   "ts": 1762353608000,
+   "projectId": "p9f2",
+   "ticketId": "t2",
+   "text": "check the CI run",
+   "origin": "schedule",
+   "scheduleId": "cron_1"
+  },
+  {
+   "type": "activity",
+   "sessionId": "s1",
+   "seq": 7,
+   "ts": 1762353609000,
+   "projectId": "p9f2",
+   "kind": "shell",
+   "tool": "Bash"
+  },
+  {
+   "type": "ticket.return",
+   "sessionId": "s1",
+   "seq": 8,
+   "ts": 1762353640000,
+   "projectId": "p9f2",
+   "ticketId": "t2",
+   "reason": "Stop hook: tests must pass before finishing"
+  },
+  {
+   "type": "activity",
+   "sessionId": "s1",
+   "seq": 9,
+   "ts": 1762353641000,
+   "projectId": "p9f2",
+   "kind": "edit",
+   "tool": "Edit"
+  },
+  {
+   "type": "ticket.done",
+   "sessionId": "s1",
+   "seq": 10,
+   "ts": 1762353700000,
+   "projectId": "p9f2",
+   "ticketId": "t2",
+   "durationMs": 92000,
+   "aborted": false
+  },
+  {
+   "type": "schedule.delete",
+   "sessionId": "s1",
+   "seq": 11,
+   "ts": 1762353720000,
+   "projectId": "p9f2",
+   "scheduleId": "cron_1"
+  }
+ ]
+}

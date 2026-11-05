@@ -1,0 +1,862 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/samsonchen/claude-town/protocol/schema/v1.schema.json",
+  "title": "claude-town protocol v1 batch",
+  "description": "POST /v1/events body. Senders must send only known events. Receivers ignore unknown event types and unknown fields (see docs/protocol.md).",
+  "type": "object",
+  "required": [
+    "protocol",
+    "events"
+  ],
+  "properties": {
+    "protocol": {
+      "const": 1
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/knownEvent"
+      }
+    }
+  },
+  "$defs": {
+    "envelope": {
+      "type": "object",
+      "required": [
+        "type",
+        "sessionId",
+        "seq",
+        "ts",
+        "projectId"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "projectId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
+    },
+    "session.open": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "projectName",
+            "surface",
+            "ccVersion"
+          ],
+          "properties": {
+            "type": {
+              "const": "session.open"
+            },
+            "projectName": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "surface": {
+              "type": "string",
+              "enum": [
+                "terminal",
+                "desktop",
+                "vscode",
+                "mobile",
+                "headless"
+              ]
+            },
+            "ccVersion": {
+              "type": "string"
+            },
+            "locale": {
+              "type": "string"
+            },
+            "model": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "session.close": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "reason"
+          ],
+          "properties": {
+            "type": {
+              "const": "session.close"
+            },
+            "reason": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "heartbeat": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "const": "heartbeat"
+            }
+          }
+        }
+      ]
+    },
+    "ticket.submit": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "ticketId",
+            "text"
+          ],
+          "properties": {
+            "type": {
+              "const": "ticket.submit"
+            },
+            "ticketId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "text": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "origin": {
+              "type": "string",
+              "enum": [
+                "user",
+                "schedule",
+                "task",
+                "unknown"
+              ]
+            },
+            "scheduleId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "taskIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "parentTicketId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        }
+      ]
+    },
+    "chief.hat": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "ticketId",
+            "taskType"
+          ],
+          "properties": {
+            "type": {
+              "const": "chief.hat"
+            },
+            "ticketId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "taskType": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        }
+      ]
+    },
+    "ticket.done": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "ticketId",
+            "durationMs",
+            "aborted"
+          ],
+          "properties": {
+            "type": {
+              "const": "ticket.done"
+            },
+            "ticketId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "durationMs": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "aborted": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "ticket.return": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "ticketId"
+          ],
+          "properties": {
+            "type": {
+              "const": "ticket.return"
+            },
+            "ticketId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "reason": {
+              "type": "string",
+              "maxLength": 200
+            }
+          }
+        }
+      ]
+    },
+    "staff.hire": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "agentId",
+            "subagentType",
+            "description",
+            "teammate",
+            "background"
+          ],
+          "properties": {
+            "type": {
+              "const": "staff.hire"
+            },
+            "agentId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "parentAgentId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "subagentType": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "name": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "teammate": {
+              "type": "boolean"
+            },
+            "background": {
+              "type": "boolean"
+            },
+            "model": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "staff.role": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "agentId",
+            "role"
+          ],
+          "properties": {
+            "type": {
+              "const": "staff.role"
+            },
+            "agentId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        }
+      ]
+    },
+    "staff.done": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "agentId",
+            "status"
+          ],
+          "properties": {
+            "type": {
+              "const": "staff.done"
+            },
+            "agentId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed",
+                "killed",
+                "aborted"
+              ]
+            },
+            "durationMs": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      ]
+    },
+    "model.update": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "model"
+          ],
+          "properties": {
+            "type": {
+              "const": "model.update"
+            },
+            "agentId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "model": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    },
+    "task.start": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "taskId",
+            "kind",
+            "description"
+          ],
+          "properties": {
+            "type": {
+              "const": "task.start"
+            },
+            "taskId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "shell",
+                "monitor",
+                "workflow",
+                "other"
+              ]
+            },
+            "agentId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "ticketId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        }
+      ]
+    },
+    "task.role": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "taskId",
+            "role"
+          ],
+          "properties": {
+            "type": {
+              "const": "task.role"
+            },
+            "taskId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        }
+      ]
+    },
+    "task.done": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "taskId",
+            "status"
+          ],
+          "properties": {
+            "type": {
+              "const": "task.done"
+            },
+            "taskId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed",
+                "killed"
+              ]
+            },
+            "durationMs": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      ]
+    },
+    "schedule.create": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "scheduleId",
+            "text",
+            "recurring"
+          ],
+          "properties": {
+            "type": {
+              "const": "schedule.create"
+            },
+            "scheduleId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "text": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "recurring": {
+              "type": "boolean"
+            },
+            "nextRunTs": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      ]
+    },
+    "schedule.delete": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "scheduleId"
+          ],
+          "properties": {
+            "type": {
+              "const": "schedule.delete"
+            },
+            "scheduleId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        }
+      ]
+    },
+    "message.send": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "const": "message.send"
+            },
+            "fromAgentId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "toAgentId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "toName": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "broadcast": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "activity": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "kind",
+            "tool"
+          ],
+          "properties": {
+            "type": {
+              "const": "activity"
+            },
+            "agentId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "read",
+                "edit",
+                "shell",
+                "web",
+                "mcp",
+                "other"
+              ]
+            },
+            "tool": {
+              "type": "string",
+              "maxLength": 200
+            }
+          }
+        }
+      ]
+    },
+    "approval.wait": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "approvalId",
+            "tool"
+          ],
+          "properties": {
+            "type": {
+              "const": "approval.wait"
+            },
+            "approvalId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "agentId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "tool": {
+              "type": "string",
+              "maxLength": 200
+            }
+          }
+        }
+      ]
+    },
+    "approval.end": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "approvalId",
+            "outcome"
+          ],
+          "properties": {
+            "type": {
+              "const": "approval.end"
+            },
+            "approvalId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "outcome": {
+              "type": "string",
+              "enum": [
+                "allowed",
+                "denied",
+                "unknown"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "knownEvent": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/session.open"
+        },
+        {
+          "$ref": "#/$defs/session.close"
+        },
+        {
+          "$ref": "#/$defs/heartbeat"
+        },
+        {
+          "$ref": "#/$defs/ticket.submit"
+        },
+        {
+          "$ref": "#/$defs/chief.hat"
+        },
+        {
+          "$ref": "#/$defs/ticket.done"
+        },
+        {
+          "$ref": "#/$defs/ticket.return"
+        },
+        {
+          "$ref": "#/$defs/staff.hire"
+        },
+        {
+          "$ref": "#/$defs/staff.role"
+        },
+        {
+          "$ref": "#/$defs/staff.done"
+        },
+        {
+          "$ref": "#/$defs/model.update"
+        },
+        {
+          "$ref": "#/$defs/task.start"
+        },
+        {
+          "$ref": "#/$defs/task.role"
+        },
+        {
+          "$ref": "#/$defs/task.done"
+        },
+        {
+          "$ref": "#/$defs/schedule.create"
+        },
+        {
+          "$ref": "#/$defs/schedule.delete"
+        },
+        {
+          "$ref": "#/$defs/message.send"
+        },
+        {
+          "$ref": "#/$defs/activity"
+        },
+        {
+          "$ref": "#/$defs/approval.wait"
+        },
+        {
+          "$ref": "#/$defs/approval.end"
+        }
+      ]
+    },
+    "endpointFile": {
+      "type": "object",
+      "required": [
+        "protocol",
+        "port",
+        "token",
+        "pid",
+        "app",
+        "appVersion"
+      ],
+      "properties": {
+        "protocol": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "token": {
+          "type": "string",
+          "minLength": 32
+        },
+        "pid": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "app": {
+          "const": "claude-town"
+        },
+        "appVersion": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
