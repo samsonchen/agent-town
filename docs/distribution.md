@@ -4,18 +4,18 @@ Users install two things: the macOS app and the Claude Code plugin. Neither shou
 
 ## The plugin: this repo is the marketplace
 
-The repo root holds `.claude-plugin/marketplace.json`, which lists one plugin, `agent-town`, with its source at `./plugin`. The plugin cannot be called `claude-town`: Claude Code reserves names that start with `claude-`. The app and the repository keep the name claude-town. Users install it in a Claude Code session:
+The repo root holds `.claude-plugin/marketplace.json`, which lists one plugin, `town-link`, with its source at `./plugin`. The plugin links Claude Code to the town app; it cannot be called `claude-town`, because Claude Code reserves names that start with `claude-`. The app and the repository keep the name claude-town. Users install it in a Claude Code session:
 
 ```
 /plugin marketplace add samsonchen/claude-town
-/plugin install agent-town@agent-town
+/plugin install town-link@agent-town
 ```
 
 Or from the shell:
 
 ```bash
 claude plugin marketplace add samsonchen/claude-town
-claude plugin install agent-town@agent-town
+claude plugin install town-link@agent-town
 ```
 
 The marketplace name (`agent-town`, after the `@`; it avoids the reserved `claude-` prefix too) is set in `marketplace.json`. Updates arrive through Claude Code's normal plugin update flow.
