@@ -1,6 +1,6 @@
-# claude-town docs
+# agent-town docs
 
-claude-town shows Claude Code's work as a small office building. The user is the CEO. Each Claude Code session is a Chief of Staff. Each subagent is a staff member whose job title matches the work it was given.
+agent-town shows Claude Code's work as a small office building. The user is the CEO. Each Claude Code session is a Chief of Staff. Each subagent is a staff member whose job title matches the work it was given.
 
 The project has two parts:
 
@@ -17,7 +17,8 @@ The project has two parts:
 | [roles.md](roles.md) | The staff role catalog and the Chief of Staff's task types (hats) |
 | [distribution.md](distribution.md) | How users install the app and the plugin without building from source |
 | [roadmap.md](roadmap.md) | Build phases, items to verify before coding, and open questions |
+| [verification.md](verification.md) | Phase 0 answers: what the Claude Code mod API provides, checked against the types and a live session |
 
 ## Status
 
-Planning. No code yet. These documents are the input for implementation with Claude Code.
+Phase 0 (verification) and Phase 1 (catalogs, protocol schema and fixtures, debug receiver) are done. Results are in [verification.md](verification.md). Phase 2, the macOS app, is next.

@@ -1,9 +1,9 @@
-// claude-town Phase 0 recorder.
+// agent-town Phase 0 recorder.
 //
-// Observes the Claude Code events claude-town uses and appends one JSON line per
-// event to ~/Library/Application Support/claude-town/recorder/<session>.jsonl.
+// Observes the Claude Code events agent-town uses and appends one JSON line per
+// event to ~/Library/Application Support/agent-town/recorder/<session>.jsonl.
 // Every hook passes the event on unchanged. It also runs two probes once per
-// session: a POST to the claude-town endpoint (Phase 0 item 1) and a Haiku
+// session: a POST to the agent-town endpoint (Phase 0 item 1) and a Haiku
 // classification over the role catalog (item 6).
 
 import type { Register } from 'claude-code'
@@ -52,7 +52,7 @@ export const register: Register = on => {
       started = Date.now()
       const home = await $.env.get('HOME')
       const sid = await $.session.id()
-      outPath = `${home}/Library/Application Support/claude-town/recorder/${sid}.jsonl`
+      outPath = `${home}/Library/Application Support/agent-town/recorder/${sid}.jsonl`
       rec('session.start', {
         e: snap(e),
         sessionId: sid,
@@ -68,7 +68,7 @@ export const register: Register = on => {
         })
       })
       // Probe 1: POST to the endpoint, if the app or the debug receiver runs.
-      const ep = `${home}/Library/Application Support/claude-town/endpoint.json`
+      const ep = `${home}/Library/Application Support/agent-town/endpoint.json`
       if (await $.fs.exists(ep)) {
         const info = JSON.parse(String(await $.fs.read(ep))) as { port: number; token: string }
         const t0 = Date.now()

@@ -1,4 +1,4 @@
-"""Convert Kenney GLB models to USDZ for the claude-town app.
+"""Convert Kenney GLB models to USDZ for the agent-town app.
 
 Run from the repository root:
 

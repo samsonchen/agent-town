@@ -96,7 +96,7 @@ Each Chief of Staff and staff member can show a small badge with the model it is
 - The badge shows the model family name, looked up in `catalog/models.json`. A model ID that matches no entry is shown in short form, for example `foo-2-5` for `claude-foo-2-5-20260101` (rules in [architecture.md](architecture.md)).
 - The badge shows the model that actually answered the character's latest request. If the user switches models with `/model`, or a subagent runs on a different model from its parent, the badge follows.
 - Until the first request is answered, the badge shows the requested model. For a subagent with no requested model, this is the parent's current model: the Chief of Staff's, or the parent staff member's for a nested subagent.
-- The Haiku calls claude-town itself makes for role and task-type classification are not shown.
+- The Haiku calls agent-town itself makes for role and task-type classification are not shown.
 - An app setting shows or hides all badges. Default: hidden.
 
 ### Activities

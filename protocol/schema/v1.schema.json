@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/samsonchen/claude-town/protocol/schema/v1.schema.json",
-  "title": "claude-town protocol v1 batch",
+  "$id": "https://github.com/samsonchen/agent-town/protocol/schema/v1.schema.json",
+  "title": "agent-town protocol v1 batch",
   "description": "POST /v1/events body. Senders must send only known events. Receivers ignore unknown event types and unknown fields (see docs/protocol.md).",
   "type": "object",
   "required": [
@@ -851,7 +851,7 @@
           "minimum": 1
         },
         "app": {
-          "const": "claude-town"
+          "const": "agent-town"
         },
         "appVersion": {
           "type": "string"

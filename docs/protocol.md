@@ -1,6 +1,6 @@
 # Protocol v1
 
-The protocol between the claude-town mod (sender) and a claude-town app (receiver). It has no platform-specific parts except the location of the endpoint file. The JSON Schema for every event goes in `protocol/schema/`, and recorded event streams for tests go in `protocol/fixtures/`.
+The protocol between the agent-town mod (sender) and a agent-town app (receiver). It has no platform-specific parts except the location of the endpoint file. The JSON Schema for every event goes in `protocol/schema/`, and recorded event streams for tests go in `protocol/fixtures/`.
 
 ## Transport
 
@@ -37,16 +37,16 @@ The app writes this file when its server starts and deletes it on quit. Mode 060
   "port": 51234,
   "token": "random-32-bytes-base64url",
   "pid": 4242,
-  "app": "claude-town",
+  "app": "agent-town",
   "appVersion": "0.1.0"
 }
 ```
 
 | Platform | Path |
 |---|---|
-| macOS | `~/Library/Application Support/claude-town/endpoint.json` |
-| Windows | `%APPDATA%\claude-town\endpoint.json` (future) |
-| Linux | `$XDG_STATE_HOME/claude-town/endpoint.json` (future) |
+| macOS | `~/Library/Application Support/agent-town/endpoint.json` |
+| Windows | `%APPDATA%\agent-town\endpoint.json` (future) |
+| Linux | `$XDG_STATE_HOME/agent-town/endpoint.json` (future) |
 
 ## Event envelope
 
@@ -247,7 +247,7 @@ The message text is not sent.
 
 ```json
 {"protocol":1,"events":[
- {"type":"session.open","sessionId":"s1","seq":1,"ts":1762353000000,"projectId":"p9f2","projectName":"claude-town","surface":"terminal","ccVersion":"2.1.300"},
+ {"type":"session.open","sessionId":"s1","seq":1,"ts":1762353000000,"projectId":"p9f2","projectName":"agent-town","surface":"terminal","ccVersion":"2.1.300"},
  {"type":"ticket.submit","sessionId":"s1","seq":2,"ts":1762353005000,"projectId":"p9f2","ticketId":"t1","text":"Add a settings screen with a sound threshold slider"},
  {"type":"chief.hat","sessionId":"s1","seq":3,"ts":1762353006100,"projectId":"p9f2","ticketId":"t1","taskType":"coding"},
  {"type":"staff.hire","sessionId":"s1","seq":4,"ts":1762353012000,"projectId":"p9f2","agentId":"a1","subagentType":"general-purpose","description":"Build the SwiftUI settings view","teammate":false,"background":false},

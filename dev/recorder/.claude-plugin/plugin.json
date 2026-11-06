@@ -3,5 +3,5 @@
   "version": "0.1.0",
   "author": { "name": "Samson Chen" },
   "license": "Apache-2.0",
-  "description": "Phase 0 recorder for claude-town: logs the Claude Code events claude-town uses to a JSONL file, and probes loopback HTTP and classification."
+  "description": "Phase 0 recorder for agent-town: logs the Claude Code events agent-town uses to a JSONL file, and probes loopback HTTP and classification."
 }

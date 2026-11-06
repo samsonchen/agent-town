@@ -1,4 +1,4 @@
-"""Validate claude-town protocol batches against protocol/schema/v1.schema.json.
+"""Validate agent-town protocol batches against protocol/schema/v1.schema.json.
 
 Standard library only. Implements the JSON Schema keywords the v1 schema uses:
 type, const, enum, required, properties, items, minLength, maxLength,

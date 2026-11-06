@@ -1,4 +1,4 @@
-"""claude-town debug receiver: a stand-in for the app that prints incoming events.
+"""agent-town debug receiver: a stand-in for the app that prints incoming events.
 
 It does what the app's loopback server does (docs/protocol.md):
 - binds 127.0.0.1 on a random port (or --port);
@@ -28,7 +28,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from protocol_check import check_batch, load_schema  # noqa: E402
 
 DEFAULT_ENDPOINT = os.path.expanduser(
-    "~/Library/Application Support/claude-town/endpoint.json"
+    "~/Library/Application Support/agent-town/endpoint.json"
 )
 PROTOCOL = 1
 APP_VERSION = "0.0.0-debug"
@@ -45,7 +45,7 @@ def write_endpoint(path, port, token):
                 "port": port,
                 "token": token,
                 "pid": os.getpid(),
-                "app": "claude-town",
+                "app": "agent-town",
                 "appVersion": APP_VERSION,
             },
             fh,
@@ -56,7 +56,7 @@ def write_endpoint(path, port, token):
 
 def make_handler(token, schema, log_path, quiet):
     class Handler(BaseHTTPRequestHandler):
-        server_version = "claude-town-debug"
+        server_version = "agent-town-debug"
 
         def log_message(self, format, *args):  # noqa: A002 - silence access log
             pass
@@ -109,7 +109,7 @@ def make_handler(token, schema, log_path, quiet):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="claude-town debug receiver")
+    ap = argparse.ArgumentParser(description="agent-town debug receiver")
     ap.add_argument("--port", type=int, default=0)
     ap.add_argument("--endpoint", default=DEFAULT_ENDPOINT)
     ap.add_argument("--log")
@@ -123,7 +123,7 @@ def main():
     )
     port = server.server_address[1]
     write_endpoint(args.endpoint, port, token)
-    print(f"claude-town debug receiver on http://127.0.0.1:{port}/v1/events")
+    print(f"agent-town debug receiver on http://127.0.0.1:{port}/v1/events")
     print(f"endpoint file: {args.endpoint}")
     sys.stdout.flush()
 

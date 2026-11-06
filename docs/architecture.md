@@ -5,12 +5,12 @@
 ```mermaid
 flowchart LR
   subgraph CC["Claude Code session (CLI or Desktop Code tab)"]
-    E[Claude Code events] --> M[claude-town mod]
+    E[Claude Code events] --> M[agent-town mod]
     M --> C[Classifier<br/>$.model.classify]
     C --> M
   end
   M -- "JSON events over HTTP<br/>127.0.0.1 + token" --> S
-  subgraph APP["claude-town.app (macOS)"]
+  subgraph APP["agent-town.app (macOS)"]
     S[Loopback server] --> ST[Building state]
     ST --> CH[Choreographer<br/>per-character queues]
     CH --> SC[RealityKit scene]
@@ -35,7 +35,7 @@ The protocol between them is in [protocol.md](protocol.md). It has no macOS-spec
 ## Repository layout
 
 ```
-claude-town/
+agent-town/
 ├── .claude-plugin/
 │   └── marketplace.json        # makes this repo a plugin marketplace
 ├── plugin/                     # the Claude Code plugin containing the mod
@@ -114,13 +114,13 @@ Rules for every hook:
 - Ignore any `agentId` that was never seen in `agent.spawn` (engine forks such as compaction carry such IDs).
 - Never `await` a network call or a classification inside a hook. Push the event into an outbox and return.
 - An outbox timer (`$.clock.every`, about every 250 ms) sends queued events in one POST. If the app is not running, drop the batch and try the endpoint file again later. Do not retry old events.
-- Wrap everything in `try`/`catch`. A failure in claude-town must never affect the Claude Code session.
+- Wrap everything in `try`/`catch`. A failure in agent-town must never affect the Claude Code session.
 
 ### Model badge source
 
 - **Chief of Staff:** `session.open` carries `$.session.model()`. After that, each main `turn.complete` carries `usage?.model`, the model that answered last in that turn.
 - **Staff:** `staff.hire` carries the resolved `model` from `agent.spawn`'s result. After that, the staff member's `turn.complete` updates it.
-- **claude-town's own calls:** `$.model.classify` is a separate operation and does not raise `turn.step` or `turn.complete`, so it never touches a badge (Phase 0 item 12).
+- **agent-town's own calls:** `$.model.classify` is a separate operation and does not raise `turn.step` or `turn.complete`, so it never touches a badge (Phase 0 item 12).
 
 ### Turn origin
 
