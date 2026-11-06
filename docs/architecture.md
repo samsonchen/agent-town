@@ -89,14 +89,15 @@ Event and field names are checked against Claude Code 2.1.318. See [verification
 | `prompt.submit` with `turnId` absent and `origin.kind` `composer` | Start task-type classification in the background; pass the prompt on unchanged | `ticket.submit` (`origin: user`), later `chief.hat` |
 | `prompt.submit` with `turnId` absent and `origin.kind` `task-notification` | Parse the task IDs and statuses from the text | `task.done` for each task, then `ticket.submit` (`origin: task`) |
 | `prompt.submit` with `turnId` absent and `origin.kind` `scheduled-trigger` | | `ticket.submit` (`origin: schedule`) |
+| `prompt.submit` with `turnId` absent and `origin.kind` `auto-continuation` | A Stop hook sent the work back. Not a new ticket | `ticket.return` for the last ticket (the app reopens it if `ticket.done` already arrived) |
 | `prompt.submit` with `turnId` absent and any other `origin.kind` | | `ticket.submit` (`origin: unknown`) |
 | `prompt.submit` with `turnId` set (delivered into a running turn) | A `task-notification` still ends its tasks; no new ticket | `task.done` when it is a task notification |
 | `turn.complete` without `agentId` | Read `durationMs`, `isAborted`, `usage?.model` | `ticket.done`; `model.update` when the model changed |
-| `classic.Stop` whose `await next(e)` has `block` set | Keep the ticket open; diff `background_tasks` against known tasks | `ticket.return`; `task.done` for tasks no longer listed |
+| `classic.Stop` whose `await next(e)` has `block` set (backup: another plugin can keep this hook from running) | Keep the ticket open; diff `background_tasks` against known tasks | `ticket.return` unless already sent; `task.done` for tasks no longer listed |
 | `agent.spawn` | `await next(e)`; read `agentId` and `model` from the result; start role classification in the background | `staff.hire` (with `model`), later `staff.role` |
 | `turn.complete` with a known `agentId` | Read `usage?.model` | `staff.done`; `model.update` when the model changed |
 | `tool.call` | Map the tool to an activity; send it before the tool runs | `activity` |
-| `tool.check` returning `ask` with `approver === 'person'` | | `approval.wait` |
+| `tool.check` returning `ask` with `approver === 'person'`, and the call still unsettled 3 s later | In auto mode the classifier settles most asks in 1–3 s with no dialog | `approval.wait` |
 | That `tool.call`'s `next` settles | Result means allowed; `deny` or `isError` means refused | `approval.end` |
 | `tool.call` for `Bash` with `run_in_background`, `Monitor`, `Workflow` | `await next(e)`; task ID from `backgroundTaskId` (Bash) or `taskId` (Monitor, Workflow); role by rule or classification | `task.start`, later `task.role` |
 | `tool.call` for `CronCreate` | `await next(e)`; `scheduleId` is the result's `id` | `schedule.create` |
@@ -126,7 +127,7 @@ Rules for every hook:
 Every turn on the main loop that starts while the session is idle goes through `prompt.submit`. Its `origin.kind` names the issuer (see the event mapping). A prompt that carries `turnId` was delivered into a turn already running, so it adds to the open ticket instead of opening a new one.
 
 - **Task:** the notification text names the finished tasks. `parentTicketId` is the ticket that was open when the first of those tasks started. The text format is not part of the typed API, so the parser is tested against recorded notifications. As a backup, each `classic.Stop` lists the session's `background_tasks`, and a task that disappears from that list has ended.
-- **Stop-hook continuation:** not a new ticket. `classic.Stop` with `block` set sends `ticket.return`. A block raised by a managed hook, or by a module that runs before ours, is not seen. Then the work simply continues on the open ticket, with no Inspector scene.
+- **Stop-hook continuation:** not a new ticket. The main signal is a `prompt.submit` with `origin.kind: 'auto-continuation'`, which sends `ticket.return`. `classic.Stop` with `block` set is a backup only: at runtime another plugin (`cc-plugin-sec-default`) ran first and the engine skipped our Stop hook. If neither signal is seen, the work simply continues on the open ticket, with no Inspector scene.
 
 ### Background roles by rule
 
