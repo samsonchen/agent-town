@@ -15,9 +15,17 @@ It has two parts:
 
 ## Status
 
-The town-link plugin works and has been tested in a live session (Phases 0 and 1). The macOS app is next (Phase 2), so there is nothing to see yet.
+The town-link plugin works (Phases 0 and 1). The macOS app (Phase 2) shows the executive floor and a floor per project, with the CEO bringing tickets and the Chief of Staff bringing reports back. Staff, operators and the other scenes come in Phases 3 and 4.
 
-To try the plugin with the stand-in receiver, which prints each event:
+To run the app (macOS 15 or later, Xcode installed):
+
+```bash
+cd app/macos
+swift run AgentTown                       # listens for town-link
+swift run AgentTown --demo ../../protocol/fixtures/01-basic-ticket.json   # replays a recorded stream
+```
+
+To try the plugin with the stand-in receiver instead, which prints each event:
 
 ```bash
 python3 tools/debug-receiver.py          # keep it running

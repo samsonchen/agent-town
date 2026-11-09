@@ -21,4 +21,4 @@ The project has two parts:
 
 ## Status
 
-Phase 0 (verification) and Phase 1 are done: the catalogs, the protocol schema and fixtures, the debug receiver, and the town-link plugin in `plugin/`, which has been run in a live session against the debug receiver. Phase 0 results are in [verification.md](verification.md). Phase 2, the macOS app, is next.
+Phase 0 (verification) and Phase 1 are done: the catalogs, the protocol schema and fixtures, the debug receiver, and the town-link plugin in `plugin/`, which has been run in a live session against the debug receiver. Phase 0 results are in [verification.md](verification.md). Phase 2, the macOS app, is mostly done: see [roadmap.md](roadmap.md).

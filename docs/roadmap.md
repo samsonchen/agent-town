@@ -36,13 +36,16 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - Mod tests with `claude plugin test`
 - A debug receiver: a small script or a bare app window that prints incoming events. Used to look at real event timing.
 
-## Phase 2: one floor
+## Phase 2: one floor (mostly done)
 
-- App shell, loopback server, endpoint file, building state, choreographer
-- Executive floor and one project floor
-- CEO, Chief of Staff, ticket and report scenes (2, 8, 9)
-- Completion sound with the duration gate
-- State tests driven by `protocol/fixtures/`
+- [x] App shell, loopback server, endpoint file, building state, choreographer
+- [x] Executive floor and project floors (stacked apart as an exploded view, with an elevator shaft)
+- [x] CEO, Chief of Staff, ticket and report scenes (1, 2, 8, 9, 10)
+- [x] Completion sound with the duration gate (system sound for now)
+- [x] State tests driven by `protocol/fixtures/` (`swift test` in `app/macos`)
+- [x] Offscreen snapshots for checking scenes: `AgentTown --demo <fixture> --snapshot out.png --at 10`
+- [ ] Settings window (threshold, sounds, ticket text, badges, language); Cubic 11 font
+- [ ] An `.app` bundle (the package runs as a bare executable for now)
 
 ## Phase 3: staff
 
