@@ -157,7 +157,7 @@ The word lists live in `catalog/roles.json` with each background role, so they c
 
 ### Project identity
 
-The floor is keyed by the project:
+The office block is keyed by the project:
 
 1. `$.session.repo()`, when it returns a repository with a `remote`: use the remote URL, normalized (no scheme, no credentials, no `.git`).
 2. Otherwise the repository `root`, or `$.session.root()` when there is no repository: use the absolute path.
@@ -188,10 +188,10 @@ Registered with `immediate: true` so it works while Claude is busy.
 |---|---|---|
 | Shell | SwiftUI, `MenuBarExtra` | Main window, menu bar toggle, settings, first-run screen |
 | Loopback server | Network.framework (`NWListener`) | Binds 127.0.0.1 on a random port; checks the token and protocol version; writes the endpoint file |
-| Building state | Swift model | Floors, sessions, characters, pending approvals. Pure logic, unit-tested with fixtures. |
+| Building state | Swift model | Project blocks, sessions, characters, pending approvals. Pure logic, unit-tested with fixtures. |
 | Choreographer | Swift | Turns state changes into per-character action queues; applies the timing rules |
-| Scene | RealityKit in a SwiftUI `RealityView`, orthographic camera at a fixed isometric angle | Draws floors, elevator, furniture, characters, tickets, hats; plays character animation clips; handles scrolling |
-| Labels | SwiftUI overlay | Name tags, hats, model badges, ticket text. Drawn in 2D over the 3D view at each character's projected position, so text stays sharp and uses the Cubic 11 font. |
+| Scene | RealityKit in a SwiftUI `RealityView`, orthographic camera looking down at the office (62° from the floor), characters leaned back to face it | Draws the flat blocks and path (unlit tiled planes), furniture, telephones, characters, tickets, hats; plays character animation clips; lays the blocks out in a grid; handles panning |
+| Labels | SwiftUI overlay | Name tags, hats, model badges, ticket text, block signs, ring tags and call lines. Drawn in 2D over the 3D view at each character's projected position, so text stays sharp and uses the Cubic 11 font. |
 | Audio | AVFoundation | Completion and approval sounds; applies the duration gate |
 | Localization | String Catalogs plus `catalog/*.json` | UI strings and role/task labels in English and Traditional Chinese |
 
@@ -207,12 +207,12 @@ Registered with `immediate: true` so it works while Claude is busy.
 
 ```
 Building
-├── executiveFloor
-│   ├── ceo
-│   ├── dispatcher
+├── executive block
+│   ├── ceo (telephone)
+│   ├── dispatcher (radio)
 │   │   └── board: schedules[scheduleId] (sessionId, text, recurring, nextRunTs)
 │   └── inspector
-└── floors[projectId]
+└── blocks[projectId]   (removed when its last session closes)
     ├── bench[characterId] (outfit, lastRole, waitingSince)
     └── chiefs[sessionId]
         ├── currentTicket (origin, issuer, returnedCount)
@@ -221,7 +221,7 @@ Building
         └── operators[taskId] (role, kind, status, startedTicketId)
 ```
 
-The bench belongs to the floor, not to a session. Staff and operators are *characters* that move between the bench and a job. A hire or task start takes a character from the bench, and `staff.done` or `task.done` returns it. The protocol knows nothing about the bench. It is purely app-side presentation.
+The bench belongs to the block, not to a session. Staff and operators are *characters* that move between the bench and a job. A hire or task start takes a character from the bench, and `staff.done` or `task.done` returns it. The protocol knows nothing about the bench. It is purely app-side presentation.
 
 The state is updated from protocol events only. The choreographer reads state changes and schedules animations. Keeping these separate lets the state be tested without RealityKit, and lets a later Windows app reuse the same design.
 

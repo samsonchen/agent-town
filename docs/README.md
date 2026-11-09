@@ -1,11 +1,11 @@
 # agent-town docs
 
-agent-town shows Claude Code's work as a small office building. The user is the CEO. Each Claude Code session is a Chief of Staff. Each subagent is a staff member whose job title matches the work it was given.
+agent-town shows Claude Code's work as a small office seen from above, like a Gather Town map. The user is the CEO. Each Claude Code session is a Chief of Staff. Each subagent is a staff member whose job title matches the work it was given.
 
 The project has two parts:
 
 - **The mod**: a Claude Code plugin that listens to Claude Code events and sends them to the app.
-- **The app**: a macOS app that draws the building and plays sounds.
+- **The app**: a macOS app that draws the office and plays sounds.
 
 ## Documents
 

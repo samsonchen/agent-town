@@ -34,8 +34,7 @@ enum Demo {
         let camera = Entity()
         camera.components.set(OrthographicCameraComponent())
         let view = TownView(scene: scene)
-        let proj = view.projector(size)
-        proj.apply(to: camera)
+        view.projector(size).apply(to: camera)
         renderer.entities.append(scene.root)
         renderer.entities.append(camera)
         renderer.activeCamera = camera
@@ -48,6 +47,9 @@ enum Demo {
             try await Task.sleep(for: .milliseconds(33))
         }
 
+        // Frame the office as it is now (blocks may have been added since the start).
+        let proj = view.projector(size)
+        proj.apply(to: camera)
         let device = MTLCreateSystemDefaultDevice()!
         let desc = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm_srgb, width: Int(size.width),
                                                             height: Int(size.height), mipmapped: false)
@@ -76,8 +78,24 @@ enum Demo {
         let ctx = CGContext(data: &bytes, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
                             space: CGColorSpace(name: CGColorSpace.sRGB)!,
                             bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue)!
+        drawCalls(scene.callLines(), projector: proj, in: ctx, height: CGFloat(h))
         drawLabels(scene.labelItems(), projector: proj, in: ctx, height: CGFloat(h))
         try NSBitmapImageRep(cgImage: ctx.makeImage()!).representation(using: .png, properties: [:])!.write(to: url)
+    }
+
+    private static func drawCalls(_ lines: [(SIMD3<Float>, SIMD3<Float>)], projector: Projector, in ctx: CGContext, height: CGFloat) {
+        ctx.saveGState()
+        ctx.setStrokeColor(NSColor(Tag.callColor).cgColor)
+        ctx.setLineWidth(2.5)
+        ctx.setLineDash(phase: 0, lengths: [6, 6])
+        for (a, b) in lines {
+            let p = projector.screen(a), q = projector.screen(b)
+            let c = CallLines.control(p, q)
+            ctx.move(to: CGPoint(x: p.x, y: height - p.y))
+            ctx.addQuadCurve(to: CGPoint(x: q.x, y: height - q.y), control: CGPoint(x: c.x, y: height - c.y))
+        }
+        ctx.strokePath()
+        ctx.restoreGState()
     }
 
     /// The same labels as the window's overlay, drawn with AppKit for the snapshot.
@@ -86,10 +104,11 @@ enum Demo {
         NSGraphicsContext.current = NSGraphicsContext(cgContext: ctx, flipped: false)
         for item in items {
             let p = projector.screen(item.anchor)
-            var y = height - p.y + CGFloat(item.lines.count) * 9 + 9
+            let isSign = item.lines.first?.1 == .sign
+            var y = height - p.y + (isSign ? 9 : CGFloat(item.lines.count) * 19 + 2)
             for (text, style) in item.lines {
                 let font = NSFont.systemFont(ofSize: style == .sign ? 13 : 10.5, weight: style == .name || style == .sign ? .semibold : .regular)
-                let fg: NSColor = (style == .hat || style == .ticket) ? .black : .white
+                let fg = NSColor(Tag.foreground(style))
                 let s = NSAttributedString(string: text, attributes: [.font: font, .foregroundColor: fg])
                 let size = s.size()
                 let rect = NSRect(x: p.x - size.width / 2 - 5, y: y - size.height - 1.5, width: size.width + 10, height: size.height + 3)

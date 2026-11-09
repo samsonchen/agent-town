@@ -1,21 +1,21 @@
 # agent-town
 
-agent-town shows Claude Code's work as a small 3D office building on macOS.
+agent-town shows Claude Code's work as a small office on macOS, seen from above like a Gather Town map, with 3D characters.
 
-- **You are the CEO.** Each prompt you type becomes a ticket on the Chief of Staff's desk.
+- **You are the CEO.** Each prompt you type becomes a ticket that the CEO phones through to the Chief of Staff.
 - **Each Claude Code session is a Chief of Staff.** They take the ticket, put on a hat for the kind of task, and get to work.
 - **Subagents are staff.** The Chief of Staff calls them from the resource bench, and each one gets a job title that matches the work it was given.
 - **Background tasks are operators** in the machine room. Scheduled work comes from the Dispatcher, and the Inspector at reception sends unfinished work back.
-- **Each project gets its own floor.** Sounds tell you when work is done or needs your approval.
+- **Each project gets its own office block.** The Chief of Staff phones the report back when the work is done, and sounds tell you when work is done or needs your approval.
 
 It has two parts:
 
 - **town-link**: a Claude Code plugin that observes Claude Code events and sends them to the app over a local connection. It never changes what Claude Code does.
-- **The app**: a macOS app that draws the building with RealityKit and plays the sounds.
+- **The app**: a macOS app that draws the office with RealityKit and plays the sounds.
 
 ## Status
 
-The town-link plugin works (Phases 0 and 1). The macOS app (Phase 2) shows the executive floor and a floor per project, with the CEO bringing tickets and the Chief of Staff bringing reports back. Staff, operators and the other scenes come in Phases 3 and 4.
+The town-link plugin works (Phases 0 and 1). The macOS app (Phase 2) shows the executive block and a block per project, with the CEO phoning tickets through and the Chief of Staff phoning reports back. Staff, operators and the other scenes come in Phases 3 and 4.
 
 To run the app (macOS 15 or later, Xcode installed):
 

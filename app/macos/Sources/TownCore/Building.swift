@@ -60,7 +60,7 @@ public struct Chief: Sendable, Equatable {
     }
 }
 
-public struct Floor: Sendable, Equatable {
+public struct Block: Sendable, Equatable {
     public let projectId: String
     public var name: String
     public var chiefs: [String: Chief] = [:]
@@ -80,7 +80,9 @@ public struct Schedule: Sendable, Equatable {
 /// What changed, for the choreographer. Story changes are queued per character;
 /// `activity` is not (spec: timing rules).
 public enum Change: Equatable, Sendable {
-    case floorAdded(projectId: String)
+    case blockAdded(projectId: String)
+    /// The project's last session closed; the block goes, so the layout stays as small as possible.
+    case blockRemoved(projectId: String)
     case chiefArrived(projectId: String, sessionId: String)
     case chiefLeft(projectId: String, sessionId: String)
     case ticketSubmitted(projectId: String, sessionId: String, ticket: Ticket)
@@ -118,8 +120,8 @@ public struct SoundSettings: Sendable, Equatable {
 
 /// The building, updated from protocol events only (docs/architecture.md: Building state).
 public struct Building: Sendable {
-    public private(set) var floors: [String: Floor] = [:]
-    public private(set) var floorOrder: [String] = []
+    public private(set) var blocks: [String: Block] = [:]
+    public private(set) var blockOrder: [String] = []
     public private(set) var schedules: [String: Schedule] = [:]
     public var sound = SoundSettings()
 
@@ -138,20 +140,20 @@ public struct Building: Sendable {
             return closeSession(projectId: p, sessionId: s)
         }
 
-        // Any event creates the floor and the session (the app may start after the session).
-        if floors[p] == nil {
-            floors[p] = Floor(projectId: p, name: e.string("projectName") ?? p)
-            floorOrder.append(p)
-            out.append(.floorAdded(projectId: p))
+        // Any event creates the block and the session (the app may start after the session).
+        if blocks[p] == nil {
+            blocks[p] = Block(projectId: p, name: e.string("projectName") ?? p)
+            blockOrder.append(p)
+            out.append(.blockAdded(projectId: p))
         }
-        if floors[p]!.chiefs[s] == nil {
-            floors[p]!.chiefs[s] = Chief(sessionId: s, model: e.string("model"), lastEventTs: seen)
-            floors[p]!.order.append(s)
+        if blocks[p]!.chiefs[s] == nil {
+            blocks[p]!.chiefs[s] = Chief(sessionId: s, model: e.string("model"), lastEventTs: seen)
+            blocks[p]!.order.append(s)
             out.append(.chiefArrived(projectId: p, sessionId: s))
         }
-        if let name = e.string("projectName"), e.type == "session.open" { floors[p]!.name = name }
+        if let name = e.string("projectName"), e.type == "session.open" { blocks[p]!.name = name }
 
-        var c = floors[p]!.chiefs[s]!
+        var c = blocks[p]!.chiefs[s]!
         c.lastEventTs = max(c.lastEventTs, seen)
 
         switch e.type {
@@ -295,18 +297,23 @@ public struct Building: Sendable {
             break // session.open, heartbeat, unknown types
         }
 
-        floors[p]!.chiefs[s] = c
+        blocks[p]!.chiefs[s] = c
         return out
     }
 
     private mutating func closeSession(projectId p: String, sessionId s: String) -> [Change] {
-        guard floors[p]?.chiefs[s] != nil else { return [] }
-        floors[p]!.chiefs[s] = nil
-        floors[p]!.order.removeAll { $0 == s }
+        guard blocks[p]?.chiefs[s] != nil else { return [] }
+        blocks[p]!.chiefs[s] = nil
+        blocks[p]!.order.removeAll { $0 == s }
         var out: [Change] = [.chiefLeft(projectId: p, sessionId: s)]
         for (id, sch) in schedules where sch.sessionId == s {
             schedules[id] = nil
             out.append(.scheduleRemoved(scheduleId: id))
+        }
+        if blocks[p]!.chiefs.isEmpty {
+            blocks[p] = nil
+            blockOrder.removeAll { $0 == p }
+            out.append(.blockRemoved(projectId: p))
         }
         return out
     }
@@ -314,18 +321,11 @@ public struct Building: Sendable {
     /// Closes sessions with no event for `staleAfterMs` (spec scene 10; architecture: stale sessions).
     public mutating func expireStale(nowMs: Int64, staleAfterMs: Int64 = 120_000) -> [Change] {
         var out: [Change] = []
-        for (p, f) in floors {
+        for (p, f) in blocks {
             for (s, c) in f.chiefs where nowMs - c.lastEventTs > staleAfterMs {
                 out += closeSession(projectId: p, sessionId: s)
             }
         }
         return out
-    }
-
-    /// Removes floors that have had no sessions; the caller decides when (empty-floor setting).
-    public mutating func removeFloor(_ projectId: String) {
-        guard floors[projectId]?.chiefs.isEmpty == true else { return }
-        floors[projectId] = nil
-        floorOrder.removeAll { $0 == projectId }
     }
 }

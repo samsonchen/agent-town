@@ -14,7 +14,7 @@ These points come from the mods documentation and the type declarations, but wer
 | 6 | `$.model.classify`: how to choose Haiku, how many labels it accepts, its cost and delay | Role and hat classification | `$.model.complete` with a Haiku prompt that returns one ID; or the two-step department-then-role split |
 | 7 | Shape of `$.session.repo()` | Project identity | `$.session.root()` |
 | 8 | Do mods load the same way in the Desktop app's Code tab? | Supported surfaces | Document the CLI as the supported surface |
-| 9 | When a background subagent is still running after the main turn ends, what events arrive? | Scene 7 and 8 order | Keep staff working on the floor after the report trip |
+| 9 | When a background subagent is still running after the main turn ends, what events arrive? | Scene 7 and 8 order | Keep staff working in the block after the report call |
 | 10 | `claude plugin marketplace add` from the shell | One-click install from the app | Show the `/plugin` commands to copy |
 | 11 | Is `turn.step` a generator hook (`yield* next(e)`)? Format of `result.usage.model`, and is it present for every request? | Model badges; correct pass-through | `$.session.model()` for the Chief of Staff, the `agent.spawn` model (or its parent's) for staff |
 | 12 | Do `$.model.classify` calls go through `turn.step`? If so, can the mod tell them apart from the session's own requests? | Keeping agent-town's Haiku calls off the badges | Take the Chief of Staff's model only from `$.session.model()` on `prompt.submit` and `turn.complete`; use `turn.step` for staff only |
@@ -36,11 +36,13 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - Mod tests with `claude plugin test`
 - A debug receiver: a small script or a bare app window that prints incoming events. Used to look at real event timing.
 
-## Phase 2: one floor (mostly done)
+## Phase 2: the office and one project (mostly done)
 
 - [x] App shell, loopback server, endpoint file, building state, choreographer
-- [x] Executive floor and project floors (stacked apart as an exploded view, with an elevator shaft)
-- [x] CEO, Chief of Staff, ticket and report scenes (1, 2, 8, 9, 10)
+- [x] Gather-style office: flat blocks on a path, no walls or doors, 3D characters and furniture at half the first size
+- [x] Executive block and one block per project, laid out in a grid; a project's block goes when its last session ends
+- [x] Telephones: the CEO phones the ticket to the Chief of Staff, who phones the report back (the Dispatcher uses a radio)
+- [x] CEO, Chief of Staff, ticket and report call scenes (1, 2, 8, 9, 10)
 - [x] Completion sound with the duration gate (system sound for now)
 - [x] State tests driven by `protocol/fixtures/` (`swift test` in `app/macos`)
 - [x] Offscreen snapshots for checking scenes: `AgentTown --demo <fixture> --snapshot out.png --at 10`
@@ -53,16 +55,15 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - Staff roles, desks, report back, failure (scenes 4, 7)
 - Agent-to-agent messages (scene 16)
 - Activities (scene 5)
-- Approval trip and approval sound (scene 6)
+- Approval call and approval sound (scene 6)
 - Operators: background tasks, machine room, follow-up tickets, background roles by rule (scenes 11, 12)
 
-## Phase 4: the building
+## Phase 4: the whole office
 
-- Several floors, elevator, vertical scrolling
-- Several sessions on one floor
-- Stale-session cleanup, empty-floor removal
-- Window and floor size settings
-- Executive floor rooms: Dispatcher's room and board, scheduled tickets (scenes 13, 14); reception desk and Inspector (scene 15)
+- Many project blocks: panning and zoom
+- Several sessions in one block (desks, phones; the layout supports up to four)
+- Window and block size settings
+- Executive block: the Dispatcher's board and scheduled tickets (scenes 13, 14); the Inspector at reception (scene 15)
 
 ## Phase 5: polish
 
@@ -85,9 +86,7 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 |---|---|
 | Default for ticket text | Full prompt text, or task type only |
 | Should `claude -p` and Agent SDK runs appear in the building? | Yes, no, or a setting (default off) |
-| Pin the executive floor at the top while scrolling? | Pinned, or scrolls with the rest |
-| How long an empty floor stays | A fixed default (for example 10 minutes), or until the app restarts |
 | Sound files | Pick from CC0 libraries, or commission original ones |
-| Default bench size, and whether the bench is per floor (current spec) or one shared bench on a lower floor | Per floor keeps calls fast; a shared bench means elevator trips |
-| Where the report for a scheduled ticket goes | The Dispatcher's room (current spec), or the CEO's office like every other report |
+| Default bench size, and whether the bench is per block (current spec) or one shared bench | Per block keeps calls fast; a shared bench means walks across the office |
+| Where the report for a scheduled ticket goes | A call to the Dispatcher (current spec), or to the CEO like every other report |
 | Long-lived operators (dev servers) | Stay in the machine room until killed or the session ends (current spec), or move to a smaller "on duty" spot after a few minutes |

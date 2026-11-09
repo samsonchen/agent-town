@@ -3,54 +3,68 @@ import Foundation
 import RealityKit
 import simd
 
-/// World layout, in meters (one Kenney floor tile = 1 m). x runs right, z runs
-/// toward the viewer, y is up. Floor 0 is the executive floor at the top.
+/// World layout, in meters, on one flat plane (y up). x runs right and z runs down
+/// the screen. The office is a set of blocks with paths between them, like a
+/// Gather map: the executive block first, then one block per active project.
+/// Positions inside a block are local to the block's top-left corner.
 enum Layout {
-    static let floorWidth: Float = 12
-    static let floorDepth: Float = 6
-    /// Floors are drawn apart (an exploded view), so the floor above never hides the one below.
-    static let floorSpacing: Float = 7.0
-    static let furnitureScale: Float = 1.7
-    static let characterScale: Float = 1.5
-    static let slab: Float = 0.12
-    static let walkSpeed: Float = 1.7 // m/s
-    static let rideSecondsPerFloor: Double = 1.4
+    static let blockWidth: Float = 6
+    static let blockDepth: Float = 4
+    /// The path between blocks.
+    static let gap: Float = 1.4
+    /// The margin of path around the whole office.
+    static let margin: Float = 0.9
+    static let furnitureScale: Float = 0.85
+    static let characterScale: Float = 0.75
+    static let floorThickness: Float = 0.02
+    static let walkSpeed: Float = 1.1 // m/s
 
-    /// The corridor characters walk along, so paths stay clear of the desks.
-    static let aisleZ: Float = 4.9
-    /// Where the elevator doors are on every floor; the shaft is just left of the floor.
-    static let elevatorDoor = SIMD2<Float>(0.35, 4.9)
-    static let elevatorShaftX: Float = -0.7
+    // Executive block.
+    static let ceoDesk = SIMD2<Float>(1.2, 1.25)
+    static let ceoHome = SIMD2<Float>(1.2, 0.8)
+    static let receptionDesk = SIMD2<Float>(3.0, 2.9)
+    static let inspectorHome = SIMD2<Float>(3.0, 2.5)
+    static let dispatcherDesk = SIMD2<Float>(4.8, 1.25)
+    static let dispatcherHome = SIMD2<Float>(4.8, 0.8)
+    static let boardCenter = SIMD2<Float>(4.8, 0.2)
 
-    // Executive floor spots (x, z).
-    static let ceoHome = SIMD2<Float>(2.0, 1.6)
-    static let ceoDesk = SIMD2<Float>(2.0, 2.5)
-    static let ceoHandIn = SIMD2<Float>(2.0, 3.4)
-    static let receptionDesk = SIMD2<Float>(5.6, 3.6)
-    static let inspectorHome = SIMD2<Float>(5.6, 2.9)
-    static let dispatcherHome = SIMD2<Float>(9.4, 2.3)
-    static let dispatcherHandIn = SIMD2<Float>(9.4, 3.4)
-    static let boardCenter = SIMD2<Float>(9.4, 0.2)
-
-    // Project floor: Chief of Staff desks along the middle row.
-    static let deskRowZ: Float = 3.0
-    static let firstDeskX: Float = 3.9
-    static let deskGap: Float = 1.9
+    // Project block: Chief of Staff desks along the back row.
+    static let deskRowZ: Float = 1.15
+    static let firstDeskX: Float = 1.05
+    static let deskGap: Float = 1.3
     static let maxDesks = 4
-
-    /// Floors stack downward from the executive floor, so adding a floor never moves the others.
-    static func floorY(_ index: Int) -> Float { -Float(index) * floorSpacing }
+    /// Chiefs of Staff come in from the path on the block's left side, along the row behind the desks.
+    static let backAisleZ: Float = 0.7
 
     static func deskX(slot: Int) -> Float { firstDeskX + Float(slot % maxDesks) * deskGap }
     /// Where a Chief of Staff stands at desk `slot` (behind the desk, facing the viewer).
-    static func chiefSpot(slot: Int) -> SIMD2<Float> { [deskX(slot: slot), deskRowZ - 0.75] }
-    /// Where a visitor stands to hand a ticket over the desk.
-    static func visitorSpot(slot: Int) -> SIMD2<Float> { [deskX(slot: slot), deskRowZ + 0.85] }
+    static func chiefSpot(slot: Int) -> SIMD2<Float> { [deskX(slot: slot), backAisleZ] }
+    /// Where a Chief of Staff enters and leaves the block.
+    static let entrance = SIMD2<Float>(-gap / 2, backAisleZ)
+
+    /// Columns for `count` blocks: side by side while there are few, then a grid.
+    static func columns(_ count: Int) -> Int { count <= 2 ? max(1, count) : (count <= 4 ? 2 : 3) }
+
+    /// The top-left corner of block `index` in the office.
+    static func blockOrigin(_ index: Int, count: Int) -> SIMD2<Float> {
+        let cols = columns(count)
+        return [margin + Float(index % cols) * (blockWidth + gap), margin + Float(index / cols) * (blockDepth + gap)]
+    }
+
+    /// The whole office, path margin included.
+    static func officeSize(count: Int) -> SIMD2<Float> {
+        let cols = columns(count), rows = (max(1, count) + cols - 1) / cols
+        return [2 * margin + Float(cols) * blockWidth + Float(cols - 1) * gap,
+                2 * margin + Float(rows) * blockDepth + Float(rows - 1) * gap]
+    }
 }
 
-/// The fixed isometric orthographic camera, and the math to place 2D labels over it.
+/// The fixed top-down orthographic camera, tilted a little so characters and furniture
+/// show their fronts, and the math to place 2D labels over it.
 struct Projector {
-    static let direction = simd_normalize(SIMD3<Float>(1, 0.95, 1.15))
+    /// From the target toward the camera: 62° above the floor, looking straight up the screen.
+    static let pitch: Float = 62 * .pi / 180
+    static let direction = SIMD3<Float>(0, sin(pitch), cos(pitch))
     static let distance: Float = 40
 
     var target: SIMD3<Float>
@@ -63,6 +77,9 @@ struct Projector {
         let t = Transform(matrix: float4x4(lookingFrom: position, at: target))
         return t.rotation
     }
+
+    /// Screen meters per world meter along z (the floor is foreshortened by the tilt).
+    static var depthFactor: Float { sin(pitch) }
 
     func screen(_ w: SIMD3<Float>) -> CGPoint {
         let v = orientation.inverse.act(w - position)
@@ -79,6 +96,14 @@ struct Projector {
             c.scale = scale / 2
             camera.components.set(c)
         }
+    }
+
+    /// A camera that shows `office` (x by z meters, from the origin) at `pixelsPerMeter`,
+    /// centered when it fits and moved by `pan` (meters) when it does not.
+    static func fitting(office: SIMD2<Float>, size: CGSize, pixelsPerMeter: CGFloat, pan: SIMD2<Float>) -> Projector {
+        let scale = Float(size.height / pixelsPerMeter)
+        let center = SIMD3<Float>(office.x / 2 + pan.x, 0, office.y / 2 + pan.y)
+        return Projector(target: center, scale: scale, size: size)
     }
 }
 
@@ -123,4 +148,6 @@ struct Labels {
     var dispatcher: String { locale == "zh-TW" ? "調度員" : "Dispatcher" }
     var inspector: String { locale == "zh-TW" ? "稽核員" : "Inspector" }
     var returned: String { locale == "zh-TW" ? "退回" : "Returned" }
+    var executive: String { locale == "zh-TW" ? "執行辦公室" : "Executive office" }
+    var ring: String { locale == "zh-TW" ? "鈴鈴" : "Ring ring" }
 }

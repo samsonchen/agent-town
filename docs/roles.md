@@ -17,7 +17,7 @@ The list is drawn from how large companies in software, banking, legal, consulti
 
 ## Role catalog
 
-Each role has an ID (used in the protocol), an English label, and a Traditional Chinese label. The department is used for floor layout (staff from the same department sit together) and for the two-step classification fallback.
+Each role has an ID (used in the protocol), an English label, and a Traditional Chinese label. The department is used for block layout (staff from the same department sit together) and for the two-step classification fallback.
 
 ### Software engineering 軟體工程
 
@@ -226,7 +226,7 @@ Desk work only. No clinical roles.
 
 ## Background roles
 
-Operators stand for background tasks, not agents: shell commands running in the background, monitors, and workflow runs. They work in each floor's machine room. A background subagent is still a staff member, not an operator.
+Operators stand for background tasks, not agents: shell commands running in the background, monitors, and workflow runs. They work in each project block's machine room. A background subagent is still a staff member, not an operator.
 
 Roles are chosen by rule where possible (see [architecture.md](architecture.md)), otherwise by Haiku using only the IDs below. Each row lists its rule words in `catalog/roles.json`.
 
@@ -252,10 +252,10 @@ These are not in the catalog and are not classified.
 
 | Character | English | 繁體中文 | Where |
 |---|---|---|---|
-| CEO | CEO | 執行長 | CEO's office, executive floor |
-| Chief of Staff | Chief of Staff | 幕僚長 | A desk on the project floor |
-| Dispatcher | Dispatcher | 調度員 | Dispatcher's room, executive floor |
-| Inspector | Inspector | 稽核員 | Reception desk, executive floor |
+| CEO | CEO | 執行長 | CEO's desk with a telephone, executive block (does not walk) |
+| Chief of Staff | Chief of Staff | 幕僚長 | A desk with a telephone in the project block |
+| Dispatcher | Dispatcher | 調度員 | Dispatcher's desk with a radio and the board, executive block |
+| Inspector | Inspector | 稽核員 | Reception desk, executive block |
 
 ## Character looks
 
@@ -276,7 +276,7 @@ Fixed characters use set base characters so they are easy to spot:
 | Character | Base character | Look |
 |---|---|---|
 | CEO | `male-d` | Black suit, red tie |
-| Chief of Staff | Any base character except `male-d`, `male-c`, `female-e` | Charcoal gray outfit and a clipboard. Several Chiefs of Staff on one floor have different base characters. |
+| Chief of Staff | Any base character except `male-d`, `male-c`, `female-e` | Charcoal gray outfit and a clipboard. Several Chiefs of Staff in one block have different base characters. |
 | Dispatcher | `female-e` | White, with a headset |
 | Inspector | `male-c` | Uniform with a cap, and a stamp |
 

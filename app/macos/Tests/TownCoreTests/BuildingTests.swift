@@ -31,21 +31,21 @@ func replay(_ name: String, sound: SoundSettings = SoundSettings()) throws -> (B
 
 @Test func basicTicket() throws {
     let (b, changes) = try replay("01-basic-ticket", sound: SoundSettings(thresholdSeconds: 5))
-    #expect(b.floorOrder.count == 1)
-    #expect(changes.contains { if case .floorAdded = $0 { return true }; return false })
+    #expect(b.blockOrder.count == 1)
+    #expect(changes.contains { if case .blockAdded = $0 { return true }; return false })
     #expect(changes.contains { if case .hat(_, _, let t) = $0 { return !t.isEmpty }; return false })
     let done = changes.compactMap { c -> (Issuer, Bool)? in
         if case .ticketDone(_, _, _, let issuer, _, let play) = c { return (issuer, play) }; return nil
     }
     #expect(done.count == 1)
     #expect(done.first?.0 == .ceo)
-    let chief = b.floors.values.first!.chiefs.values.first!
+    let chief = b.blocks.values.first!.chiefs.values.first!
     #expect(chief.ticket == nil)
 }
 
 @Test func staffAndApproval() throws {
     let (b, changes) = try replay("02-staff-and-approval")
-    let chief = b.floors.values.first!.chiefs.values.first!
+    let chief = b.blocks.values.first!.chiefs.values.first!
     #expect(!chief.staff.isEmpty)
     #expect(chief.staff.values.allSatisfy { $0.role != nil })
     #expect(chief.approvals.isEmpty)
@@ -55,7 +55,7 @@ func replay(_ name: String, sound: SoundSettings = SoundSettings()) throws -> (B
 
 @Test func taskFollowUpReportsToTheParentIssuer() throws {
     let (b, changes) = try replay("03-background-task-followup")
-    let chief = b.floors.values.first!.chiefs.values.first!
+    let chief = b.blocks.values.first!.chiefs.values.first!
     #expect(chief.operators.isEmpty)
     #expect(changes.contains { if case .taskStarted = $0 { return true }; return false })
     let tickets = changes.compactMap { c -> Ticket? in if case .ticketSubmitted(_, _, let t) = c { return t }; return nil }
@@ -72,7 +72,7 @@ func replay(_ name: String, sound: SoundSettings = SoundSettings()) throws -> (B
 
 @Test func twoProjectsAndMessages() throws {
     let (b, changes) = try replay("05-two-projects-messages")
-    #expect(b.floorOrder.count == 2)
+    #expect(b.blockOrder.count == 2)
     #expect(changes.contains { if case .message = $0 { return true }; return false })
 }
 
@@ -95,14 +95,14 @@ func replay(_ name: String, sound: SoundSettings = SoundSettings()) throws -> (B
     b.apply(ev("ticket.done", 2, ["ticketId": .string("t1"), "durationMs": .number(10), "aborted": .bool(false)]))
     let c = b.apply(ev("ticket.return", 3, ["ticketId": .string("t1")]))
     #expect(c == [.ticketReturned(projectId: "p", sessionId: "s", ticketId: "t1")])
-    #expect(b.floors["p"]!.chiefs["s"]!.ticket?.returnedCount == 1)
+    #expect(b.blocks["p"]!.chiefs["s"]!.ticket?.returnedCount == 1)
 }
 
 @Test func staleSessionsLeave() {
     var b = Building()
     b.apply(TownEvent(type: "heartbeat", sessionId: "s", seq: 1, ts: 1000, projectId: "p"))
     #expect(b.expireStale(nowMs: 60_000).isEmpty)
-    #expect(b.expireStale(nowMs: 200_000) == [.chiefLeft(projectId: "p", sessionId: "s")])
+    #expect(b.expireStale(nowMs: 200_000) == [.chiefLeft(projectId: "p", sessionId: "s"), .blockRemoved(projectId: "p")])
 }
 
 @Test func sequencerReorders() {
@@ -129,4 +129,20 @@ func replay(_ name: String, sound: SoundSettings = SoundSettings()) throws -> (B
     // An event stamped long ago by the sender, received now, is not stale.
     b.apply(TownEvent(type: "heartbeat", sessionId: "s", seq: 1, ts: 1000, projectId: "p"), receivedMs: 10_000_000)
     #expect(b.expireStale(nowMs: 10_060_000).isEmpty)
+}
+
+@Test func blockGoesWhenItsLastSessionCloses() throws {
+    var b = Building()
+    func ev(_ type: String, _ s: String, _ ts: Int64) -> TownEvent {
+        try! Batch.decode(Data("""
+        {"protocol":1,"events":[{"type":"\(type)","seq":\(ts),"ts":\(ts),"projectId":"p","sessionId":"\(s)","projectName":"demo","surface":"terminal","ccVersion":"2.1.318"}]}
+        """.utf8)).events[0]
+    }
+    b.apply(ev("session.open", "a", 1))
+    b.apply(ev("session.open", "b", 2))
+    let first = b.apply(ev("session.close", "a", 3))
+    #expect(!first.contains { if case .blockRemoved = $0 { return true }; return false })
+    let last = b.apply(ev("session.close", "b", 4))
+    #expect(last.contains(.blockRemoved(projectId: "p")))
+    #expect(b.blockOrder.isEmpty)
 }
