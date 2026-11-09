@@ -48,6 +48,7 @@ public struct Chief: Sendable, Equatable {
     public var operators: [String: Operator] = [:]
     public var approvals: [String: Approval] = [:]
     public var activity: String?
+    /// When the app last heard from this session (its own clock).
     public var lastEventTs: Int64
     /// Issuers of past tickets, so a task follow-up reports to the right place.
     public var issuers: [String: Issuer] = [:]
@@ -125,8 +126,11 @@ public struct Building: Sendable {
     public init() {}
 
     /// Applies one event and returns what changed. Unknown types are ignored.
+    /// `receivedMs` is the app's clock when the event arrived; stale-session checks use it,
+    /// since the sender's clock (`ts`) may differ. Defaults to `ts`.
     @discardableResult
-    public mutating func apply(_ e: TownEvent) -> [Change] {
+    public mutating func apply(_ e: TownEvent, receivedMs: Int64? = nil) -> [Change] {
+        let seen = receivedMs ?? e.ts
         var out: [Change] = []
         let p = e.projectId, s = e.sessionId
 
@@ -141,14 +145,14 @@ public struct Building: Sendable {
             out.append(.floorAdded(projectId: p))
         }
         if floors[p]!.chiefs[s] == nil {
-            floors[p]!.chiefs[s] = Chief(sessionId: s, model: e.string("model"), lastEventTs: e.ts)
+            floors[p]!.chiefs[s] = Chief(sessionId: s, model: e.string("model"), lastEventTs: seen)
             floors[p]!.order.append(s)
             out.append(.chiefArrived(projectId: p, sessionId: s))
         }
         if let name = e.string("projectName"), e.type == "session.open" { floors[p]!.name = name }
 
         var c = floors[p]!.chiefs[s]!
-        c.lastEventTs = max(c.lastEventTs, e.ts)
+        c.lastEventTs = max(c.lastEventTs, seen)
 
         switch e.type {
         case "ticket.submit":

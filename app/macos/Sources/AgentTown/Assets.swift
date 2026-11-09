@@ -56,6 +56,7 @@ final class Assets {
     func character(_ base: String, outfit: NSColor?) throws -> CharacterEntity {
         guard let info = characters.characters[base] else { throw CocoaError(.fileNoSuchFile) }
         let model = try cached("models/characters/\(info.model).usdz").clone(recursive: true)
+        model.name = base
         if let outfit {
             let tex = try texture(for: base, cells: info.shirt, color: outfit)
             model.forEachModel { entity in

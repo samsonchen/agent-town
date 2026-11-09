@@ -1,0 +1,104 @@
+import AppKit
+import Metal
+import RealityKit
+import TownCore
+
+/// `AgentTown --demo <fixture.json> [--speed N] [--snapshot out.png --at S]`
+///
+/// Replays a protocol fixture into the app, with the gaps between events shortened.
+/// With `--snapshot`, renders the building offscreen `S` seconds in, labels
+/// included, writes a PNG and quits. Used to check scenes without a window.
+@MainActor
+enum Demo {
+    static func events(from path: String) throws -> [TownEvent] {
+        try Batch.decode(Data(contentsOf: URL(fileURLWithPath: path))).events
+    }
+
+    /// Feeds events to `store` with the original timing, each gap capped and divided by `speed`.
+    static func play(_ events: [TownEvent], into store: TownStore, speed: Double) {
+        Task { @MainActor in
+            var last: Int64?
+            for e in events {
+                if let l = last {
+                    let gap = min(4.0, Double(e.ts - l) / 1000) / speed
+                    try? await Task.sleep(for: .seconds(gap))
+                }
+                last = e.ts
+                store.receive(Batch(protocol: 1, events: [e]))
+            }
+        }
+    }
+
+    static func snapshot(scene: TownScene, at seconds: Double, to url: URL, size: CGSize = CGSize(width: 1400, height: 900)) async throws {
+        let renderer = try RealityRenderer()
+        let camera = Entity()
+        camera.components.set(OrthographicCameraComponent())
+        let view = TownView(scene: scene)
+        let proj = view.projector(size)
+        proj.apply(to: camera)
+        renderer.entities.append(scene.root)
+        renderer.entities.append(camera)
+        renderer.activeCamera = camera
+        renderer.cameraSettings.colorBackground = .color(CGColor(srgbRed: 0.93, green: 0.93, blue: 0.95, alpha: 1))
+
+        // Advance the scene in real time so queued scenes and animations play.
+        let start = Date()
+        while Date().timeIntervalSince(start) < seconds {
+            try renderer.update(1.0 / 30)
+            try await Task.sleep(for: .milliseconds(33))
+        }
+
+        let device = MTLCreateSystemDefaultDevice()!
+        let desc = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm_srgb, width: Int(size.width),
+                                                            height: Int(size.height), mipmapped: false)
+        desc.usage = [.renderTarget, .shaderRead, .shaderWrite]
+        desc.storageMode = .shared
+        let tex = device.makeTexture(descriptor: desc)!
+        let output = try RealityRenderer.CameraOutput(.singleProjection(colorTexture: tex))
+        await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
+            do { try renderer.updateAndRender(deltaTime: 1.0 / 30, cameraOutput: output, onComplete: { _ in done.resume() }) }
+            catch { done.resume() }
+        }
+
+        if ProcessInfo.processInfo.environment["TOWN_DEBUG"] != nil {
+            func walk(_ e: Entity, _ depth: Int) {
+                if e.components.has(ModelComponent.self) == false, !e.name.isEmpty || depth <= 1 {
+                    print(String(repeating: "  ", count: depth), e.name, e.position(relativeTo: nil))
+                }
+                if depth < 2 { e.children.forEach { walk($0, depth + 1) } }
+            }
+            walk(scene.root, 0)
+            for a in scene.actors.values { print("actor", a.id, a.body.baseName ?? "-", a.root.position(relativeTo: nil)) }
+        }
+        let w = tex.width, h = tex.height
+        var bytes = [UInt8](repeating: 0, count: w * h * 4)
+        tex.getBytes(&bytes, bytesPerRow: w * 4, from: MTLRegionMake2D(0, 0, w, h), mipmapLevel: 0)
+        let ctx = CGContext(data: &bytes, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+                            space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                            bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue)!
+        drawLabels(scene.labelItems(), projector: proj, in: ctx, height: CGFloat(h))
+        try NSBitmapImageRep(cgImage: ctx.makeImage()!).representation(using: .png, properties: [:])!.write(to: url)
+    }
+
+    /// The same labels as the window's overlay, drawn with AppKit for the snapshot.
+    private static func drawLabels(_ items: [TownScene.LabelItem], projector: Projector, in ctx: CGContext, height: CGFloat) {
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(cgContext: ctx, flipped: false)
+        for item in items {
+            let p = projector.screen(item.anchor)
+            var y = height - p.y + CGFloat(item.lines.count) * 9 + 9
+            for (text, style) in item.lines {
+                let font = NSFont.systemFont(ofSize: style == .sign ? 13 : 10.5, weight: style == .name || style == .sign ? .semibold : .regular)
+                let fg: NSColor = (style == .hat || style == .ticket) ? .black : .white
+                let s = NSAttributedString(string: text, attributes: [.font: font, .foregroundColor: fg])
+                let size = s.size()
+                let rect = NSRect(x: p.x - size.width / 2 - 5, y: y - size.height - 1.5, width: size.width + 10, height: size.height + 3)
+                NSColor(Tag.background(style)).setFill()
+                NSBezierPath(roundedRect: rect, xRadius: 4, yRadius: 4).fill()
+                s.draw(at: NSPoint(x: rect.minX + 5, y: rect.minY + 1.5))
+                y -= size.height + 5
+            }
+        }
+        NSGraphicsContext.restoreGraphicsState()
+    }
+}

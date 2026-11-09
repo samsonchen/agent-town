@@ -123,3 +123,10 @@ func replay(_ name: String, sound: SoundSettings = SoundSettings()) throws -> (B
     #expect(m.label(for: "claude-nova-2-20261001") == "nova-2")
     #expect(m.label(for: "claude-zeta-1[1m]") == "zeta-1")
 }
+
+@Test func staleUsesArrivalTimeNotSenderClock() {
+    var b = Building()
+    // An event stamped long ago by the sender, received now, is not stale.
+    b.apply(TownEvent(type: "heartbeat", sessionId: "s", seq: 1, ts: 1000, projectId: "p"), receivedMs: 10_000_000)
+    #expect(b.expireStale(nowMs: 10_060_000).isEmpty)
+}
