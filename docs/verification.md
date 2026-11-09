@@ -22,7 +22,7 @@ These answers come from the mod API types that Claude Code 2.1.318 writes (`clau
 | 16 | Workflow agents | Yes: `agent.spawn` has `workflow: { runId, agentIndex }`, and `tool_use_id` is the Workflow call. The Workflow result has `taskId`, `runId`, `workflowName`. | Link workflow staff to the coordinator by `runId`. |
 | 17 | Schedule tools | `CronCreate { cron, prompt, recurring?, durable? }` → `{ id, humanSchedule, recurring, nextFireAt? }`. `CronDelete { id }`. `ScheduleWakeup { delaySeconds?, prompt?, stop?, … }` → `{ scheduledFor, stopped?, … }`, with no ID. | `scheduleId` = Cron `id`, or the `ScheduleWakeup` `tool_use_id`. |
 | 18 | Agent messages | Yes, through `session.send` (`{ to, text, origin, agentId }`, the sender) and `session.receive` (with the receiver's `agentId`). The `SendMessage` result is untyped. | Use `session.send` and `session.receive`, not `tool.call`. |
-| 19 | RealityKit | Not covered by these types. **Runtime:** Swift prototype — load the converted USDZ, cut clips by time, swap the texture per instance, use `OrthographicCameraComponent` in a macOS `RealityView`. | Phase 2 spike. |
+| 19 | RealityKit | **Confirmed** (macOS 27, Xcode 27.2): a SwiftPM app loads the converted USDZ, cuts clips from the one timeline with `trimStart`/`trimEnd` on the animation definition, gives each instance its own recolored copy of `colormap.png` (shirt cells from `catalog/characters.json`), and draws through `OrthographicCameraComponent`. `RealityRenderer` renders the same scene offscreen to a PNG (`AgentTown --snapshot out.png`), with no window and no screen-recording permission. | Scenes are checked with offscreen snapshots. |
 
 ## Other facts
 
