@@ -15,7 +15,16 @@ It has two parts:
 
 ## Status
 
-Planning and verification are done (Phases 0 and 1). The macOS app is next. Nothing is ready to install yet.
+The town-link plugin works and has been tested in a live session (Phases 0 and 1). The macOS app is next (Phase 2), so there is nothing to see yet.
+
+To try the plugin with the stand-in receiver, which prints each event:
+
+```bash
+python3 tools/debug-receiver.py          # keep it running
+claude --plugin-dir plugin               # in another terminal
+```
+
+In a session, `/town` shows whether the plugin is connected, and `/town on` or `/town off` turns sending on or off for all sessions. Role and task-type classification uses a short Haiku call on your own Claude plan or API key.
 
 ## Documentation
 

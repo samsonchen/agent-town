@@ -1,6 +1,6 @@
 # Roadmap
 
-## Phase 0: verify before building
+## Phase 0: verify before building (done)
 
 These points come from the mods documentation and the type declarations, but were not fully confirmed. Check each one against the `claude-code.d.ts` that Claude Code writes for the installed version, or with a small test mod, before writing the real code.
 
@@ -28,7 +28,7 @@ These points come from the mods documentation and the type declarations, but wer
 
 Answers: [verification.md](verification.md). Most items are answered by the API types. The rest need the recorder mod in a real session.
 
-## Phase 1: protocol and mod
+## Phase 1: protocol and mod (done)
 
 - `catalog/roles.json`, `catalog/task-types.json` from [roles.md](roles.md); `catalog/models.json`
 - `protocol/schema/` and a few recorded streams in `protocol/fixtures/`

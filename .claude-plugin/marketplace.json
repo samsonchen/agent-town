@@ -1,0 +1,12 @@
+{
+  "name": "agent-town",
+  "owner": { "name": "Samson Chen" },
+  "description": "agent-town: Claude Code's work shown as a small office building on macOS.",
+  "plugins": [
+    {
+      "name": "town-link",
+      "source": "./plugin",
+      "description": "Sends what Claude Code does to the agent-town macOS app."
+    }
+  ]
+}

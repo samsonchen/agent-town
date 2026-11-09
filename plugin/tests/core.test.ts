@@ -1,0 +1,280 @@
+// Tests for the event mapping in hooks/core.ts. Run: claude plugin test plugin
+//
+// The notification and spawn shapes are copied from a live 2.1.318 session
+// (docs/verification.md).
+
+import { describe, expect, test } from 'claude-code/testing'
+import { Town, activityKind, parseNotifications, projectIdentity, shellRole, taskStatus, APPROVAL_DELAY_MS, HOLD_MS } from '../hooks/core'
+
+const ids = () => {
+  let n = 0
+  return () => `t${++n}`
+}
+const types = (t: Town) => t.drain().map(e => e.type)
+
+const NOTE = (id: string, status = 'completed') =>
+  `<task-notification>\n<task-id>${id}</task-id>\n<tool-use-id>toolu_1</tool-use-id>\n<output-file>/tmp/x.output</output-file>\n<status>${status}</status>\n<summary>Background command "npm test" completed (exit code 0)</summary>\n</task-notification>`
+
+describe('helpers', () => {
+  test('activity kinds', async () => {
+    expect(activityKind('Read')).toBe('read')
+    expect(activityKind('Edit')).toBe('edit')
+    expect(activityKind('Bash')).toBe('shell')
+    expect(activityKind('WebFetch')).toBe('web')
+    expect(activityKind('mcp__slack__send')).toBe('mcp')
+    expect(activityKind('TodoWrite')).toBe('other')
+  })
+
+  test('shell roles match whole words in rule order', async () => {
+    expect(shellRole('npm run build')).toBe('build-operator')
+    expect(shellRole('xcodebuild -scheme App')).toBe('build-operator')
+    expect(shellRole('pytest -q')).toBe('test-runner')
+    expect(shellRole('npm run dev')).toBe('server-operator')
+    expect(shellRole('pip install requests')).toBe('install-operator')
+    expect(shellRole('./deploy.sh prod')).toBe('deploy-operator')
+    expect(shellRole('git log --latest')).toBe(undefined)
+    expect(shellRole('sleep 3; echo done')).toBe(undefined)
+  })
+
+  test('notification parsing', async () => {
+    expect(parseNotifications(NOTE('b3jzg042j'))).toEqual([{ taskId: 'b3jzg042j', status: 'completed' }])
+    expect(parseNotifications(NOTE('a') + '\n' + NOTE('b', 'failed')).map(x => x.taskId)).toEqual(['a', 'b'])
+    expect(parseNotifications('The person enabled mod hot-reloading')).toEqual([])
+    expect(taskStatus('failed')).toBe('failed')
+    expect(taskStatus('stopped')).toBe('killed')
+    expect(taskStatus('completed')).toBe('completed')
+  })
+
+  test('project identity', async () => {
+    expect(projectIdentity('https://github.com/samsonchen/agent-town.git', '/x/y')).toEqual({ identity: 'github.com/samsonchen/agent-town', name: 'agent-town' })
+    expect(projectIdentity('git@github.com:samsonchen/agent-town.git', '/x')).toEqual({ identity: 'github.com/samsonchen/agent-town', name: 'agent-town' })
+    expect(projectIdentity('https://user:secret@example.com/a/b/', '/x').identity).toBe('example.com/a/b')
+    expect(projectIdentity(null, '/Users/me/work/site/')).toEqual({ identity: '/Users/me/work/site', name: 'site' })
+  })
+})
+
+describe('tickets', () => {
+  test('a typed prompt opens a ticket, asks for a hat, and closes with Claude Code duration', async () => {
+    const t = new Town(ids())
+    t.prompt({ text: 'Add a settings screen', kind: 'composer' }, 1000)
+    const [submit] = t.drain()
+    expect(submit).toEqual({ type: 'ticket.submit', ticketId: 't1', text: 'Add a settings screen', origin: 'user' })
+    const [job] = t.takeJobs()
+    expect(job?.kind).toBe('task-type')
+    t.classified(job!, 'coding')
+    t.classified({ ...job!, id: 'zz' }, 'not-a-type')
+    expect(t.drain()).toEqual([
+      { type: 'chief.hat', ticketId: 't1', taskType: 'coding' },
+      { type: 'chief.hat', ticketId: 'zz', taskType: 'general' },
+    ])
+    t.turnComplete({ durationMs: 4200, isAborted: false, model: 'claude-opus-5-5' }, 9000)
+    expect(t.drain()).toEqual([
+      { type: 'model.update', model: 'claude-opus-5-5' },
+      { type: 'ticket.done', ticketId: 't1', durationMs: 4200, aborted: false },
+    ])
+  })
+
+  test('a prompt delivered into a running turn adds to the open ticket', async () => {
+    const t = new Town(ids())
+    t.prompt({ text: 'first', kind: 'composer' }, 0)
+    t.drain()
+    t.prompt({ text: 'also this', kind: 'composer', turnId: 'turn-1' }, 10)
+    t.prompt({ text: '<agent-message>…', kind: 'peer', turnId: 'turn-1', isMeta: true }, 20)
+    expect(t.drain()).toEqual([])
+  })
+
+  test('the session model is not repeated as an update', async () => {
+    const t = new Town(ids())
+    t.open({ projectName: 'p', surface: 'terminal', ccVersion: '2.1.319', model: 'claude-opus-5-5' })
+    t.prompt({ text: 'x', kind: 'composer' }, 0)
+    t.turnComplete({ durationMs: 5, isAborted: false, model: 'claude-opus-5-5' }, 5)
+    expect(types(t)).toEqual(['session.open', 'ticket.submit', 'ticket.done'])
+  })
+
+  test('an auto-continuation returns the last ticket, and the next done covers all the work', async () => {
+    const t = new Town(ids())
+    t.prompt({ text: 'fix it', kind: 'composer' }, 1000)
+    t.turnComplete({ durationMs: 3000, isAborted: false }, 4000)
+    t.drain()
+    t.prompt({ text: 'Tests still fail', kind: 'auto-continuation' }, 4100)
+    t.turnComplete({ durationMs: 2000, isAborted: false }, 6100)
+    expect(t.drain()).toEqual([
+      { type: 'ticket.return', ticketId: 't1', reason: 'Tests still fail' },
+      { type: 'ticket.done', ticketId: 't1', durationMs: 5100, aborted: false },
+    ])
+  })
+
+  test('a Stop block and the auto-continuation that follows count as one return', async () => {
+    const t = new Town(ids())
+    t.prompt({ text: 'fix it', kind: 'composer' }, 0)
+    t.stopBlocked('Tests still fail', 100)
+    t.turnComplete({ durationMs: 100, isAborted: false }, 100)
+    t.prompt({ text: 'Tests still fail', kind: 'auto-continuation' }, 150)
+    expect(types(t).filter(x => x === 'ticket.return')).toEqual(['ticket.return'])
+  })
+
+  test('a system notice with no known task opens an unknown ticket', async () => {
+    const t = new Town(ids())
+    t.prompt({ text: '<task-notification>\nThe person enabled mod hot-reloading\n</task-notification>', kind: 'task-notification', isMeta: true }, 0)
+    expect(t.drain()[0]).toMatchObject({ type: 'ticket.submit', origin: 'unknown' })
+  })
+})
+
+describe('background tasks and schedules', () => {
+  test('a background shell task starts with a rule role and its notification opens a task ticket', async () => {
+    const t = new Town(ids())
+    t.prompt({ text: 'run the tests', kind: 'composer' }, 0)
+    const call = { tool: 'Bash', tool_use_id: 'toolu_1', input: { command: 'npm test', run_in_background: true, description: 'Run tests' } }
+    t.toolStart(call, 10)
+    t.toolEnd(call, { ok: true, result: { backgroundTaskId: 'b1' } }, 20)
+    t.turnComplete({ durationMs: 30, isAborted: false }, 30)
+    expect(t.drain()).toEqual([
+      { type: 'ticket.submit', ticketId: 't1', text: 'run the tests', origin: 'user' },
+      { type: 'activity', kind: 'shell', tool: 'Bash' },
+      { type: 'task.start', taskId: 'b1', kind: 'shell', ticketId: 't1', description: 'Run tests', role: 'test-runner' },
+      { type: 'ticket.done', ticketId: 't1', durationMs: 30, aborted: false },
+    ])
+    t.prompt({ text: NOTE('b1'), kind: 'task-notification' }, 5020)
+    t.turnComplete({ durationMs: 1000, isAborted: false }, 6020)
+    expect(t.drain()).toEqual([
+      { type: 'task.done', taskId: 'b1', status: 'completed', durationMs: 5000 },
+      { type: 'ticket.submit', ticketId: 't2', text: 'Background command "npm test" completed (exit code 0)', origin: 'task', taskIds: ['b1'], parentTicketId: 't1' },
+      { type: 'ticket.done', ticketId: 't2', durationMs: 6000, aborted: false },
+    ])
+  })
+
+  test('a task with no rule is classified among background roles', async () => {
+    const t = new Town(ids())
+    const call = { tool: 'Bash', tool_use_id: 'u', input: { command: 'sleep 3; echo done' } }
+    t.toolEnd(call, { ok: true, result: { backgroundTaskId: 'b2' } }, 0)
+    const [job] = t.takeJobs()
+    expect(job?.kind).toBe('task-role')
+    t.classified(job!, 'nonsense')
+    expect(t.drain().at(-1)).toEqual({ type: 'task.role', taskId: 'b2', role: 'background-worker' })
+  })
+
+  test('Monitor and Workflow get their roles by tool', async () => {
+    const t = new Town(ids())
+    t.toolEnd({ tool: 'Monitor', tool_use_id: 'u1', input: { description: 'watch logs' } }, { ok: true, result: { taskId: 'm1' } }, 0)
+    t.toolEnd({ tool: 'Workflow', tool_use_id: 'u2', input: {} }, { ok: true, result: { taskId: 'w1', workflowName: 'review' } }, 0)
+    expect(t.drain().map(e => [e.kind, e.role])).toEqual([
+      ['monitor', 'log-monitor'],
+      ['workflow', 'workflow-coordinator'],
+    ])
+  })
+
+  test('cron and wakeup schedules, and a scheduled ticket', async () => {
+    const t = new Town(ids())
+    t.toolEnd(
+      { tool: 'CronCreate', tool_use_id: 'u1', input: { cron: '0 9 * * *', prompt: 'Check the build status' } },
+      { ok: true, result: { id: 'c1', recurring: true, nextFireAt: 1793990000000 } },
+      0,
+    )
+    t.toolEnd(
+      { tool: 'ScheduleWakeup', tool_use_id: 'u2', input: { delaySeconds: 600, prompt: 'Look at CI again' } },
+      { ok: true, result: { scheduledFor: '2026-11-09T10:00:00Z' } },
+      0,
+    )
+    expect(t.drain()).toEqual([
+      { type: 'schedule.create', scheduleId: 'c1', text: 'Check the build status', recurring: true, nextRunTs: 1793990000000 },
+      { type: 'schedule.create', scheduleId: 'u2', text: 'Look at CI again', recurring: false, nextRunTs: Date.parse('2026-11-09T10:00:00Z') },
+    ])
+    t.prompt({ text: 'Look at CI again', kind: 'scheduled-trigger' }, 100)
+    expect(t.drain()).toEqual([
+      { type: 'ticket.submit', ticketId: 't1', text: 'Look at CI again', origin: 'schedule', scheduleId: 'u2' },
+      { type: 'schedule.delete', scheduleId: 'u2' },
+    ])
+    t.toolEnd({ tool: 'CronDelete', tool_use_id: 'u3', input: { id: 'c1' } }, { ok: true, result: {} }, 200)
+    expect(t.drain()).toEqual([{ type: 'schedule.delete', scheduleId: 'c1' }])
+  })
+
+  test('a refused call starts nothing', async () => {
+    const t = new Town(ids())
+    t.toolEnd({ tool: 'Bash', tool_use_id: 'u', input: { command: 'npm test' } }, { ok: false, result: { backgroundTaskId: 'b9' } }, 0)
+    expect(t.drain()).toEqual([])
+  })
+})
+
+describe('staff', () => {
+  const spawn = { subagentType: 'general-purpose', description: 'Tiny probe subagent', prompt: 'Reply ok', background: true }
+
+  test('hire with the resolved model, then role by classification', async () => {
+    const t = new Town(ids())
+    t.hire(spawn, { agentId: 'a1', model: 'claude-haiku-5-5' }, 0)
+    expect(t.drain()).toEqual([
+      { type: 'staff.hire', agentId: 'a1', subagentType: 'general-purpose', description: 'Tiny probe subagent', teammate: false, background: true, model: 'claude-haiku-5-5' },
+    ])
+    const [job] = t.takeJobs()
+    t.classified(job!, 'code-reviewer')
+    expect(t.drain()).toEqual([{ type: 'staff.role', agentId: 'a1', role: 'code-reviewer' }])
+  })
+
+  test('a custom agent named after a role needs no classification', async () => {
+    const t = new Town(ids())
+    t.hire({ ...spawn, subagentType: 'security-engineer' }, { agentId: 'a1' }, 0)
+    expect(types(t)).toEqual(['staff.hire', 'staff.role'])
+    expect(t.takeJobs()).toEqual([])
+  })
+
+  test('events that beat the hire are held and replayed; strangers are dropped', async () => {
+    const t = new Town(ids())
+    t.toolStart({ tool: 'Read', agentId: 'a1' }, 0)
+    t.toolStart({ tool: 'Read', agentId: 'fork-x' }, 0)
+    expect(t.drain()).toEqual([])
+    t.hire(spawn, { agentId: 'a1' }, 5)
+    expect(types(t)).toEqual(['staff.hire', 'activity'])
+    t.tick(HOLD_MS + 10)
+    t.hire(spawn, { agentId: 'fork-x' }, HOLD_MS + 20)
+    expect(types(t)).toEqual(['staff.hire'])
+  })
+
+  test('staff done carries status and the model change', async () => {
+    const t = new Town(ids())
+    t.hire(spawn, { agentId: 'a1', model: 'claude-haiku-5-5' }, 0)
+    t.drain()
+    t.turnComplete({ agentId: 'a1', durationMs: 5040, isAborted: false, reason: 'answer', model: 'claude-sonnet-5-5' }, 5040)
+    expect(t.drain()).toEqual([
+      { type: 'model.update', agentId: 'a1', model: 'claude-sonnet-5-5' },
+      { type: 'staff.done', agentId: 'a1', status: 'completed', durationMs: 5040 },
+    ])
+  })
+
+  test('messages resolve the receiver by ID or name', async () => {
+    const t = new Town(ids())
+    t.hire({ ...spawn, name: 'reviewer' }, { agentId: 'a1' }, 0)
+    t.hire(spawn, { agentId: 'a2' }, 0)
+    t.drain()
+    t.message({ to: 'reviewer', agentId: 'a2' }, 1)
+    t.message({ to: 'a2' }, 1)
+    t.message({ to: '*', agentId: 'a1' }, 1)
+    t.message({ to: 'team-lead', agentId: 'a1' }, 1)
+    expect(t.drain()).toEqual([
+      { type: 'message.send', fromAgentId: 'a2', toAgentId: 'a1' },
+      { type: 'message.send', toAgentId: 'a2' },
+      { type: 'message.send', fromAgentId: 'a1', broadcast: true },
+      { type: 'message.send', fromAgentId: 'a1', toName: 'team-lead' },
+    ])
+  })
+})
+
+describe('approvals', () => {
+  test('an ask settled quickly by auto mode shows nothing', async () => {
+    const t = new Town(ids())
+    t.ask({ tool_use_id: 'u1', tool: 'Bash' }, 0)
+    t.tick(1500)
+    t.toolEnd({ tool: 'Bash', tool_use_id: 'u1', input: {} }, { ok: true, result: {} }, 1500)
+    expect(t.drain()).toEqual([])
+  })
+
+  test('an ask still open after the delay waits, then ends', async () => {
+    const t = new Town(ids())
+    t.ask({ tool_use_id: 'u1', tool: 'Bash' }, 0)
+    t.tick(APPROVAL_DELAY_MS)
+    t.tick(APPROVAL_DELAY_MS + 250)
+    t.toolEnd({ tool: 'Bash', tool_use_id: 'u1', input: {} }, { ok: false, result: {} }, 9000)
+    expect(t.drain()).toEqual([
+      { type: 'approval.wait', approvalId: 'u1', tool: 'Bash' },
+      { type: 'approval.end', approvalId: 'u1', outcome: 'denied' },
+    ])
+  })
+})

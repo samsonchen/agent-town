@@ -1,0 +1,8 @@
+{
+  "name": "town-link",
+  "version": "0.1.0",
+  "description": "Sends what Claude Code does to the agent-town macOS app, which shows it as a small office building.",
+  "author": { "name": "Samson Chen" },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/samsonchen/agent-town"
+}
