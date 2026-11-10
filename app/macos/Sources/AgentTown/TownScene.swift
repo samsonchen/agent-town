@@ -28,6 +28,9 @@ final class TownScene: ObservableObject {
     var blocks: [String: BlockNode] = [:]
     /// The blocks on screen, executive first, then each open project in the order it opened.
     var blockOrder: [String] = []
+    /// The Dispatcher's board: scheduleId → card, and the cards in the order they were pinned.
+    var boardCards: [String: Entity] = [:]
+    var boardOrder: [String] = []
     var actors: [String: Actor] = [:]
     private var calls: [(Actor, Actor)] = []
     /// Pages in progress: the caller, the block whose bench speaker they talk through, and who is called.
@@ -95,6 +98,7 @@ final class TownScene: ObservableObject {
             let node = BlockNode(id: p, name: building.blocks[p]?.name ?? p)
             blocks[p] = node
             let c = Self.blockColors[(blocks.count - 2) % Self.blockColors.count]
+            node.color = NSColor(hex: c.0)
             buildProjectBlock(node, colors: (NSColor(hex: c.0)!, NSColor(hex: c.1)!))
             placeNewBlock(p)
             fillBench(node)
@@ -280,8 +284,10 @@ final class TownScene: ObservableObject {
         case .context:
             break // the bar under the block reads the building state
 
-        case .scheduleAdded, .scheduleRemoved:
-            break // the Dispatcher's board comes in Phase 4
+        case .scheduleAdded(let id):
+            scheduleAdded(id)
+        case .scheduleRemoved(let id):
+            scheduleRemoved(id)
         }
     }
 
@@ -717,6 +723,7 @@ final class TownScene: ObservableObject {
             items.append(LabelItem(id: "block-\(node.id)", anchor: o + [Layout.blockWidth / 2, 0, edge],
                                    lines: [(sign.text, .sign)], scroll: sign.scroll))
         }
+        items += boardLabels()
         return items
     }
 

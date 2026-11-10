@@ -172,6 +172,8 @@ final class BlockNode {
     let entity = Entity()
     var name: String
     var placed = false
+    /// The floor color, for this project's cards on the Dispatcher's board.
+    var color: NSColor?
     /// Phones on the Chief of Staff desks, by desk slot.
     var deskPhones: [Int: Phone] = [:]
     /// sessionId → Chief of Staff desk slot.
