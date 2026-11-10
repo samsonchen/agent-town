@@ -183,6 +183,7 @@ The default is to be decided (see [roadmap.md](roadmap.md)).
 
 The app runs in the menu bar, with no Dock icon. Its menu:
 
+- **About agent-town** opens a window with the version and build number, the author (Samson Chen), the license (Apache 2.0) with a link, the repository link, and the third-party components with links to each one and its license (Kenney Mini Characters and Kenney Furniture Kit, CC0 1.0).
 - **Show agent-town** (checked while the office window is open). Closing the window unchecks it; the app keeps running.
 - **Sound** (checked while sounds play). Works whether the window is shown or hidden.
 - **Show tips** (on by default). Shows the closable tips in the window, such as moving the CEO with the arrow keys. Closing a tip turns this off; checking it again brings the tips back.

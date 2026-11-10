@@ -14,6 +14,18 @@
 "Quit agent-town" = "結束 agent-town";
 "Close" = "關閉";
 
+/* About */
+"About agent-town" = "關於 agent-town";
+"Version %@ (build %@)" = "版本 %1$@（建置 %2$@）";
+"Version %@ (development build)" = "版本 %@（開發版）";
+"Shows Claude Code's work as a small office." = "把 Claude Code 的工作畫成一間小辦公室。";
+"By Samson Chen" = "作者：Samson Chen";
+"License" = "授權";
+"agent-town is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)." = "agent-town 以 [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) 授權。";
+"Third-party components" = "第三方元件";
+"3D models, license: [%@](%@)" = "3D 模型，授權：[%1$@](%2$@)";
+"CC0 does not require credit; we credit Kenney (kenney.nl) anyway." = "CC0 不要求標示來源，我們仍在此感謝 Kenney（kenney.nl）。";
+
 /* Names and tags */
 "Chief of Staff" = "幕僚長";
 "CEO" = "執行長";

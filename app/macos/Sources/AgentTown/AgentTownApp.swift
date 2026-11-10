@@ -75,6 +75,11 @@ struct AgentTownApp: App {
         .defaultLaunchBehavior(Prefs.isOn(Prefs.showWindow) ? .presented : .suppressed)
         .restorationBehavior(.disabled)
 
+        Window(Labels.text("About agent-town"), id: "about") { AboutView() }
+            .windowResizability(.contentSize)
+            .defaultLaunchBehavior(.suppressed)
+            .restorationBehavior(.disabled)
+
         Window(Labels.text("Settings"), id: "settings") { SettingsView() }
             .windowResizability(.contentSize)
             .defaultLaunchBehavior(.suppressed)
@@ -101,6 +106,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                               seconds: seconds, to: URL(fileURLWithPath: out))
                     print("snapshot written")
                 } catch { print("snapshot failed: \(error)") }
+                exit(0)
+            }
+            return
+        }
+
+        // --about-snapshot PATH: a picture of the About window, for checking its layout.
+        if let out = value("--about-snapshot") {
+            Task { @MainActor in
+                let r = ImageRenderer(content: AboutView().background(Color(nsColor: .windowBackgroundColor)))
+                r.scale = 2
+                if let img = r.nsImage, let tiff = img.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff),
+                   let png = rep.representation(using: .png, properties: [:]) {
+                    try? png.write(to: URL(fileURLWithPath: out))
+                    print("snapshot written")
+                }
                 exit(0)
             }
             return

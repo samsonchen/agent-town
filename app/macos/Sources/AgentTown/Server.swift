@@ -22,7 +22,7 @@ final class LoopbackServer: @unchecked Sendable {
         l.stateUpdateHandler = { [weak self] state in
             guard let self, case .ready = state, let p = l.port?.rawValue else { return }
             self.port = Int(p)
-            let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.2.2"
+            let version = AppInfo.version
             do {
                 try EndpointFile(port: Int(p), token: self.token, appVersion: version).write()
                 NSLog("agent-town: listening on 127.0.0.1:%d", Int(p))

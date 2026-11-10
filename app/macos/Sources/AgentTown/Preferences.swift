@@ -41,7 +41,7 @@ enum Prefs {
     }
 }
 
-/// The menu bar menu: show the window, sound, tips, Settings and Quit.
+/// The menu bar menu: About, show the window, sound, tips, Settings and Quit.
 struct TownMenu: View {
     @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
@@ -50,6 +50,11 @@ struct TownMenu: View {
     @AppStorage(Prefs.showTips) private var showTips = true
 
     var body: some View {
+        Button(Labels.text("About agent-town")) {
+            openWindow(id: "about")
+            NSApp.activate(ignoringOtherApps: true)
+        }
+        Divider()
         Toggle(Labels.text("Show agent-town"), isOn: Binding(get: { showWindow }, set: { on in
             if on {
                 openWindow(id: "town")
