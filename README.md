@@ -35,6 +35,17 @@ claude --plugin-dir plugin               # in another terminal
 
 In a session, `/town` shows whether the plugin is connected, and `/town on` or `/town off` turns sending on or off for all sessions. Role and task-type classification uses a short Haiku call on your own Claude plan or API key.
 
+## Known issues
+
+Things you may notice while using agent-town, and what to expect:
+
+- **Automatic compaction may not show.** When Claude Code compacts the conversation on its own because the context is full, the Chief of Staff tidies their notes only if no other plugin writes the summary. With the `cc-plugin-sec-default` plugin installed, the automatic compaction happens but the office shows nothing. Typing `/compact` yourself always shows the scene.
+- **Work done while the app is closed is not shown later.** town-link sends events only while the app is running and drops them otherwise. Open the app first; a Claude Code session that is already running shows up within a few seconds of the app starting, from that point on.
+- **A session leaves the office about two minutes after it stops.** When a Claude Code session ends or stops responding, its Chief of Staff stays until the app has heard nothing for two minutes.
+- **Labels can cover someone near the top of a small window.** Name tags and notes slide down to stay inside the window, so in a short window they may sit over the character's head. Make the window taller or scroll to see them clearly.
+- **Task titles and staff roles use your Claude plan.** Each new task makes a short Haiku request on your own plan or API key to pick a title and a role. If that request fails, the sign shows no task title and the hat and roles fall back to defaults.
+- **No installer yet.** The app runs from source with Swift (see above); a signed `.app` download is planned.
+
 ## Documentation
 
 Start with [docs/README.md](docs/README.md). It links to:
