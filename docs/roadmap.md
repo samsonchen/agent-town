@@ -62,6 +62,8 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - [ ] More idle life on the bench (coffee, magazine, darts); sitting on the sofa
 - [ ] Workflow subagents report to the workflow coordinator (Phase 0 item 16)
 - [ ] Name tags that move apart when characters stand close together
+- [x] Blocks on screen: executive block plus one project block always; extra blocks show while they have work; no walk-in or walk-out
+- [x] Typing at desks, writing at hot desks; no approval sound in auto mode
 - [x] Walking the CEO with the arrow keys, H to go back to the desk, a closable tip, the view following the CEO, a mobile phone away from the desk, and status statements from the character the CEO stands next to
 
 ## Phase 4: the whole office

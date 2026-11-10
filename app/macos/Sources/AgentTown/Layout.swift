@@ -231,5 +231,12 @@ struct Labels {
     var failed: String { t("Failed", "失敗") }
     var result: String { t("Result", "結果") }
     var tipArrows: String { t("Move the CEO with the arrow keys ← ↑ ↓ →", "用方向鍵 ← ↑ ↓ → 移動執行長") }
+    var compacting: String { t("Tidying notes…", "整理筆記中…") }
+    /// After a compaction: the conversation's size before and after, in tokens, when known.
+    func compacted(before: Int64?, after: Int64?) -> String {
+        guard let before, let after else { return t("Notes tidied", "筆記整理完成") }
+        func k(_ n: Int64) -> String { n >= 1000 ? "\((n + 500) / 1000)k" : "\(n)" }
+        return t("Notes tidied: \(k(before)) → \(k(after)) tokens", "筆記整理完成：\(k(before)) → \(k(after)) tokens")
+    }
     var tipHome: String { t("Press H to send the CEO back to the desk", "按 H 讓執行長回到座位") }
 }

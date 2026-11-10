@@ -77,7 +77,10 @@ struct TownView: View {
                 RealityView { content in
                     content.add(scene.root)
                     content.add(camera)
-                } update: { _ in
+                } update: { content in
+                    // Put the scene back if anything took it out of this view.
+                    if scene.root.scene == nil { content.add(scene.root) }
+                    if camera.scene == nil { content.add(camera) }
                     proj.apply(to: camera)
                 }
                 .realityViewCameraControls(.none)
@@ -88,6 +91,11 @@ struct TownView: View {
                     }
                 }
                 .allowsHitTesting(false)
+            }
+            .contentShape(Rectangle())
+            .onTapGesture(coordinateSpace: .local) { point in
+                // A click on a character sends the CEO over to talk to them.
+                if let a = scene.actor(at: point, projector: proj) { scene.visit(a) }
             }
             .onAppear { proj.apply(to: camera) }
             .onChange(of: geo.size) { proj.apply(to: camera) }

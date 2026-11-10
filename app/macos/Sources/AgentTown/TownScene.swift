@@ -26,8 +26,13 @@ final class TownScene: ObservableObject {
     private let ground = Entity()
     private var groundSize: SIMD2<Float> = .zero
     var blocks: [String: BlockNode] = [:]
-    private var blockOrder: [String] = []
-    private var pendingRemoval: [String: Task<Void, Never>] = [:]
+    /// The blocks on screen, executive first. A project's block is on screen only while it has work.
+    var blockOrder: [String] = []
+    /// Project blocks kept off-screen while their sessions have no work (spec: as few blocks as possible).
+    var hidden: Set<String> = []
+    var idleSince: [String: Date] = [:]
+    /// When each project last had work, to choose which block stays on screen.
+    var lastWork: [String: Date] = [:]
     var actors: [String: Actor] = [:]
     private var calls: [(Actor, Actor)] = []
     /// approvalId → the character waiting.
@@ -46,6 +51,8 @@ final class TownScene: ObservableObject {
     var heldArrows: Set<UInt16> = []
     var ceoDriver: Task<Void, Never>?
     var ceoTrip: Task<Void, Never>?
+    /// The character the user clicked; the CEO talks to them once there.
+    weak var ceoVisitee: Actor?
     var mobilePhone: Phone?
     private static let blockColors: [(String, String)] = [
         ("#CDD0DA", "#C3C6D1"), // gray
@@ -75,42 +82,41 @@ final class TownScene: ObservableObject {
         dispatcher.phone = execPhones.dispatcher
         for a in [ceo, dispatcher, inspector] { a.body.play("idle") }
         startBenchLife()
+        startIdleWatch()
+        startTyping()
     }
 
     // MARK: Changes
 
     func handle(_ change: Change, building: Building) {
         self.building = building
+        if let p = change.projectId, hasWork(p) {
+            lastWork[p] = Date()
+            if hidden.contains(p) { show(p) }
+        }
         switch change {
         case .blockAdded(let p):
-            if let pending = pendingRemoval.removeValue(forKey: p) {
-                pending.cancel() // the project came back before its block was cleared away
-                blocks[p]?.name = building.blocks[p]?.name ?? p
-                return
-            }
             let node = BlockNode(id: p, name: building.blocks[p]?.name ?? p)
             blocks[p] = node
-            blockOrder.append(p)
-            let c = Self.blockColors[(blockOrder.count - 2) % Self.blockColors.count]
+            let c = Self.blockColors[(blocks.count - 2) % Self.blockColors.count]
             buildProjectBlock(node, colors: (NSColor(hex: c.0)!, NSColor(hex: c.1)!))
-            relayout()
+            placeNewBlock(p)
             fillBench(node)
 
         case .blockRemoved(let p):
-            pendingRemoval[p] = Task { @MainActor [weak self] in
-                // Let the last Chief of Staff walk out first.
-                for _ in 0..<80 {
-                    try? await Task.sleep(for: .milliseconds(150))
-                    if Task.isCancelled { return }
-                    if self?.actors.values.contains(where: { $0.block == p && $0.kind == .chief }) != true { break }
-                }
-                guard let self, !Task.isCancelled else { return }
-                self.pendingRemoval[p] = nil
-                self.blocks.removeValue(forKey: p)?.entity.removeFromParent()
-                for (id, a) in self.actors where a.block == p { self.actors[id] = nil }
-                self.blockOrder.removeAll { $0 == p }
-                self.relayout()
-                self.ceoBackIfOfficeEmpty()
+            // The last session closed: the block goes at once, no one walks out.
+            guard let node = blocks.removeValue(forKey: p) else { return }
+            node.entity.removeFromParent()
+            for (id, a) in actors where a.block == p { actors[id] = nil }
+            for (id, c) in pendingCalls where c.node === node { pendingCalls[id] = nil }
+            hidden.remove(p)
+            idleSince[p] = nil
+            lastWork[p] = nil
+            if blockOrder.contains(p) {
+                blockOrder.removeAll { $0 == p }
+                relayout()
+                keepOneProjectShown()
+                ceoBackIfOfficeEmpty()
             }
 
         case .chiefArrived(let p, let s):
@@ -120,27 +126,22 @@ final class TownScene: ObservableObject {
             node.chiefSlots[s] = slot
             let chief = makeActor(id: s, kind: .chief, base: chiefBase(node),
                                   outfit: NSColor(hex: assets.characters.chiefOfStaff.color),
-                                  block: node, name: labels.chiefOfStaff, at: Layout.entrance)
+                                  block: node, name: labels.chiefOfStaff, at: Layout.chiefSpot(slot: slot))
+            // Already at the desk when the block shows; no walk-in.
             chief.home = Layout.chiefSpot(slot: slot)
+            chief.hasComputer = true
             chief.phone = node.deskPhones[slot % Layout.maxDesks]
             chief.model = building.blocks[p]?.chiefs[s]?.model
-            chief.enqueue { [weak self] in
-                guard let self else { return }
-                await self.goHome(chief)
-            }
+            chief.settle()
 
         case .chiefLeft(let p, let s):
             guard let chief = actors[s], let node = blocks[p] else { return }
             node.chiefSlots[s] = nil
             chief.working = false
             sessionEnded(s, in: node)
-            chief.enqueue { [weak self] in
-                guard let self else { return }
-                await self.walk(chief, to: Layout.entrance)
-                await self.move(chief, to: [Layout.entrance.x, -Layout.gap / 2])
-                chief.root.removeFromParent()
-                if self.actors[s] === chief { self.actors[s] = nil }
-            }
+            // The session ended: the Chief of Staff is gone at once, no walk-out.
+            chief.root.removeFromParent()
+            actors[s] = nil
 
         case .ticketSubmitted(_, let s, let ticket):
             guard let chief = actors[s] else { return }
@@ -220,12 +221,12 @@ final class TownScene: ObservableObject {
         case .taskDone(let p, let s, let taskId, let status):
             jobDone(p, job: "t:\(s)/\(taskId)", status: status)
 
-        case .approvalWait(let p, let s, let id, let agentId):
+        case .approvalWait(let p, let s, let id, let agentId, let autoMode):
             guard let a = agentId.flatMap({ worker(p, "a:\(s)/\($0)") }) ?? actors[s] else { return }
             approvals[id] = a
             a.awaitingApproval = true
             if !a.isBusy { a.settle() }
-            onSound?("approval")
+            if !autoMode { onSound?("approval") } // in auto mode the classifier, not the user, answers
             ringCeoForApprovals()
 
         case .approvalEnd(_, _, let id, _):
@@ -237,6 +238,11 @@ final class TownScene: ObservableObject {
 
         case .message(let p, let s, let from, let to, let broadcast):
             message(p, s, from: from, to: to, broadcast: broadcast)
+
+        case .compactStarted(let p, let s, _):
+            compactStarted(p, s)
+        case .compactDone(let p, let s, let outcome, let before, let after):
+            compactDone(p, s, outcome: outcome, before: before, after: after)
 
         case .scheduleAdded, .scheduleRemoved:
             break // the Dispatcher's board comes in Phase 4
@@ -373,7 +379,7 @@ final class TownScene: ObservableObject {
     }
 
     /// Places the blocks in their grid and sizes the path around them.
-    private func relayout() {
+    func relayout() {
         let n = blockOrder.count
         for (i, id) in blockOrder.enumerated() {
             guard let node = blocks[id] else { continue }
@@ -550,6 +556,7 @@ final class TownScene: ObservableObject {
             if let desk = place("desk", in: f, at: [x, Layout.chiefDeskZ]) {
                 place("computerScreen", in: f, at: [x - 0.1, Layout.chiefDeskZ - 0.05], scale: 0.8, onTopOf: desk)
                 node.deskPhones[slot] = telephone(in: f, at: [x + 0.28, Layout.chiefDeskZ + 0.02], on: desk)
+                node.deskTops[slot] = desk.visualBounds(relativeTo: f).max.y
             }
             // Staff desks.
             if let desk = place("desk", in: f, at: [x, Layout.staffDeskZ]) {
@@ -595,11 +602,12 @@ final class TownScene: ObservableObject {
     func labelItems() -> [LabelItem] {
         var items: [LabelItem] = []
         let touched = touchedByCeo()
-        for a in actors.values {
+        for a in actors.values where onScreen(a) {
             var lines: [(String, LabelItem.Style)] = []
             if a.speaking { lines.append(("• • •", .speech)) }
             if a.awaitingApproval { lines.append((labels.needsApproval, .ring)) }
             if let b = a.bubble { lines.append((b, .bubble)) }
+            if let n = a.note { lines.append((n, .ticket)) }
             // The hat shows only while no staff are working (spec: hats).
             if let h = a.hat, !hasWorkingStaff(a) { lines.append((h, .hat)) }
             if let t = a.ticketText { lines.append((String(t.prefix(28)) + (t.count > 28 ? "…" : ""), .ticket)) }

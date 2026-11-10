@@ -720,6 +720,10 @@
             "tool": {
               "type": "string",
               "maxLength": 200
+            },
+            "autoMode": {
+              "type": "boolean",
+              "description": "True when the session is in auto mode: a classifier, not the user, answers most asks."
             }
           }
         }
@@ -753,6 +757,68 @@
                 "denied",
                 "unknown"
               ]
+            }
+          }
+        }
+      ]
+    },
+    "compact.start": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "trigger"
+          ],
+          "properties": {
+            "type": {
+              "const": "compact.start"
+            },
+            "trigger": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "auto",
+                "other"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "compact.end": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "outcome"
+          ],
+          "properties": {
+            "type": {
+              "const": "compact.end"
+            },
+            "outcome": {
+              "type": "string",
+              "enum": [
+                "done",
+                "skipped",
+                "failed"
+              ]
+            },
+            "tokensBefore": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tokensAfter": {
+              "type": "integer",
+              "minimum": 0
             }
           }
         }
@@ -819,6 +885,12 @@
         },
         {
           "$ref": "#/$defs/approval.end"
+        },
+        {
+          "$ref": "#/$defs/compact.start"
+        },
+        {
+          "$ref": "#/$defs/compact.end"
         }
       ]
     },

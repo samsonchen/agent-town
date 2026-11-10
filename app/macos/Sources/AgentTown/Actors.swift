@@ -45,8 +45,16 @@ final class Actor {
     var atWork = false
     var waitingSince = Date()
     var sitting = false
+    /// Works at a desk with a computer (types); otherwise writes.
+    var hasComputer = false
     /// When the current ticket or job started, for the status the character gives the CEO.
     var since: Date?
+    /// A calm status line (white), such as "Tidying notes…".
+    var note: String?
+    /// Tidying its notes: the conversation is being compacted.
+    var compacting = false
+    /// The stack of notes on the desk while compacting.
+    var papers: Entity?
     /// The CEO is walking under the user's control; scenes leave its animation alone.
     var steering = false
 
@@ -86,12 +94,15 @@ final class Actor {
         guard !onCall, !steering else { return }
         if awaitingApproval {
             body.play("holding-right")
+        } else if compacting {
+            body.play("write") // going through the notes
         } else if working {
-            switch activity {
-            case "read": body.play("holding-both")
-            case "shell": body.play("interact-left")
-            case "web", "mcp": body.play("holding-right")
-            default: body.play("interact-right")
+            if isOperator {
+                // At the racks: hands on the machines.
+                body.play(activity == "shell" ? "interact-left" : "interact-right")
+            } else {
+                // At a desk: typing at the computer (reading on screen included), else writing.
+                body.play(hasComputer ? "type-right" : "write")
             }
         } else if sitting {
             body.play("sit")
@@ -174,6 +185,8 @@ final class BlockNode {
     var pendingDone: [String: String] = [:]
     /// Messages from characters still on their way to work: job key → replays.
     var deferred: [String: [() -> Void]] = [:]
+    /// The height of each Chief of Staff desk top (block-local), by desk slot.
+    var deskTops: [Int: Float] = [:]
     /// Furniture footprints (block-local x and z), which the CEO walks around.
     var obstacles: [(min: SIMD2<Float>, max: SIMD2<Float>)] = []
 

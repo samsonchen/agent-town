@@ -25,7 +25,7 @@ final class TownApp: ObservableObject {
             guard UserDefaults.standard.object(forKey: key) as? Bool ?? true else { return }
             NSSound(named: name == "completion" ? "Glass" : "Ping")?.play()
         }
-        let thresh = UserDefaults.standard.object(forKey: "completionThreshold") as? Double ?? 30
+        let thresh = UserDefaults.standard.object(forKey: "completionThreshold") as? Double ?? 0
         store.sound = SoundSettings(thresholdSeconds: thresh)
     }
 
@@ -51,7 +51,9 @@ struct AgentTownApp: App {
     @StateObject private var town = TownApp.shared
 
     var body: some Scene {
-        WindowGroup("agent-town") {
+        // One window: the scene's entities can be in only one RealityView at a time, so a second
+        // window (⌘N, the Dock icon) would take them from the first and leave it blank.
+        Window("agent-town", id: "town") {
             if CommandLine.arguments.contains("--spike") {
                 SpikeView().frame(minWidth: 900, minHeight: 600)
             } else {

@@ -169,11 +169,13 @@ extension TownScene {
         if isOp {
             let slot = BlockNode.free(node.consoleSlots)
             node.consoleSlots[w.id] = slot
+            w.hasComputer = false
             w.home = Layout.operatorSpot(slot: slot)
             w.homeFacing = [0, -1]
         } else {
             let slot = BlockNode.free(node.staffSlots)
             node.staffSlots[w.id] = slot
+            w.hasComputer = slot < Layout.maxDesks // past the desks, staff stand at hot desks and write
             w.home = Layout.staffSpot(slot: slot)
             w.homeFacing = [0, 1]
         }
@@ -335,7 +337,7 @@ extension TownScene {
             while true {
                 try? await Task.sleep(for: .seconds(2.5))
                 guard let self else { return }
-                let idle = self.blocks.values.flatMap(\.bench).filter { !$0.isBusy && !$0.sitting }
+                let idle = self.blocks.values.filter { $0.placed }.flatMap(\.bench).filter { !$0.isBusy && !$0.sitting }
                 guard let w = idle.randomElement() else { continue }
                 w.enqueue {
                     w.body.play(Bool.random() ? "emote-yes" : "interact-left", loop: false)

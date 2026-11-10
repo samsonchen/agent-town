@@ -41,7 +41,7 @@ type Origin = 'user' | 'schedule' | 'task' | 'unknown'
 type Ticket = { id: string; origin: Origin; startTs: number; returned: boolean; lastReturnTs?: number }
 type Staff = { name?: string; hireTs: number }
 type Task = { startTs: number; ticketId?: string }
-type Approval = { tool: string; agentId?: string; askTs: number; waited: boolean }
+type Approval = { tool: string; agentId?: string; askTs: number; waited: boolean; autoMode: boolean }
 
 export type ToolOutcome = { ok: boolean; result: Record<string, unknown> }
 
@@ -123,6 +123,8 @@ export class Town {
   private tasks = new Map<string, Task>()
   private schedules = new Map<string, { text: string; recurring: boolean }>()
   private approvals = new Map<string, Approval>()
+  /** The session's permission mode, as the last classic hook reported it. */
+  private permissionMode?: string
   private counter = 0
   private readonly newId: () => string
 
@@ -145,9 +147,19 @@ export class Town {
 
   // -- session
 
+  private openFields?: { projectName: string; surface: string; ccVersion: string; model?: string }
+
   open(fields: { projectName: string; surface: string; ccVersion: string; model?: string }) {
+    this.openFields = fields
     this.chiefModel = fields.model
     this.emit({ type: 'session.open', ...fields })
+  }
+
+  /** The app appeared after this session opened: introduce the session again, with its latest model. */
+  reopen() {
+    if (!this.openFields) return
+    const model = this.chiefModel ?? this.openFields.model
+    this.emit({ type: 'session.open', ...this.openFields, ...(model ? { model } : {}) })
   }
 
   close(reason: string) {
@@ -332,7 +344,12 @@ export class Town {
   /** tool.check returned `ask` for a person. */
   ask(e: { tool_use_id: string; tool: string; agentId?: string }, now: number) {
     if (e.agentId && !this.staff.has(e.agentId) && !this.held.has(e.agentId)) return
-    this.approvals.set(e.tool_use_id, { tool: e.tool, agentId: e.agentId, askTs: now, waited: false })
+    this.approvals.set(e.tool_use_id, { tool: e.tool, agentId: e.agentId, askTs: now, waited: false, autoMode: this.permissionMode === 'auto' })
+  }
+
+  /** The permission mode from a classic hook's input. In auto mode a classifier answers asks. */
+  setPermissionMode(mode: string | undefined) {
+    if (mode) this.permissionMode = mode
   }
 
   /** tool.call, after next(e) settled. */
@@ -453,6 +470,79 @@ export class Town {
     else this.emit({ type: 'task.role', taskId: job.id, role: value })
   }
 
+  // -- surviving a reload
+
+  /** What a hot reload of the plugin would lose: open tickets, staff, tasks and waits. JSON data. */
+  save(): Record<string, unknown> {
+    return {
+      v: 1,
+      ticket: this.ticket,
+      lastTicket: this.lastTicket,
+      chiefModel: this.chiefModel,
+      staff: [...this.staff],
+      staffModels: [...this.staffModels],
+      tasks: [...this.tasks],
+      doneTasks: [...this.doneTasks],
+      schedules: [...this.schedules],
+      approvals: [...this.approvals],
+      permissionMode: this.permissionMode,
+      counter: this.counter,
+      compacting: this.compacting,
+      openFields: this.openFields,
+    }
+  }
+
+  /** Takes back what `save` returned, after a reload. Anything malformed is left at its default. */
+  restore(x: Record<string, unknown>) {
+    if (!x || x.v !== 1) return
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = (v: unknown) => new Map<string, any>(Array.isArray(v) ? (v as [string, unknown][]) : [])
+    const obj = <T>(v: unknown) => (v && typeof v === 'object' ? (v as T) : undefined)
+    this.ticket = obj<Ticket>(x.ticket)
+    this.lastTicket = obj<Ticket>(x.lastTicket)
+    this.chiefModel = typeof x.chiefModel === 'string' ? x.chiefModel : undefined
+    this.staff = map(x.staff)
+    this.staffModels = map(x.staffModels)
+    this.tasks = map(x.tasks)
+    this.doneTasks = map(x.doneTasks)
+    this.schedules = map(x.schedules)
+    this.approvals = map(x.approvals)
+    this.permissionMode = typeof x.permissionMode === 'string' ? x.permissionMode : undefined
+    this.counter = typeof x.counter === 'number' ? x.counter : 0
+    this.compacting = x.compacting === true
+    this.openFields = obj(x.openFields)
+  }
+
+  // -- compaction
+
+  private compacting = false
+
+  /** session.compact, before it runs. Only the main conversation's compaction shows; a
+   *  subagent's or a fork's (agentId) and a background precompute do not. */
+  compactStart(e: { trigger?: string; agentId?: string }): boolean {
+    if (e.agentId || e.trigger === 'precompute' || this.compacting) return false
+    this.compacting = true
+    const trigger = e.trigger === 'manual' || e.trigger === 'auto' ? e.trigger : 'other'
+    this.emit({ type: 'compact.start', trigger })
+    return true
+  }
+
+  /** session.compact, after it ran (r undefined: it threw). */
+  compactEnd(r: { skip?: string; tokensBefore?: number; tokensAfter?: number } | undefined) {
+    if (!this.compacting) return
+    this.compacting = false
+    const outcome = !r ? 'failed' : typeof r.skip === 'string' ? 'skipped' : 'done'
+    const n = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? Math.round(v) : undefined)
+    const before = outcome === 'done' ? n(r?.tokensBefore) : undefined
+    const after = outcome === 'done' ? n(r?.tokensAfter) : undefined
+    this.emit({
+      type: 'compact.end',
+      outcome,
+      ...(before !== undefined ? { tokensBefore: before } : {}),
+      ...(after !== undefined ? { tokensAfter: after } : {}),
+    })
+  }
+
   // -- timer
 
   /** Called by the outbox timer: expire held events, raise approval waits. */
@@ -461,7 +551,13 @@ export class Town {
     for (const [id, a] of this.approvals) {
       if (!a.waited && now - a.askTs >= APPROVAL_DELAY_MS) {
         a.waited = true
-        this.emit({ type: 'approval.wait', approvalId: id, ...(a.agentId ? { agentId: a.agentId } : {}), tool: a.tool })
+        this.emit({
+          type: 'approval.wait',
+          approvalId: id,
+          ...(a.agentId ? { agentId: a.agentId } : {}),
+          tool: a.tool,
+          ...(a.autoMode ? { autoMode: true } : {}),
+        })
       }
     }
   }

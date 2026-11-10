@@ -235,6 +235,7 @@ The message text is not sent.
 | `approvalId` | string | The tool use ID |
 | `agentId` | string, optional | Absent for the main agent |
 | `tool` | string | |
+| `autoMode` | boolean, optional | `true` when the session is in auto mode, where a classifier rather than the user answers most asks. The app shows the wait but plays no sound. |
 
 ### `approval.end`
 
@@ -242,6 +243,22 @@ The message text is not sent.
 |---|---|---|
 | `approvalId` | string | |
 | `outcome` | string | `allowed`, `denied`, `unknown` |
+
+### `compact.start`
+
+The main conversation's compaction began (`/compact`, or the automatic one). A subagent's or an engine fork's compaction, and a background precompute, send nothing.
+
+| Field | Type | Notes |
+|---|---|---|
+| `trigger` | string | `manual` (`/compact`), `auto`, `other` |
+
+### `compact.end`
+
+| Field | Type | Notes |
+|---|---|---|
+| `outcome` | string | `done`, `skipped` (a hook vetoed it), `failed` |
+| `tokensBefore` | integer, optional | The conversation's size before, when `done` and known |
+| `tokensAfter` | integer, optional | Its size after, when `done` and known |
 
 ## Example stream
 

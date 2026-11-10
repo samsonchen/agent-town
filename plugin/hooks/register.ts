@@ -8,6 +8,7 @@
 
 import type { Register } from 'claude-code'
 import { Town, projectIdentity, type ClassifyJob, type Ev } from './core'
+import type { TownSaved } from '../types'
 
 const PROTOCOL = 1
 const FLUSH_MS = 250
@@ -40,6 +41,23 @@ let sending = false
 let enabled = true
 let refused = false // the app answered 426
 let endpointPath = ''
+let dirty = false // something changed since the last save
+
+// A hot reload (an update of this plugin mid-session) starts the module over; the session's
+// state keeps the open ticket and the unsent events, so a report is not lost to it.
+const SAVED = { plugin: 'town-link', key: 'saved' } as const
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function save($: any) {
+  if (!dirty || !sessionId) return
+  dirty = false
+  const value: TownSaved = { sessionId, seq, queue, town: town.save() }
+  try {
+    await $.state.set(SAVED, JSON.parse(JSON.stringify(value)))
+  } catch {
+    dirty = true
+  }
+}
 
 function envelope(ev: Ev): Ev {
   return { ...ev, sessionId, seq: ++seq, ts: Date.now(), projectId }
@@ -52,6 +70,7 @@ function collect() {
     queue.push(envelope(ev))
   }
   if (queue.length > MAX_QUEUE) queue = queue.slice(-MAX_QUEUE)
+  dirty = true
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -91,7 +110,10 @@ async function flush($: any) {
   if (sending) return
   safe(() => town.tick(Date.now()))
   collect()
-  if (queue.length === 0) return
+  await save($)
+  // Look for the app every couple of seconds while not connected, even with nothing to send,
+  // so a session shows up as soon as the app starts rather than at its next event.
+  if (queue.length === 0 && (endpoint || Date.now() - endpointCheckedAt < ENDPOINT_RETRY_MS)) return
   sending = true
   try {
     if (!endpoint) {
@@ -100,11 +122,19 @@ async function flush($: any) {
       endpoint = await readEndpoint($)
       if (!endpoint) {
         queue = [] // the app is not running: drop, never retry old events
+        dirty = true
         return
       }
+      // Newly connected: the app may have missed this session's session.open.
+      if (!queue.some(ev => ev.type === 'session.open')) {
+        safe(() => town.reopen())
+        collect()
+      }
     }
+    if (queue.length === 0) return
     const batch = queue
     queue = []
+    dirty = true
     const ep = endpoint
     const res = await $.http.fetch(`http://127.0.0.1:${ep.port}/v1/events`, {
       method: 'POST',
@@ -145,10 +175,28 @@ export const register: Register = on => {
       const stored = await $.store.get('enabled')
       enabled = stored !== false
 
+      // After a hot reload: take back this session's open ticket and unsent events.
+      let reloaded = false
+      const held = (await $.state.get(SAVED).catch(() => undefined)) as { value?: TownSaved } | undefined
+      const saved = held?.value
+      if (saved && saved.sessionId === sessionId) {
+        safe(() => town.restore(saved.town))
+        seq = typeof saved.seq === 'number' ? saved.seq : 0
+        queue = Array.isArray(saved.queue) ? (saved.queue as Ev[]) : []
+        reloaded = true
+      }
+
       const repo = await $.session.repo()
       const root = repo?.root ?? (await $.session.root())
       const { identity, name } = projectIdentity(repo?.remote, root)
       projectId = await hashId(identity)
+
+      // The starting permission mode, for when no classic hook reports it (another plugin may
+      // pass classic events on before ours run). Auto mode: a classifier answers most asks.
+      const permissions = (await $.settings.read({ key: 'permissions' }).catch(() => undefined)) as
+        | { defaultMode?: string }
+        | undefined
+      if (!reloaded) town.setPermissionMode(permissions?.defaultMode)
 
       const version = await $.session.version()
       const model = await $.session.model()
@@ -200,7 +248,7 @@ export const register: Register = on => {
     return next(e)
   }).catch(passOn)
 
-  on('turn.complete', ($, e, next) => {
+  on('turn.complete', async ($, e, next) => {
     safe(() =>
       town.turnComplete(
         { agentId: e.agentId, durationMs: e.durationMs, isAborted: e.isAborted, reason: e.reason, model: e.usage?.model },
@@ -208,11 +256,14 @@ export const register: Register = on => {
       ),
     )
     collect()
+    // The end of a turn is when an update of this plugin reloads it: keep the report safe first.
+    await save($).catch(() => {})
     return next(e)
   }).catch(passOn)
 
   on('agent.spawn', async ($, e, next) => {
     const r = await next(e)
+    safe(() => town.setPermissionMode(e.permissionMode)) // the parent's mode, which the subagent inherits
     safe(() =>
       town.hire(
         {
@@ -265,6 +316,35 @@ export const register: Register = on => {
       if (e.origin?.kind === 'model') town.message({ to: e.to, agentId: e.agentId }, Date.now())
     })
     collect()
+    return next(e)
+  }).catch(passOn)
+
+  // A compaction of the main conversation (/compact, or the automatic one): the Chief of Staff
+  // tidies its notes until it ends.
+  on('session.compact', async ($, e, next) => {
+    let shown = false
+    safe(() => {
+      shown = town.compactStart({ trigger: e.trigger, agentId: e.agentId })
+    })
+    collect()
+    if (!shown) return next(e)
+    try {
+      const r = await next(e)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      safe(() => town.compactEnd(r as any))
+      collect()
+      return r
+    } catch (err) {
+      safe(() => town.compactEnd(undefined))
+      collect()
+      throw err
+    }
+  }).catch(passOn)
+
+  // Classic hooks carry the session's permission mode; auto mode means a classifier, not the
+  // user, answers most permission asks (the app then skips the approval sound).
+  on('classic.PreToolUse', async ($, e, next) => {
+    safe(() => town.setPermissionMode((e as { permission_mode?: string }).permission_mode))
     return next(e)
   }).catch(passOn)
 

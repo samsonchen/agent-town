@@ -26,7 +26,7 @@ Every piece of work starts with a ticket, and every ticket has an issuer. The re
 
 - The view is an office seen from above, like a Gather Town map. The floor plan is flat and 2D: blocks of tiled carpet on a cream path, with no walls or doors. The characters and furniture are low-poly 3D (an orthographic camera tilted a little from straight down; characters lean toward the camera so they show their fronts). Characters and furniture come from Kenney's CC0 packs (Mini Characters, Furniture Kit); see [roles.md](roles.md) and [distribution.md](distribution.md). The reference for the feel is Gather Town; no Gather Town assets are used.
 - **One block per project.** All sessions in the same project share that block. Blocks sit side by side with paths between them, and wrap into a grid as projects are added.
-- **As few blocks as possible.** With no task running, the office is the executive block alone, and the window opens at that size. A session that is open but has not started any work stays off-screen; its project's block and its Chief of Staff appear with its first task. With one project at work, the office is two blocks. A project's block is removed when its last session ends.
+- **As few blocks as possible.** The office always shows the executive block and, while any session is open, at least one project block, so the window keeps a steady size. With no session open, it is the executive block alone, and the window opens at that size. Each further project block is on screen only while it has work: it appears when a task begins (a prompt, a scheduled ticket, a background task, an approval), with its Chiefs of Staff already at their desks, and leaves the screen about 1.5 seconds after everything in it has settled (the report call made, staff and operators back on the bench). The block worked in most recently is the one that stays. Nobody walks in or out; the view simply changes. While off-screen, a block keeps its bench and desks for the next task. A project's block is dropped entirely when its last session ends.
 - **Several sessions in one project** put several Chiefs of Staff in the same block. Each one has its own desk, telephone and staff.
 - **The executive block** is always first. It has three areas:
   - the CEO's desk, with a telephone. The CEO stays at the desk unless the user walks the CEO around (see "Walking the CEO" below);
@@ -45,22 +45,23 @@ Each scene below is triggered by a Claude Code event. The event mapping is in [a
 
 | # | Trigger | What happens |
 |---|---|---|
-| 1 | Session starts its first task | A Chief of Staff walks in from the path to a desk in the project's block (the block is created if it is new). A session that has only opened shows nothing yet. |
+| 1 | Session starts | The session's Chief of Staff is at a desk in the project's block, with no walk-in (the block is created if it is new). Whether the block is on screen follows the rule above. |
 | 2 | User submits a prompt | The CEO phones that session's Chief of Staff. The Chief of Staff's phone rings and is answered, and the ticket passes from the CEO to the Chief of Staff over the call. |
 | 3 | Main agent works with no subagents active | The Chief of Staff works at the desk and wears a hat showing the task type (see "Hats"). |
 | 4 | A subagent starts | The Chief of Staff walks to the resource bench and calls a waiting character (see "Resource bench"). The Chief of Staff hands them a smaller ticket there. The character walks to a free desk and starts work. The name tag shows the role. If no role is decided yet when the character leaves the bench, they keep a neutral outfit until it is. |
 | 5 | Someone uses a tool | A short activity animation for that character (see "Activities"). |
-| 6 | A tool call needs the user's approval | The character whose call is waiting raises a hand, and the CEO's phone rings until the call is approved or refused. The approval sound plays. Then the character returns to work. |
+| 6 | A tool call needs the user's approval | The character whose call is waiting raises a hand, and the CEO's phone rings until the call is approved or refused. The approval sound plays, except in auto mode, where a classifier rather than the user answers most asks. Then the character returns to work. |
 | 7 | A subagent finishes | The staff member brings a report to the Chief of Staff, then walks back to the resource bench and waits there, still in their role outfit. A failed subagent shows a distinct "failed" report. |
 | 8 | The main task finishes | The Chief of Staff phones the report to the CEO. The completion sound plays if the sound rule below allows it. |
 | 9 | The user interrupts the task | The Chief of Staff stops working. No report call, no sound. |
-| 10 | Session ends | The Chief of Staff walks out of the block along the path. Any remaining staff and operators go back to the resource bench. The session's cards are removed from the Dispatcher's board. A block with no sessions left is removed, and the other blocks close up. |
+| 10 | Session ends | The Chief of Staff is gone from the desk, with no walk-out. Any remaining staff and operators go back to the resource bench. The session's cards are removed from the Dispatcher's board. A block with no sessions left is removed, and the other blocks close up. |
 | 11 | A background task starts | The character that started the task (the Chief of Staff, or a staff member) walks to the resource bench and calls a waiting operator. The operator walks into the machine room and starts work at a console. The name tag shows the background role. If no role is decided yet when the operator leaves the bench, they keep a neutral outfit until it is. |
 | 12 | A background task finishes | The operator brings the result to the Chief of Staff and walks back to the resource bench. If Claude Code then starts a new turn to handle the result, the Chief of Staff works on it as a follow-up ticket. No call comes from the CEO for it. When that turn ends, the report goes to the issuer of the ticket that started the operator (scene 8). A failed task shows a distinct "failed" result. A task that is stopped (killed) leaves with no result. |
 | 13 | A schedule is created or deleted | A card is pinned to or removed from the Dispatcher's board. |
 | 14 | A schedule fires | The Dispatcher radios the card's ticket to that session's Chief of Staff, the same way the CEO phones in scene 2. When the turn ends, the Chief of Staff phones the report to the Dispatcher, not to the CEO. |
 | 15 | A hook sends the main agent back to work | The Inspector at reception stops the report before it reaches the CEO: a "Returned" (「退回」) stamp shows over the Chief of Staff, who keeps working on the same ticket. The ticket ends when a later report gets past the Inspector. |
 | 16 | One agent sends a message to another | The sender walks to the receiver's desk, a speech bubble shows over both for a moment, and the sender walks back. This applies to staff and agent-team teammates messaging each other, to the Chief of Staff messaging a staff member, and to a staff member messaging the Chief of Staff. The bubble shows no message text. |
+| 17 | The conversation is compacted (`/compact`, or the automatic compaction) | A stack of notes appears on the Chief of Staff's desk, and the Chief of Staff goes through it, writing, under a "Tidying notes…" (「整理筆記中…」) line. When it ends, most sheets fly off and a few stay, in proportion to what was kept, and the line shows the size before and after, such as "Notes tidied: 152k → 20k tokens". Then the stack goes. A skipped or failed compaction just clears the stack. No sound. A subagent's own compaction shows nothing. |
 
 Scene 15 happens when a Stop hook, such as a check that tests pass or a rule that a to-do list must be finished, refuses to let the main agent end its turn. To the user, the task is still running. The Inspector makes that visible. For a subagent held back by its own Stop hook, the Chief of Staff hands the staff member's report back at the desk instead.
 
@@ -70,10 +71,11 @@ The user can walk the CEO around the office with the arrow keys, for fun and to 
 
 - The CEO walks around furniture and stays on the office floor. Diagonal keys can be held together. The view pans to keep the CEO in sight.
 - A tip at the top of the window says "Move the CEO with the arrow keys" (「用方向鍵 ← ↑ ↓ → 移動執行長」). While the CEO is away from the desk, it says "Press H to send the CEO back to the desk" (「按 H 讓執行長回到座位」). Each tip has a close button. A closed arrow-keys tip stays closed; the H tip shows again each time the CEO walks away from the seat.
-- H walks the CEO back to the desk, around the furniture. An arrow key during that walk takes control back.
+- **Clicking a character** walks the CEO over to that character, around the furniture, to a free spot beside them (across their desk if that is the only way). The CEO turns to them, and they talk (see below). Clicking the name tags just above a character counts too. Clicking the CEO, or empty floor, does nothing.
+- H walks the CEO back to the desk, around the furniture. An arrow key during either walk takes control back.
 - When the last project block is removed and only the executive office is left, the CEO walks back to the desk by itself. If the CEO was in a block that went away, the view moves to the executive office and the CEO walks in from the nearest edge of it. If a block is removed while other blocks remain, the CEO can walk back onto the floor from where it was.
 - Away from the desk, the CEO holds a mobile phone. Calls with the Chiefs of Staff, and the ringing for approvals, go to the mobile, and the CEO can keep walking during a call. While the CEO is on the desk phone, the CEO stays at the desk until the call ends.
-- **Talking to a character.** When the CEO stands next to a character (within about a meter, across a desk counts), that character's tags change to a short statement about its work, in its own words. For example, a Chief of Staff says what ticket it is on, for how long, the task type, how many staff and operators are helping, and what it is doing right now. A staff member gives its role, its job and how long it has been at it. An operator says what it is running in the background. A character on the bench says it is waiting, and its last role. Characters waiting for approval say which tool needs it. The Dispatcher talks about the schedules, and the Inspector about returned tickets. Only the nearest character talks.
+- **Talking to a character.** When the CEO stands next to a character (within about a meter, across a desk counts), that character's tags change to a short statement about its work, in its own words. For example, a Chief of Staff says what ticket it is on, for how long, the task type, how many staff and operators are helping, and what it is doing right now. A staff member gives its role, its job and how long it has been at it. An operator says what it is running in the background. A character on the bench says it is waiting, and its last role. Characters waiting for approval say which tool needs it. The Dispatcher talks about the schedules, and the Inspector about returned tickets. Only one character talks: the one the user clicked while the CEO is next to them, else the nearest.
 
 ### Resource bench
 
@@ -121,6 +123,8 @@ Each Chief of Staff and staff member can show a small badge with the model it is
 | MCP tools | Using the phone |
 | Anything else | Typing |
 
+In the app today, the Chief of Staff and staff at a desk type at the computer for every tool (hands tapping, switching hands), and staff at a hot desk with no computer write. Operators work the racks. The per-tool animations above are still to come.
+
 ### Hats
 
 When a session's Chief of Staff has no active subagents, they wear a hat with a short text label showing the task type, such as "Debug" or 「除錯」. The task type is chosen by Haiku from the task type list in [roles.md](roles.md) when the prompt is submitted. While staff are working, the Chief of Staff does not wear a hat.
@@ -135,7 +139,7 @@ When a session's Chief of Staff has no active subagents, they wear a hat with a 
 
 | Sound | When it plays | Rule |
 |---|---|---|
-| Completion | Scene 8 | Plays only when the end-to-end time of the task is longer than a threshold. The threshold is set by the user. **Minimum 5 seconds.** Default 30 seconds. End-to-end time is measured from prompt submission to the end of the main agent's turn (Claude Code's own duration for the turn), not animation time. For a follow-up ticket from a background task, it is measured from the start of that task. For a returned ticket (scene 15), it covers all of the work until the report is accepted. For a scheduled ticket, it is measured from the time the schedule fired. Never plays for an interrupted task. |
+| Completion | Scene 8 | Plays when a task finishes, however long it took (default). The user can set a threshold in seconds so that only tasks at least that long play it; the default threshold is 0. End-to-end time is measured from prompt submission to the end of the main agent's turn (Claude Code's own duration for the turn), not animation time. For a follow-up ticket from a background task, it is measured from the start of that task. For a returned ticket (scene 15), it covers all of the work until the report is accepted. For a scheduled ticket, it is measured from the time the schedule fired. Never plays for an interrupted task. |
 | Approval needed | Scene 6 | A different sound from completion. Its own on/off setting. Not gated by duration. |
 
 The user can pick the sound file for each, set the volume, or mute all sounds.
@@ -168,7 +172,7 @@ The default is to be decided (see [roadmap.md](roadmap.md)).
 
 - Language: system, English, 繁體中文
 - Window size; block size (desks per block); bench size (characters waiting per block)
-- Completion sound: on/off, threshold in seconds (minimum 5), sound file
+- Completion sound: on/off, threshold in seconds (default 0: every task), sound file
 - Approval sound: on/off, sound file
 - Master volume, mute
 - Ticket text: full, or task type only

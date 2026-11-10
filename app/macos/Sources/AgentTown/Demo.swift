@@ -57,6 +57,20 @@ enum Demo {
             }
         }
 
+        // TOWN_CLICK="x,y@seconds": click the window at that point, as a user would.
+        if let spec = ProcessInfo.processInfo.environment["TOWN_CLICK"] {
+            let parts = spec.split(separator: "@")
+            let v = parts[0].split(separator: ",").compactMap { Double($0) }
+            let delay = parts.count > 1 ? Double(parts[1]) ?? 1 : 1
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(delay))
+                guard v.count == 2 else { return }
+                let hit = scene.actor(at: CGPoint(x: v[0], y: v[1]), projector: view.projector(size))
+                if ProcessInfo.processInfo.environment["TOWN_DEBUG"] != nil { print("click (\(v[0]), \(v[1])) → \(hit?.id ?? "nobody")") }
+                if let hit { scene.visit(hit) }
+            }
+        }
+
         // Advance the scene in real time so queued scenes and animations play.
         let start = Date()
         while Date().timeIntervalSince(start) < seconds {
@@ -87,8 +101,8 @@ enum Demo {
                 if depth < 2 { e.children.forEach { walk($0, depth + 1) } }
             }
             walk(scene.root, 0)
-            for a in scene.actors.values { print("actor", a.id, a.body.baseName ?? "-", a.root.position(relativeTo: nil), "local", a.spot, "home", a.home) }
-            for b in scene.blocks.values { print("block", b.id, b.entity.position(relativeTo: nil)) }
+            for a in scene.actors.values { print("actor", a.id, a.body.baseName ?? "-", a.root.position(relativeTo: nil), "local", a.spot, "home", a.home, "clip", a.body.currentClip ?? "-") }
+            for b in scene.blocks.values { print("block", b.id, b.placed ? "shown" : "hidden") }
         }
         let w = tex.width, h = tex.height
         var bytes = [UInt8](repeating: 0, count: w * h * 4)

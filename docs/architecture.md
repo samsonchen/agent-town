@@ -42,9 +42,10 @@ agent-town/
 │   ├── .claude-plugin/plugin.json
 │   ├── hooks/
 │   │   ├── hooks.json          # "modules": ["./register.ts"]
-│   │   ├── register.ts         # hooks, outbox, endpoint file, /town
+│   │   ├── register.ts         # hooks, outbox, endpoint file, /town, state kept across reloads
 │   │   ├── core.ts             # event mapping, pure logic (no $)
 │   │   └── catalog.ts          # generated from catalog/*.json
+│   ├── types/index.d.ts        # $.state contract (what survives a reload)
 │   └── tests/core.test.ts      # claude plugin test plugin
 ├── catalog/
 │   ├── roles.json              # role IDs + labels per locale (source of truth)
@@ -93,7 +94,7 @@ Event and field names are checked against Claude Code 2.1.318 and 2.1.319. The m
 
 | Claude Code event | Mod action | Protocol event |
 |---|---|---|
-| `session.start` | Read the endpoint file, register `/town`, start the outbox and heartbeat timers, work out the project | `session.open` |
+| `session.start` | Read the endpoint file, register `/town`, start the outbox and heartbeat timers, work out the project. After a hot reload of the plugin, take back the open ticket, staff, tasks, waits and unsent events from the session's `$.state` (saved every outbox tick and at each `turn.complete`), so a report is not lost | `session.open` |
 | `session.end` | Flush the outbox | `session.close` |
 | `prompt.submit` with `turnId` absent and `origin.kind` `composer` | Start task-type classification in the background; pass the prompt on unchanged | `ticket.submit` (`origin: user`), later `chief.hat` |
 | `prompt.submit` with `turnId` absent and `origin.kind` `task-notification` | Parse the task IDs and statuses from the text | `task.done` for each task, then `ticket.submit` (`origin: task`) |
@@ -106,8 +107,9 @@ Event and field names are checked against Claude Code 2.1.318 and 2.1.319. The m
 | `agent.spawn` | `await next(e)`; read `agentId` and `model` from the result; start role classification in the background | `staff.hire` (with `model`), later `staff.role` |
 | `turn.complete` with a known `agentId` | Read `usage?.model` | `staff.done`; `model.update` when the model changed |
 | `tool.call` | Map the tool to an activity; send it before the tool runs | `activity` |
-| `tool.check` returning `ask` with `approver === 'person'`, and the call still unsettled 5 s later | In auto mode the classifier settles most asks in 1–4 s with no dialog | `approval.wait` |
+| `tool.check` returning `ask` with `approver === 'person'`, and the call still unsettled 5 s later | In auto mode the classifier settles most asks in 1–4 s with no dialog. The permission mode comes from `classic.PreToolUse`'s `permission_mode` when that hook runs (another plugin may pass classic events on first), from `agent.spawn`'s `permissionMode`, and at session start from the `permissions.defaultMode` setting; in auto mode the event carries `autoMode: true` and the app plays no sound | `approval.wait` |
 | That `tool.call`'s `next` settles | Result means allowed; `deny` or `isError` means refused | `approval.end` |
+| `session.compact` with no `agentId` and a trigger other than `precompute` | Sent before `next(e)`; the result's `skip` means skipped, a throw means failed, else done with `tokensBefore`/`tokensAfter` | `compact.start`, then `compact.end` |
 | `tool.call` for `Bash` with `run_in_background`, `Monitor`, `Workflow` | `await next(e)`; task ID from `backgroundTaskId` (Bash) or `taskId` (Monitor, Workflow); role by rule or classification | `task.start`, later `task.role` |
 | `tool.call` for `CronCreate` | `await next(e)`; `scheduleId` is the result's `id` | `schedule.create` |
 | `tool.call` for `ScheduleWakeup` | `scheduleId` is the call's `tool_use_id`; `stop: true` deletes the session's wakeups | `schedule.create` or `schedule.delete` |
@@ -122,7 +124,7 @@ Rules for every hook:
   - The mod does not hook `turn.step`. If a later version needs it: it is a generator hook, so use `const result = yield* next(e)` and then `return result`, and never yield values of its own.
 - Ignore any `agentId` that was never seen in `agent.spawn` (engine forks such as compaction carry such IDs).
 - Never `await` a network call or a classification inside a hook. Push the event into an outbox and return.
-- An outbox timer (`$.clock.every`, every 250 ms) sends queued events in one POST. If the app is not running, drop the batch and try the endpoint file again later. Do not retry old events.
+- An outbox timer (`$.clock.every`, every 250 ms) sends queued events in one POST. If the app is not running, drop the batch and try the endpoint file again later. Do not retry old events. While not connected, read the endpoint file every 2 s even with nothing to send; on connecting, send `session.open` again (with the latest model) unless one is already queued, so a session already open shows up within about 2 s of the app starting.
 - Wrap everything in `try`/`catch`. A failure in agent-town must never affect the Claude Code session.
 
 ### Model badge source
@@ -189,7 +191,7 @@ Registered with `immediate: true` so it works while Claude is busy.
 | Shell | SwiftUI, `MenuBarExtra` | Main window, menu bar toggle, settings, first-run screen |
 | Loopback server | Network.framework (`NWListener`) | Binds 127.0.0.1 on a random port; checks the token and protocol version; writes the endpoint file |
 | Building state | Swift model | Project blocks, sessions, characters, pending approvals. Pure logic, unit-tested with fixtures. |
-| Choreographer | Swift (`TownScene`, `TownScene+Staff`, `TownScene+CEO`) | Turns state changes into per-character action queues; applies the timing rules. Handles calls, walking along the block walkways, the bench, staff, operators, approvals and messages. `TownScene+CEO` handles the CEO under the user's control: the arrow keys and H, walking around furniture (grid path search), the mobile phone, and the statements characters give the CEO |
+| Choreographer | Swift (`TownScene`, `TownScene+Staff`, `TownScene+CEO`, `TownScene+Blocks`) | Turns state changes into per-character action queues; applies the timing rules. Handles calls, walking along the block walkways, the bench, staff, operators, approvals and messages. `TownScene+CEO` handles the CEO under the user's control: the arrow keys and H, walking around furniture (grid path search), the mobile phone, and the statements characters give the CEO. `TownScene+Blocks` shows a project block only while it has work |
 | Scene | RealityKit in a SwiftUI `RealityView`, orthographic camera looking down at the office (62° from the floor), characters leaned back to face it | Draws the flat blocks and path (unlit tiled planes), furniture, telephones, characters, tickets, hats; plays character animation clips; lays the blocks out in a grid; handles panning |
 | Labels | SwiftUI overlay | Name tags, hats, model badges, ticket text, block signs, ring tags and call lines. Drawn in 2D over the 3D view at each character's projected position, so text stays sharp and uses the Cubic 11 font. |
 | Audio | AVFoundation | Completion and approval sounds; applies the duration gate |

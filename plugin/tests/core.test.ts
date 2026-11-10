@@ -257,7 +257,27 @@ describe('staff', () => {
   })
 })
 
+describe('reconnecting', () => {
+  test('reopen introduces the session again with its latest model', async () => {
+    const t = new Town(ids())
+    t.open({ projectName: 'demo', surface: 'terminal', ccVersion: '2.1.319', model: 'claude-opus-5-5' })
+    t.drain()
+    t.reopen()
+    expect(t.drain()).toEqual([
+      { type: 'session.open', projectName: 'demo', surface: 'terminal', ccVersion: '2.1.319', model: 'claude-opus-5-5' },
+    ])
+  })
+})
+
 describe('approvals', () => {
+  test('a wait in auto mode is marked so the app stays quiet', async () => {
+    const t = new Town(ids())
+    t.setPermissionMode('auto')
+    t.ask({ tool_use_id: 'u1', tool: 'Bash' }, 0)
+    t.tick(APPROVAL_DELAY_MS)
+    expect(t.drain()).toEqual([{ type: 'approval.wait', approvalId: 'u1', tool: 'Bash', autoMode: true }])
+  })
+
   test('an ask settled quickly by auto mode shows nothing', async () => {
     const t = new Town(ids())
     t.ask({ tool_use_id: 'u1', tool: 'Bash' }, 0)
@@ -276,5 +296,64 @@ describe('approvals', () => {
       { type: 'approval.wait', approvalId: 'u1', tool: 'Bash' },
       { type: 'approval.end', approvalId: 'u1', outcome: 'denied' },
     ])
+  })
+})
+
+describe('compaction', () => {
+  test('the main conversation compacting shows, with the sizes', async () => {
+    const t = new Town(ids())
+    expect(t.compactStart({ trigger: 'manual' })).toBe(true)
+    t.compactEnd({ tokensBefore: 152_340, tokensAfter: 20_110 })
+    expect(t.drain()).toEqual([
+      { type: 'compact.start', trigger: 'manual' },
+      { type: 'compact.end', outcome: 'done', tokensBefore: 152_340, tokensAfter: 20_110 },
+    ])
+  })
+
+  test('a subagent, a fork or a precompute compacting shows nothing', async () => {
+    const t = new Town(ids())
+    expect(t.compactStart({ trigger: 'auto', agentId: 'a1' })).toBe(false)
+    expect(t.compactStart({ trigger: 'precompute' })).toBe(false)
+    t.compactEnd({ tokensBefore: 1, tokensAfter: 1 })
+    expect(t.drain()).toEqual([])
+  })
+
+  test('a skipped or failed compaction ends without sizes', async () => {
+    const t = new Town(ids())
+    t.compactStart({ trigger: 'auto' })
+    t.compactEnd({ skip: 'blocked by a hook' })
+    t.compactStart({ trigger: 'auto' })
+    t.compactEnd(undefined)
+    expect(t.drain()).toEqual([
+      { type: 'compact.start', trigger: 'auto' },
+      { type: 'compact.end', outcome: 'skipped' },
+      { type: 'compact.start', trigger: 'auto' },
+      { type: 'compact.end', outcome: 'failed' },
+    ])
+  })
+})
+
+describe('surviving a reload', () => {
+  test('a ticket open before a reload is reported after it', async () => {
+    const before = new Town(ids())
+    before.prompt({ text: 'fix it', kind: 'user' }, 1000)
+    before.hire({ subagentType: 'Explore', description: 'look' }, { agentId: 'a1' }, 1500)
+    before.drain()
+    const saved = JSON.parse(JSON.stringify(before.save()))
+
+    const after = new Town(ids())
+    after.restore(saved)
+    after.turnComplete({ agentId: 'a1', durationMs: 0, isAborted: false }, 5000)
+    after.turnComplete({ durationMs: 9000, isAborted: false }, 10_000)
+    const out = after.drain()
+    expect(out.map(e => e.type)).toEqual(['staff.done', 'ticket.done'])
+    expect(out[1]).toMatchObject({ ticketId: 't1', durationMs: 9000, aborted: false })
+  })
+
+  test('something that is not a saved tracker is ignored', async () => {
+    const t = new Town(ids())
+    t.restore({ v: 99, ticket: { id: 'x' } })
+    t.turnComplete({ durationMs: 1, isAborted: false }, 1)
+    expect(t.drain()).toEqual([])
   })
 })

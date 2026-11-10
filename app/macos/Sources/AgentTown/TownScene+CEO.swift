@@ -50,6 +50,7 @@ extension TownScene {
         guard ceoDriver == nil, let ceo else { return }
         ceoTrip?.cancel() // the user takes over from a walk home
         ceoTrip = nil
+        ceoVisitee = nil
         ceoDriver = Task { @MainActor [weak self] in
             var last = Date()
             while let self, !Task.isCancelled {
@@ -140,12 +141,60 @@ extension TownScene {
     /// H: the CEO walks back to the desk around the furniture.
     func sendCeoHome() {
         guard ceoAway, ceoDriver == nil, let exec = blocks[Self.executive] else { return }
+        ceoVisitee = nil
         let o = exec.entity.position(relativeTo: nil)
         walkCeo(to: [o.x + Layout.ceoHome.x, o.z + Layout.ceoHome.y])
     }
 
+    /// The character drawn under a click at `point` (window points), if any: the body,
+    /// or the tags just above the head. The nearest one to the camera wins.
+    func actor(at point: CGPoint, projector: Projector) -> Actor? {
+        var best: (Actor, Float)?
+        for a in actors.values where onScreen(a) && a.root.parent != nil {
+            let feet = projector.screen(a.root.position(relativeTo: nil))
+            let top = projector.screen(a.head(above: 0))
+            let halfWidth = max(14, abs(feet.y - top.y) * 0.45)
+            guard abs(point.x - feet.x) <= halfWidth, point.y <= feet.y + 6, point.y >= top.y - 24 else { continue }
+            let depth = a.worldSpot.y // farther down the screen is nearer the camera
+            if depth > (best?.1 ?? -.infinity) { best = (a, depth) }
+        }
+        return best?.0
+    }
+
+    /// A click on a character: the CEO walks over to them and turns to them, and they say
+    /// how their work is going. A click on the CEO, or while the arrow keys drive, does nothing.
+    func visit(_ a: Actor) {
+        guard let ceo, a !== ceo, ceoDriver == nil, onScreen(a), a.root.parent != nil else { return }
+        let target = a.worldSpot, from = ceo.worldSpot
+        let rects = worldObstacles()
+        // A free spot next to them, on the side nearest the CEO; across their desk if need be.
+        var spots: [SIMD2<Float>] = []
+        for r: Float in [0.45, 0.7, 0.95] {
+            for i in 0..<16 {
+                let t = Float(i) / 16 * 2 * .pi
+                spots.append(target + r * SIMD2(cos(t), sin(t)))
+            }
+        }
+        let free = spots.filter { p in
+            offFloor(p) == 0 && !rects.contains { Self.inside(p, $0, pad: Self.ceoRadius) }
+        }
+        guard let goal = free.min(by: { simd_distance($0, from) + 2 * simd_distance($0, target)
+                                         < simd_distance($1, from) + 2 * simd_distance($1, target) })
+        else { return }
+        ceoVisitee = a
+        if simd_distance(from, target) < Self.touchDistance, simd_distance(from, goal) < 0.2 {
+            face(ceo, toward: target - from) // already there
+            return
+        }
+        walkCeo(to: goal) { [weak self] in
+            guard let self, let ceo = self.ceo else { return }
+            self.face(ceo, toward: a.worldSpot - ceo.worldSpot)
+        }
+    }
+
     /// Walks the CEO to a point on the office floor (x, z), finding a way around furniture.
-    func walkCeo(to goal: SIMD2<Float>) {
+    /// `arrived` runs once the CEO has stopped there.
+    func walkCeo(to goal: SIMD2<Float>, arrived: (() -> Void)? = nil) {
         guard let ceo else { return }
         ceoTrip?.cancel()
         ceoTrip = Task { @MainActor [weak self] in
@@ -176,6 +225,7 @@ extension TownScene {
             }
             self.ceoTrip = nil
             self.stopped(ceo)
+            if !ceo.onCall { arrived?() }
         }
     }
 
@@ -214,7 +264,7 @@ extension TownScene {
     /// A CEO who was in another block shows up on the path at the nearest edge of the
     /// executive office (where the view now is) and walks in from there.
     func ceoBackIfOfficeEmpty() {
-        guard blocks.count == 1, ceoAway, let ceo, let exec = blocks[Self.executive] else { return }
+        guard blockOrder.count == 1, ceoAway, let ceo, let exec = blocks[Self.executive] else { return }
         heldArrows.removeAll()
         ceoDriver?.cancel()
         ceoDriver = nil
@@ -326,8 +376,9 @@ extension TownScene {
     func touchedByCeo() -> Actor? {
         guard let ceo, ceoAway || ceo.steering else { return nil }
         let c = ceo.worldSpot
+        if let v = ceoVisitee, v.root.parent != nil, onScreen(v), simd_distance(v.worldSpot, c) < Self.touchDistance { return v }
         var best: (Actor, Float)?
-        for a in actors.values where a !== ceo && a.root.parent != nil {
+        for a in actors.values where a !== ceo && onScreen(a) && a.root.parent != nil {
             let d = simd_distance(a.worldSpot, c)
             if d < Self.touchDistance, d < (best?.1 ?? .infinity) { best = (a, d) }
         }
@@ -366,6 +417,10 @@ extension TownScene {
         guard let c = building.blocks[a.block]?.chiefs[a.id] else { return L.t("Just got here.", "剛到。") }
         if let ap = c.approvals.values.first(where: { $0.agentId == nil }) {
             return L.t("I need your approval to use \(ap.tool).", "我需要你核准使用 \(ap.tool)。")
+        }
+        if c.compacting {
+            return L.t("I'm tidying our conversation notes to make room. Back to work in a moment.",
+                       "正在整理對話筆記、騰出空間，馬上回來工作。")
         }
         guard let t = c.ticket else { return L.t("No ticket right now. Ready for the next one.", "目前沒有工單，隨時待命。") }
         var parts: [String] = []

@@ -160,13 +160,30 @@ final class CharacterEntity {
         root.addChild(model)
     }
 
+    /// Clips made from part of another: a hand tapping back and forth at the reach of `interact`,
+    /// for typing (alternating hands) and writing (one hand, slower). (base, from, to, speed)
+    static let derived: [String: (base: String, from: Double, to: Double, speed: Float)] = [
+        "type-right": ("interact-right", 0.35, 0.6, 1.4),
+        "type-left": ("interact-left", 0.35, 0.6, 1.4),
+        "write": ("interact-right", 0.4, 0.6, 0.7),
+    ]
+
     func play(_ name: String, loop: Bool = true, transition: TimeInterval = 0.15) {
-        guard name != currentClip, let clip = clips[name],
+        let d = Self.derived[name]
+        guard name != currentClip, let clip = clips[d?.base ?? name],
               let target = model.animatedEntity, let full = target.availableAnimations.first else { return }
         var def = full.definition
-        def.trimStart = clip.start
-        def.trimEnd = clip.end
-        def.repeatMode = loop ? .repeat : .none
+        if let d {
+            let len = clip.end - clip.start
+            def.trimStart = clip.start + len * d.from
+            def.trimEnd = clip.start + len * d.to
+            def.speed = d.speed
+            def.repeatMode = .autoReverse
+        } else {
+            def.trimStart = clip.start
+            def.trimEnd = clip.end
+            def.repeatMode = loop ? .repeat : .none
+        }
         guard let res = try? AnimationResource.generate(with: def) else { return }
         controller = target.playAnimation(res, transitionDuration: transition, startsPaused: false)
         currentClip = name

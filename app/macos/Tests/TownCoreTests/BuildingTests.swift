@@ -77,11 +77,16 @@ func replay(_ name: String, sound: SoundSettings = SoundSettings()) throws -> (B
 }
 
 @Test func completionSoundRule() {
-    var s = SoundSettings(thresholdSeconds: 2)
-    #expect(s.thresholdSeconds == 5) // minimum 5 s
-    #expect(!s.playsCompletion(durationMs: 5000, aborted: false))
-    #expect(s.playsCompletion(durationMs: 5001, aborted: false))
+    var s = SoundSettings()
+    #expect(s.thresholdSeconds == 0) // every finished task, however short
+    #expect(s.playsCompletion(durationMs: 0, aborted: false))
+    #expect(s.playsCompletion(durationMs: 1200, aborted: false))
     #expect(!s.playsCompletion(durationMs: 60000, aborted: true))
+    s.thresholdSeconds = 5
+    #expect(!s.playsCompletion(durationMs: 4999, aborted: false))
+    #expect(s.playsCompletion(durationMs: 5000, aborted: false))
+    s.thresholdSeconds = -3
+    #expect(s.thresholdSeconds == 0)
     s.completionOn = false
     #expect(!s.playsCompletion(durationMs: 60000, aborted: false))
 }
@@ -141,11 +146,6 @@ func replay(_ name: String, sound: SoundSettings = SoundSettings()) throws -> (B
     }
     b.apply(ev("session.open", "a", 1))
     b.apply(ev("session.open", "b", 2))
-    #expect(b.blockOrder.isEmpty) // no work yet
-    for (s, n) in [("a", 10), ("b", 11)] {
-        b.apply(TownEvent(type: "ticket.submit", sessionId: s, seq: n, ts: Int64(n), projectId: "p",
-                          fields: ["ticketId": .string("t\(s)"), "text": .string("x"), "origin": .string("user")]))
-    }
     #expect(b.blockOrder == ["p"])
     let first = b.apply(ev("session.close", "a", 3))
     #expect(!first.contains { if case .blockRemoved = $0 { return true }; return false })
@@ -154,24 +154,36 @@ func replay(_ name: String, sound: SoundSettings = SoundSettings()) throws -> (B
     #expect(b.blockOrder.isEmpty)
 }
 
-@Test func blockWaitsForTheFirstTask() throws {
+@Test func autoModeApprovalIsMarked() {
     var b = Building()
-    func ev(_ type: String, _ seq: Int, _ f: [String: JSONValue] = [:]) -> TownEvent {
+    func ev(_ type: String, _ seq: Int, _ f: [String: JSONValue]) -> TownEvent {
         TownEvent(type: type, sessionId: "s", seq: seq, ts: Int64(seq), projectId: "p", fields: f)
     }
-    #expect(b.apply(ev("session.open", 1, ["projectName": .string("demo"), "model": .string("claude-opus-5-5")])).isEmpty)
-    #expect(b.apply(ev("heartbeat", 2)).isEmpty)
-    #expect(b.blockOrder.isEmpty)
-    let c = b.apply(ev("ticket.submit", 3, ["ticketId": .string("t1"), "text": .string("x"), "origin": .string("user")]))
-    #expect(c.first == .blockAdded(projectId: "p"))
-    #expect(c.contains(.chiefArrived(projectId: "p", sessionId: "s")))
-    #expect(b.blocks["p"]?.name == "demo")
-    #expect(b.blocks["p"]?.chiefs["s"]?.model == "claude-opus-5-5")
+    b.apply(ev("ticket.submit", 1, ["ticketId": .string("t1"), "text": .string("x"), "origin": .string("user")]))
+    let quiet = b.apply(ev("approval.wait", 2, ["approvalId": .string("u1"), "tool": .string("Bash"), "autoMode": .bool(true)]))
+    #expect(quiet == [.approvalWait(projectId: "p", sessionId: "s", approvalId: "u1", agentId: nil, autoMode: true)])
+    let loud = b.apply(ev("approval.wait", 3, ["approvalId": .string("u2"), "tool": .string("Bash")]))
+    #expect(loud == [.approvalWait(projectId: "p", sessionId: "s", approvalId: "u2", agentId: nil, autoMode: false)])
 }
 
-@Test func idleSessionClosesWithoutABlock() {
+@Test func sessionOpenBringsItsBlock() {
     var b = Building()
-    b.apply(TownEvent(type: "session.open", sessionId: "s", seq: 1, ts: 1, projectId: "p"))
-    #expect(b.apply(TownEvent(type: "session.close", sessionId: "s", seq: 2, ts: 2, projectId: "p")).isEmpty)
-    #expect(b.waiting.isEmpty)
+    let c = b.apply(TownEvent(type: "session.open", sessionId: "s", seq: 1, ts: 1, projectId: "p", fields: ["projectName": .string("demo")]))
+    #expect(c == [.blockAdded(projectId: "p"), .chiefArrived(projectId: "p", sessionId: "s")])
+    #expect(b.blocks["p"]?.name == "demo")
+}
+
+@Test func compactionStartsAndEnds() {
+    var b = Building()
+    func ev(_ type: String, _ seq: Int, _ f: [String: JSONValue]) -> TownEvent {
+        TownEvent(type: type, sessionId: "s", seq: seq, ts: Int64(seq), projectId: "p", fields: f)
+    }
+    b.apply(ev("session.open", 1, [:]))
+    #expect(b.apply(ev("compact.start", 2, ["trigger": .string("manual")])) == [.compactStarted(projectId: "p", sessionId: "s", trigger: "manual")])
+    #expect(b.blocks["p"]?.chiefs["s"]?.compacting == true)
+    let end = b.apply(ev("compact.end", 3, ["outcome": .string("done"), "tokensBefore": .number(150_000), "tokensAfter": .number(20_000)]))
+    #expect(end == [.compactDone(projectId: "p", sessionId: "s", outcome: "done", tokensBefore: 150_000, tokensAfter: 20_000)])
+    #expect(b.blocks["p"]?.chiefs["s"]?.compacting == false)
+    // An end with no start (the app started mid-compaction) changes nothing.
+    #expect(b.apply(ev("compact.end", 4, ["outcome": .string("done")])).isEmpty)
 }
