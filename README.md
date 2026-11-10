@@ -63,19 +63,20 @@ Like every plugin with a hooks module, town-link runs with your user's permissio
 
 ### The app
 
-Requires macOS 15 or later.
-
-A signed download from GitHub Releases is planned; until then, build the app yourself. You need Xcode (or its command line tools) for Swift:
+Requires macOS 15 or later. With [Homebrew](https://brew.sh):
 
 ```bash
-git clone https://github.com/samsonchen/agent-town.git
-cd agent-town
-app/macos/scripts/release.sh --unsigned
+brew tap samsonchen/agent-town https://github.com/samsonchen/agent-town
+brew install --cask samsonchen/agent-town/agent-town
 ```
 
-Copy `app/macos/build/release/AgentTown.app` into `/Applications` and open it. It appears in the menu bar as a small building, with no Dock icon. A build made on your own Mac opens without a warning; a copy made on another Mac is blocked until it is signed.
+Or download `AgentTown-<version>.dmg` from [Releases](https://github.com/samsonchen/agent-town/releases), open it, and drag AgentTown into Applications.
 
-Open the app before you start work: town-link sends events only while the app is running.
+The app is not signed yet, so macOS blocks it the first time it opens. Open System Settings → Privacy & Security, find the message about AgentTown, and click **Open Anyway**. This is needed once. A signed version is planned; it will open without this step.
+
+The app appears in the menu bar as a small building, with no Dock icon. Open it before you start work: town-link sends events only while the app is running. To have it start with your Mac, turn on Settings → Open at login.
+
+To update: `brew upgrade --cask agent-town`, or download the new `.dmg`.
 
 ## 3. The office
 
@@ -120,7 +121,7 @@ A strip across the top, with three people at their desks:
 - **A session leaves the office about two minutes after it stops.** When a Claude Code session ends or stops responding, its Chief of Staff stays until the app has heard nothing for two minutes.
 - **Labels can cover someone near the top of a small window.** Name tags and notes slide down to stay inside the window, so in a short window they may sit over the character's head. Make the window taller or scroll.
 - **Task titles and staff roles use your Claude plan.** Each new task makes a short Haiku request on your own plan or API key to pick a title and a role. If that request fails, the sign shows no task title and the hat and roles fall back to defaults.
-- **No signed download yet.** Until the first release, the app has to be built from source (see [Installing](#2-installing)).
+- **The app is not signed yet.** macOS blocks it the first time it opens, until you click Open Anyway in System Settings → Privacy & Security (see [Installing](#2-installing)).
 - **macOS only.** The app needs macOS 15 or later.
 
 ## 5. Claude Desktop and Cowork
@@ -168,6 +169,13 @@ Try the plugin without installing it, with the stand-in receiver that prints eac
 ```bash
 python3 tools/debug-receiver.py          # keep it running
 claude --plugin-dir plugin               # in another terminal
+```
+
+Build the app as a `.app` and `.dmg` (`app/macos/build/release/`), and publish a release: see [releasing.md](docs/releasing.md).
+
+```bash
+app/macos/scripts/release.sh --unsigned             # a local build
+app/macos/scripts/release.sh --unsigned --publish   # an unsigned pre-release on GitHub
 ```
 
 Checks: `claude plugin validate plugin` and `claude plugin test plugin` for the plugin; `swift build` and `swift test` in `app/macos` for the app.

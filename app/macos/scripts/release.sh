@@ -4,7 +4,12 @@
 #
 #   app/macos/scripts/release.sh             build, sign, notarize, make the .dmg
 #   app/macos/scripts/release.sh --publish   the same, then a draft GitHub release v<version>
-#   app/macos/scripts/release.sh --unsigned  a local test build: no Developer ID, no notarization
+#   app/macos/scripts/release.sh --unsigned  a test build: no Developer ID, no notarization
+#   app/macos/scripts/release.sh --unsigned --publish
+#                                            an unsigned pre-release on GitHub (until the Developer ID exists)
+#
+# --publish also writes the new version and the .dmg's checksum into Casks/agent-town.rb
+# (the Homebrew cask); commit that change after the release.
 #
 # One-time setup on the Mac that releases (no secrets are ever stored in the repo):
 #   1. Xcode > Settings > Accounts: add the Apple Account of the developer team;
@@ -26,7 +31,7 @@ for arg in "$@"; do
   case "$arg" in
     --publish) PUBLISH=1 ;;
     --unsigned) MODE=unsigned ;;
-    -h|--help) sed -n '2,23p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,27p' "$0"; exit 0 ;;
     *) echo "unknown option: $arg" >&2; exit 2 ;;
   esac
 done
@@ -56,7 +61,6 @@ if [ "$MODE" = release ]; then
   fi
   echo "Signing as: $SIGN_IDENTITY"
 fi
-[ "$PUBLISH" -eq 0 ] || [ "$MODE" = release ] || fail "--publish needs a signed build"
 if [ "$PUBLISH" -eq 1 ]; then
   [ -z "$(git -C "$REPO" status --porcelain)" ] || fail "commit your changes before publishing"
   command -v gh >/dev/null || fail "--publish needs the GitHub CLI (gh)"
@@ -146,10 +150,23 @@ fi
 
 # -- Publish -----------------------------------------------------------------------------------
 if [ "$PUBLISH" -eq 1 ]; then
-  step "Creating a draft GitHub release v$VERSION"
-  (cd "$REPO" && gh release create "v$VERSION" "$DMG" --draft --target "$(git rev-parse HEAD)" --title "agent-town $VERSION" \
-    --notes "Download AgentTown-$VERSION.dmg, open it, and drag AgentTown into Applications. Requires macOS 15 or later. See the README for the town-link plugin and known issues.")
-  echo "Review and publish the draft on GitHub."
+  if [ "$MODE" = release ]; then
+    flags=(--draft)
+    notes="Download AgentTown-$VERSION.dmg, open it, and drag AgentTown into Applications, or install with Homebrew (see the README). Requires macOS 15 or later."
+  else
+    # Unsigned: published at once as a pre-release, so Homebrew can download it.
+    flags=(--prerelease)
+    notes="Unsigned pre-release: macOS blocks the app the first time it opens. Open System Settings → Privacy & Security and click Open Anyway. Install with Homebrew or download AgentTown-$VERSION.dmg; see the README. Requires macOS 15 or later."
+  fi
+  step "Creating GitHub release v$VERSION (${flags[*]})"
+  (cd "$REPO" && gh release create "v$VERSION" "$DMG" "${flags[@]}" --target "$(git rev-parse HEAD)" \
+    --title "agent-town $VERSION" --notes "$notes")
+
+  CASK="$REPO/Casks/agent-town.rb"
+  SHA="$(shasum -a 256 "$DMG" | cut -d' ' -f1)"
+  sed -i '' -e "s/^  version \".*\"/  version \"$VERSION\"/" -e "s/^  sha256 \".*\"/  sha256 \"$SHA\"/" "$CASK"
+  echo "Updated $CASK to $VERSION ($SHA). Commit and push it so 'brew upgrade' sees the release."
+  [ "$MODE" = release ] && echo "Review and publish the draft on GitHub; Homebrew can download it only once it is published."
 fi
 
 step "Done"

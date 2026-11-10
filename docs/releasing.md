@@ -108,3 +108,25 @@ app/macos/scripts/release.sh --publish
 - It refuses to run with uncommitted changes.
 - Check the draft on GitHub → Releases, then click **Publish**.
 - While the repo is private, only people with access to it can download the release.
+
+## Unsigned pre-releases (until the Developer ID exists)
+
+```
+app/macos/scripts/release.sh --unsigned --publish
+```
+
+- Builds the app without signing or notarization, and publishes GitHub release `v<version>` at once, marked Pre-release, with the `.dmg` attached. A signed release is made as a draft instead, for review.
+- macOS blocks an unsigned app the first time it opens; users click Open Anyway in System Settings → Privacy & Security once. The README and the cask's message say so.
+
+## Homebrew
+
+The cask is `Casks/agent-town.rb` in this repo, so the repo is also a Homebrew tap:
+
+```
+brew tap samsonchen/agent-town https://github.com/samsonchen/agent-town
+brew install --cask samsonchen/agent-town/agent-town
+```
+
+- `release.sh --publish` writes the new version and the `.dmg`'s checksum into the cask. Commit and push that change after each release; `brew upgrade` sees a new version only then.
+- Homebrew downloads only from a published release (not a draft) in a public repo.
+- Once the app is signed and notarized, remove the "not signed yet" message from the cask's `caveats`. A signed app could also be submitted to the official Homebrew casks, which accept only signed and notarized apps.

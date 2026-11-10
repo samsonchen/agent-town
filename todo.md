@@ -30,8 +30,8 @@ Check these on the personal account:
 
 - [ ] The first signed and notarized build: `app/macos/scripts/release.sh`, then the downloaded-app test in `docs/releasing.md` Part E.
 - [ ] `release.sh --publish`, which creates a draft GitHub release `v<version>` with the `.dmg`.
-- [ ] Before making the repo public: scan the whole git history for secrets.
-- [ ] Make the repository public after the first release.
+- [x] The repo is public (2026-11-11). The history was scanned for secrets first: none found.
+- [x] Homebrew cask in `Casks/agent-town.rb` (this repo is the tap).
 - [ ] Later: signing and notarization in GitHub Actions, a Homebrew cask, Sparkle updates (roadmap Phase 6).
 
 ## 4. README and docs
