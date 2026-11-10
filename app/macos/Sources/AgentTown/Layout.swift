@@ -75,6 +75,8 @@ enum Layout {
     ]
     /// Where the caller stands to call characters from the bench.
     static let benchCaller = SIMD2<Float>(5.4, lanes[2])
+    /// The bench's speaker, on a side table left of the sofa: the Chief of Staff pages through it.
+    static let speakerSpot = SIMD2<Float>(4.05, 3.45)
 
     /// Chiefs of Staff come in from the path on the block's left side, along the back walkway;
     /// bench characters come in along the front walkway.
@@ -278,6 +280,8 @@ struct Labels {
     var result: String { t("Result") }
     var tipArrows: String { t("Move the CEO with the arrow keys ← ↑ ↓ →") }
     var compacting: String { t("Tidying notes…") }
+    /// The speaker's line while someone pages the bench: who is called.
+    func paging(_ names: [String]) -> String { t("Paging: \(names.joined(separator: ", "))") }
     /// After a compaction: the conversation's size before and after, in tokens, when known.
     func compacted(before: Int64?, after: Int64?) -> String {
         guard let before, let after else { return t("Notes tidied") }

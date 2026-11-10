@@ -4,7 +4,7 @@
 // (docs/verification.md).
 
 import { describe, expect, test } from 'claude-code/testing'
-import { Town, cleanTitle, fileRole, DESK_SWITCH_MS, TITLE_MAX, activityKind, parseNotifications, projectIdentity, shellRole, taskStatus, APPROVAL_DELAY_MS, HOLD_MS } from '../hooks/core'
+import { Town, cleanTitle, fileRole, DESK_MAX, TITLE_MAX, activityKind, parseNotifications, projectIdentity, shellRole, taskStatus, APPROVAL_DELAY_MS, HOLD_MS } from '../hooks/core'
 
 const ids = () => {
   let n = 0
@@ -74,20 +74,37 @@ describe('the desk worker', () => {
     ])
   })
 
-  test('a file of another language brings someone else, once the first has worked a while', () => {
+  test('each role is its own person: the work moves, the others wait at their desks until the ticket ends', () => {
     const t = new Town(ids())
     t.prompt({ text: 'port it', kind: 'composer' }, 0)
     t.toolStart(edit('/r/a.ts'), 0)
-    t.toolStart(edit('/r/b.py'), 1000) // too soon: stays
-    t.toolStart(edit('/r/b.py'), DESK_SWITCH_MS + 10)
-    const evs = t.drain()
-    expect(evs.filter(e => e.type.startsWith('staff.'))).toEqual([
+    t.toolStart(edit('/r/b.swift'), 5000) // someone new for Swift; the TypeScript engineer stays
+    t.toolStart({ tool: 'Read', input: { file_path: '/r/c.py' } }, 6000) // a read does not move the work
+    t.toolStart(edit('/r/a.ts'), 7000) // back to TypeScript: the same person, no new call
+    t.turnComplete({ durationMs: 9000, isAborted: false }, 9000)
+    const evs = t.drain().filter(e => e.type.startsWith('staff.') || e.type === 'activity')
+    expect(evs).toEqual([
       { type: 'staff.hire', agentId: 'desk-t1-1', subagentType: 'main-loop', description: 'port it', teammate: false, background: false },
       { type: 'staff.role', agentId: 'desk-t1-1', role: 'typescript-engineer' },
-      { type: 'staff.done', agentId: 'desk-t1-1', status: 'completed', durationMs: DESK_SWITCH_MS + 10 },
+      { type: 'activity', agentId: 'desk-t1-1', kind: 'edit', tool: 'Edit' },
       { type: 'staff.hire', agentId: 'desk-t1-2', subagentType: 'main-loop', description: 'port it', teammate: false, background: false },
-      { type: 'staff.role', agentId: 'desk-t1-2', role: 'python-engineer' },
+      { type: 'staff.role', agentId: 'desk-t1-2', role: 'swift-engineer' },
+      { type: 'activity', agentId: 'desk-t1-2', kind: 'edit', tool: 'Edit' },
+      { type: 'activity', agentId: 'desk-t1-2', kind: 'read', tool: 'Read' },
+      { type: 'activity', agentId: 'desk-t1-1', kind: 'edit', tool: 'Edit' },
+      { type: 'staff.done', agentId: 'desk-t1-1', status: 'completed', durationMs: 9000 },
+      { type: 'staff.done', agentId: 'desk-t1-2', status: 'completed', durationMs: 4000 },
     ])
+  })
+
+  test('past the most desk workers, the one idle longest reports first', () => {
+    const t = new Town(ids())
+    t.prompt({ text: 'many', kind: 'composer' }, 0)
+    const files = ['a.ts', 'b.py', 'c.go', 'd.rs', 'e.java', 'f.rb']
+    files.forEach((f, i) => t.toolStart(edit('/r/' + f), i * 10))
+    const evs = t.drain().filter(e => e.type === 'staff.done')
+    expect(evs).toEqual([{ type: 'staff.done', agentId: 'desk-t1-1', status: 'completed', durationMs: 50 }])
+    expect(DESK_MAX).toBe(5)
   })
 
   test('the task type names an unsure desk worker\'s role; a main-loop approval is theirs', () => {

@@ -28,6 +28,7 @@ Every piece of work starts with a ticket, and every ticket has an issuer. The re
 - **One block per project.** All sessions in the same project share that block. Blocks sit side by side with paths between them, and wrap into a grid as projects are added.
 - **As few blocks as possible.** The office always shows the executive block and, while any session is open, at least one project block, so the window keeps a steady size. With no session open, it is the executive block alone, and the window opens at that size. Each further project block is on screen only while it has work: it appears when a task begins (a prompt, a scheduled ticket, a background task, an approval), with its Chiefs of Staff already at their desks, and leaves the screen about 1.5 seconds after everything in it has settled (the report call made, staff and operators back on the bench). The block worked in most recently is the one that stays. Nobody walks in or out; the view simply changes. While off-screen, a block keeps its bench and desks for the next task. A project's block is dropped entirely when its last session ends.
 - **Several sessions in one project** put several Chiefs of Staff in the same block. Each one has its own desk, telephone and staff.
+- **Six desks per project block.** The back row has one Chief of Staff desk with a telephone; the front row has five staff desks. The rest of the back row is open floor. A second session's Chief of Staff walks in from the path carrying a desk with a telephone, sets it down in the back row, and carries it out again when the session ends. When all five staff desks are taken, the next staff member paged is a newcomer who walks in carrying a desk for the back row; after reporting, they pick the desk up and leave along the path instead of joining the bench. Carried desks look smaller while carried, held above the head. With the back row full too, extra staff work standing at the hot desks by the bench.
 - **The executive block** is always first. It has three areas:
   - the CEO's desk, with a telephone. The CEO stays at the desk unless the user walks the CEO around (see "Walking the CEO" below);
   - the Dispatcher's desk, with a radio and a board that shows one card for each active schedule, labeled with the project name;
@@ -36,7 +37,7 @@ Every piece of work starts with a ticket, and every ticket has an issuer. The re
 - **Each project block has a machine room** in one corner, with consoles and server racks. Operators work there, apart from the staff desks.
 - **Each project block has a resource bench** (待命室): a lounge where staff and operators wait between jobs. See "Resource bench" below.
 - The whole office is visible at once. There are no tabs. When it does not fit in the window, the view pans with the scroll wheel or trackpad, and it follows the CEO when the user walks the CEO around.
-- The user sets the window size, the block size (number of desks per block), and the bench size (number of characters waiting on each bench). When a block has more staff than desks, the extra staff use hot desks or the meeting room.
+- The user sets the window size and the bench size (number of characters waiting on each bench).
 - Each block shows a sign with the project name. While a typed prompt is being worked on, the sign adds a short title naming the task, written by Haiku from the prompt, for example "agent-town · Fix missing sound" (two tasks at most, by desk). A title is asked to be at most 20 characters, or 10 Chinese characters (a CJK character counts as two). When the titles are wider than that, the whole sign (name and titles) scrolls sideways in a window 20 characters wide. Before the project name is known, the sign shows the project ID, a 16-character hash; with a task running it shows the task title instead.
 
 ## Scenes
@@ -45,17 +46,17 @@ Each scene below is triggered by a Claude Code event. The event mapping is in [a
 
 | # | Trigger | What happens |
 |---|---|---|
-| 1 | Session starts | The session's Chief of Staff is at a desk in the project's block, with no walk-in (the block is created if it is new). Whether the block is on screen follows the rule above. |
+| 1 | Session starts | The session's Chief of Staff is at the block's Chief of Staff desk, with no walk-in (the block is created if it is new). If that desk is taken by another session, the new Chief of Staff walks in carrying a desk (see "Six desks per project block"). Whether the block is on screen follows the rule above. |
 | 2 | User submits a prompt | The CEO phones that session's Chief of Staff. The Chief of Staff's phone rings and is answered, and the ticket passes from the CEO to the Chief of Staff over the call. A short dispatch sound plays as the phone rings. |
-| 3 | Main agent uses its first tool on a ticket | The Chief of Staff does not do the work itself: it calls a desk worker from the resource bench, as in scene 4, and the main agent's own tool calls (activities, approvals) show on that worker. The role comes from the files being changed (a `.ts` file brings a TypeScript engineer, `.py` a Python engineer, `.md` a technical writer), else from a file being read or the task type, else a generalist. A first guess is corrected on the same character when the work shows a role. When a file of another role is changed after the worker has worked at least 8 seconds, that worker reports and goes back to the bench, and the Chief of Staff calls someone in the new role. While staff work, the Chief of Staff waits at the desk instead of typing. A turn with no tool calls (an answer only) stays with the Chief of Staff, who wears a hat showing the task type (see "Hats"). |
-| 4 | A subagent starts | The Chief of Staff walks to the resource bench and calls a waiting character (see "Resource bench"). The Chief of Staff hands them a smaller ticket there. The character walks to a free desk and starts work. The name tag shows the role. If no role is decided yet when the character leaves the bench, they keep a neutral outfit until it is. |
+| 3 | Main agent uses its first tool on a ticket | The Chief of Staff does not do the work itself: it pages a desk worker from the resource bench, as in scene 4, and the main agent's own tool calls (activities, approvals) show on that worker. The role comes from the files being changed (a `.ts` file brings a TypeScript engineer, `.swift` a Swift engineer, `.md` a technical writer), else from a file being read or the task type, else a generalist. Each role on a ticket is its own person: when the work moves to another role (a file of another kind is changed, or web research starts), the Chief of Staff pages someone new for it, and the earlier worker stays at the desk, idle, until the ticket ends. When the work comes back to a role, that person picks it up again with no new page. Reading a file does not move the work. A first guess is corrected on the same character only while they are still on the way (about 3 seconds). At most five desk workers per ticket; past that, the one idle longest reports and goes back first. When the ticket ends (the turn is over, including when Claude stops to ask the user something), every desk worker brings a report to the Chief of Staff and goes back to the bench. They stay at their desks through an approval wait. While staff work, the Chief of Staff waits at the desk instead of typing. A turn with no tool calls (an answer only) stays with the Chief of Staff, who wears a hat showing the task type (see "Hats"). |
+| 4 | A subagent starts | The Chief of Staff pages a waiting character over the bench speaker, from the desk (see "Resource bench"). The character takes a smaller ticket and walks to a free desk and starts work. The name tag shows the role. If no role is decided yet when the character leaves the bench, they keep a neutral outfit until it is. |
 | 5 | Someone uses a tool | A short activity animation for that character (see "Activities"). |
 | 6 | A tool call needs the user's approval | The character whose call is waiting raises a hand, and the CEO's phone rings until the call is approved or refused. The approval sound plays, except in auto mode, where a classifier rather than the user answers most asks. Then the character returns to work. |
 | 7 | A subagent finishes | The staff member brings a report to the Chief of Staff, then walks back to the resource bench and waits there, still in their role outfit. A failed subagent shows a distinct "failed" report. |
-| 8 | The main task finishes | The desk worker brings its report to the Chief of Staff (scene 7), then the Chief of Staff phones the report to the CEO. The completion sound plays as the CEO's phone starts to ring, so the call is on screen when it is heard, if the sound rule below allows it. |
+| 8 | The main task finishes | The desk workers bring their reports to the Chief of Staff (scene 7), then the Chief of Staff phones the report to the CEO. The completion sound plays as the CEO's phone starts to ring, so the call is on screen when it is heard, if the sound rule below allows it. |
 | 9 | The user interrupts the task | The Chief of Staff stops working. No report call, no sound. |
-| 10 | Session ends | The Chief of Staff is gone from the desk, with no walk-out. Any remaining staff and operators go back to the resource bench. The session's cards are removed from the Dispatcher's board. A block with no sessions left is removed, and the other blocks close up. |
-| 11 | A background task starts | The character that started the task (the Chief of Staff, or a staff member) walks to the resource bench and calls a waiting operator. The operator walks into the machine room and starts work at a console. The name tag shows the background role. If no role is decided yet when the operator leaves the bench, they keep a neutral outfit until it is. |
+| 10 | Session ends | The Chief of Staff is gone from the desk, with no walk-out; a Chief who carried a desk in carries it out along the path. Any remaining staff and operators go back to the resource bench (a newcomer who carried a desk in leaves with it). The session's cards are removed from the Dispatcher's board. A block with no sessions left is removed, and the other blocks close up. |
+| 11 | A background task starts | The character that started the task (the Chief of Staff, or a staff member) pages a waiting operator over the bench speaker. The operator walks into the machine room and starts work at a console. The name tag shows the background role. If no role is decided yet when the operator leaves the bench, they keep a neutral outfit until it is. |
 | 12 | A background task finishes | The operator brings the result to the Chief of Staff and walks back to the resource bench. If Claude Code then starts a new turn to handle the result, the Chief of Staff works on it as a follow-up ticket. No call comes from the CEO for it. When that turn ends, the report goes to the issuer of the ticket that started the operator (scene 8). A failed task shows a distinct "failed" result. A task that is stopped (killed) leaves with no result. |
 | 13 | A schedule is created or deleted | A card is pinned to or removed from the Dispatcher's board. |
 | 14 | A schedule fires | The Dispatcher radios the card's ticket to that session's Chief of Staff, the same way the CEO phones in scene 2. When the turn ends, the Chief of Staff phones the report to the Dispatcher, not to the CEO. |
@@ -94,15 +95,17 @@ The resource bench is a lounge in each project block. Every session in the block
 
 **Calling from the bench (scenes 4 and 11)**
 
-1. The Chief of Staff walks to the bench. If role classification has not finished yet, they wait at the bench for up to 3 seconds.
-2. The Chief of Staff calls one character, picked in this order:
+The bench has a speaker on a side table beside the sofa. The caller does not walk to the bench.
+
+1. The Chief of Staff picks up the desk phone and pages the bench: a call line runs from them to the speaker, which shows "Paging: TypeScript Engineer" (「廣播：TypeScript 工程師」). A staff member who pages has no phone and just talks. If role classification has not finished yet, the page waits up to 3 seconds.
+2. The page calls one character, picked in this order:
    1. a waiting character who last had the same role;
    2. a waiting character from the same department (same outfit);
    3. a neutral character, who changes into the role outfit;
    4. anyone waiting, who changes outfit.
 3. If the bench is empty, a new character walks in from the path and comes to the bench to be called.
-4. Subagents or tasks that start within about 1 second of each other are called in one trip. The Chief of Staff calls several characters at once.
-5. The called characters walk to free desks (staff) or to the machine room (operators).
+4. Subagents or tasks that start within about 1 second of each other are called in one page. The Chief of Staff calls several characters at once.
+5. The called characters stand up and walk straight to free desks (staff) or to the machine room (operators), each carrying a smaller ticket. The caller hangs up. When the five staff desks are taken, a newcomer walks in from the path with a desk instead (see "Six desks per project block").
 
 An operator can be called back from the bench as staff, and the other way around. They change outfit on the way.
 
@@ -178,7 +181,7 @@ The default is to be decided (see [roadmap.md](roadmap.md)).
 ## Settings (app)
 
 - Language: system, English, 繁體中文
-- Window size; block size (desks per block); bench size (characters waiting per block)
+- Window size; bench size (characters waiting per block)
 - Completion sound: on/off, threshold in seconds (default 0: every task), sound file
 - Approval sound: on/off, sound file
 - Master volume, mute

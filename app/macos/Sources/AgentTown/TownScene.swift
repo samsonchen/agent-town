@@ -35,6 +35,8 @@ final class TownScene: ObservableObject {
     var lastWork: [String: Date] = [:]
     var actors: [String: Actor] = [:]
     private var calls: [(Actor, Actor)] = []
+    /// Pages in progress: the caller, the block whose bench speaker they talk through, and who is called.
+    var pages: [(caller: Actor, node: BlockNode, text: String)] = []
     /// approvalId → the character waiting.
     var approvals: [String: Actor] = [:]
     private var ceoRinging = false
@@ -129,25 +131,51 @@ final class TownScene: ObservableObject {
             if let name = building.blocks[p]?.name { node.name = name }
             let slot = BlockNode.free(node.chiefSlots, below: Layout.maxDesks)
             node.chiefSlots[s] = slot
+            let carriesDesk = slot > 0
             let chief = makeActor(id: s, kind: .chief, base: chiefBase(node),
                                   outfit: NSColor(hex: assets.characters.chiefOfStaff.color),
-                                  block: node, name: labels.chiefOfStaff, at: Layout.chiefSpot(slot: slot))
-            // Already at the desk when the block shows; no walk-in.
+                                  block: node, name: labels.chiefOfStaff,
+                                  at: carriesDesk ? Layout.entrance : Layout.chiefSpot(slot: slot))
             chief.home = Layout.chiefSpot(slot: slot)
             chief.hasComputer = true
-            chief.phone = node.deskPhones[slot % Layout.maxDesks]
             chief.model = building.blocks[p]?.chiefs[s]?.model
-            chief.settle()
+            if carriesDesk {
+                // Another session in the project: its Chief walks in with a desk and a phone.
+                let (kit, phone) = makeDeskKit(node, chief: true)
+                carry(kit, by: chief)
+                chief.enqueue { [weak self] in
+                    guard let self else { return }
+                    await self.walk(chief, to: chief.home)
+                    await self.putDown(kit, by: chief, in: node, slot: slot)
+                    chief.phone = phone
+                    self.face(chief, toward: chief.homeFacing)
+                    chief.settle()
+                }
+            } else {
+                // The first Chief is already at the desk when the block shows; no walk-in.
+                chief.phone = node.deskPhones[0]
+                chief.settle()
+            }
 
         case .chiefLeft(let p, let s):
             // Only this block's Chief: a session ID seen in two projects must not take the other one.
             guard let chief = actors[s], chief.block == p, let node = blocks[p] else { return }
-            node.chiefSlots[s] = nil
+            let slot = node.chiefSlots.removeValue(forKey: s)
             chief.working = false
             sessionEnded(s, in: node)
-            // The session ended: the Chief of Staff is gone at once, no walk-out.
-            chief.root.removeFromParent()
             actors[s] = nil
+            if let slot, node.carried[slot] != nil {
+                // A Chief who carried a desk in carries it out again.
+                chief.enqueue { [weak self] in
+                    guard let self else { return }
+                    await self.walk(chief, to: Layout.chiefSpot(slot: slot))
+                    await self.pickUp(by: chief, in: node, slot: slot)
+                    await self.leave(chief, node)
+                }
+            } else {
+                // The session ended: the Chief of Staff is gone at once, no walk-out.
+                chief.root.removeFromParent()
+            }
 
         case .ticketSubmitted(_, let s, let ticket):
             guard let chief = actors[s] else { return }
@@ -188,6 +216,7 @@ final class TownScene: ObservableObject {
             }
 
         case .ticketDone(let p, let s, _, let issuer, let aborted, let playSound):
+            blocks[p]?.activeDesk[s] = nil
             guard let chief = actors[s] else { return }
             chief.working = false
             chief.hat = nil
@@ -220,6 +249,7 @@ final class TownScene: ObservableObject {
         case .activity(let p, let s, let agentId, let kind):
             guard let a = agentId.map({ worker(p, "a:\(s)/\($0)") }) ?? actors[s] else { return }
             a.activity = kind
+            if let agentId, agentId.hasPrefix("desk-") { focusDesk(p, s, job: "a:\(s)/\(agentId)") }
             if !a.isBusy { a.settle() }
 
         case .model(let p, let s, let agentId, let model):
@@ -498,7 +528,7 @@ final class TownScene: ObservableObject {
 
     /// Places a furniture model with its footprint centered on `p` (Kenney models are anchored at a corner).
     @discardableResult
-    private func place(_ name: String, in f: Entity, at p: SIMD2<Float>, yaw: Float = 0, scale: Float = 1,
+    func place(_ name: String, in f: Entity, at p: SIMD2<Float>, yaw: Float = 0, scale: Float = 1,
                        onTopOf base: Entity? = nil) -> Entity? {
         guard let model = try? assets.furniture(name) else { return nil }
         // Wrap it: the model's own root transform turns the file's axes upright and must be kept.
@@ -519,7 +549,7 @@ final class TownScene: ObservableObject {
     }
 
     /// A desk telephone at `p` on top of `desk`.
-    private func telephone(in f: Entity, at p: SIMD2<Float>, on desk: Entity) -> Phone {
+    func telephone(in f: Entity, at p: SIMD2<Float>, on desk: Entity) -> Phone {
         let top = desk.visualBounds(relativeTo: f).max.y
         let k = Layout.furnitureScale / 0.85
         let device = Entity()
@@ -572,14 +602,16 @@ final class TownScene: ObservableObject {
     private func buildProjectBlock(_ node: BlockNode, colors: (NSColor, NSColor)) {
         let f = node.entity
         floor(node, colors: colors)
+        // One Chief of Staff desk with a telephone; the rest of the back row is open floor,
+        // where a second session's Chief, or staff past the front desks, set down a desk they carry in.
+        let x0 = Layout.deskX(slot: 0)
+        if let desk = place("desk", in: f, at: [x0, Layout.chiefDeskZ]) {
+            place("computerScreen", in: f, at: [x0 - 0.1, Layout.chiefDeskZ - 0.05], scale: 0.8, onTopOf: desk)
+            node.deskPhones[0] = telephone(in: f, at: [x0 + 0.28, Layout.chiefDeskZ + 0.02], on: desk)
+            node.deskTops[0] = desk.visualBounds(relativeTo: f).max.y
+        }
         for slot in 0..<Layout.maxDesks {
             let x = Layout.deskX(slot: slot)
-            // Chief of Staff desks, each with a telephone.
-            if let desk = place("desk", in: f, at: [x, Layout.chiefDeskZ]) {
-                place("computerScreen", in: f, at: [x - 0.1, Layout.chiefDeskZ - 0.05], scale: 0.8, onTopOf: desk)
-                node.deskPhones[slot] = telephone(in: f, at: [x + 0.28, Layout.chiefDeskZ + 0.02], on: desk)
-                node.deskTops[slot] = desk.visualBounds(relativeTo: f).max.y
-            }
             // Staff desks.
             if let desk = place("desk", in: f, at: [x, Layout.staffDeskZ]) {
                 place("laptop", in: f, at: [x, Layout.staffDeskZ - 0.03], onTopOf: desk)
@@ -595,6 +627,9 @@ final class TownScene: ObservableObject {
         place("rugRound", in: f, at: Layout.benchCenter, scale: 1.3)
         place("loungeSofaLong", in: f, at: [Layout.benchCenter.x, 3.5])
         place("tableCoffee", in: f, at: [Layout.benchCenter.x, 4.3])
+        if let table = place("sideTable", in: f, at: Layout.speakerSpot) {
+            node.speaker = place("speaker", in: f, at: Layout.speakerSpot, scale: 0.8, onTopOf: table)
+        }
         place("kitchenCoffeeMachine", in: f, at: [6.75, 3.45])
         place("pottedPlant", in: f, at: [6.75, 5.1])
         place("pottedPlant", in: f, at: [6.75, 0.3])
@@ -615,6 +650,9 @@ final class TownScene: ObservableObject {
     /// waiting for approval to the CEO.
     func callLines() -> [(SIMD3<Float>, SIMD3<Float>)] {
         var out = calls.map { (a, b) in (a.head(above: -0.15), b.head(above: -0.15)) }
+        for page in pages {
+            if let top = speakerTop(page.node) { out.append((page.caller.head(above: -0.15), top)) }
+        }
         if let ceo = actors["ceo"] {
             for a in Set(approvals.values.map(\.id)).compactMap({ actors[$0] }) {
                 out.append((a.head(above: -0.15), ceo.head(above: -0.15)))
@@ -686,6 +724,11 @@ final class TownScene: ObservableObject {
                 items.append(LabelItem(id: "ring-\(a.id)", anchor: phone.anchor, lines: [(labels.ring, .ring)]))
             }
         }
+        for page in pages where !page.text.isEmpty {
+            if let top = speakerTop(page.node) {
+                items.append(LabelItem(id: "page-\(page.node.id)", anchor: top + [0, 0.05, 0], lines: [(page.text, .ring)]))
+            }
+        }
         for node in blocks.values where node.placed {
             let o = node.entity.position(relativeTo: nil)
             let sign = sign(node)
@@ -693,6 +736,13 @@ final class TownScene: ObservableObject {
                                    lines: [(sign.text, .sign)], scroll: sign.scroll))
         }
         return items
+    }
+
+    /// The top of a block's bench speaker, in world space.
+    func speakerTop(_ node: BlockNode) -> SIMD3<Float>? {
+        guard let s = node.speaker else { return nil }
+        let b = s.visualBounds(relativeTo: nil)
+        return [b.center.x, b.max.y, b.center.z]
     }
 
     /// The block's sign: the project's name, then the title of each running task, by desk.

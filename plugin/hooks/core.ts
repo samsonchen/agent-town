@@ -40,7 +40,7 @@ const cut = (s: unknown, n = TEXT_MAX) => (typeof s === 'string' ? s.slice(0, n)
 type Origin = 'user' | 'schedule' | 'task' | 'unknown'
 type Ticket = { id: string; origin: Origin; startTs: number; returned: boolean; lastReturnTs?: number; text?: string; title?: string; taskType?: string }
 /** The staff member the Chief of Staff called to do the main loop's own work on the open ticket. */
-type Desk = { id: string; role: string; firm: boolean; since: number }
+type Desk = { id: string; role: string; firm: boolean; since: number; lastActive: number }
 type Staff = { name?: string; hireTs: number }
 type Task = { startTs: number; ticketId?: string }
 type Approval = { tool: string; agentId?: string; askTs: number; waited: boolean; autoMode: boolean }
@@ -49,8 +49,11 @@ export type ToolOutcome = { ok: boolean; result: Record<string, unknown> }
 
 // ---- Pure helpers -------------------------------------------------------
 
-/** A desk worker stays at least this long before a different role takes over. */
-export const DESK_SWITCH_MS = 8000
+/** For this long after being called, a desk worker hired on a guess takes a better role
+ *  in place; after that, a different role is someone else's job. */
+export const DESK_GUESS_MS = 3000
+/** At most this many desk workers per ticket; past it the one idle longest reports and leaves. */
+export const DESK_MAX = 5
 
 const EXT_ROLES: Record<string, string> = {
   ts: 'typescript-engineer', tsx: 'typescript-engineer', mts: 'typescript-engineer', cts: 'typescript-engineer',
@@ -177,8 +180,13 @@ export class Town {
   private ticket: Ticket | undefined // open ticket
   private lastTicket: Ticket | undefined // most recently closed
   private chiefModel: string | undefined
-  private desk: Desk | undefined
+  /** The ticket's desk workers, one per role, in the order called; `activeDesk` has the work now. */
+  private desks: Desk[] = []
+  private activeDesk: string | undefined
   private deskCount = 0
+  private get desk(): Desk | undefined {
+    return this.desks.find(d => d.id === this.activeDesk)
+  }
   private staff = new Map<string, Staff>()
   private staffModels = new Map<string, string>()
   private held = new Map<string, { until: number; replay: (() => void)[] }>()
@@ -226,7 +234,7 @@ export class Town {
     if (this.lastContext) this.emit({ ...this.lastContext })
     if (this.ticket) this.emit({ type: 'ticket.submit', ticketId: this.ticket.id, text: this.ticket.text ?? '', origin: 'unknown' })
     if (this.ticket?.title) this.emit({ type: 'ticket.title', ticketId: this.ticket.id, title: this.ticket.title })
-    if (this.ticket && this.desk) this.emitDesk(this.desk, this.ticket)
+    if (this.ticket) for (const d of this.desks) this.emitDesk(d, this.ticket)
   }
 
   // -- context window
@@ -349,7 +357,7 @@ export class Town {
   }
 
   private openTicket(origin: Origin, text: string, startTs: number, extra: Record<string, unknown> = {}): Ticket {
-    this.releaseDesk('completed', startTs) // a ticket left open without a turn's end
+    this.releaseDesks('completed', startTs) // a ticket left open without a turn's end
     const t: Ticket = { id: this.newId(), origin, startTs, returned: false, text: cut(text) }
     this.ticket = t
     this.emit({ type: 'ticket.submit', ticketId: t.id, text: cut(text), origin, ...extra })
@@ -388,7 +396,7 @@ export class Town {
     this.modelChange(undefined, e.model)
     const t = this.ticket
     if (!t) return
-    this.releaseDesk(e.isAborted ? 'aborted' : e.reason === 'error' ? 'failed' : 'completed', now)
+    this.releaseDesks(e.isAborted ? 'aborted' : e.reason === 'error' ? 'failed' : 'completed', now)
     const durationMs = t.origin === 'user' && !t.returned ? e.durationMs : Math.max(0, now - t.startTs)
     this.emit({ type: 'ticket.done', ticketId: t.id, durationMs: Math.round(durationMs), aborted: e.isAborted })
     this.lastTicket = t
@@ -463,21 +471,33 @@ export class Town {
 
   // -- the desk worker
 
-  /** The desk worker for a main-loop tool call: called on the first one, given a firmer role
-   *  when one shows, and replaced by someone else when a file asks for a different role. */
+  /** The desk worker for a main-loop tool call. Each role on a ticket is its own person:
+   *  the work moving to a new role brings someone new, while the others stay at their desks
+   *  until the ticket ends; moving back to a role finds that person still there. Only a
+   *  file being changed, or web research, moves the work; reading a file does not. */
   private deskFor(r: { role: string; firm: boolean } | undefined, now: number): string {
     const d = this.desk
     if (!d) return this.callDesk(r?.role ?? this.taskRole(), r?.firm ?? false, now).id
+    d.lastActive = now
     if (!r || r.role === d.role) return d.id
-    if (!d.firm) {
-      // The first guess gives way to what the work shows, on the same character.
+    if (!d.firm && now - d.since < DESK_GUESS_MS && !this.desks.some(x => x.role === r.role)) {
+      // A first guess, still on the way to the desk, takes the role the work shows.
       d.role = r.role
       d.firm = r.firm
       this.emit({ type: 'staff.role', agentId: d.id, role: r.role })
       return d.id
     }
-    if (!r.firm || now - d.since < DESK_SWITCH_MS) return d.id
-    this.releaseDesk('completed', now)
+    if (!r.firm && r.role !== 'research-scientist') return d.id
+    const there = this.desks.find(x => x.role === r.role)
+    if (there) {
+      there.lastActive = now
+      this.activeDesk = there.id
+      return there.id
+    }
+    if (this.desks.length >= DESK_MAX) {
+      const idle = this.desks.filter(x => x.id !== d.id).sort((a, b) => a.lastActive - b.lastActive)[0]
+      if (idle) this.releaseDesk(idle, 'completed', now)
+    }
     return this.callDesk(r.role, true, now).id
   }
 
@@ -488,8 +508,9 @@ export class Town {
 
   private callDesk(role: string, firm: boolean, now: number): Desk {
     const t = this.ticket!
-    const d: Desk = { id: `desk-${t.id}-${++this.deskCount}`, role, firm, since: now }
-    this.desk = d
+    const d: Desk = { id: `desk-${t.id}-${++this.deskCount}`, role, firm, since: now, lastActive: now }
+    this.desks.push(d)
+    this.activeDesk = d.id
     this.emitDesk(d, t)
     return d
   }
@@ -507,11 +528,15 @@ export class Town {
     this.emit({ type: 'staff.role', agentId: d.id, role: d.role })
   }
 
-  private releaseDesk(status: string, now: number) {
-    const d = this.desk
-    if (!d) return
-    this.desk = undefined
+  private releaseDesk(d: Desk, status: string, now: number) {
+    this.desks = this.desks.filter(x => x !== d)
+    if (this.activeDesk === d.id) this.activeDesk = undefined
     this.emit({ type: 'staff.done', agentId: d.id, status, durationMs: Math.max(0, now - d.since) })
+  }
+
+  /** The ticket ended: every desk worker reports, in the order they were called. */
+  private releaseDesks(status: string, now: number) {
+    for (const d of [...this.desks]) this.releaseDesk(d, status, now)
   }
 
   /** tool.check returned `ask` for a person. */
@@ -645,7 +670,7 @@ export class Town {
         this.ticket.taskType = value
         const d = this.desk
         const role = TASK_TYPE_ROLES[value]
-        if (d && !d.firm && role && role !== d.role) {
+        if (d && !d.firm && this.desks.length === 1 && role && role !== d.role) {
           d.role = role
           this.emit({ type: 'staff.role', agentId: d.id, role })
         }
@@ -684,7 +709,8 @@ export class Town {
       openFields: this.openFields,
       ctx: this.ctx,
       lastContext: this.lastContext,
-      desk: this.desk,
+      desks: this.desks,
+      activeDesk: this.activeDesk,
       deskCount: this.deskCount,
     }
   }
@@ -710,7 +736,8 @@ export class Town {
     this.openFields = obj(x.openFields)
     this.ctx = obj(x.ctx) ?? {}
     this.lastContext = obj(x.lastContext)
-    this.desk = obj<Desk>(x.desk)
+    this.desks = Array.isArray(x.desks) ? (x.desks as Desk[]).filter(d => d && typeof d.id === 'string') : []
+    this.activeDesk = typeof x.activeDesk === 'string' ? x.activeDesk : undefined
     this.deskCount = typeof x.deskCount === 'number' ? x.deskCount : 0
   }
 

@@ -18,6 +18,8 @@ final class Actor {
     var speaking = false
     var model: String?
     var working = false
+    /// A desk this character is carrying, held above the head.
+    var carrying: Entity?
     /// A Chief of Staff whose ticket is being worked on by staff: it waits instead of typing.
     var delegating = false
     var activity: String?
@@ -189,6 +191,20 @@ final class BlockNode {
     var deferred: [String: [() -> Void]] = [:]
     /// The height of each Chief of Staff desk top (block-local), by desk slot.
     var deskTops: [Int: Float] = [:]
+    /// The bench's speaker, for paging.
+    var speaker: Entity?
+    /// Desks carried into the back row: back-row slot → the desk, with its footprint.
+    var carried: [Int: (desk: Entity, footprint: (min: SIMD2<Float>, max: SIMD2<Float>))] = [:]
+    /// Session → the job key of the desk worker who has the main agent's work right now.
+    var activeDesk: [String: String] = [:]
+    /// Staff who carry in a desk because the front desks are taken: actor id → back-row slot.
+    var tempSlots: [String: Int] = [:]
+    /// A back-row slot with no Chief, no desk carried in and no one bringing one.
+    func freeBackSlot() -> Int? {
+        (1..<Layout.maxDesks).first { b in
+            !chiefSlots.values.contains(b) && !tempSlots.values.contains(b) && carried[b] == nil
+        }
+    }
     /// Furniture footprints (block-local x and z), which the CEO walks around.
     var obstacles: [(min: SIMD2<Float>, max: SIMD2<Float>)] = []
 

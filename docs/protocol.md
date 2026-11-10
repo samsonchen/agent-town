@@ -136,7 +136,7 @@ A hook stopped the main agent from ending its turn and sent it back to work (spe
 |---|---|---|
 | `agentId` | string | |
 | `parentAgentId` | string, optional | Set when a subagent starts another subagent |
-| `subagentType` | string | Such as `general-purpose`, `Explore`, or a custom agent name. `main-loop` for a desk worker: not a subagent, but the main agent's own work on the open ticket, shown as staff the Chief of Staff called. Its `agentId` is `desk-<ticketId>-<n>`; the main agent's activities and approvals carry that `agentId`, and its `staff.done` comes just before the ticket's `ticket.done` (or when another role takes over) |
+| `subagentType` | string | Such as `general-purpose`, `Explore`, or a custom agent name. `main-loop` for a desk worker: not a subagent, but the main agent's own work on the open ticket, shown as staff the Chief of Staff called. Its `agentId` is `desk-<ticketId>-<n>`; a ticket can have several, one per role. The main agent's activities and approvals carry the `agentId` of the one with the work now; the others wait. Their `staff.done` events come together just before the ticket's `ticket.done` (or earlier for the one idle longest, past five) |
 | `name` | string, optional | |
 | `description` | string | First 200 characters |
 | `teammate` | boolean | `true` for an agent-team teammate |

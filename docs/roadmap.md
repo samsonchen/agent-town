@@ -51,7 +51,7 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 
 ## Phase 3: staff (mostly done)
 
-- [x] Resource bench: a mixed bench in each new block, calling from the bench (one trip for hires within a second, waiting up to 3 seconds for roles, the picking order), return to the bench with a faint name tag, the longest-waiting leave when the bench is full (scenes 4, 7)
+- [x] Resource bench: a mixed bench in each new block, paging the bench over its speaker from the desk (one page for hires within a second, waiting up to 3 seconds for roles, the picking order), return to the bench with a faint name tag, the longest-waiting leave when the bench is full (scenes 4, 7)
 - [x] Staff roles and department outfit colors, staff desks (hot desks past five), report back to whoever started the job, "Failed" reports (scenes 4, 7)
 - [x] Agent-to-agent messages: the sender walks over and both show a speech bubble (scene 16)
 - [x] Activities for the Chief of Staff and staff (scene 5)
@@ -66,11 +66,12 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - [x] Typing at desks, writing at hot desks; no approval sound in auto mode
 - [x] Walking the CEO with the arrow keys, H to go back to the desk, a closable tip, the view following the CEO, a mobile phone away from the desk, and status statements from the character the CEO stands next to
 - [x] Clicking a character walks the CEO there; the CEO walks back to the desk once all work is done
-- [x] Desk workers: the Chief of Staff calls a staff member by role (from the files being changed) to do the main agent's own work, switches roles mid-task, and waits for the report before phoning the CEO (scene 3)
+- [x] Desk workers: the Chief of Staff calls a staff member by role (from the files being changed) to do the main agent's own work, one person per role (the others wait at their desks until the ticket ends), and waits for the reports before phoning the CEO (scene 3)
 - [x] Compaction scene (scene 17)
 - [x] Context bar under each block: fill, used / window, percent, the last turn's new tokens
 - [x] Task titles from Haiku on the block sign, scrolling when wider than 20 columns
 - [x] Dispatch sound as a ticket's call rings
+- [x] Six desks per block (one Chief of Staff desk, five staff desks); a second session's Chief, and staff past five, carry a desk in and out of the back row
 
 ## Phase 4: the whole office
 

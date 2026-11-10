@@ -73,13 +73,19 @@ extension TownScene {
         }
     }
 
-    /// The caller walks to the bench, calls one character per job, hands each a smaller
-    /// ticket, and walks back. Called characters go to a desk or a console.
+    /// The caller stays where they are and pages the bench over its speaker (on the desk phone
+    /// when they have one): one character per job stands up and walks straight to a desk or a
+    /// console, carrying a smaller ticket.
     private func benchTrip(_ call: PendingCall) async {
         let caller = call.caller, node = call.node, p = node.id
-        await walk(caller, to: Layout.benchCaller)
-        face(caller, toward: [0, 1])
-        caller.settle()
+        while caller.onCall { try? await Task.sleep(for: .milliseconds(150)) }
+        caller.onCall = true
+        caller.body.play("interact-right", loop: false)
+        try? await Task.sleep(for: .seconds(0.35))
+        let phone = caller.phone
+        phone?.lift(to: caller)
+        caller.body.play("holding-right")
+        pages.append((caller, node, ""))
 
         // Wait up to 3 seconds for the roles, so the right character can be picked.
         let start = Date()
@@ -88,38 +94,42 @@ extension TownScene {
         }
 
         var called: [(String, Actor)] = []
-        var newcomers = 0
+        var frontFree = Layout.maxDesks - node.staffSlots.values.filter { $0 < Layout.maxDesks }.count
         for job in call.jobs {
             let i = info(p, job)
-            if let w = pick(node, role: i.role, isOperator: parse(job).isOperator) {
-                link(w, job, node)
-                called.append((job, w))
+            let isOp = parse(job).isOperator
+            let w: Actor
+            if !isOp, frontFree <= 0, let b = node.freeBackSlot() {
+                // The front desks are taken: someone new walks in carrying a desk for the back row.
+                w = spawnWorker(node, at: Layout.workerEntrance, department: nil)
+                node.tempSlots[w.id] = b
             } else {
+                if !isOp { frontFree -= 1 }
                 // The bench is empty: someone new walks in from the path.
-                let w = spawnWorker(node, at: Layout.workerEntrance, department: nil)
-                let spot = Layout.benchCaller + [-0.5 - Float(newcomers) * 0.35, 0.35]
-                newcomers += 1
-                w.enqueue { [weak self] in await self?.walk(w, to: spot) }
-                link(w, job, node)
-                called.append((job, w))
+                w = pick(node, role: i.role, isOperator: isOp) ?? spawnWorker(node, at: Layout.workerEntrance, department: nil)
             }
+            link(w, job, node)
+            called.append((job, w))
         }
-        // Everyone called comes over to the caller.
-        for (n, (_, w)) in called.enumerated() where !w.isBusy {
-            let spot = Layout.benchCaller + [Float(n % 4) * 0.35 - 0.5, 0.4 + Float(n / 4) * 0.3]
-            w.enqueue { [weak self] in await self?.walk(w, to: spot) }
+        let names = called.map { job, _ in
+            info(p, job).role.map(labels.role) ?? (parse(job).isOperator ? labels.operatorName : labels.staff)
         }
-        while called.contains(where: { $0.1.isBusy }) { try? await Task.sleep(for: .milliseconds(100)) }
-
-        caller.body.play("interact-right", loop: false)
+        if let i = pages.firstIndex(where: { $0.caller === caller && $0.node === node }) {
+            pages[i].text = labels.paging(names)
+        }
+        try? await Task.sleep(for: .seconds(0.6))
         for (job, w) in called {
-            face(w, toward: caller.spot - w.spot)
-            w.body.play("pick-up", loop: false)
             w.ticketText = info(p, job).description
+            assign(w, job: job, node: node)
         }
-        try? await Task.sleep(for: .seconds(1.0))
-        for (job, w) in called { assign(w, job: job, node: node) }
-        await goHome(caller)
+        try? await Task.sleep(for: .seconds(1.2))
+
+        pages.removeAll { $0.caller === caller && $0.node === node }
+        phone?.hangUp()
+        try? await Task.sleep(for: .seconds(0.3))
+        caller.onCall = false
+        caller.settle()
+        syncCeoPhone()
     }
 
     /// Picks a waiting character: one who last had the same role, then one from the same
@@ -152,6 +162,20 @@ extension TownScene {
         updateDelegating(parse(job).session)
     }
 
+    /// The main agent's work moved to the desk worker on `job`: they work, and the session's
+    /// other desk workers wait at their desks, doing nothing, until the ticket ends.
+    func focusDesk(_ p: String, _ s: String, job: String) {
+        guard let node = blocks[p] else { return }
+        node.activeDesk[s] = job
+        for (k, w) in node.jobs where k.hasPrefix("a:\(s)/desk-") {
+            let on = k == job
+            guard w.working != on else { continue }
+            w.working = on // one still walking over settles to this on arrival
+            if !on { w.activity = nil }
+            if w.atWork && !w.isBusy { w.settle() }
+        }
+    }
+
     /// The Chief of Staff stops typing while staff do the work, and picks it back up after.
     func updateDelegating(_ s: String) {
         guard let chief = actors[s] else { return }
@@ -174,9 +198,17 @@ extension TownScene {
         w.department = i.role.flatMap(labels.department(ofRole:))
         dress(w)
         w.model = i.model
-        w.working = true
+        // A desk worker whose turn has passed while they walked over waits at the desk.
+        let (session, id, _) = parse(job)
+        w.working = !id.hasPrefix("desk-") || node.activeDesk[session] == nil || node.activeDesk[session] == job
         w.activity = nil
-        if isOp {
+        let backSlot = isOp ? nil : node.tempSlots[w.id]
+        if let b = backSlot {
+            w.hasComputer = true
+            w.home = Layout.chiefSpot(slot: b)
+            w.homeFacing = [0, 1]
+            if w.carrying == nil { carry(makeDeskKit(node, chief: false).0, by: w) }
+        } else if isOp {
             let slot = BlockNode.free(node.consoleSlots)
             node.consoleSlots[w.id] = slot
             w.hasComputer = false
@@ -193,6 +225,11 @@ extension TownScene {
         w.enqueue { [weak self] in
             guard let self else { return }
             await self.goHome(w)
+            if let b = backSlot, let kit = w.carrying {
+                await self.putDown(kit, by: w, in: node, slot: b)
+                self.face(w, toward: w.homeFacing)
+                w.settle()
+            }
             w.ticketText = nil
             guard node.jobs[job] === w else { return } // the session ended on the way
             w.atWork = true
@@ -247,7 +284,19 @@ extension TownScene {
         }
         release(w, node)
         updateDelegating(parse(job).session)
-        await returnToBench(w, node)
+        await offDuty(w, node)
+    }
+
+    /// Back to the bench; or, for someone who carried a desk in, out along the path with it.
+    private func offDuty(_ w: Actor, _ node: BlockNode) async {
+        guard let b = node.tempSlots[w.id] else { return await returnToBench(w, node) }
+        if node.carried[b] != nil {
+            await walk(w, to: Layout.chiefSpot(slot: b))
+            face(w, toward: [0, 1])
+            await pickUp(by: w, in: node, slot: b)
+        }
+        node.tempSlots[w.id] = nil
+        await leave(w, node)
     }
 
     private func release(_ w: Actor, _ node: BlockNode) {
@@ -287,7 +336,7 @@ extension TownScene {
         }
     }
 
-    private func leave(_ w: Actor, _ node: BlockNode) async {
+    func leave(_ w: Actor, _ node: BlockNode) async {
         await walk(w, to: Layout.workerEntrance)
         await move(w, to: [Layout.workerEntrance.x, Layout.blockDepth + Layout.gap / 2])
         w.root.removeFromParent()
@@ -297,11 +346,12 @@ extension TownScene {
     /// Scene 10: the session's staff and operators go back to the bench.
     func sessionEnded(_ s: String, in node: BlockNode) {
         pendingCalls[s] = nil
+        node.activeDesk[s] = nil
         for (job, w) in node.jobs where parse(job).session == s {
             w.enqueue { [weak self] in
                 guard let self else { return }
                 self.release(w, node)
-                await self.returnToBench(w, node)
+                await self.offDuty(w, node)
             }
         }
         for (id, a) in approvals where a.id == s || a.job.map({ parse($0).session == s }) == true {
@@ -395,6 +445,7 @@ extension TownScene {
     /// Where someone stands to talk to `r`: across the desk, or behind an operator.
     func visitorSpot(_ r: Actor, _ node: BlockNode) -> SIMD2<Float> {
         if r.kind == .chief, let slot = node.chiefSlots[r.id] { return Layout.chiefVisitor(slot: slot) }
+        if let b = node.tempSlots[r.id] { return Layout.chiefVisitor(slot: b) }
         if let slot = node.staffSlots[r.id] { return Layout.staffVisitor(slot: slot) }
         if let slot = node.consoleSlots[r.id] { return Layout.operatorSpot(slot: slot) + [0, 0.45] }
         return r.spot + [0.45, 0]

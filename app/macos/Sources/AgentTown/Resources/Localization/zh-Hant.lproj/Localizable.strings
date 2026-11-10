@@ -25,6 +25,7 @@
 
 /* Compaction */
 "Tidying notes…" = "整理筆記中…";
+"Paging: %@" = "廣播：%@";
 "Notes tidied" = "筆記整理完成";
 "Notes tidied: %@ → %@ tokens" = "筆記整理完成：%1$@ → %2$@ tokens";
 
