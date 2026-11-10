@@ -149,6 +149,16 @@ extension TownScene {
         w.atWork = false
         w.since = Date()
         node.jobs[job] = w
+        updateDelegating(parse(job).session)
+    }
+
+    /// The Chief of Staff stops typing while staff do the work, and picks it back up after.
+    func updateDelegating(_ s: String) {
+        guard let chief = actors[s] else { return }
+        let d = hasWorkingStaff(chief)
+        guard d != chief.delegating else { return }
+        chief.delegating = d
+        if !chief.isBusy { chief.settle() }
     }
 
     private func assign(_ w: Actor, job: String, node: BlockNode) {
@@ -236,6 +246,7 @@ extension TownScene {
             if !receiver.isBusy { receiver.settle() }
         }
         release(w, node)
+        updateDelegating(parse(job).session)
         await returnToBench(w, node)
     }
 

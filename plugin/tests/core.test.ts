@@ -4,7 +4,7 @@
 // (docs/verification.md).
 
 import { describe, expect, test } from 'claude-code/testing'
-import { Town, cleanTitle, TITLE_MAX, activityKind, parseNotifications, projectIdentity, shellRole, taskStatus, APPROVAL_DELAY_MS, HOLD_MS } from '../hooks/core'
+import { Town, cleanTitle, fileRole, DESK_SWITCH_MS, TITLE_MAX, activityKind, parseNotifications, projectIdentity, shellRole, taskStatus, APPROVAL_DELAY_MS, HOLD_MS } from '../hooks/core'
 
 const ids = () => {
   let n = 0
@@ -50,6 +50,63 @@ describe('helpers', () => {
     expect(projectIdentity('git@github.com:samsonchen/agent-town.git', '/x')).toEqual({ identity: 'github.com/samsonchen/agent-town', name: 'agent-town' })
     expect(projectIdentity('https://user:secret@example.com/a/b/', '/x').identity).toBe('example.com/a/b')
     expect(projectIdentity(null, '/Users/me/work/site/')).toEqual({ identity: '/Users/me/work/site', name: 'site' })
+  })
+})
+
+describe('the desk worker', () => {
+  const edit = (file: string) => ({ tool: 'Edit', input: { file_path: file } })
+
+  test('the main loop\'s work goes to a desk worker by role, who reports before the ticket closes', () => {
+    const t = new Town(ids())
+    t.prompt({ text: 'fix the parser', kind: 'composer' }, 0)
+    t.toolStart({ tool: 'Grep', input: { pattern: 'x' } }, 10)
+    t.toolStart(edit('/r/src/parse.ts'), 20)
+    t.turnComplete({ durationMs: 100, isAborted: false }, 100)
+    expect(t.drain().slice(1)).toEqual([
+      { type: 'staff.hire', agentId: 'desk-t1-1', subagentType: 'main-loop', description: 'fix the parser', teammate: false, background: false },
+      { type: 'staff.role', agentId: 'desk-t1-1', role: 'generalist' },
+      { type: 'activity', agentId: 'desk-t1-1', kind: 'read', tool: 'Grep' },
+      // The first guess gives way to the file's role, on the same character.
+      { type: 'staff.role', agentId: 'desk-t1-1', role: 'typescript-engineer' },
+      { type: 'activity', agentId: 'desk-t1-1', kind: 'edit', tool: 'Edit' },
+      { type: 'staff.done', agentId: 'desk-t1-1', status: 'completed', durationMs: 90 },
+      { type: 'ticket.done', ticketId: 't1', durationMs: 100, aborted: false },
+    ])
+  })
+
+  test('a file of another language brings someone else, once the first has worked a while', () => {
+    const t = new Town(ids())
+    t.prompt({ text: 'port it', kind: 'composer' }, 0)
+    t.toolStart(edit('/r/a.ts'), 0)
+    t.toolStart(edit('/r/b.py'), 1000) // too soon: stays
+    t.toolStart(edit('/r/b.py'), DESK_SWITCH_MS + 10)
+    const evs = t.drain()
+    expect(evs.filter(e => e.type.startsWith('staff.'))).toEqual([
+      { type: 'staff.hire', agentId: 'desk-t1-1', subagentType: 'main-loop', description: 'port it', teammate: false, background: false },
+      { type: 'staff.role', agentId: 'desk-t1-1', role: 'typescript-engineer' },
+      { type: 'staff.done', agentId: 'desk-t1-1', status: 'completed', durationMs: DESK_SWITCH_MS + 10 },
+      { type: 'staff.hire', agentId: 'desk-t1-2', subagentType: 'main-loop', description: 'port it', teammate: false, background: false },
+      { type: 'staff.role', agentId: 'desk-t1-2', role: 'python-engineer' },
+    ])
+  })
+
+  test('the task type names an unsure desk worker\'s role; a main-loop approval is theirs', () => {
+    const t = new Town(ids())
+    t.prompt({ text: 'write the release notes', kind: 'composer' }, 0)
+    const job = t.takeJobs().find(j => j.kind === 'task-type')!
+    t.toolStart({ tool: 'Bash', input: { command: 'git log' } }, 10)
+    t.classified(job, 'docs')
+    t.ask({ tool_use_id: 'u1', tool: 'Bash' }, 20)
+    t.tick(20 + APPROVAL_DELAY_MS)
+    const evs = t.drain()
+    expect(evs).toContainEqual({ type: 'staff.role', agentId: 'desk-t1-1', role: 'technical-writer' })
+    expect(evs).toContainEqual({ type: 'approval.wait', approvalId: 'u1', agentId: 'desk-t1-1', tool: 'Bash' })
+  })
+
+  test('file roles', () => {
+    expect(fileRole('/a/App.swift')).toBe('swift-engineer')
+    expect(fileRole('/a/Dockerfile')).toBe('devops-engineer')
+    expect(fileRole('/a/data.json')).toBeUndefined()
   })
 })
 
@@ -154,8 +211,11 @@ describe('background tasks and schedules', () => {
     t.turnComplete({ durationMs: 30, isAborted: false }, 30)
     expect(t.drain()).toEqual([
       { type: 'ticket.submit', ticketId: 't1', text: 'run the tests', origin: 'user' },
-      { type: 'activity', kind: 'shell', tool: 'Bash' },
+      { type: 'staff.hire', agentId: 'desk-t1-1', subagentType: 'main-loop', description: 'run the tests', teammate: false, background: false },
+      { type: 'staff.role', agentId: 'desk-t1-1', role: 'generalist' },
+      { type: 'activity', agentId: 'desk-t1-1', kind: 'shell', tool: 'Bash' },
       { type: 'task.start', taskId: 'b1', kind: 'shell', ticketId: 't1', description: 'Run tests', role: 'test-runner' },
+      { type: 'staff.done', agentId: 'desk-t1-1', status: 'completed', durationMs: 20 },
       { type: 'ticket.done', ticketId: 't1', durationMs: 30, aborted: false },
     ])
     t.prompt({ text: NOTE('b1'), kind: 'task-notification' }, 5020)

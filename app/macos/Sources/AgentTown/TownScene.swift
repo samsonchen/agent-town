@@ -159,7 +159,8 @@ final class TownScene: ObservableObject {
                 let issuer = actors[ticket.issuer == .dispatcher ? "dispatcher" : "ceo"]!
                 chief.enqueue { [weak self] in
                     guard let self else { return }
-                    await self.call(from: issuer, to: chief, carrying: ticket.text)
+                    // A short computer sound as the ticket's call rings.
+                    await self.call(from: issuer, to: chief, carrying: ticket.text) { self.onSound?("dispatch") }
                     chief.working = true
                     chief.settle()
                 }
@@ -186,7 +187,7 @@ final class TownScene: ObservableObject {
                 if chief.bubble == self.labels.returned { chief.bubble = nil }
             }
 
-        case .ticketDone(_, let s, _, let issuer, let aborted, let playSound):
+        case .ticketDone(let p, let s, _, let issuer, let aborted, let playSound):
             guard let chief = actors[s] else { return }
             chief.working = false
             chief.hat = nil
@@ -197,15 +198,23 @@ final class TownScene: ObservableObject {
                 chief.settle()
                 return
             }
-            // The Chief of Staff phones the report back to whoever issued the ticket.
+            // The Chief of Staff phones the report back to whoever issued the ticket, once the
+            // desk worker who did the main loop's work has brought theirs (up to 15 seconds).
             let receiver = actors[issuer == .dispatcher ? "dispatcher" : "ceo"]!
-            chief.enqueue { [weak self] in
-                guard let self else { return }
-                // The sound plays as the report call rings, so the call is on screen when it is heard.
-                await self.call(from: chief, to: receiver, carrying: nil) {
-                    if playSound { self.onSound?("completion") }
+            Task { @MainActor [weak self] in
+                let until = Date().addingTimeInterval(15)
+                while Date() < until, let node = self?.blocks[p],
+                      node.jobs.keys.contains(where: { $0.hasPrefix("a:\(s)/desk-") }) {
+                    try? await Task.sleep(for: .milliseconds(200))
                 }
-                chief.settle()
+                chief.enqueue { [weak self] in
+                    guard let self else { return }
+                    // The sound plays as the report call rings, so the call is on screen when it is heard.
+                    await self.call(from: chief, to: receiver, carrying: nil) {
+                        if playSound { self.onSound?("completion") }
+                    }
+                    chief.settle()
+                }
             }
 
         case .activity(let p, let s, let agentId, let kind):

@@ -65,6 +65,12 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - [x] Blocks on screen: executive block plus one project block always; extra blocks show while they have work; no walk-in or walk-out
 - [x] Typing at desks, writing at hot desks; no approval sound in auto mode
 - [x] Walking the CEO with the arrow keys, H to go back to the desk, a closable tip, the view following the CEO, a mobile phone away from the desk, and status statements from the character the CEO stands next to
+- [x] Clicking a character walks the CEO there; the CEO walks back to the desk once all work is done
+- [x] Desk workers: the Chief of Staff calls a staff member by role (from the files being changed) to do the main agent's own work, switches roles mid-task, and waits for the report before phoning the CEO (scene 3)
+- [x] Compaction scene (scene 17)
+- [x] Context bar under each block: fill, used / window, percent, the last turn's new tokens
+- [x] Task titles from Haiku on the block sign, scrolling when wider than 20 columns
+- [x] Dispatch sound as a ticket's call rings
 
 ## Phase 4: the whole office
 
@@ -77,7 +83,8 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 
 - Hats (scene 3)
 - Model badges, with the show/hide setting (default hidden)
-- English and Traditional Chinese, Cubic 11 font
+- [x] English and Traditional Chinese string tables, following the macOS language (Simplified Chinese falls back to English)
+- Cubic 11 font
 - Ticket text setting, all other settings, launch at login
 - Menu bar toggle
 

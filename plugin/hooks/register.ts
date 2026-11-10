@@ -343,7 +343,7 @@ export const register: Register = on => {
   on('tool.call', async ($, e, next) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const call = e as any
-    safe(() => town.toolStart({ tool: call.tool, agentId: call.agentId }, Date.now()))
+    safe(() => town.toolStart({ tool: call.tool, agentId: call.agentId, input: call }, Date.now()))
     collect()
     const r = await next(e)
     safe(() => {

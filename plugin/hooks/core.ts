@@ -38,7 +38,9 @@ const RETURN_DEDUP_MS = 5000
 const cut = (s: unknown, n = TEXT_MAX) => (typeof s === 'string' ? s.slice(0, n) : '')
 
 type Origin = 'user' | 'schedule' | 'task' | 'unknown'
-type Ticket = { id: string; origin: Origin; startTs: number; returned: boolean; lastReturnTs?: number; text?: string; title?: string }
+type Ticket = { id: string; origin: Origin; startTs: number; returned: boolean; lastReturnTs?: number; text?: string; title?: string; taskType?: string }
+/** The staff member the Chief of Staff called to do the main loop's own work on the open ticket. */
+type Desk = { id: string; role: string; firm: boolean; since: number }
 type Staff = { name?: string; hireTs: number }
 type Task = { startTs: number; ticketId?: string }
 type Approval = { tool: string; agentId?: string; askTs: number; waited: boolean; autoMode: boolean }
@@ -46,6 +48,53 @@ type Approval = { tool: string; agentId?: string; askTs: number; waited: boolean
 export type ToolOutcome = { ok: boolean; result: Record<string, unknown> }
 
 // ---- Pure helpers -------------------------------------------------------
+
+/** A desk worker stays at least this long before a different role takes over. */
+export const DESK_SWITCH_MS = 8000
+
+const EXT_ROLES: Record<string, string> = {
+  ts: 'typescript-engineer', tsx: 'typescript-engineer', mts: 'typescript-engineer', cts: 'typescript-engineer',
+  js: 'javascript-engineer', jsx: 'javascript-engineer', mjs: 'javascript-engineer', cjs: 'javascript-engineer',
+  py: 'python-engineer', ipynb: 'data-scientist', go: 'golang-engineer', rs: 'rust-engineer', java: 'java-engineer',
+  kt: 'kotlin-engineer', kts: 'kotlin-engineer', swift: 'swift-engineer', cs: 'csharp-engineer',
+  c: 'cpp-engineer', cc: 'cpp-engineer', cpp: 'cpp-engineer', h: 'cpp-engineer', hpp: 'cpp-engineer',
+  php: 'php-engineer', rb: 'ruby-engineer', css: 'frontend-engineer', scss: 'frontend-engineer',
+  html: 'frontend-engineer', vue: 'frontend-engineer', svelte: 'frontend-engineer', sql: 'database-engineer',
+  md: 'technical-writer', mdx: 'technical-writer', rst: 'technical-writer', tf: 'devops-engineer', hcl: 'devops-engineer',
+}
+
+/** The staff role a file suggests, by its extension (or name, for a Dockerfile). */
+export function fileRole(path: string | undefined): string | undefined {
+  if (!path) return undefined
+  const name = path.split('/').pop() ?? ''
+  if (/^Dockerfile/i.test(name) || /(^|\/)\.github\/workflows\//.test(path)) return 'devops-engineer'
+  const ext = /\.([A-Za-z0-9]+)$/.exec(name)?.[1]?.toLowerCase()
+  return ext ? EXT_ROLES[ext] : undefined
+}
+
+const TASK_TYPE_ROLES: Record<string, string> = {
+  coding: 'fullstack-engineer', debugging: 'fullstack-engineer', refactoring: 'software-architect',
+  testing: 'qa-engineer', 'code-review': 'code-reviewer', devops: 'devops-engineer', security: 'security-engineer',
+  data: 'data-analyst', research: 'research-scientist', writing: 'content-writer', docs: 'technical-writer',
+  translation: 'translator', design: 'ux-designer', planning: 'project-manager', slides: 'graphic-designer',
+  spreadsheet: 'data-analyst', legal: 'legal-counsel', finance: 'financial-analyst', marketing: 'marketing-manager',
+}
+
+/** A main-loop tool call's role for the desk worker: `firm` when a file being changed names it. */
+export function toolRole(tool: string, input: Record<string, unknown> | undefined): { role: string; firm: boolean } | undefined {
+  const str = (v: unknown) => (typeof v === 'string' ? v : undefined)
+  const path = str(input?.file_path) ?? str(input?.notebook_path) ?? str(input?.path)
+  if (['Edit', 'Write', 'MultiEdit', 'NotebookEdit'].includes(tool)) {
+    const r = fileRole(path)
+    return r ? { role: r, firm: true } : undefined
+  }
+  if (tool === 'Read') {
+    const r = fileRole(path)
+    return r ? { role: r, firm: false } : undefined
+  }
+  if (tool === 'WebSearch' || tool === 'WebFetch') return { role: 'research-scientist', firm: false }
+  return undefined
+}
 
 /** A hard cap only: Haiku is asked for 20 columns, and the app scrolls a wider title. */
 export const TITLE_MAX = 60
@@ -128,6 +177,8 @@ export class Town {
   private ticket: Ticket | undefined // open ticket
   private lastTicket: Ticket | undefined // most recently closed
   private chiefModel: string | undefined
+  private desk: Desk | undefined
+  private deskCount = 0
   private staff = new Map<string, Staff>()
   private staffModels = new Map<string, string>()
   private held = new Map<string, { until: number; replay: (() => void)[] }>()
@@ -175,6 +226,7 @@ export class Town {
     if (this.lastContext) this.emit({ ...this.lastContext })
     if (this.ticket) this.emit({ type: 'ticket.submit', ticketId: this.ticket.id, text: this.ticket.text ?? '', origin: 'unknown' })
     if (this.ticket?.title) this.emit({ type: 'ticket.title', ticketId: this.ticket.id, title: this.ticket.title })
+    if (this.ticket && this.desk) this.emitDesk(this.desk, this.ticket)
   }
 
   // -- context window
@@ -297,6 +349,7 @@ export class Town {
   }
 
   private openTicket(origin: Origin, text: string, startTs: number, extra: Record<string, unknown> = {}): Ticket {
+    this.releaseDesk('completed', startTs) // a ticket left open without a turn's end
     const t: Ticket = { id: this.newId(), origin, startTs, returned: false, text: cut(text) }
     this.ticket = t
     this.emit({ type: 'ticket.submit', ticketId: t.id, text: cut(text), origin, ...extra })
@@ -335,6 +388,7 @@ export class Town {
     this.modelChange(undefined, e.model)
     const t = this.ticket
     if (!t) return
+    this.releaseDesk(e.isAborted ? 'aborted' : e.reason === 'error' ? 'failed' : 'completed', now)
     const durationMs = t.origin === 'user' && !t.returned ? e.durationMs : Math.max(0, now - t.startTs)
     this.emit({ type: 'ticket.done', ticketId: t.id, durationMs: Math.round(durationMs), aborted: e.isAborted })
     this.lastTicket = t
@@ -398,17 +452,72 @@ export class Town {
   // -- tools
 
   /** tool.call, before next(e). */
-  toolStart(e: { tool: string; agentId?: string }, now: number) {
+  toolStart(e: { tool: string; agentId?: string; input?: Record<string, unknown> }, now: number) {
     if (e.tool === 'Agent' || e.tool === 'Task') return // the hire shows it
+    // The main loop's own work goes to a desk worker the Chief of Staff calls, by role.
+    const agentId = e.agentId ?? (this.ticket ? this.deskFor(toolRole(e.tool, e.input), now) : undefined)
     this.whenKnown(e.agentId, now, () => {
-      this.emit({ type: 'activity', ...(e.agentId ? { agentId: e.agentId } : {}), kind: activityKind(e.tool), tool: e.tool })
+      this.emit({ type: 'activity', ...(agentId ? { agentId } : {}), kind: activityKind(e.tool), tool: e.tool })
     })
+  }
+
+  // -- the desk worker
+
+  /** The desk worker for a main-loop tool call: called on the first one, given a firmer role
+   *  when one shows, and replaced by someone else when a file asks for a different role. */
+  private deskFor(r: { role: string; firm: boolean } | undefined, now: number): string {
+    const d = this.desk
+    if (!d) return this.callDesk(r?.role ?? this.taskRole(), r?.firm ?? false, now).id
+    if (!r || r.role === d.role) return d.id
+    if (!d.firm) {
+      // The first guess gives way to what the work shows, on the same character.
+      d.role = r.role
+      d.firm = r.firm
+      this.emit({ type: 'staff.role', agentId: d.id, role: r.role })
+      return d.id
+    }
+    if (!r.firm || now - d.since < DESK_SWITCH_MS) return d.id
+    this.releaseDesk('completed', now)
+    return this.callDesk(r.role, true, now).id
+  }
+
+  private taskRole(): string {
+    const tt = this.ticket?.taskType
+    return (tt && TASK_TYPE_ROLES[tt]) || STAFF_FALLBACK
+  }
+
+  private callDesk(role: string, firm: boolean, now: number): Desk {
+    const t = this.ticket!
+    const d: Desk = { id: `desk-${t.id}-${++this.deskCount}`, role, firm, since: now }
+    this.desk = d
+    this.emitDesk(d, t)
+    return d
+  }
+
+  private emitDesk(d: Desk, t: Ticket) {
+    this.emit({
+      type: 'staff.hire',
+      agentId: d.id,
+      subagentType: 'main-loop',
+      description: cut(t.title || t.text || ''),
+      teammate: false,
+      background: false,
+      ...(this.chiefModel ? { model: this.chiefModel } : {}),
+    })
+    this.emit({ type: 'staff.role', agentId: d.id, role: d.role })
+  }
+
+  private releaseDesk(status: string, now: number) {
+    const d = this.desk
+    if (!d) return
+    this.desk = undefined
+    this.emit({ type: 'staff.done', agentId: d.id, status, durationMs: Math.max(0, now - d.since) })
   }
 
   /** tool.check returned `ask` for a person. */
   ask(e: { tool_use_id: string; tool: string; agentId?: string }, now: number) {
     if (e.agentId && !this.staff.has(e.agentId) && !this.held.has(e.agentId)) return
-    this.approvals.set(e.tool_use_id, { tool: e.tool, agentId: e.agentId, askTs: now, waited: false, autoMode: this.permissionMode === 'auto' })
+    this.approvals.set(e.tool_use_id, { tool: e.tool, agentId: e.agentId ?? this.desk?.id, askTs: now, waited: false, autoMode: this.permissionMode === 'auto' })
   }
 
   /** The permission mode from a classic hook's input. In auto mode a classifier answers asks. */
@@ -530,7 +639,18 @@ export class Town {
   classified(job: ClassifyJob, label: string | undefined) {
     if (job.kind === 'task-title') return this.titled(job.id, label)
     const value = label && job.labels.includes(label) ? label : job.fallback
-    if (job.kind === 'task-type') this.emit({ type: 'chief.hat', ticketId: job.id, taskType: value })
+    if (job.kind === 'task-type') {
+      this.emit({ type: 'chief.hat', ticketId: job.id, taskType: value })
+      if (this.ticket?.id === job.id) {
+        this.ticket.taskType = value
+        const d = this.desk
+        const role = TASK_TYPE_ROLES[value]
+        if (d && !d.firm && role && role !== d.role) {
+          d.role = role
+          this.emit({ type: 'staff.role', agentId: d.id, role })
+        }
+      }
+    }
     else if (job.kind === 'staff-role') this.emit({ type: 'staff.role', agentId: job.id, role: value })
     else this.emit({ type: 'task.role', taskId: job.id, role: value })
   }
@@ -564,6 +684,8 @@ export class Town {
       openFields: this.openFields,
       ctx: this.ctx,
       lastContext: this.lastContext,
+      desk: this.desk,
+      deskCount: this.deskCount,
     }
   }
 
@@ -588,6 +710,8 @@ export class Town {
     this.openFields = obj(x.openFields)
     this.ctx = obj(x.ctx) ?? {}
     this.lastContext = obj(x.lastContext)
+    this.desk = obj<Desk>(x.desk)
+    this.deskCount = typeof x.deskCount === 'number' ? x.deskCount : 0
   }
 
   // -- compaction

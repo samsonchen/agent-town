@@ -4,9 +4,10 @@ agent-town shows Claude Code's work as a small office on macOS, seen from above 
 
 - **You are the CEO.** Each prompt you type becomes a ticket that the CEO phones through to the Chief of Staff.
 - **Each Claude Code session is a Chief of Staff.** They take the ticket, put on a hat for the kind of task, and get to work.
-- **Subagents are staff.** The Chief of Staff calls them from the resource bench, and each one gets a job title that matches the work it was given.
+- **The Chief of Staff dispatches, staff do the work.** For the main agent's own work, the Chief of Staff calls a staff member whose role fits the files being changed (a TypeScript engineer for `.ts`, and so on); each subagent is a staff member too. They report back to the Chief of Staff when done.
 - **Background tasks are operators** in the machine room. Scheduled work comes from the Dispatcher, and the Inspector at reception sends unfinished work back.
-- **Each project gets its own office block.** The Chief of Staff phones the report back when the work is done, and sounds tell you when work is done or needs your approval.
+- **Each project gets its own office block.** Its sign shows the project and a short title for the running task, and a bar under it shows the session's context use. The Chief of Staff phones the report back when the work is done, and sounds tell you when a ticket arrives, when work is done, or when it needs your approval.
+- **English and Traditional Chinese**, following the macOS language setting.
 
 It has two parts:
 
@@ -15,7 +16,7 @@ It has two parts:
 
 ## Status
 
-The town-link plugin works (Phases 0 and 1). The macOS app (Phase 2) shows the executive block and a block per project, with the CEO phoning tickets through and the Chief of Staff phoning reports back. Staff, operators and the other scenes come in Phases 3 and 4.
+The town-link plugin works (Phases 0 and 1). The macOS app shows the executive block and a block per project, with tickets and reports by phone, staff and desk workers called from the bench, operators, approvals, compaction, the context bar and task titles (Phases 2 and 3, mostly done). See [roadmap.md](docs/roadmap.md) for what is left.
 
 To run the app (macOS 15 or later, Xcode installed):
 

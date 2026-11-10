@@ -18,6 +18,8 @@ final class Actor {
     var speaking = false
     var model: String?
     var working = false
+    /// A Chief of Staff whose ticket is being worked on by staff: it waits instead of typing.
+    var delegating = false
     var activity: String?
     /// The telephone (or the Dispatcher's radio) this character uses.
     var phone: Phone?
@@ -96,7 +98,7 @@ final class Actor {
             body.play("holding-right")
         } else if compacting {
             body.play("write") // going through the notes
-        } else if working {
+        } else if working && !delegating {
             if isOperator {
                 // At the racks: hands on the machines.
                 body.play(activity == "shell" ? "interact-left" : "interact-right")

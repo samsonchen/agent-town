@@ -21,9 +21,13 @@ final class TownApp: ObservableObject {
         }
         scene.onSound = { name in
             // Each sound has its own on/off setting (spec: sounds). System sounds for now.
-            let key = name == "completion" ? "completionSound" : "approvalSound"
+            let (key, sound) = switch name {
+            case "completion": ("completionSound", "Glass")
+            case "dispatch": ("dispatchSound", "Pop")
+            default: ("approvalSound", "Ping")
+            }
             guard UserDefaults.standard.object(forKey: key) as? Bool ?? true else { return }
-            NSSound(named: name == "completion" ? "Glass" : "Ping")?.play()
+            NSSound(named: sound)?.play()
         }
         let thresh = UserDefaults.standard.object(forKey: "completionThreshold") as? Double ?? 0
         store.sound = SoundSettings(thresholdSeconds: thresh)
