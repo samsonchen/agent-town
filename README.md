@@ -28,6 +28,8 @@ Nothing leaves your Mac except one short request per task: town-link asks Haiku,
 - It does not control Claude Code. You still work in the terminal or the Claude desktop app; agent-town only watches.
 - It is not finished. See [Known issues and limitations](#4-known-issues-and-limitations) and the [roadmap](docs/roadmap.md). If something in the office looks wrong, or you would like a scene that is not there yet, please open an issue on GitHub.
 
+![agent-town: the executive office with the CEO, the Inspector and the Dispatcher, and a project block where the Chief of Staff phones the CEO while a DevOps Engineer works and staff wait on the bench](docs/images/agent-town.png)
+
 ## 2. Installing
 
 You need both parts: the plugin in Claude Code, and the app on your Mac.
