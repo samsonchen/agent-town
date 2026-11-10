@@ -215,8 +215,8 @@ Building
 │   ├── dispatcher (radio)
 │   │   └── board: schedules[scheduleId] (sessionId, text, recurring, nextRunTs)
 │   └── inspector
-└── blocks[projectId]   (added with a session's first task, removed when its last session closes;
-                          sessions with no task yet wait in `waiting`, off-screen)
+└── blocks[projectId]   (added with a session's first event, usually session.open; removed when
+                          its last session closes; on screen the whole time)
     ├── bench[characterId] (outfit, lastRole, waitingSince)
     └── chiefs[sessionId]
         ├── currentTicket (origin, issuer, returnedCount)

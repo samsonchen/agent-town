@@ -26,13 +26,8 @@ final class TownScene: ObservableObject {
     private let ground = Entity()
     private var groundSize: SIMD2<Float> = .zero
     var blocks: [String: BlockNode] = [:]
-    /// The blocks on screen, executive first. A project's block is on screen only while it has work.
+    /// The blocks on screen, executive first, then each open project in the order it opened.
     var blockOrder: [String] = []
-    /// Project blocks kept off-screen while their sessions have no work (spec: as few blocks as possible).
-    var hidden: Set<String> = []
-    var idleSince: [String: Date] = [:]
-    /// When each project last had work, to choose which block stays on screen.
-    var lastWork: [String: Date] = [:]
     var actors: [String: Actor] = [:]
     private var calls: [(Actor, Actor)] = []
     /// Pages in progress: the caller, the block whose bench speaker they talk through, and who is called.
@@ -86,7 +81,6 @@ final class TownScene: ObservableObject {
         dispatcher.phone = execPhones.dispatcher
         for a in [ceo, dispatcher, inspector] { a.body.play("idle") }
         startBenchLife()
-        startIdleWatch()
         startTyping()
     }
 
@@ -96,10 +90,6 @@ final class TownScene: ObservableObject {
         let wasAllDone = allWorkDone
         self.building = building
         defer { if !wasAllDone && allWorkDone { ceoHomeWhenAllDone() } }
-        if let p = change.projectId, hasWork(p) {
-            lastWork[p] = Date()
-            if hidden.contains(p) { show(p) }
-        }
         switch change {
         case .blockAdded(let p):
             let node = BlockNode(id: p, name: building.blocks[p]?.name ?? p)
@@ -115,13 +105,9 @@ final class TownScene: ObservableObject {
             node.entity.removeFromParent()
             for (id, a) in actors where a.block == p { actors[id] = nil }
             for (id, c) in pendingCalls where c.node === node { pendingCalls[id] = nil }
-            hidden.remove(p)
-            idleSince[p] = nil
-            lastWork[p] = nil
             if blockOrder.contains(p) {
                 blockOrder.removeAll { $0 == p }
                 relayout()
-                keepOneProjectShown()
                 ceoBackIfOfficeEmpty()
             }
 

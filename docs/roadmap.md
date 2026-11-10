@@ -40,7 +40,7 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 
 - [x] App shell, loopback server, endpoint file, building state, choreographer
 - [x] Gather-style office: flat blocks on a path, no walls or doors, 3D characters and furniture at half the first size
-- [x] Executive block and one block per project, laid out in a grid; a project's block goes when its last session ends
+- [x] Executive block and one block per project, stacked in one column with the window growing to fit; a project's block shows from its session's start and goes when its last session ends
 - [x] Telephones: the CEO phones the ticket to the Chief of Staff, who phones the report back (the Dispatcher uses a radio)
 - [x] CEO, Chief of Staff, ticket and report call scenes (1, 2, 8, 9, 10)
 - [x] Completion sound with the duration gate (system sound for now)

@@ -9,6 +9,8 @@ struct TownView: View {
     @State private var camera = TownView.makeCamera()
     /// Tips show while "Show tips" is on in the menu; closing one turns it off.
     @AppStorage(Prefs.showTips) private var showTips = true
+    /// The window this view is in, to grow it when a block is added.
+    @State private var window: NSWindow?
 
     /// The office is shown at this size when it fits, and never smaller than `minPixelsPerMeter`.
     static let pixelsPerMeter: CGFloat = 110
@@ -60,6 +62,25 @@ struct TownView: View {
         pan = [min(lim.x, max(-lim.x, x)), min(lim.y, max(-lim.y, z))]
     }
 
+    /// Makes the window as tall as the office at the current width's scale, keeping its top edge
+    /// where it is and staying on the screen. Runs when a block is added or removed, so a size the
+    /// user dragged to holds until then. A taller office than the screen pans with the scroll wheel.
+    private func fitWindow(width: CGFloat, in w: NSWindow? = nil) {
+        guard let window = w ?? window, let screen = window.screen ?? NSScreen.main, !window.styleMask.contains(.fullScreen) else { return }
+        let ppm = min(Self.pixelsPerMeter, max(Self.minPixelsPerMeter, width / CGFloat(max(1, scene.officeSize.x))))
+        let content = window.contentRect(forFrameRect: window.frame)
+        let chrome = window.frame.height - content.height
+        let wanted = max(480, officePixels(ppm).height) + chrome
+        let visible = screen.visibleFrame
+        let height = min(wanted, visible.height)
+        var frame = window.frame
+        guard abs(frame.height - height) > 1 else { return }
+        let top = min(frame.maxY, visible.maxY)
+        frame.size.height = height
+        frame.origin.y = max(visible.minY, top - height)
+        window.setFrame(frame, display: true, animate: true)
+    }
+
     @ViewBuilder private var tip: some View {
         if showTips {
             TipBar(text: scene.ceoAway ? scene.labels.tipHome : scene.labels.tipArrows) { showTips = false }
@@ -96,9 +117,17 @@ struct TownView: View {
             }
             .onAppear { proj.apply(to: camera) }
             .onChange(of: geo.size) { proj.apply(to: camera) }
-            .onChange(of: scene.officeSize) { projector(geo.size).apply(to: camera) }
+            .onChange(of: scene.officeSize) {
+                fitWindow(width: geo.size.width)
+                projector(geo.size).apply(to: camera)
+            }
             .onChange(of: scene.ceoSpot) { _, spot in follow(spot, size: geo.size) }
             .overlay(alignment: .bottomLeading) { tip.padding([.leading, .bottom], 12) } // clear of the context bar under a block
+            .background(WindowReader { w in
+                guard let w, w !== window else { return }
+                window = w
+                fitWindow(width: geo.size.width, in: w) // sessions already open when the window opens
+            })
             .background(KeyCatcher(onKey: { scene.key($0, down: $1) }, onResign: { scene.releaseKeys() }))
             .background(ScrollCatcher { dx, dy in
                 let ppm = Float(pixelsPerMeter(geo.size))
@@ -406,5 +435,18 @@ struct TipBar: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .background(Capsule().fill(Color.black.opacity(0.7)))
+    }
+}
+
+/// Hands over the NSWindow a view is in, once it is in one.
+private struct WindowReader: NSViewRepresentable {
+    let found: (NSWindow?) -> Void
+    func makeNSView(context: Context) -> NSView {
+        let v = NSView()
+        DispatchQueue.main.async { found(v.window) }
+        return v
+    }
+    func updateNSView(_ v: NSView, context: Context) {
+        DispatchQueue.main.async { if let w = v.window { found(w) } }
     }
 }

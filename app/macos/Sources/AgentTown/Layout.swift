@@ -108,25 +108,18 @@ enum Layout {
         return out
     }
 
-    /// Columns for `count` project blocks: side by side while there are few, then a grid.
-    static func columns(_ count: Int) -> Int { count <= 2 ? max(1, count) : (count <= 4 ? 2 : 3) }
-
-    /// The top-left corner of block `index` of `count` (index 0 is the executive block, above
-    /// the first column of project blocks).
+    /// The top-left corner of block `index` (index 0 is the executive block; project blocks are
+    /// stacked under it in one column).
     static func blockOrigin(_ index: Int, count: Int) -> SIMD2<Float> {
         guard index > 0 else { return [margin, margin] }
-        let cols = columns(count - 1), i = index - 1
-        return [margin + Float(i % cols) * (blockWidth + gap),
-                margin + execDepth + gap + Float(i / cols) * (blockDepth + gap)]
+        return [margin, margin + execDepth + gap + Float(index - 1) * (blockDepth + gap)]
     }
 
     /// The whole office for `count` blocks (the executive block included), path margin included.
     static func officeSize(count: Int) -> SIMD2<Float> {
         let projects = max(0, count - 1)
-        let cols = columns(projects), rows = (projects + cols - 1) / cols
-        let grid = rows == 0 ? 0 : gap + Float(rows) * blockDepth + Float(rows - 1) * gap
-        return [2 * margin + Float(cols) * blockWidth + Float(cols - 1) * gap,
-                2 * margin + execDepth + grid]
+        let column = projects == 0 ? 0 : Float(projects) * (gap + blockDepth)
+        return [2 * margin + blockWidth, 2 * margin + execDepth + column]
     }
 }
 
