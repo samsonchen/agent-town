@@ -16,10 +16,10 @@ On the Care Active Team account, Claude Code manages the organization's settings
 Check these on the personal account:
 
 - [x] `/plugin` → Errors shows nothing for town-link (checked 2026-11-11 on the personal account).
-- [ ] Automatic compaction shows the notes scene (`session.compact` with trigger `auto`).
+- [ ] Automatic compaction shows the notes scene (`session.compact` with trigger `auto`). Low priority: the user is not worried about it; check it if it comes up.
 - [x] The Inspector's "Returned" scene works on the personal account (checked 2026-11-11 with a test Stop hook). `classic.Stop` runs there; town-link read the hook's reason from the wrong field, fixed in 0.2.3 (the reason is `block`'s text).
-- [ ] The permission mode follows Shift+Tab. In auto mode, a slow ask plays no approval sound (`classic.PreToolUse` reports the mode).
-- [ ] After checking, update the README known issues so they say which items happen only where an organization manages Claude Code. `docs/verification.md` item 15 still names `cc-plugin-sec-default` as the cause.
+- [x] The permission mode follows Shift+Tab (checked 2026-11-11): in manual mode a slow approval shows the wait and plays the sound; in auto mode the classifier's quick answers show nothing. A classifier answer slower than 5 seconds can't be forced, so that case is untested.
+- [x] The README's known issues say these happen only where an organization manages Claude Code, and `docs/verification.md` item 15 names that cause.
 
 ## 2. Waiting on others
 
