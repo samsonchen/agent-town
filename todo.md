@@ -45,8 +45,8 @@ Check these on the personal account:
 From `docs/roadmap.md` and `docs/spec.md`:
 
 - [x] The Dispatcher's board: one card per active schedule (scene 13), `TownScene+Board.swift`.
-- [ ] Scene 14: the Dispatcher radios a scheduled ticket to the Chief of Staff, and the report comes back to the Dispatcher. Check how much of it works already with a real `/loop`.
-- [x] The Inspector stopping a returned report at reception (scene 15), `TownScene+Inspector.swift`. Still to check with a real Stop hook (section 1).
+- [x] Scene 14: the Dispatcher radios a scheduled ticket to the Chief of Staff, and the report goes back to the Dispatcher (checked 2026-11-11 with a one-time CronCreate schedule).
+- [x] The Inspector stopping a returned report at reception (scene 15), `TownScene+Inspector.swift`, checked 2026-11-11 with a test Stop hook.
 - [ ] Several sessions in one project block: desks and phones, up to four.
 - [ ] Settings for window size and bench size.
 - [ ] Zoom, for many project blocks. Blocks are now one column, the window grows up to the screen height, and a taller office scrolls.
