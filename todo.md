@@ -5,9 +5,10 @@ Open items as of 2026-11-11, for the next session to pick up. Everything listed 
 ## Where things stand
 
 - Work is committed on `main`. The `phase2/app` branch points at an older commit on `main` and can be deleted.
-- town-link 0.2.3 is installed from GitHub on the personal account (`claude plugin marketplace add samsonchen/agent-town`, then `claude plugin install town-link@agent-town`). After a plugin change, raise the version in `plugin/.claude-plugin/plugin.json` and `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, push, then run `claude plugin marketplace update agent-town` and `claude plugin update town-link@agent-town`, and restart Claude Code.
-- The app is built with `app/macos/scripts/release.sh --unsigned` and copied to `/Applications` by hand. It runs from the menu bar.
-- Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (43 tests). App checks: `swift build` and `swift test` in `app/macos` (23 tests).
+- Version 0.2.6 (plugin and app share it). town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`), as an unsigned pre-release.
+- After a change: raise the version in `plugin/.claude-plugin/plugin.json` and `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push. Then the user runs `app/macos/scripts/release.sh --unsigned --publish` (auto mode refuses to publish a release); check the uploaded `.dmg`'s checksum against the cask, commit and push the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town`.
+- Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (45 tests). App checks: `swift build` and `swift test` in `app/macos` (23 tests).
+- Two Swift warnings in the release build, harmless: `TownScene+Staff.swift:72` (a weak self inside a strong one) and `TownView.swift:479` (a non-Sendable observer closure). Clean up when convenient.
 
 ## 1. Check on a personal (non-Team) account
 
@@ -29,10 +30,11 @@ Check these on the personal account:
 ## 3. Release
 
 - [ ] The first signed and notarized build: `app/macos/scripts/release.sh`, then the downloaded-app test in `docs/releasing.md` Part E.
-- [ ] `release.sh --publish`, which creates a draft GitHub release `v<version>` with the `.dmg`.
+- [ ] `release.sh --publish`, which creates a draft GitHub release `v<version>` with the signed `.dmg`; publish it, update the cask, and remove the "not signed yet" caveat from the cask and the README.
+- [x] Unsigned pre-releases v0.2.3 to v0.2.6 on GitHub Releases.
 - [x] The repo is public (2026-11-11). The history was scanned for secrets first: none found.
 - [x] Homebrew cask in `Casks/agent-town.rb` (this repo is the tap).
-- [ ] Later: signing and notarization in GitHub Actions, a Homebrew cask, Sparkle updates (roadmap Phase 6).
+- [ ] Later: signing and notarization in GitHub Actions, the official Homebrew casks (signed apps only), Sparkle updates (roadmap Phase 6).
 
 ## 4. README and docs
 
