@@ -34,6 +34,13 @@ function safe(f: () => void) {
 type Endpoint = { port: number; token: string }
 
 let town = new Town()
+
+// Reads the permission mode a classic hook's input carries, then passes the event on.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function readMode($: any, e: any, next: any) {
+  safe(() => town.setPermissionMode((e as { permission_mode?: string }).permission_mode))
+  return next(e)
+}
 let sessionId = ''
 let projectId = ''
 let seq = 0
@@ -463,11 +470,14 @@ export const register: Register = on => {
   })
 
   // Classic hooks carry the session's permission mode; auto mode means a classifier, not the
-  // user, answers most permission asks (the app then skips the approval sound).
-  on('classic.PreToolUse', async ($, e, next) => {
-    safe(() => town.setPermissionMode((e as { permission_mode?: string }).permission_mode))
-    return next(e)
-  }).catch(passOn)
+  // user, answers most permission asks (the app then skips the approval sound). Where an
+  // organization manages Claude Code, PreToolUse passes over plugins the user installed, so the
+  // mode is also read from events that still reach them: each prompt, each finished tool call and
+  // each permission ask.
+  on('classic.PreToolUse', readMode).catch(passOn)
+  on('classic.UserPromptSubmit', readMode).catch(passOn)
+  on('classic.PostToolUse', readMode).catch(passOn)
+  on('classic.PermissionRequest', readMode).catch(passOn)
 
   on('classic.Stop', async ($, e, next) => {
     const r = await next(e)

@@ -139,7 +139,7 @@ Rules for every hook:
 Every turn on the main loop that starts while the session is idle goes through `prompt.submit`. Its `origin.kind` names the issuer (see the event mapping). A prompt that carries `turnId` was delivered into a turn already running, so it adds to the open ticket instead of opening a new one.
 
 - **Task:** the notification text names the finished tasks. `parentTicketId` is the ticket that was open when the first of those tasks started. The text format is not part of the typed API, so the parser is tested against recorded notifications. As a backup, each `classic.Stop` lists the session's `background_tasks`, and a task that disappears from that list has ended.
-- **Stop-hook continuation:** not a new ticket. The main signal is a `prompt.submit` with `origin.kind: 'auto-continuation'`, which sends `ticket.return`. `classic.Stop` with `block` set is a backup only: at runtime another plugin (`cc-plugin-sec-default`) ran first and the engine skipped our Stop hook. If neither signal is seen, the work simply continues on the open ticket, with no Inspector scene.
+- **Stop-hook continuation:** not a new ticket. The main signal is a `prompt.submit` with `origin.kind: 'auto-continuation'`, which sends `ticket.return`. `classic.Stop` with `block` set is a backup only: where an organization manages Claude Code, the engine passes `classic.Stop`, `classic.PreToolUse` and `session.compact` over plugins the user installed (the plugin manager shows this under Errors), so our Stop hook does not run. If neither signal is seen, the work simply continues on the open ticket, with no Inspector scene.
 
 ### Background roles by rule
 
