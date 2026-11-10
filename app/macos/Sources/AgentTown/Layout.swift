@@ -8,8 +8,8 @@ import simd
 /// Gather map: the executive block first, then one block per active project.
 /// Positions inside a block are local to the block's top-left corner.
 enum Layout {
-    static let blockWidth: Float = 6
-    static let blockDepth: Float = 4
+    static let blockWidth: Float = 7
+    static let blockDepth: Float = 5.4
     /// The path between blocks.
     static let gap: Float = 1.4
     /// The margin of path around the whole office.
@@ -17,30 +17,86 @@ enum Layout {
     static let furnitureScale: Float = 0.85
     static let characterScale: Float = 0.75
     static let floorThickness: Float = 0.02
-    static let walkSpeed: Float = 1.1 // m/s
+    static let walkSpeed: Float = 2.34 // m/s
 
     // Executive block.
-    static let ceoDesk = SIMD2<Float>(1.2, 1.25)
-    static let ceoHome = SIMD2<Float>(1.2, 0.8)
-    static let receptionDesk = SIMD2<Float>(3.0, 2.9)
-    static let inspectorHome = SIMD2<Float>(3.0, 2.5)
-    static let dispatcherDesk = SIMD2<Float>(4.8, 1.25)
-    static let dispatcherHome = SIMD2<Float>(4.8, 0.8)
-    static let boardCenter = SIMD2<Float>(4.8, 0.2)
+    static let ceoDesk = SIMD2<Float>(1.3, 1.3)
+    static let ceoHome = SIMD2<Float>(1.3, 0.85)
+    static let receptionDesk = SIMD2<Float>(3.5, 3.5)
+    static let inspectorHome = SIMD2<Float>(3.5, 3.1)
+    static let dispatcherDesk = SIMD2<Float>(5.6, 1.3)
+    static let dispatcherHome = SIMD2<Float>(5.6, 0.85)
+    static let boardCenter = SIMD2<Float>(5.6, 0.2)
 
-    // Project block: Chief of Staff desks along the back row.
-    static let deskRowZ: Float = 1.15
-    static let firstDeskX: Float = 1.05
-    static let deskGap: Float = 1.3
-    static let maxDesks = 4
-    /// Chiefs of Staff come in from the path on the block's left side, along the row behind the desks.
-    static let backAisleZ: Float = 0.7
+    // Project block, back to front: the Chiefs of Staff's row, the staff row,
+    // then the machine room (left) and the resource bench (right).
+    static let maxDesks = 5
+    static let firstDeskX: Float = 1.1
+    static let deskGap: Float = 1.2
+    static let chiefDeskZ: Float = 1.0
+    static let staffDeskZ: Float = 2.35
+    /// Walkways across the block; characters walk along these and the two side lanes,
+    /// so they never cross a desk.
+    static let lanes: [Float] = [0.55, 1.6, 2.95]
+    static let sideLanes: [Float] = [0.3, blockWidth - 0.3]
+    /// The gaps between desks, and the side lanes, where characters cross from one walkway to another.
+    static let crossings: [Float] = sideLanes + (0..<(maxDesks - 1)).map { firstDeskX + deskGap * (Float($0) + 0.5) }
 
     static func deskX(slot: Int) -> Float { firstDeskX + Float(slot % maxDesks) * deskGap }
     /// Where a Chief of Staff stands at desk `slot` (behind the desk, facing the viewer).
-    static func chiefSpot(slot: Int) -> SIMD2<Float> { [deskX(slot: slot), backAisleZ] }
-    /// Where a Chief of Staff enters and leaves the block.
-    static let entrance = SIMD2<Float>(-gap / 2, backAisleZ)
+    static func chiefSpot(slot: Int) -> SIMD2<Float> { [deskX(slot: slot), lanes[0]] }
+    /// Where someone stands to talk to the Chief of Staff at desk `slot`, across the desk.
+    static func chiefVisitor(slot: Int) -> SIMD2<Float> { [deskX(slot: slot), lanes[1]] }
+    /// Staff desks; past the last desk, staff work standing at the hot desks between
+    /// the machine room and the bench.
+    static func staffSpot(slot: Int) -> SIMD2<Float> {
+        slot < maxDesks ? [deskX(slot: slot), 1.95] : [hotDeskX - 0.3, 3.45 + Float((slot - maxDesks) % 4) * 0.5]
+    }
+    static func staffVisitor(slot: Int) -> SIMD2<Float> {
+        slot < maxDesks ? [deskX(slot: slot), 2.8] : staffSpot(slot: slot) + [0.55, 0]
+    }
+    static let hotDeskX: Float = 3.85
+
+    // Machine room: racks along the back, operators facing them.
+    static let consoles = 4
+    static func rackX(_ i: Int) -> Float { 0.65 + Float(i) * 0.75 }
+    static let rackZ: Float = 3.55
+    static func operatorSpot(slot: Int) -> SIMD2<Float> {
+        slot < consoles ? [rackX(slot), 4.1] : [rackX(slot % consoles), 4.75]
+    }
+
+    // Resource bench: a sofa, a coffee table and standing spots around it.
+    static let benchCenter = SIMD2<Float>(5.4, 4.2)
+    static let benchSpots: [(SIMD2<Float>, sitting: Bool)] = [
+        ([5.0, 3.68], true), ([5.8, 3.68], true),
+        ([4.4, 4.45], false), ([6.4, 4.45], false), ([4.9, 4.95], false), ([5.9, 4.95], false),
+        ([4.2, 5.1], false), ([6.6, 5.1], false),
+    ]
+    /// Where the caller stands to call characters from the bench.
+    static let benchCaller = SIMD2<Float>(5.4, lanes[2])
+
+    /// Chiefs of Staff come in from the path on the block's left side, along the back walkway;
+    /// bench characters come in along the front walkway.
+    static let entrance = SIMD2<Float>(-gap / 2, lanes[0])
+    static let workerEntrance = SIMD2<Float>(-gap / 2, lanes[2])
+
+    /// A walking path from `a` to `b` inside a block, along the walkways.
+    static func route(_ a: SIMD2<Float>, _ b: SIMD2<Float>) -> [SIMD2<Float>] {
+        func lane(_ z: Float) -> Float { lanes.min { abs($0 - z) < abs($1 - z) }! }
+        let la = lane(a.y), lb = lane(b.y)
+        var pts: [SIMD2<Float>] = [[a.x, la]]
+        if la != lb {
+            // Cross between walkways at a side lane or a gap between desks, whichever is shortest.
+            let cols = a.x < 0 || b.x < 0 ? [sideLanes[0]] : crossings
+            let x = cols.min { abs(a.x - $0) + abs(b.x - $0) < abs(a.x - $1) + abs(b.x - $1) }!
+            pts += [[x, la], [x, lb]]
+        }
+        pts += [[b.x, lb], b]
+        var out: [SIMD2<Float>] = []
+        var last = a
+        for p in pts where simd_distance(p, last) > 0.02 { out.append(p); last = p }
+        return out
+    }
 
     /// Columns for `count` blocks: side by side while there are few, then a grid.
     static func columns(_ count: Int) -> Int { count <= 2 ? max(1, count) : (count <= 4 ? 2 : 3) }
@@ -117,37 +173,63 @@ extension float4x4 {
     }
 }
 
-/// Localized labels for task types and roles, from catalog/*.json.
+/// Localized labels for task types and roles, and role colors, from catalog/*.json.
 struct Labels {
     private var taskTypes: [String: [String: String]] = [:]
     private var roles: [String: [String: String]] = [:]
+    private var roleDepartment: [String: String] = [:]
+    private var departmentColor: [String: String] = [:]
+    let neutralColor: String
     let locale: String
 
     init() {
         let res = Bundle.module.resourceURL!
         struct L: Decodable { let id: String; let labels: [String: String] }
         struct T: Decodable { let taskTypes: [L] }
-        struct R: Decodable { let roles: [L] }
+        struct Role: Decodable { let id: String; let labels: [String: String]; let department: String }
+        struct Dept: Decodable { let id: String; let color: String }
+        struct R: Decodable { let roles: [Role]; let departments: [Dept]; let neutralColor: String }
         if let d = try? Data(contentsOf: res.appending(path: "catalog/task-types.json")),
            let t = try? JSONDecoder().decode(T.self, from: d) {
             taskTypes = Dictionary(uniqueKeysWithValues: t.taskTypes.map { ($0.id, $0.labels) })
         }
+        var neutral = "#D1D5DB"
         if let d = try? Data(contentsOf: res.appending(path: "catalog/roles.json")),
            let r = try? JSONDecoder().decode(R.self, from: d) {
             roles = Dictionary(uniqueKeysWithValues: r.roles.map { ($0.id, $0.labels) })
+            roleDepartment = Dictionary(uniqueKeysWithValues: r.roles.map { ($0.id, $0.department) })
+            departmentColor = Dictionary(uniqueKeysWithValues: r.departments.map { ($0.id, $0.color) })
+            neutral = r.neutralColor
         }
+        neutralColor = neutral
         let pref = UserDefaults.standard.string(forKey: "language") ?? Locale.preferredLanguages.first ?? "en"
         locale = pref.hasPrefix("zh") ? "zh-TW" : "en"
     }
 
     func taskType(_ id: String) -> String { taskTypes[id]?[locale] ?? taskTypes[id]?["en"] ?? id }
     func role(_ id: String) -> String { roles[id]?[locale] ?? roles[id]?["en"] ?? id }
+    func department(ofRole id: String) -> String? { roleDepartment[id] }
+    /// The outfit color for a role: its department's color.
+    func color(forRole id: String?) -> String {
+        id.flatMap { roleDepartment[$0] }.flatMap { departmentColor[$0] } ?? neutralColor
+    }
+    func color(department: String?) -> String { department.flatMap { departmentColor[$0] } ?? neutralColor }
+    var operatorColor: String { departmentColor["background"] ?? "#FF6B00" }
 
-    var chiefOfStaff: String { locale == "zh-TW" ? "幕僚長" : "Chief of Staff" }
-    var ceo: String { locale == "zh-TW" ? "執行長" : "CEO" }
-    var dispatcher: String { locale == "zh-TW" ? "調度員" : "Dispatcher" }
-    var inspector: String { locale == "zh-TW" ? "稽核員" : "Inspector" }
-    var returned: String { locale == "zh-TW" ? "退回" : "Returned" }
-    var executive: String { locale == "zh-TW" ? "執行辦公室" : "Executive office" }
-    var ring: String { locale == "zh-TW" ? "鈴鈴" : "Ring ring" }
+    func t(_ en: String, _ zh: String) -> String { locale == "zh-TW" ? zh : en }
+    var chiefOfStaff: String { t("Chief of Staff", "幕僚長") }
+    var ceo: String { t("CEO", "執行長") }
+    var dispatcher: String { t("Dispatcher", "調度員") }
+    var inspector: String { t("Inspector", "稽核員") }
+    var returned: String { t("Returned", "退回") }
+    var executive: String { t("Executive office", "執行辦公室") }
+    var ring: String { t("Ring ring", "鈴鈴") }
+    var staff: String { t("Staff", "職員") }
+    var operatorName: String { t("Operator", "作業員") }
+    var needsApproval: String { t("Needs approval", "待核准") }
+    var report: String { t("Report", "報告") }
+    var failed: String { t("Failed", "失敗") }
+    var result: String { t("Result", "結果") }
+    var tipArrows: String { t("Move the CEO with the arrow keys ← ↑ ↓ →", "用方向鍵 ← ↑ ↓ → 移動執行長") }
+    var tipHome: String { t("Press H to send the CEO back to the desk", "按 H 讓執行長回到座位") }
 }

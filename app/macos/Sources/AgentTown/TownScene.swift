@@ -3,138 +3,15 @@ import Combine
 import RealityKit
 import TownCore
 
-/// One character on screen, with its own queue of story actions (spec: timing rules).
-@MainActor
-final class Actor {
-    enum Kind { case ceo, dispatcher, inspector, chief }
-
-    let id: String
-    let kind: Kind
-    let body: CharacterEntity
-    let block: String
-    var name: String
-    var hat: String?
-    var ticketText: String?
-    var bubble: String?
-    var model: String?
-    var working = false
-    var activity: String?
-    /// The telephone (or the Dispatcher's radio) this character uses.
-    var phone: Phone?
-    /// True while on a call, so a second call waits for the line.
-    var onCall = false
-    /// The round shadow under the feet, kept flat on the floor.
-    var shadow: Entity?
-    private var queue: [() async -> Void] = []
-    private var running = false
-
-    init(id: String, kind: Kind, body: CharacterEntity, block: String, name: String) {
-        self.id = id; self.kind = kind; self.body = body; self.block = block; self.name = name
-    }
-
-    var root: Entity { body.root }
-    var spot: SIMD2<Float> { [root.position.x, root.position.z] }
-
-    /// A point `above` meters over the top of the head, following the character's lean.
-    func head(above: Float = 0) -> SIMD3<Float> {
-        root.position(relativeTo: nil) + TownScene.lean.act([0, 0.67 * Layout.characterScale + above, 0])
-    }
-
-    /// Story actions play one after another, each at full length.
-    func enqueue(_ action: @escaping () async -> Void) {
-        queue.append(action)
-        guard !running else { return }
-        running = true
-        Task { @MainActor in
-            while !queue.isEmpty {
-                let next = queue.removeFirst()
-                await next()
-            }
-            running = false
-        }
-    }
-
-    var isBusy: Bool { running }
-
-    /// The looping clip for standing at the desk.
-    func settle() {
-        guard !onCall else { return }
-        if working {
-            switch activity {
-            case "read": body.play("holding-both")
-            case "shell": body.play("interact-left")
-            case "web", "mcp": body.play("holding-right")
-            default: body.play("interact-right")
-            }
-        } else {
-            body.play("idle")
-        }
-    }
-}
-
-/// A desk telephone (or a radio): the device on the desk and the part that is lifted to the ear.
-@MainActor
-final class Phone {
-    let device: Entity
-    let handset: Entity
-    private let rest: Transform
-    var ringing = false
-
-    init(device: Entity, handset: Entity) {
-        self.device = device
-        self.handset = handset
-        rest = handset.transform
-    }
-
-    /// The top of the device, for the ring label.
-    var anchor: SIMD3<Float> { device.position(relativeTo: nil) + [0, 0.12, 0] }
-
-    func ring(seconds: Double) async {
-        ringing = true
-        let base = device.transform
-        let steps = Int(seconds / 0.1)
-        for i in 0..<steps {
-            var t = base
-            t.rotation = base.rotation * simd_quatf(angle: (i % 2 == 0 ? 0.18 : -0.18), axis: [0, 1, 0])
-            device.move(to: i == steps - 1 ? base : t, relativeTo: device.parent, duration: 0.09)
-            try? await Task.sleep(for: .seconds(0.1))
-        }
-        device.transform = base
-        ringing = false
-    }
-
-    /// Lifts the handset to `actor`'s ear.
-    func lift(to actor: Actor) {
-        guard let space = actor.root.parent else { return }
-        var t = Transform(matrix: handset.transformMatrix(relativeTo: space))
-        t.translation = actor.root.position + actor.root.orientation.act([0.13, 0.43, 0.06] * (Layout.characterScale / 0.75))
-        t.rotation = actor.root.orientation * simd_quatf(angle: .pi / 2, axis: [0, 0, 1])
-        handset.move(to: t, relativeTo: space, duration: 0.3)
-    }
-
-    func hangUp() {
-        handset.move(to: rest, relativeTo: handset.parent, duration: 0.3)
-    }
-}
-
-/// One office block: the executive office, or a project's office.
-@MainActor
-final class BlockNode {
-    let id: String
-    let entity = Entity()
-    var name: String
-    /// Phones on the Chief of Staff desks, by desk slot.
-    var deskPhones: [Int: Phone] = [:]
-    var placed = false
-
-    init(id: String, name: String) { self.id = id; self.name = name }
-}
-
 /// The office: blocks on one flat floor, furniture and characters, and the choreography
-/// that turns building changes into scenes (spec scenes 1, 2, 8, 9, 10 in Phase 2).
+/// that turns building changes into scenes. Staff, operators and the bench are in
+/// TownScene+Staff.swift.
 @MainActor
 final class TownScene: ObservableObject {
     static let executive = "executive"
+    /// Characters lean back toward the camera so they show their fronts on the top-down map,
+    /// the way Gather draws people standing up on a flat floor.
+    static let lean = simd_quatf(angle: -(Projector.pitch - 0.2), axis: [1, 0, 0])
 
     let root = Entity()
     let labels = Labels()
@@ -143,17 +20,33 @@ final class TownScene: ObservableObject {
     /// The office size in meters (x by z), for the camera.
     @Published private(set) var officeSize = Layout.officeSize(count: 1)
 
-    private let assets = Assets.shared
+    let assets = Assets.shared
+    /// The latest building state, for looking up roles and parents while scenes play.
+    var building = Building()
     private let ground = Entity()
     private var groundSize: SIMD2<Float> = .zero
-    private var blocks: [String: BlockNode] = [:]
+    var blocks: [String: BlockNode] = [:]
     private var blockOrder: [String] = []
     private var pendingRemoval: [String: Task<Void, Never>] = [:]
-    private var deskSlots: [String: [String: Int]] = [:] // projectId → sessionId → slot
-    private(set) var actors: [String: Actor] = [:]
+    var actors: [String: Actor] = [:]
     private var calls: [(Actor, Actor)] = []
+    /// approvalId → the character waiting.
+    var approvals: [String: Actor] = [:]
+    private var ceoRinging = false
+    var pendingCalls: [String: PendingCall] = [:]
+    var nextWorkerId = 0
     private var families: ModelFamilies?
-    private var execPhones: (ceo: Phone?, dispatcher: Phone?) = (nil, nil)
+    var execPhones: (ceo: Phone?, dispatcher: Phone?) = (nil, nil)
+
+    // The CEO under the user's control (TownScene+CEO.swift).
+    /// True while the CEO is away from the desk; the tip and the phone follow it.
+    @Published var ceoAway = false
+    /// The CEO's position on the office floor (x, z), for the camera to follow.
+    @Published var ceoSpot: SIMD2<Float> = .zero
+    var heldArrows: Set<UInt16> = []
+    var ceoDriver: Task<Void, Never>?
+    var ceoTrip: Task<Void, Never>?
+    var mobilePhone: Phone?
     private static let blockColors: [(String, String)] = [
         ("#CDD0DA", "#C3C6D1"), // gray
         ("#B9CDE6", "#AFC4DF"), // blue
@@ -177,13 +70,17 @@ final class TownScene: ObservableObject {
         let inspector = makeActor(id: "inspector", kind: .inspector, base: "male-c", outfit: nil, block: exec,
                                   name: labels.inspector, at: Layout.inspectorHome)
         ceo.phone = execPhones.ceo
+        mobilePhone = makeMobile(for: ceo)
+        ceoSpot = ceo.worldSpot
         dispatcher.phone = execPhones.dispatcher
         for a in [ceo, dispatcher, inspector] { a.body.play("idle") }
+        startBenchLife()
     }
 
     // MARK: Changes
 
     func handle(_ change: Change, building: Building) {
+        self.building = building
         switch change {
         case .blockAdded(let p):
             if let pending = pendingRemoval.removeValue(forKey: p) {
@@ -197,6 +94,7 @@ final class TownScene: ObservableObject {
             let c = Self.blockColors[(blockOrder.count - 2) % Self.blockColors.count]
             buildProjectBlock(node, colors: (NSColor(hex: c.0)!, NSColor(hex: c.1)!))
             relayout()
+            fillBench(node)
 
         case .blockRemoved(let p):
             pendingRemoval[p] = Task { @MainActor [weak self] in
@@ -204,48 +102,50 @@ final class TownScene: ObservableObject {
                 for _ in 0..<80 {
                     try? await Task.sleep(for: .milliseconds(150))
                     if Task.isCancelled { return }
-                    if self?.actors.values.contains(where: { $0.block == p }) != true { break }
+                    if self?.actors.values.contains(where: { $0.block == p && $0.kind == .chief }) != true { break }
                 }
                 guard let self, !Task.isCancelled else { return }
                 self.pendingRemoval[p] = nil
                 self.blocks.removeValue(forKey: p)?.entity.removeFromParent()
+                for (id, a) in self.actors where a.block == p { self.actors[id] = nil }
                 self.blockOrder.removeAll { $0 == p }
-                self.deskSlots[p] = nil
                 self.relayout()
+                self.ceoBackIfOfficeEmpty()
             }
 
         case .chiefArrived(let p, let s):
             guard let node = blocks[p] else { return }
             if let name = building.blocks[p]?.name { node.name = name }
-            let slot = freeSlot(p)
-            deskSlots[p, default: [:]][s] = slot
-            let chief = makeActor(id: s, kind: .chief, base: chiefBase(project: p),
+            let slot = BlockNode.free(node.chiefSlots, below: Layout.maxDesks)
+            node.chiefSlots[s] = slot
+            let chief = makeActor(id: s, kind: .chief, base: chiefBase(node),
                                   outfit: NSColor(hex: assets.characters.chiefOfStaff.color),
                                   block: node, name: labels.chiefOfStaff, at: Layout.entrance)
-            chief.phone = node.deskPhones[slot]
+            chief.home = Layout.chiefSpot(slot: slot)
+            chief.phone = node.deskPhones[slot % Layout.maxDesks]
             chief.model = building.blocks[p]?.chiefs[s]?.model
             chief.enqueue { [weak self] in
                 guard let self else { return }
-                await self.move(chief, to: Layout.chiefSpot(slot: slot))
-                self.face(chief, toward: [0, 1])
-                chief.settle()
+                await self.goHome(chief)
             }
 
         case .chiefLeft(let p, let s):
-            guard let chief = actors[s] else { return }
-            deskSlots[p]?[s] = nil
+            guard let chief = actors[s], let node = blocks[p] else { return }
+            node.chiefSlots[s] = nil
             chief.working = false
+            sessionEnded(s, in: node)
             chief.enqueue { [weak self] in
                 guard let self else { return }
-                await self.move(chief, to: Layout.entrance)
+                await self.walk(chief, to: Layout.entrance)
                 await self.move(chief, to: [Layout.entrance.x, -Layout.gap / 2])
                 chief.root.removeFromParent()
                 if self.actors[s] === chief { self.actors[s] = nil }
             }
 
-        case .ticketSubmitted(let p, let s, let ticket):
-            guard let chief = actors[s], deskSlots[p]?[s] != nil else { return }
+        case .ticketSubmitted(_, let s, let ticket):
+            guard let chief = actors[s] else { return }
             chief.hat = nil
+            chief.since = Date()
             switch ticket.origin {
             case "user", "schedule":
                 // The CEO (or the Dispatcher, for a schedule) phones the Chief of Staff with the ticket.
@@ -283,6 +183,7 @@ final class TownScene: ObservableObject {
             guard let chief = actors[s] else { return }
             chief.working = false
             chief.hat = nil
+            chief.since = nil
             if aborted {
                 // Scene 9: stop working; no report call, no sound.
                 chief.ticketText = nil
@@ -298,24 +199,55 @@ final class TownScene: ObservableObject {
                 chief.settle()
             }
 
-        case .activity(_, let s, let agentId, let kind):
-            guard agentId == nil, let chief = actors[s] else { return }
-            chief.activity = kind
-            if !chief.isBusy { chief.settle() }
+        case .activity(let p, let s, let agentId, let kind):
+            guard let a = agentId.map({ worker(p, "a:\(s)/\($0)") }) ?? actors[s] else { return }
+            a.activity = kind
+            if !a.isBusy { a.settle() }
 
-        case .model(_, let s, let agentId, let model):
-            if agentId == nil { actors[s]?.model = model }
+        case .model(let p, let s, let agentId, let model):
+            (agentId.map { worker(p, "a:\(s)/\($0)") } ?? actors[s])?.model = model
 
-        default:
-            break // staff, operators, schedules, approvals and messages arrive in Phases 3 and 4
+        case .staffHired(let p, let s, let agentId):
+            hire(p, s, job: "a:\(s)/\(agentId)")
+        case .staffRole(let p, let s, let agentId, let role):
+            roleDecided(p, job: "a:\(s)/\(agentId)", role: role)
+        case .staffDone(let p, let s, let agentId, let status):
+            jobDone(p, job: "a:\(s)/\(agentId)", status: status)
+        case .taskStarted(let p, let s, let taskId):
+            hire(p, s, job: "t:\(s)/\(taskId)")
+        case .taskRole(let p, let s, let taskId, let role):
+            roleDecided(p, job: "t:\(s)/\(taskId)", role: role)
+        case .taskDone(let p, let s, let taskId, let status):
+            jobDone(p, job: "t:\(s)/\(taskId)", status: status)
+
+        case .approvalWait(let p, let s, let id, let agentId):
+            guard let a = agentId.flatMap({ worker(p, "a:\(s)/\($0)") }) ?? actors[s] else { return }
+            approvals[id] = a
+            a.awaitingApproval = true
+            if !a.isBusy { a.settle() }
+            onSound?("approval")
+            ringCeoForApprovals()
+
+        case .approvalEnd(_, _, let id, _):
+            guard let a = approvals.removeValue(forKey: id) else { return }
+            if !approvals.values.contains(where: { $0 === a }) {
+                a.awaitingApproval = false
+                if !a.isBusy { a.settle() }
+            }
+
+        case .message(let p, let s, let from, let to, let broadcast):
+            message(p, s, from: from, to: to, broadcast: broadcast)
+
+        case .scheduleAdded, .scheduleRemoved:
+            break // the Dispatcher's board comes in Phase 4
         }
     }
 
-    // MARK: Calls and motion
+    // MARK: Calls
 
     /// A phone call. The caller lifts the handset, the other phone rings and is answered,
     /// they talk, and the ticket (the caller's, or `text`) passes to the callee.
-    private func call(from caller: Actor, to callee: Actor, carrying text: String?) async {
+    func call(from caller: Actor, to callee: Actor, carrying text: String?) async {
         while caller.onCall || callee.onCall { try? await Task.sleep(for: .milliseconds(150)) }
         guard let out = caller.phone, let inn = callee.phone else { return }
         caller.onCall = true
@@ -328,6 +260,7 @@ final class TownScene: ObservableObject {
         caller.body.play("holding-right")
         calls.append((caller, callee))
 
+        while inn.ringing { try? await Task.sleep(for: .milliseconds(100)) } // an approval ring in progress
         await inn.ring(seconds: 1.2)
         callee.body.play("interact-right", loop: false)
         try? await Task.sleep(for: .seconds(0.35))
@@ -346,9 +279,31 @@ final class TownScene: ObservableObject {
         callee.onCall = false
         caller.settle()
         callee.settle()
+        syncCeoPhone()
     }
 
-    private func move(_ a: Actor, to p: SIMD2<Float>, speed: Float = Layout.walkSpeed) async {
+    /// The CEO's phone rings while any tool call waits for approval (spec scene 6).
+    private func ringCeoForApprovals() {
+        guard !ceoRinging, let ceo = actors["ceo"] else { return }
+        ceoRinging = true
+        Task { @MainActor in
+            while !approvals.isEmpty {
+                // The desk phone, or the mobile while the CEO is away.
+                if !ceo.onCall, let phone = ceo.phone { await phone.ring(seconds: 1.0) }
+                try? await Task.sleep(for: .seconds(0.6))
+            }
+            ceoRinging = false
+            if !ceo.onCall && !ceo.isBusy && !ceo.steering {
+                ceo.body.play("emote-yes", loop: false)
+                try? await Task.sleep(for: .seconds(0.8))
+                if !ceo.onCall { ceo.settle() }
+            }
+        }
+    }
+
+    // MARK: Motion
+
+    func move(_ a: Actor, to p: SIMD2<Float>, speed: Float = Layout.walkSpeed) async {
         let from = a.spot
         let d = simd_distance(from, p)
         guard d > 0.01 else { return }
@@ -359,14 +314,23 @@ final class TownScene: ObservableObject {
         let seconds = Double(d / speed)
         a.root.move(to: t, relativeTo: a.root.parent, duration: seconds, timingFunction: .linear)
         try? await Task.sleep(for: .seconds(seconds))
+    }
+
+    /// Walks inside the block along the walkways.
+    func walk(_ a: Actor, to dest: SIMD2<Float>) async {
+        a.sitting = false
+        for p in Layout.route(a.spot, dest) { await move(a, to: p) }
         a.body.play("idle")
     }
 
-    /// Characters lean back toward the camera so they show their fronts on the top-down map,
-    /// the way Gather draws people standing up on a flat floor.
-    static let lean = simd_quatf(angle: -(Projector.pitch - 0.2), axis: [1, 0, 0])
+    /// Walks to the character's own spot and settles there.
+    func goHome(_ a: Actor) async {
+        await walk(a, to: a.home)
+        face(a, toward: a.homeFacing)
+        a.settle()
+    }
 
-    private func face(_ a: Actor, toward dir: SIMD2<Float>) {
+    func face(_ a: Actor, toward dir: SIMD2<Float>) {
         guard simd_length(dir) > 0.001 else { return }
         a.root.orientation = Self.lean * simd_quatf(angle: atan2(dir.x, dir.y), axis: [0, 1, 0])
         a.shadow?.orientation = a.root.orientation.inverse
@@ -374,8 +338,8 @@ final class TownScene: ObservableObject {
 
     // MARK: Building
 
-    private func makeActor(id: String, kind: Actor.Kind, base: String, outfit: NSColor?, block: BlockNode, name: String,
-                           at spot: SIMD2<Float>) -> Actor {
+    func makeActor(id: String, kind: Actor.Kind, base: String, outfit: NSColor?, block: BlockNode, name: String,
+                   at spot: SIMD2<Float>) -> Actor {
         let body = (try? assets.character(base, outfit: outfit)) ?? CharacterEntity(model: Entity(), clips: [:])
         body.root.position = [spot.x, Layout.floorThickness, spot.y]
         body.model.scale = SIMD3(repeating: Layout.characterScale)
@@ -388,24 +352,19 @@ final class TownScene: ObservableObject {
         blob.position.y = 0.003
         body.root.addChild(blob)
         block.entity.addChild(body.root)
-        let a = Actor(id: id, kind: kind, body: body, block: block.id, name: name)
+        let a = Actor(id: id, kind: kind, body: body, block: block.id, name: name, home: spot)
         a.shadow = blob
         face(a, toward: [0, 1])
         actors[id] = a
         return a
     }
 
-    private func freeSlot(_ p: String) -> Int {
-        let used = Set(deskSlots[p]?.values.map { $0 } ?? [])
-        return (0..<Layout.maxDesks).first { !used.contains($0) } ?? 0
-    }
-
     /// Chiefs of Staff in one block get different base characters.
-    private func chiefBase(project p: String) -> String {
+    private func chiefBase(_ node: BlockNode) -> String {
         let excluded = Set(assets.characters.chiefOfStaff.exclude)
         let all = assets.characters.characters.keys.sorted().filter { !excluded.contains($0) }
-        let inBlock = Set((deskSlots[p] ?? [:]).keys.compactMap { actors[$0]?.body.baseName })
-        let start = abs(p.hashValue) % all.count
+        let inBlock = Set(node.chiefSlots.keys.compactMap { actors[$0]?.body.baseName })
+        let start = abs(node.id.hashValue) % all.count
         for i in 0..<all.count {
             let c = all[(start + i) % all.count]
             if !inBlock.contains(c) { return c }
@@ -445,7 +404,7 @@ final class TownScene: ObservableObject {
         root.addChild(fill)
     }
 
-    private static func box(_ size: SIMD3<Float>, _ color: NSColor, at p: SIMD3<Float>) -> ModelEntity {
+    static func box(_ size: SIMD3<Float>, _ color: NSColor, at p: SIMD3<Float>) -> ModelEntity {
         let e = ModelEntity(mesh: .generateBox(size: size, cornerRadius: min(0.01, size.min() / 3)),
                             materials: [SimpleMaterial(color: color, roughness: 0.8, isMetallic: false)])
         e.position = p
@@ -524,6 +483,10 @@ final class TownScene: ObservableObject {
         let b = e.visualBounds(relativeTo: f)
         let floorY = base.map { $0.visualBounds(relativeTo: f).max.y } ?? Layout.floorThickness
         e.position = [p.x - b.center.x, floorY - b.min.y, p.y - b.center.z]
+        if base == nil, !name.hasPrefix("rug"), let node = blocks.values.first(where: { $0.entity === f }) {
+            let fb = e.visualBounds(relativeTo: f)
+            node.obstacles.append((min: [fb.min.x, fb.min.z], max: [fb.max.x, fb.max.z]))
+        }
         return e
     }
 
@@ -555,11 +518,14 @@ final class TownScene: ObservableObject {
         // Reception, where the Inspector stands.
         place("kitchenBar", in: f, at: [Layout.receptionDesk.x - 0.19, Layout.receptionDesk.y])
         place("kitchenBar", in: f, at: [Layout.receptionDesk.x + 0.19, Layout.receptionDesk.y])
-        place("plantSmall1", in: f, at: [0.35, 3.6])
-        place("loungeChair", in: f, at: [1.0, 3.3])
+        place("plantSmall1", in: f, at: [0.35, 5.0])
+        place("loungeChair", in: f, at: [1.1, 4.4])
+        place("loungeChair", in: f, at: [1.9, 4.4])
+        place("tableCoffee", in: f, at: [1.5, 4.95], scale: 0.8)
         // The Dispatcher's desk with the radio, and the schedule board behind.
         f.addChild(Self.box([1.5, 0.55, 0.04], NSColor(hex: "#2E5244")!, at: [Layout.boardCenter.x, 0.42, Layout.boardCenter.y]))
         f.addChild(Self.box([1.6, 0.05, 0.05], NSColor(hex: "#7A5A3A")!, at: [Layout.boardCenter.x, 0.16, Layout.boardCenter.y]))
+        node.obstacles.append((min: Layout.boardCenter - [0.8, 0.05], max: Layout.boardCenter + [0.8, 0.05]))
         if let desk = place("desk", in: f, at: Layout.dispatcherDesk),
            let radio = place("radio", in: f, at: [Layout.dispatcherDesk.x + 0.25, Layout.dispatcherDesk.y], onTopOf: desk) {
             // The radio is lifted whole; a holder stays on the desk.
@@ -570,55 +536,90 @@ final class TownScene: ObservableObject {
             holder.addChild(radio)
             execPhones.dispatcher = Phone(device: holder, handset: radio)
         }
-        place("pottedPlant", in: f, at: [5.75, 0.3])
-        place("plantSmall1", in: f, at: [5.7, 3.6])
+        place("pottedPlant", in: f, at: [6.75, 0.3])
+        place("plantSmall1", in: f, at: [6.7, 5.0])
+        place("bookcaseOpen", in: f, at: [6.4, 3.3], yaw: -.pi / 2)
     }
 
     private func buildProjectBlock(_ node: BlockNode, colors: (NSColor, NSColor)) {
         let f = node.entity
         floor(node, colors: colors)
-        // Chief of Staff desks, each with a telephone.
         for slot in 0..<Layout.maxDesks {
             let x = Layout.deskX(slot: slot)
-            guard let desk = place("desk", in: f, at: [x, Layout.deskRowZ]) else { continue }
-            place("computerScreen", in: f, at: [x - 0.1, Layout.deskRowZ - 0.05], scale: 0.8, onTopOf: desk)
-            node.deskPhones[slot] = telephone(in: f, at: [x + 0.28, Layout.deskRowZ + 0.02], on: desk)
+            // Chief of Staff desks, each with a telephone.
+            if let desk = place("desk", in: f, at: [x, Layout.chiefDeskZ]) {
+                place("computerScreen", in: f, at: [x - 0.1, Layout.chiefDeskZ - 0.05], scale: 0.8, onTopOf: desk)
+                node.deskPhones[slot] = telephone(in: f, at: [x + 0.28, Layout.chiefDeskZ + 0.02], on: desk)
+            }
+            // Staff desks.
+            if let desk = place("desk", in: f, at: [x, Layout.staffDeskZ]) {
+                place("laptop", in: f, at: [x, Layout.staffDeskZ - 0.03], onTopOf: desk)
+            }
         }
-        // Machine room (front left) for operators.
-        f.addChild(Self.box([2.6, 0.006, 1.3], NSColor(hex: "#7D8590")!, at: [1.5, Layout.floorThickness + 0.003, 3.05]))
-        for i in 0..<4 { place("speaker", in: f, at: [0.6 + Float(i) * 0.55, 2.6], scale: 1.4) }
+        // Machine room (front left): racks along the back, for operators.
+        f.addChild(Self.box([3.3, 0.006, 1.95], NSColor(hex: "#7D8590")!, at: [1.8, Layout.floorThickness + 0.003, 4.275]))
+        for i in 0..<Layout.consoles {
+            place("speaker", in: f, at: [Layout.rackX(i) - 0.15, Layout.rackZ], scale: 1.4)
+            place("speaker", in: f, at: [Layout.rackX(i) + 0.15, Layout.rackZ], scale: 1.4)
+        }
         // Resource bench (front right): a lounge.
-        place("rugRound", in: f, at: [4.6, 3.0])
-        place("loungeSofaLong", in: f, at: [4.6, 2.55])
-        place("tableCoffee", in: f, at: [4.6, 3.15])
-        place("pottedPlant", in: f, at: [5.75, 0.3])
+        place("rugRound", in: f, at: Layout.benchCenter, scale: 1.3)
+        place("loungeSofaLong", in: f, at: [Layout.benchCenter.x, 3.5])
+        place("tableCoffee", in: f, at: [Layout.benchCenter.x, 4.3])
+        place("kitchenCoffeeMachine", in: f, at: [6.75, 3.45])
+        place("pottedPlant", in: f, at: [6.75, 5.1])
+        place("pottedPlant", in: f, at: [6.75, 0.3])
     }
 
     // MARK: Labels
 
     struct LabelItem {
-        enum Style { case name, hat, ticket, bubble, badge, sign, ring }
+        enum Style { case name, faint, hat, ticket, bubble, badge, sign, ring, speech, statement }
         let id: String
         let anchor: SIMD3<Float>
         let lines: [(String, Style)]
     }
 
-    /// Lines between the two ends of each call in progress.
+    /// Lines between the two ends of each call in progress, and from each character
+    /// waiting for approval to the CEO.
     func callLines() -> [(SIMD3<Float>, SIMD3<Float>)] {
-        calls.map { (a, b) in (a.head(above: -0.15), b.head(above: -0.15))
+        var out = calls.map { (a, b) in (a.head(above: -0.15), b.head(above: -0.15)) }
+        if let ceo = actors["ceo"] {
+            for a in Set(approvals.values.map(\.id)).compactMap({ actors[$0] }) {
+                out.append((a.head(above: -0.15), ceo.head(above: -0.15)))
+            }
         }
+        return out
     }
 
     func labelItems() -> [LabelItem] {
         var items: [LabelItem] = []
+        let touched = touchedByCeo()
         for a in actors.values {
             var lines: [(String, LabelItem.Style)] = []
+            if a.speaking { lines.append(("• • •", .speech)) }
+            if a.awaitingApproval { lines.append((labels.needsApproval, .ring)) }
             if let b = a.bubble { lines.append((b, .bubble)) }
-            if let h = a.hat { lines.append((h, .hat)) }
+            // The hat shows only while no staff are working (spec: hats).
+            if let h = a.hat, !hasWorkingStaff(a) { lines.append((h, .hat)) }
             if let t = a.ticketText { lines.append((String(t.prefix(28)) + (t.count > 28 ? "…" : ""), .ticket)) }
-            if showModelBadges, let m = a.model { lines.append((families?.label(for: m) ?? m, .badge)) }
-            lines.append((a.name, .name))
-            items.append(LabelItem(id: a.id, anchor: a.head(above: 0.04), lines: lines))
+            if showModelBadges, a.kind == .chief || a.job?.hasPrefix("a:") == true, let m = a.model {
+                lines.append((families?.label(for: m) ?? m, .badge))
+            }
+            if a.kind == .worker {
+                if a.job != nil {
+                    lines.append((a.role.map(labels.role) ?? (a.isOperator ? labels.operatorName : labels.staff), .name))
+                } else if let r = a.role {
+                    lines.append((labels.role(r), .faint))
+                }
+            } else {
+                lines.append((a.name, .name))
+            }
+            if a === touched {
+                // Touched by the CEO: the character says how its work is going.
+                lines = [(statement(for: a), .statement)] + lines.filter { $0.1 == .name || $0.1 == .faint }
+            }
+            if !lines.isEmpty { items.append(LabelItem(id: a.id, anchor: a.head(above: 0.04), lines: lines)) }
             if let phone = a.phone, phone.ringing {
                 items.append(LabelItem(id: "ring-\(a.id)", anchor: phone.anchor, lines: [(labels.ring, .ring)]))
             }

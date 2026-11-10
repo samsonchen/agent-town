@@ -49,14 +49,20 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - [ ] Settings window (threshold, sounds, ticket text, badges, language); Cubic 11 font
 - [ ] An `.app` bundle (the package runs as a bare executable for now)
 
-## Phase 3: staff
+## Phase 3: staff (mostly done)
 
-- Resource bench: idle animations, calling from the bench, return to the bench (scenes 4, 7)
-- Staff roles, desks, report back, failure (scenes 4, 7)
-- Agent-to-agent messages (scene 16)
-- Activities (scene 5)
-- Approval call and approval sound (scene 6)
-- Operators: background tasks, machine room, follow-up tickets, background roles by rule (scenes 11, 12)
+- [x] Resource bench: a mixed bench in each new block, calling from the bench (one trip for hires within a second, waiting up to 3 seconds for roles, the picking order), return to the bench with a faint name tag, the longest-waiting leave when the bench is full (scenes 4, 7)
+- [x] Staff roles and department outfit colors, staff desks (hot desks past five), report back to whoever started the job, "Failed" reports (scenes 4, 7)
+- [x] Agent-to-agent messages: the sender walks over and both show a speech bubble (scene 16)
+- [x] Activities for the Chief of Staff and staff (scene 5)
+- [x] Approval: the waiting character shows "Needs approval", a line runs to the CEO, and the CEO's phone rings until it is answered; approval sound (scene 6)
+- [x] Operators in safety orange at the machine room racks; results back to the Chief of Staff; killed tasks leave with no result (scenes 11, 12)
+- [x] Walkways: characters walk along the walkways and between desks, not through them
+- [ ] Props in hand (laptop, clipboard, stopwatch …) and a looping animation per background role
+- [ ] More idle life on the bench (coffee, magazine, darts); sitting on the sofa
+- [ ] Workflow subagents report to the workflow coordinator (Phase 0 item 16)
+- [ ] Name tags that move apart when characters stand close together
+- [x] Walking the CEO with the arrow keys, H to go back to the desk, a closable tip, the view following the CEO, a mobile phone away from the desk, and status statements from the character the CEO stands next to
 
 ## Phase 4: the whole office
 

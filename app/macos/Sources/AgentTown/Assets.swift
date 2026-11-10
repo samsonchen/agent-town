@@ -57,25 +57,34 @@ final class Assets {
         guard let info = characters.characters[base] else { throw CocoaError(.fileNoSuchFile) }
         let model = try cached("models/characters/\(info.model).usdz").clone(recursive: true)
         model.name = base
-        if let outfit {
-            let tex = try texture(for: base, cells: info.shirt, color: outfit)
-            model.forEachModel { entity in
-                guard var mc = entity.components[ModelComponent.self] else { return }
-                mc.materials = mc.materials.map { m in
-                    if var pbr = m as? PhysicallyBasedMaterial {
-                        pbr.baseColor.texture = .init(tex)
-                        return pbr
-                    }
-                    if var unlit = m as? UnlitMaterial {
-                        unlit.color.texture = .init(tex)
-                        return unlit
-                    }
-                    return m
-                }
-                entity.components.set(mc)
-            }
-        }
+        if let outfit { try dress(model, base: base, color: outfit) }
         return CharacterEntity(model: model, clips: clips[info.model] ?? [:])
+    }
+
+    /// Changes a character's outfit color (a staff member changing into a role's department color).
+    func dress(_ body: CharacterEntity, color: NSColor) {
+        guard let base = body.model.name.isEmpty ? nil : body.model.name else { return }
+        try? dress(body.model, base: base, color: color)
+    }
+
+    private func dress(_ model: Entity, base: String, color: NSColor) throws {
+        guard let info = characters.characters[base] else { return }
+        let tex = try texture(for: base, cells: info.shirt, color: color)
+        model.forEachModel { entity in
+            guard var mc = entity.components[ModelComponent.self] else { return }
+            mc.materials = mc.materials.map { m in
+                if var pbr = m as? PhysicallyBasedMaterial {
+                    pbr.baseColor.texture = .init(tex)
+                    return pbr
+                }
+                if var unlit = m as? UnlitMaterial {
+                    unlit.color.texture = .init(tex)
+                    return unlit
+                }
+                return m
+            }
+            entity.components.set(mc)
+        }
     }
 
     /// The colormap with the given cells tinted to `color`, keeping each pixel's shading.

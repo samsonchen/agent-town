@@ -20,7 +20,9 @@ final class TownApp: ObservableObject {
             self.scene.handle(change, building: self.store.building)
         }
         scene.onSound = { name in
-            guard UserDefaults.standard.object(forKey: "completionSound") as? Bool ?? true else { return }
+            // Each sound has its own on/off setting (spec: sounds). System sounds for now.
+            let key = name == "completion" ? "completionSound" : "approvalSound"
+            guard UserDefaults.standard.object(forKey: key) as? Bool ?? true else { return }
             NSSound(named: name == "completion" ? "Glass" : "Ping")?.play()
         }
         let thresh = UserDefaults.standard.object(forKey: "completionThreshold") as? Double ?? 30
@@ -53,9 +55,11 @@ struct AgentTownApp: App {
             if CommandLine.arguments.contains("--spike") {
                 SpikeView().frame(minWidth: 900, minHeight: 600)
             } else {
-                TownView(scene: town.scene).frame(minWidth: 900, minHeight: 600)
+                TownView(scene: town.scene).frame(minWidth: 640, minHeight: 480)
             }
         }
+        // Opens at the size of the executive office alone; project blocks come with tasks.
+        .defaultSize(width: 1000, height: 740)
         MenuBarExtra("agent-town", systemImage: "building.2") {
             Toggle("Pause", isOn: Binding(get: { town.store.paused }, set: { town.store.paused = $0 }))
             Divider()

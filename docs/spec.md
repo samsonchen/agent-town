@@ -26,16 +26,16 @@ Every piece of work starts with a ticket, and every ticket has an issuer. The re
 
 - The view is an office seen from above, like a Gather Town map. The floor plan is flat and 2D: blocks of tiled carpet on a cream path, with no walls or doors. The characters and furniture are low-poly 3D (an orthographic camera tilted a little from straight down; characters lean toward the camera so they show their fronts). Characters and furniture come from Kenney's CC0 packs (Mini Characters, Furniture Kit); see [roles.md](roles.md) and [distribution.md](distribution.md). The reference for the feel is Gather Town; no Gather Town assets are used.
 - **One block per project.** All sessions in the same project share that block. Blocks sit side by side with paths between them, and wrap into a grid as projects are added.
-- **As few blocks as possible.** With no project running, the office is the executive block alone; with one project, it is two blocks. A project's block is removed when its last session ends.
+- **As few blocks as possible.** With no task running, the office is the executive block alone, and the window opens at that size. A session that is open but has not started any work stays off-screen; its project's block and its Chief of Staff appear with its first task. With one project at work, the office is two blocks. A project's block is removed when its last session ends.
 - **Several sessions in one project** put several Chiefs of Staff in the same block. Each one has its own desk, telephone and staff.
 - **The executive block** is always first. It has three areas:
-  - the CEO's desk, with a telephone. The CEO stays at the desk and does not walk anywhere;
+  - the CEO's desk, with a telephone. The CEO stays at the desk unless the user walks the CEO around (see "Walking the CEO" below);
   - the Dispatcher's desk, with a radio and a board that shows one card for each active schedule, labeled with the project name;
   - the reception desk, where the Inspector stands.
-- **Telephones** carry tickets and reports. The CEO phones a Chief of Staff with a ticket, and a Chief of Staff phones the CEO with the report. During a call both people hold the handset, the other phone rings first, and a dashed line joins the two.
+- **Telephones** carry tickets and reports. The CEO phones a Chief of Staff with a ticket, and a Chief of Staff phones the CEO with the report. During a call both people hold the handset, the other phone rings first, and a dashed line joins the two. When the CEO is away from the desk, the CEO's calls use a mobile phone instead.
 - **Each project block has a machine room** in one corner, with consoles and server racks. Operators work there, apart from the staff desks.
 - **Each project block has a resource bench** (待命室): a lounge where staff and operators wait between jobs. See "Resource bench" below.
-- The whole office is visible at once. There are no tabs. When it does not fit in the window, the view pans with the scroll wheel or trackpad.
+- The whole office is visible at once. There are no tabs. When it does not fit in the window, the view pans with the scroll wheel or trackpad, and it follows the CEO when the user walks the CEO around.
 - The user sets the window size, the block size (number of desks per block), and the bench size (number of characters waiting on each bench). When a block has more staff than desks, the extra staff use hot desks or the meeting room.
 - Each block shows a sign with the project name.
 
@@ -45,7 +45,7 @@ Each scene below is triggered by a Claude Code event. The event mapping is in [a
 
 | # | Trigger | What happens |
 |---|---|---|
-| 1 | Session starts | A Chief of Staff walks in from the path to a desk in the project's block (the block is created if it is new). |
+| 1 | Session starts its first task | A Chief of Staff walks in from the path to a desk in the project's block (the block is created if it is new). A session that has only opened shows nothing yet. |
 | 2 | User submits a prompt | The CEO phones that session's Chief of Staff. The Chief of Staff's phone rings and is answered, and the ticket passes from the CEO to the Chief of Staff over the call. |
 | 3 | Main agent works with no subagents active | The Chief of Staff works at the desk and wears a hat showing the task type (see "Hats"). |
 | 4 | A subagent starts | The Chief of Staff walks to the resource bench and calls a waiting character (see "Resource bench"). The Chief of Staff hands them a smaller ticket there. The character walks to a free desk and starts work. The name tag shows the role. If no role is decided yet when the character leaves the bench, they keep a neutral outfit until it is. |
@@ -63,6 +63,17 @@ Each scene below is triggered by a Claude Code event. The event mapping is in [a
 | 16 | One agent sends a message to another | The sender walks to the receiver's desk, a speech bubble shows over both for a moment, and the sender walks back. This applies to staff and agent-team teammates messaging each other, to the Chief of Staff messaging a staff member, and to a staff member messaging the Chief of Staff. The bubble shows no message text. |
 
 Scene 15 happens when a Stop hook, such as a check that tests pass or a rule that a to-do list must be finished, refuses to let the main agent end its turn. To the user, the task is still running. The Inspector makes that visible. For a subagent held back by its own Stop hook, the Chief of Staff hands the staff member's report back at the desk instead.
+
+### Walking the CEO
+
+The user can walk the CEO around the office with the arrow keys, for fun and to look at blocks that do not fit in the window.
+
+- The CEO walks around furniture and stays on the office floor. Diagonal keys can be held together. The view pans to keep the CEO in sight.
+- A tip at the top of the window says "Move the CEO with the arrow keys" (「用方向鍵 ← ↑ ↓ → 移動執行長」). While the CEO is away from the desk, it says "Press H to send the CEO back to the desk" (「按 H 讓執行長回到座位」). Each tip has a close button. A closed arrow-keys tip stays closed; the H tip shows again each time the CEO walks away from the seat.
+- H walks the CEO back to the desk, around the furniture. An arrow key during that walk takes control back.
+- When the last project block is removed and only the executive office is left, the CEO walks back to the desk by itself. If the CEO was in a block that went away, the view moves to the executive office and the CEO walks in from the nearest edge of it. If a block is removed while other blocks remain, the CEO can walk back onto the floor from where it was.
+- Away from the desk, the CEO holds a mobile phone. Calls with the Chiefs of Staff, and the ringing for approvals, go to the mobile, and the CEO can keep walking during a call. While the CEO is on the desk phone, the CEO stays at the desk until the call ends.
+- **Talking to a character.** When the CEO stands next to a character (within about a meter, across a desk counts), that character's tags change to a short statement about its work, in its own words. For example, a Chief of Staff says what ticket it is on, for how long, the task type, how many staff and operators are helping, and what it is doing right now. A staff member gives its role, its job and how long it has been at it. An operator says what it is running in the background. A character on the bench says it is waiting, and its last role. Characters waiting for approval say which tool needs it. The Dispatcher talks about the schedules, and the Inspector about returned tickets. Only the nearest character talks.
 
 ### Resource bench
 

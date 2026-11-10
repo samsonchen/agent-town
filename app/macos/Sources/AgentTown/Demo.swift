@@ -40,6 +40,23 @@ enum Demo {
         renderer.activeCamera = camera
         renderer.cameraSettings.colorBackground = .color(CGColor(srgbRed: 0.93, green: 0.93, blue: 0.95, alpha: 1))
 
+        // TOWN_CEO_GOTO="x,z;x,z@seconds": walk the CEO to office points, for checking the walk.
+        if let spec = ProcessInfo.processInfo.environment["TOWN_CEO_GOTO"] {
+            let parts = spec.split(separator: "@")
+            let delay = parts.count > 1 ? Double(parts[1]) ?? 1 : 1
+            let goals = parts[0].split(separator: ";").compactMap { pair -> SIMD2<Float>? in
+                let v = pair.split(separator: ",").compactMap { Float($0) }
+                return v.count == 2 ? [v[0], v[1]] : nil
+            }
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(delay))
+                for g in goals {
+                    scene.walkCeo(to: g)
+                    while scene.ceoTrip != nil { try? await Task.sleep(for: .milliseconds(50)) }
+                }
+            }
+        }
+
         // Advance the scene in real time so queued scenes and animations play.
         let start = Date()
         while Date().timeIntervalSince(start) < seconds {
@@ -70,7 +87,8 @@ enum Demo {
                 if depth < 2 { e.children.forEach { walk($0, depth + 1) } }
             }
             walk(scene.root, 0)
-            for a in scene.actors.values { print("actor", a.id, a.body.baseName ?? "-", a.root.position(relativeTo: nil)) }
+            for a in scene.actors.values { print("actor", a.id, a.body.baseName ?? "-", a.root.position(relativeTo: nil), "local", a.spot, "home", a.home) }
+            for b in scene.blocks.values { print("block", b.id, b.entity.position(relativeTo: nil)) }
         }
         let w = tex.width, h = tex.height
         var bytes = [UInt8](repeating: 0, count: w * h * 4)
@@ -105,17 +123,29 @@ enum Demo {
         for item in items {
             let p = projector.screen(item.anchor)
             let isSign = item.lines.first?.1 == .sign
-            var y = height - p.y + (isSign ? 9 : CGFloat(item.lines.count) * 19 + 2)
-            for (text, style) in item.lines {
-                let font = NSFont.systemFont(ofSize: style == .sign ? 13 : 10.5, weight: style == .name || style == .sign ? .semibold : .regular)
-                let fg = NSColor(Tag.foreground(style))
-                let s = NSAttributedString(string: text, attributes: [.font: font, .foregroundColor: fg])
-                let size = s.size()
-                let rect = NSRect(x: p.x - size.width / 2 - 5, y: y - size.height - 1.5, width: size.width + 10, height: size.height + 3)
+            let boxes = item.lines.map { (text, style) -> (NSAttributedString, NSSize, NSSize, TownScene.LabelItem.Style) in
+                let s = NSAttributedString(string: text, attributes: [.font: Tag.font(style), .foregroundColor: NSColor(Tag.foreground(style))])
+                let size = style == .statement
+                    ? s.boundingRect(with: NSSize(width: Tag.width(text, style), height: 1000), options: .usesLineFragmentOrigin).size
+                    : s.size()
+                let pad = style == .statement ? NSSize(width: 7, height: 5) : NSSize(width: 5, height: 1.5)
+                return (s, NSSize(width: ceil(size.width), height: ceil(size.height)), pad, style)
+            }
+            let total = boxes.reduce(CGFloat(0)) { $0 + $1.1.height + 2 * $1.2.height } + CGFloat(max(0, boxes.count - 1)) * 2
+            var top = height - p.y + (isSign ? total / 2 : total + 2)
+            for (s, size, pad, style) in boxes {
+                let rect = NSRect(x: p.x - size.width / 2 - pad.width, y: top - size.height - 2 * pad.height,
+                                  width: size.width + 2 * pad.width, height: size.height + 2 * pad.height)
+                let shape = NSBezierPath(roundedRect: rect, xRadius: style == .statement ? 6 : 4, yRadius: style == .statement ? 6 : 4)
                 NSColor(Tag.background(style)).setFill()
-                NSBezierPath(roundedRect: rect, xRadius: 4, yRadius: 4).fill()
-                s.draw(at: NSPoint(x: rect.minX + 5, y: rect.minY + 1.5))
-                y -= size.height + 5
+                shape.fill()
+                if style == .statement {
+                    NSColor(Tag.callColor).setStroke()
+                    shape.lineWidth = 1.5
+                    shape.stroke()
+                }
+                s.draw(with: rect.insetBy(dx: pad.width, dy: pad.height), options: .usesLineFragmentOrigin)
+                top -= rect.height + 2
             }
         }
         NSGraphicsContext.restoreGraphicsState()

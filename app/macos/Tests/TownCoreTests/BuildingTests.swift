@@ -100,7 +100,8 @@ func replay(_ name: String, sound: SoundSettings = SoundSettings()) throws -> (B
 
 @Test func staleSessionsLeave() {
     var b = Building()
-    b.apply(TownEvent(type: "heartbeat", sessionId: "s", seq: 1, ts: 1000, projectId: "p"))
+    b.apply(TownEvent(type: "ticket.submit", sessionId: "s", seq: 1, ts: 1000, projectId: "p",
+                      fields: ["ticketId": .string("t1"), "text": .string("x"), "origin": .string("user")]))
     #expect(b.expireStale(nowMs: 60_000).isEmpty)
     #expect(b.expireStale(nowMs: 200_000) == [.chiefLeft(projectId: "p", sessionId: "s"), .blockRemoved(projectId: "p")])
 }
@@ -140,9 +141,37 @@ func replay(_ name: String, sound: SoundSettings = SoundSettings()) throws -> (B
     }
     b.apply(ev("session.open", "a", 1))
     b.apply(ev("session.open", "b", 2))
+    #expect(b.blockOrder.isEmpty) // no work yet
+    for (s, n) in [("a", 10), ("b", 11)] {
+        b.apply(TownEvent(type: "ticket.submit", sessionId: s, seq: n, ts: Int64(n), projectId: "p",
+                          fields: ["ticketId": .string("t\(s)"), "text": .string("x"), "origin": .string("user")]))
+    }
+    #expect(b.blockOrder == ["p"])
     let first = b.apply(ev("session.close", "a", 3))
     #expect(!first.contains { if case .blockRemoved = $0 { return true }; return false })
     let last = b.apply(ev("session.close", "b", 4))
     #expect(last.contains(.blockRemoved(projectId: "p")))
     #expect(b.blockOrder.isEmpty)
+}
+
+@Test func blockWaitsForTheFirstTask() throws {
+    var b = Building()
+    func ev(_ type: String, _ seq: Int, _ f: [String: JSONValue] = [:]) -> TownEvent {
+        TownEvent(type: type, sessionId: "s", seq: seq, ts: Int64(seq), projectId: "p", fields: f)
+    }
+    #expect(b.apply(ev("session.open", 1, ["projectName": .string("demo"), "model": .string("claude-opus-5-5")])).isEmpty)
+    #expect(b.apply(ev("heartbeat", 2)).isEmpty)
+    #expect(b.blockOrder.isEmpty)
+    let c = b.apply(ev("ticket.submit", 3, ["ticketId": .string("t1"), "text": .string("x"), "origin": .string("user")]))
+    #expect(c.first == .blockAdded(projectId: "p"))
+    #expect(c.contains(.chiefArrived(projectId: "p", sessionId: "s")))
+    #expect(b.blocks["p"]?.name == "demo")
+    #expect(b.blocks["p"]?.chiefs["s"]?.model == "claude-opus-5-5")
+}
+
+@Test func idleSessionClosesWithoutABlock() {
+    var b = Building()
+    b.apply(TownEvent(type: "session.open", sessionId: "s", seq: 1, ts: 1, projectId: "p"))
+    #expect(b.apply(TownEvent(type: "session.close", sessionId: "s", seq: 2, ts: 2, projectId: "p")).isEmpty)
+    #expect(b.waiting.isEmpty)
 }

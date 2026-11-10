@@ -124,8 +124,27 @@ public struct Building: Sendable {
     public private(set) var blockOrder: [String] = []
     public private(set) var schedules: [String: Schedule] = [:]
     public var sound = SoundSettings()
+    /// Sessions that are open but have not started any work yet: sessionId → what is known.
+    /// They get a block and a Chief of Staff with their first task (spec: as few blocks as possible).
+    public private(set) var waiting: [String: WaitingSession] = [:]
+
+    public struct WaitingSession: Sendable, Equatable {
+        public let projectId: String
+        public var name: String
+        public var model: String?
+        public var lastEventTs: Int64
+    }
 
     public init() {}
+
+    /// Events that keep a session open without starting work.
+    private static func isIdle(_ e: TownEvent) -> Bool {
+        switch e.type {
+        case "session.open", "heartbeat": true
+        case "model.update": e.string("agentId") == nil
+        default: false
+        }
+    }
 
     /// Applies one event and returns what changed. Unknown types are ignored.
     /// `receivedMs` is the app's clock when the event arrived; stale-session checks use it,
@@ -140,14 +159,25 @@ public struct Building: Sendable {
             return closeSession(projectId: p, sessionId: s)
         }
 
-        // Any event creates the block and the session (the app may start after the session).
+        // A session with no work yet waits off-screen.
+        if blocks[p]?.chiefs[s] == nil && Self.isIdle(e) {
+            var w = waiting[s] ?? WaitingSession(projectId: p, name: p, lastEventTs: seen)
+            if let n = e.string("projectName") { w.name = n }
+            if let m = e.string("model") { w.model = m }
+            w.lastEventTs = max(w.lastEventTs, seen)
+            waiting[s] = w
+            return []
+        }
+
+        // Its first work creates the block and the session (the app may also start after the session).
+        let w = waiting.removeValue(forKey: s)
         if blocks[p] == nil {
-            blocks[p] = Block(projectId: p, name: e.string("projectName") ?? p)
+            blocks[p] = Block(projectId: p, name: e.string("projectName") ?? w?.name ?? p)
             blockOrder.append(p)
             out.append(.blockAdded(projectId: p))
         }
         if blocks[p]!.chiefs[s] == nil {
-            blocks[p]!.chiefs[s] = Chief(sessionId: s, model: e.string("model"), lastEventTs: seen)
+            blocks[p]!.chiefs[s] = Chief(sessionId: s, model: e.string("model") ?? w?.model, lastEventTs: seen)
             blocks[p]!.order.append(s)
             out.append(.chiefArrived(projectId: p, sessionId: s))
         }
@@ -302,6 +332,7 @@ public struct Building: Sendable {
     }
 
     private mutating func closeSession(projectId p: String, sessionId s: String) -> [Change] {
+        if waiting.removeValue(forKey: s) != nil { return [] } // never started work: nothing on screen
         guard blocks[p]?.chiefs[s] != nil else { return [] }
         blocks[p]!.chiefs[s] = nil
         blocks[p]!.order.removeAll { $0 == s }
@@ -321,6 +352,7 @@ public struct Building: Sendable {
     /// Closes sessions with no event for `staleAfterMs` (spec scene 10; architecture: stale sessions).
     public mutating func expireStale(nowMs: Int64, staleAfterMs: Int64 = 120_000) -> [Change] {
         var out: [Change] = []
+        waiting = waiting.filter { nowMs - $0.value.lastEventTs <= staleAfterMs }
         for (p, f) in blocks {
             for (s, c) in f.chiefs where nowMs - c.lastEventTs > staleAfterMs {
                 out += closeSession(projectId: p, sessionId: s)
