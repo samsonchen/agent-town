@@ -16,6 +16,7 @@ The project has two parts:
 | [protocol.md](protocol.md) | The mod-to-app protocol. Platform independent. |
 | [roles.md](roles.md) | The staff role catalog and the Chief of Staff's task types (hats) |
 | [distribution.md](distribution.md) | How users install the app and the plugin without building from source |
+| [releasing.md](releasing.md) | How to build, sign, notarize and publish the macOS app |
 | [roadmap.md](roadmap.md) | Build phases, items to verify before coding, and open questions |
 | [verification.md](verification.md) | Phase 0 answers: what the Claude Code mod API provides, checked against the types and a live session |
 
