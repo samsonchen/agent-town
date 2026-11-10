@@ -1,4 +1,5 @@
 import AppKit
+import ServiceManagement
 import SwiftUI
 
 /// The user's choices from the menu bar and Settings, kept in UserDefaults so they survive a
@@ -83,9 +84,19 @@ struct TownMenu: View {
 /// Settings. Language is the only one for now; more come later.
 struct SettingsView: View {
     @AppStorage(Prefs.language) private var language = ""
+    @State private var openAtLogin = LoginItem.isOn
+    @State private var loginNote: String?
 
     var body: some View {
         Form {
+            Toggle(Labels.text("Open at login"), isOn: Binding(get: { openAtLogin }, set: { on in
+                loginNote = LoginItem.set(on)
+                openAtLogin = LoginItem.isOn
+            }))
+            .disabled(!LoginItem.isAvailable)
+            if let note = loginNote ?? LoginItem.note {
+                Text(note).font(.callout).foregroundStyle(.secondary)
+            }
             Picker(Labels.text("Language"), selection: $language) {
                 Text(Labels.text("System (macOS setting)")).tag("")
                 Text("English").tag("en")
@@ -104,5 +115,36 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(width: 440)
         .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+/// Opening agent-town when the user logs in to the Mac, as a login item macOS manages
+/// (System Settings → General → Login Items). Only the packaged app can be one.
+@MainActor enum LoginItem {
+    static var isAvailable: Bool { Bundle.main.bundleURL.pathExtension == "app" }
+
+    static var isOn: Bool {
+        guard isAvailable else { return false }
+        let s = SMAppService.mainApp.status
+        return s == .enabled || s == .requiresApproval
+    }
+
+    /// Why the setting can't take effect, or nil.
+    static var note: String? {
+        if !isAvailable { return Labels.text("Available in the installed app only.") }
+        if SMAppService.mainApp.status == .requiresApproval {
+            return Labels.text("Allow agent-town in System Settings → General → Login Items.")
+        }
+        return nil
+    }
+
+    /// Turns the login item on or off; returns a message when macOS refused.
+    static func set(_ on: Bool) -> String? {
+        do {
+            if on { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
+            return note
+        } catch {
+            return String(format: Labels.text("macOS did not allow it: %@"), error.localizedDescription)
+        }
     }
 }

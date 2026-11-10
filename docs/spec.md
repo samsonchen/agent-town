@@ -202,12 +202,13 @@ These choices, and the settings below, are kept when the app or the Mac restarts
 - Master volume, mute
 - Ticket text: full, or task type only
 - Model badges: show or hide
-- Launch at login
+- Open at login (built): a login item macOS manages, also listed in System Settings → General → Login Items. Available in the installed `.app` only, not when run with `swift run`.
 
 ## Where it works
 
 - Claude Code CLI in a terminal, and the Code tab of the Claude Desktop app. Both load mods (Claude Code v2.1.287 or later in the terminal).
-- Not supported: Desktop app WSL sessions (plugins are not loaded there) and cloud sessions (they cannot reach the app on the user's Mac).
+- Also the VS Code extension and the JetBrains terminal, which run Claude Code on the user's Mac.
+- Not supported: Desktop app WSL sessions (plugins are not loaded there), SSH sessions (they run on another machine), cloud sessions and Claude Code on the web (they cannot reach the app on the user's Mac), and Cowork (it takes plugins from the claude.ai account and runs commands in a Linux VM; plugin modules are not documented to run there).
 - `claude -p` runs also load mods. Whether they appear in the building is a setting to decide (see [roadmap.md](roadmap.md)).
 
 ## Out of scope for the first version

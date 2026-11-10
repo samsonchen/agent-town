@@ -36,9 +36,9 @@ Check these on the personal account:
 
 ## 4. README and docs
 
-- [ ] README "Install (planned)" and "No installer yet": the plugin install from GitHub works now. Update both, and the "Status" section, once the signed app is on Releases.
+- [x] README rewritten in the user's order (what it is, installing, the office, known issues, Claude Desktop and Cowork). Still to do: replace the build-from-source steps with the download once the signed app is on Releases. Was: README "Install (planned)" and "No installer yet": the plugin install from GitHub works now. Update both, and the "Status" section, once the signed app is on Releases.
 - [ ] The Traditional Chinese version of the README story ("Why agent-town exists"): the user hasn't decided yet.
-- [ ] Roadmap Phase 2 still lists "Settings window" and "An `.app` bundle" as open. The `.app`, the menu bar, the language setting and the About window are done, so update those lines. Threshold, sounds, ticket text, badges and the Cubic 11 font are still open.
+- [x] Roadmap updated to match what is built. Was: Roadmap Phase 2 still lists "Settings window" and "An `.app` bundle" as open. The `.app`, the menu bar, the language setting and the About window are done, so update those lines. Threshold, sounds, ticket text, badges and the Cubic 11 font are still open.
 
 ## 5. App features still open
 
@@ -51,7 +51,7 @@ From `docs/roadmap.md` and `docs/spec.md`:
 - [ ] Settings for window size and bench size.
 - [ ] Zoom, for many project blocks. Blocks are now one column, the window grows up to the screen height, and a taller office scrolls.
 - [ ] Phase 3 leftovers: props in hand, more idle life on the bench, workflow subagents reporting to the coordinator, and name tags that move apart when characters stand close together.
-- [ ] Phase 5: hats, model badges with a show or hide setting, the Cubic 11 font, the ticket text setting, launch at login.
+- [ ] Phase 5: hats, model badges with a show or hide setting, the Cubic 11 font, the ticket text setting. Launch at login is done (Settings → Open at login); check it in the packaged app.
 
 ## 6. To check by hand
 

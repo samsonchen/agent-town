@@ -36,7 +36,7 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - Mod tests with `claude plugin test`
 - A debug receiver: a small script or a bare app window that prints incoming events. Used to look at real event timing.
 
-## Phase 2: the office and one project (mostly done)
+## Phase 2: the office and one project (done)
 
 - [x] App shell, loopback server, endpoint file, building state, choreographer
 - [x] Gather-style office: flat blocks on a path, no walls or doors, 3D characters and furniture at half the first size
@@ -46,8 +46,10 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - [x] Completion sound with the duration gate (system sound for now)
 - [x] State tests driven by `protocol/fixtures/` (`swift test` in `app/macos`)
 - [x] Offscreen snapshots for checking scenes: `AgentTown --demo <fixture> --snapshot out.png --at 10`
-- [ ] Settings window (threshold, sounds, ticket text, badges, language); Cubic 11 font
-- [ ] An `.app` bundle (the package runs as a bare executable for now)
+- [x] Menu bar app with no Dock icon: About, Show agent-town, Sound, Show tips, Settings…, Quit; choices kept across restarts
+- [x] Settings window: language (with Restart now) and open at login. Threshold, sounds, ticket text and badges move to Phase 5
+- [x] An `.app` bundle and `.dmg` from `app/macos/scripts/release.sh` (unsigned for now; see [releasing.md](releasing.md))
+- [x] The window opens where it was when the app last quit
 
 ## Phase 3: staff (mostly done)
 
@@ -62,7 +64,7 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - [ ] More idle life on the bench (coffee, magazine, darts); sitting on the sofa
 - [ ] Workflow subagents report to the workflow coordinator (Phase 0 item 16)
 - [ ] Name tags that move apart when characters stand close together
-- [x] Blocks on screen: executive block plus one project block always; extra blocks show while they have work; no walk-in or walk-out
+- [x] Blocks on screen: every open project's block, from its session's start until its last session ends; no walk-in or walk-out
 - [x] Typing at desks, writing at hot desks; no approval sound in auto mode
 - [x] Walking the CEO with the arrow keys, H to go back to the desk, a closable tip, the view following the CEO, a mobile phone away from the desk, and status statements from the character the CEO stands next to
 - [x] Clicking a character walks the CEO there; the CEO walks back to the desk once all work is done
@@ -73,12 +75,12 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - [x] Dispatch sound as a ticket's call rings
 - [x] Six desks per block (one Chief of Staff desk, five staff desks); a second session's Chief, and staff past five, carry a desk in and out of the back row
 
-## Phase 4: the whole office
+## Phase 4: the whole office (in progress)
 
-- Many project blocks: panning and zoom
-- Several sessions in one block (desks, phones; the layout supports up to four)
-- Window and block size settings
-- Executive block: the Dispatcher's board and scheduled tickets (scenes 13, 14); the Inspector at reception (scene 15)
+- [x] Executive block: the Dispatcher's board and scheduled tickets (scenes 13, 14); the Inspector at reception (scene 15)
+- [ ] Many project blocks: zoom (blocks are one column now; a taller office scrolls)
+- [ ] Several sessions in one block: check the walk-in desk scene and the limit of four (two sessions work)
+- [ ] Window and bench size settings
 
 ## Phase 5: polish
 
@@ -86,14 +88,16 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - Model badges, with the show/hide setting (default hidden)
 - [x] English and Traditional Chinese string tables, following the macOS language (Simplified Chinese falls back to English)
 - Cubic 11 font
-- Ticket text setting, all other settings, launch at login
-- Menu bar toggle
+- Ticket text setting, completion threshold and sound settings, model badge setting
+- [x] Launch at login (Settings → Open at login)
+- [x] Menu bar menu
 
 ## Phase 6: release
 
 - Signing and notarization in GitHub Actions
 - DMG on Releases, Homebrew cask, Sparkle
-- `marketplace.json`, README with install steps and the list of events the mod handles
+- [x] `marketplace.json`; README with install steps
+- The list of events the mod handles, in the README or a doc
 - `CONTRIBUTING.md`, `assets/LICENSES.md`
 
 ## Open questions
@@ -104,5 +108,4 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 | Should `claude -p` and Agent SDK runs appear in the building? | Yes, no, or a setting (default off) |
 | Sound files | Pick from CC0 libraries, or commission original ones |
 | Default bench size, and whether the bench is per block (current spec) or one shared bench | Per block keeps calls fast; a shared bench means walks across the office |
-| Where the report for a scheduled ticket goes | A call to the Dispatcher (current spec), or to the CEO like every other report |
 | Long-lived operators (dev servers) | Stay in the machine room until killed or the session ends (current spec), or move to a smaller "on duty" spot after a few minutes |

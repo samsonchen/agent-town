@@ -11,6 +11,10 @@
 "System (macOS setting)" = "跟隨系統（macOS 設定）";
 "Restart agent-town to use the new language." = "重新啟動 agent-town 以套用新語言。";
 "Restart now" = "立即重新啟動";
+"Open at login" = "登入時開啟";
+"Available in the installed app only." = "僅限安裝後的 app 使用。";
+"Allow agent-town in System Settings → General → Login Items." = "請在「系統設定」→「一般」→「登入項目」中允許 agent-town。";
+"macOS did not allow it: %@" = "macOS 不允許此設定：%@";
 "Quit agent-town" = "結束 agent-town";
 "Close" = "關閉";
 
