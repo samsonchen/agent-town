@@ -480,7 +480,8 @@ export const register: Register = on => {
     safe(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const res = r as any
-      if (res?.block) town.stopBlocked(typeof res.reason === 'string' ? res.reason : undefined, Date.now())
+      // A block carries the hook's reason as its text (ClassicResult.block).
+      if (res?.block) town.stopBlocked(typeof res.block === 'string' ? res.block : undefined, Date.now())
     })
     collect()
     return r

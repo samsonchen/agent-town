@@ -74,3 +74,20 @@ describe('/compact', () => {
     ])
   })
 })
+
+describe('Stop hook', () => {
+  test("a Stop block's reason reaches the app with the return", async ($, on) => {
+    const { clock, posted } = world(on)
+    on('classic.Stop', () => ({ block: 'Tests are failing' }))
+
+    await $.session.start({ cwd: '/work/town', surface: 'terminal', isInteractive: true })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await ($.prompt as any).submit({ text: 'fix the login bug' }).catch(() => undefined)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await ($.classic as any).Stop({ session_id: 'session-1', transcript_path: '', cwd: '/work/town', hook_event_name: 'Stop', stop_hook_active: false })
+    await clock.advance(1_000)
+
+    const returns = posted.filter(ev => ev.type === 'ticket.return')
+    expect(returns.map(ev => ev.reason)).toEqual(['Tests are failing'])
+  })
+})

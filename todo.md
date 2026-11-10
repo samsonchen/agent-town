@@ -5,9 +5,9 @@ Open items as of 2026-11-11, for the next session to pick up. Everything listed 
 ## Where things stand
 
 - Work is committed on `main`. The `phase2/app` branch points at an older commit on `main` and can be deleted.
-- town-link 0.2.2 is installed from GitHub on the personal account (`claude plugin marketplace add samsonchen/agent-town`, then `claude plugin install town-link@agent-town`). After a plugin change, raise the version in `plugin/.claude-plugin/plugin.json` and `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, push, then run `claude plugin marketplace update agent-town` and `claude plugin update town-link@agent-town`, and restart Claude Code.
+- town-link 0.2.3 is installed from GitHub on the personal account (`claude plugin marketplace add samsonchen/agent-town`, then `claude plugin install town-link@agent-town`). After a plugin change, raise the version in `plugin/.claude-plugin/plugin.json` and `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, push, then run `claude plugin marketplace update agent-town` and `claude plugin update town-link@agent-town`, and restart Claude Code.
 - The app is built with `app/macos/scripts/release.sh --unsigned` and copied to `/Applications` by hand. It runs from the menu bar.
-- Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (42 tests). App checks: `swift build` and `swift test` in `app/macos` (22 tests).
+- Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (43 tests). App checks: `swift build` and `swift test` in `app/macos` (23 tests).
 
 ## 1. Check on a personal (non-Team) account
 
@@ -17,7 +17,7 @@ Check these on the personal account:
 
 - [x] `/plugin` → Errors shows nothing for town-link (checked 2026-11-11 on the personal account).
 - [ ] Automatic compaction shows the notes scene (`session.compact` with trigger `auto`).
-- [ ] The Inspector's "Returned" stamp shows when a Stop hook sends Claude Code back to work. Also check whether `prompt.submit` with `origin.kind: 'auto-continuation'` arrives without `classic.Stop` (`docs/verification.md` item 15, still to check).
+- [x] The Inspector's "Returned" scene works on the personal account (checked 2026-11-11 with a test Stop hook). `classic.Stop` runs there; town-link read the hook's reason from the wrong field, fixed in 0.2.3 (the reason is `block`'s text).
 - [ ] The permission mode follows Shift+Tab. In auto mode, a slow ask plays no approval sound (`classic.PreToolUse` reports the mode).
 - [ ] After checking, update the README known issues so they say which items happen only where an organization manages Claude Code. `docs/verification.md` item 15 still names `cc-plugin-sec-default` as the cause.
 
@@ -46,7 +46,7 @@ From `docs/roadmap.md` and `docs/spec.md`:
 
 - [x] The Dispatcher's board: one card per active schedule (scene 13), `TownScene+Board.swift`.
 - [ ] Scene 14: the Dispatcher radios a scheduled ticket to the Chief of Staff, and the report comes back to the Dispatcher. Check how much of it works already with a real `/loop`.
-- [ ] The Inspector stopping a returned report at reception (scene 15).
+- [x] The Inspector stopping a returned report at reception (scene 15), `TownScene+Inspector.swift`. Still to check with a real Stop hook (section 1).
 - [ ] Several sessions in one project block: desks and phones, up to four.
 - [ ] Settings for window size and bench size.
 - [ ] Zoom, for many project blocks. Blocks are now one column, the window grows up to the screen height, and a taller office scrolls.

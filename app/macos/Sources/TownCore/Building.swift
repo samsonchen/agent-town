@@ -12,6 +12,8 @@ public struct Ticket: Sendable, Equatable {
     /// A few words naming the task, written by a small model; absent until it answers.
     public var title: String?
     public var returnedCount = 0
+    /// The hook's reason for the last return, if the plugin could read it.
+    public var returnReason: String?
 }
 
 public struct Staff: Sendable, Equatable {
@@ -222,13 +224,16 @@ public struct Building: Sendable {
 
         case "ticket.return":
             let id = e.string("ticketId") ?? ""
+            let reason = e.string("reason")
             if c.ticket?.id == id {
                 c.ticket?.returnedCount += 1
+                c.ticket?.returnReason = reason
                 out.append(.ticketReturned(projectId: p, sessionId: s, ticketId: id))
             } else if let issuer = c.issuers[id] {
                 // ticket.done already arrived: reopen it.
                 var t = Ticket(id: id, origin: "unknown", text: "", issuer: issuer)
                 t.returnedCount = 1
+                t.returnReason = reason
                 c.ticket = t
                 out.append(.ticketReturned(projectId: p, sessionId: s, ticketId: id))
             }

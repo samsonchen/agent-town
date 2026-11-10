@@ -103,6 +103,17 @@ func replay(_ name: String, sound: SoundSettings = SoundSettings()) throws -> (B
     #expect(b.blocks["p"]!.chiefs["s"]!.ticket?.returnedCount == 1)
 }
 
+@Test func returnKeepsTheHooksReason() {
+    var b = Building()
+    func ev(_ type: String, _ seq: Int, _ f: [String: JSONValue]) -> TownEvent {
+        TownEvent(type: type, sessionId: "s", seq: seq, ts: Int64(seq) * 1000, projectId: "p", fields: f)
+    }
+    b.apply(ev("ticket.submit", 1, ["ticketId": .string("t1"), "text": .string("x"), "origin": .string("user")]))
+    b.apply(ev("ticket.return", 2, ["ticketId": .string("t1"), "reason": .string("Tests are failing")]))
+    #expect(b.blocks["p"]!.chiefs["s"]!.ticket?.returnReason == "Tests are failing")
+    #expect(b.blocks["p"]!.chiefs["s"]!.ticket?.returnedCount == 1)
+}
+
 @Test func staleSessionsLeave() {
     var b = Building()
     b.apply(TownEvent(type: "ticket.submit", sessionId: "s", seq: 1, ts: 1000, projectId: "p",

@@ -41,7 +41,7 @@ final class TownScene: ObservableObject {
     var pendingCalls: [String: PendingCall] = [:]
     var nextWorkerId = 0
     private var families: ModelFamilies?
-    var execPhones: (ceo: Phone?, dispatcher: Phone?) = (nil, nil)
+    var execPhones: (ceo: Phone?, dispatcher: Phone?, inspector: Phone?) = (nil, nil, nil)
 
     // The CEO under the user's control (TownScene+CEO.swift).
     /// True while the CEO is away from the desk; the tip and the phone follow it.
@@ -82,6 +82,7 @@ final class TownScene: ObservableObject {
         mobilePhone = makeMobile(for: ceo)
         ceoSpot = ceo.worldSpot
         dispatcher.phone = execPhones.dispatcher
+        inspector.phone = execPhones.inspector
         for a in [ceo, dispatcher, inspector] { a.body.play("idle") }
         startBenchLife()
         startTyping()
@@ -196,14 +197,8 @@ final class TownScene: ObservableObject {
         case .hat(_, let s, let taskType):
             actors[s]?.hat = labels.taskType(taskType)
 
-        case .ticketReturned(_, let s, _):
-            guard let chief = actors[s] else { return }
-            chief.working = true
-            chief.bubble = labels.returned
-            Task { @MainActor in
-                try? await Task.sleep(for: .seconds(2.5))
-                if chief.bubble == self.labels.returned { chief.bubble = nil }
-            }
+        case .ticketReturned(let p, let s, _):
+            ticketReturned(p, s)
 
         case .ticketDone(let p, let s, _, let issuer, let aborted, let playSound):
             blocks[p]?.activeDesk[s] = nil
@@ -565,7 +560,9 @@ final class TownScene: ObservableObject {
         }
         // Reception, where the Inspector stands.
         place("kitchenBar", in: f, at: [Layout.receptionDesk.x - 0.19, Layout.receptionDesk.y])
-        place("kitchenBar", in: f, at: [Layout.receptionDesk.x + 0.19, Layout.receptionDesk.y])
+        if let bar = place("kitchenBar", in: f, at: [Layout.receptionDesk.x + 0.19, Layout.receptionDesk.y]) {
+            execPhones.inspector = telephone(in: f, at: [Layout.receptionDesk.x + 0.24, Layout.receptionDesk.y + 0.02], on: bar)
+        }
         // The schedule board on the back wall, and the Dispatcher's desk with the radio.
         let w = Layout.boardWidth
         f.addChild(Self.box([w, 0.55, 0.04], NSColor(hex: "#2E5244")!, at: [Layout.boardCenter.x, 0.42, Layout.boardCenter.y]))
