@@ -65,7 +65,6 @@ struct AboutView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(Labels.text("By Samson Chen"))
-                Text("© 2026 Care Active").foregroundStyle(.secondary)
                 Text(markdown("[github.com/samsonchen/agent-town](\(AppInfo.repository.absoluteString))"))
             }
 

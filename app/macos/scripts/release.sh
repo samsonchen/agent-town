@@ -97,7 +97,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <!-- A menu bar app: no Dock icon. -->
   <key>LSUIElement</key><true/>
   <key>NSHighResolutionCapable</key><true/>
-  <key>NSHumanReadableCopyright</key><string>© $(date +%Y) Care Active</string>
+  <key>NSHumanReadableCopyright</key><string>© $(date +%Y) Samson Chen</string>
 </dict>
 </plist>
 PLIST
