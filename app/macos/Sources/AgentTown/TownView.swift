@@ -65,10 +65,10 @@ struct TownView: View {
     /// Makes the window as tall as the office at the current width's scale, keeping its top edge
     /// where it is and staying on the screen. Runs when a block is added or removed, so a size the
     /// user dragged to holds until then. A taller office than the screen pans with the scroll wheel.
-    private func fitWindow(width: CGFloat, in w: NSWindow? = nil) {
+    private func fitWindow(in w: NSWindow? = nil) {
         guard let window = w ?? window, let screen = window.screen ?? NSScreen.main, !window.styleMask.contains(.fullScreen) else { return }
-        let ppm = min(Self.pixelsPerMeter, max(Self.minPixelsPerMeter, width / CGFloat(max(1, scene.officeSize.x))))
         let content = window.contentRect(forFrameRect: window.frame)
+        let ppm = min(Self.pixelsPerMeter, max(Self.minPixelsPerMeter, content.width / CGFloat(max(1, scene.officeSize.x))))
         let chrome = window.frame.height - content.height
         let wanted = max(480, officePixels(ppm).height) + chrome
         let visible = screen.visibleFrame
@@ -118,7 +118,7 @@ struct TownView: View {
             .onAppear { proj.apply(to: camera) }
             .onChange(of: geo.size) { proj.apply(to: camera) }
             .onChange(of: scene.officeSize) {
-                fitWindow(width: geo.size.width)
+                fitWindow()
                 projector(geo.size).apply(to: camera)
             }
             .onChange(of: scene.ceoSpot) { _, spot in follow(spot, size: geo.size) }
@@ -126,7 +126,9 @@ struct TownView: View {
             .background(WindowReader { w in
                 guard let w, w !== window else { return }
                 window = w
-                fitWindow(width: geo.size.width, in: w) // sessions already open when the window opens
+                WindowPlace.restore(w)
+                fitWindow(in: w) // sessions already open when the window opens
+                WindowPlace.keep(w)
             })
             .background(KeyCatcher(onKey: { scene.key($0, down: $1) }, onResign: { scene.releaseKeys() }))
             .background(ScrollCatcher { dx, dy in
@@ -448,5 +450,34 @@ private struct WindowReader: NSViewRepresentable {
     }
     func updateNSView(_ v: NSView, context: Context) {
         DispatchQueue.main.async { if let w = v.window { found(w) } }
+    }
+}
+
+/// Keeps the office window where the user put it, across restarts of the app. The frame is saved
+/// in screen coordinates (AppKit's own autosave can put it on another display of the same size).
+@MainActor enum WindowPlace {
+    private static var observers: [NSObjectProtocol] = []
+
+    /// Moves the window to its saved frame, if that is still on a connected display.
+    static func restore(_ w: NSWindow) {
+        guard let s = UserDefaults.standard.string(forKey: Prefs.windowFrame) else { return }
+        let r = NSRectFromString(s)
+        guard r.width >= 200, r.height >= 200,
+              NSScreen.screens.contains(where: { $0.visibleFrame.intersection(r).width >= 100 && $0.visibleFrame.intersection(r).height >= 100 })
+        else { return }
+        w.setFrame(r, display: true)
+    }
+
+    /// Saves the frame each time the window moves or is resized.
+    static func keep(_ w: NSWindow) {
+        observers.forEach(NotificationCenter.default.removeObserver)
+        let save: (Notification) -> Void = { n in
+            guard let w = n.object as? NSWindow, !w.styleMask.contains(.fullScreen) else { return }
+            UserDefaults.standard.set(NSStringFromRect(w.frame), forKey: Prefs.windowFrame)
+        }
+        observers = [NSWindow.didMoveNotification, NSWindow.didResizeNotification].map {
+            NotificationCenter.default.addObserver(forName: $0, object: w, queue: .main, using: save)
+        }
+        UserDefaults.standard.set(NSStringFromRect(w.frame), forKey: Prefs.windowFrame)
     }
 }

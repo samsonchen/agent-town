@@ -12,6 +12,8 @@ enum Prefs {
     static let showTips = "showTips"
     /// The UI language (`en`, `zh-Hant`); absent or empty follows macOS.
     static let language = "language"
+    /// The office window's frame in screen coordinates, as NSStringFromRect writes it.
+    static let windowFrame = "windowFrame"
 
     static func isOn(_ key: String) -> Bool {
         let d = UserDefaults.standard
