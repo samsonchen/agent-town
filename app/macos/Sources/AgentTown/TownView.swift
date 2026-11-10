@@ -7,10 +7,8 @@ struct TownView: View {
     @ObservedObject var scene: TownScene
     @State private var pan: SIMD2<Float> = .zero
     @State private var camera = TownView.makeCamera()
-    /// The arrow-keys tip stays closed once the user closes it. The H tip comes back
-    /// each time the CEO walks away from the seat.
-    @AppStorage("tipArrowsClosed") private var arrowsTipClosed = false
-    @State private var homeTipClosed = false
+    /// Tips show while "Show tips" is on in the menu; closing one turns it off.
+    @AppStorage(Prefs.showTips) private var showTips = true
 
     /// The office is shown at this size when it fits, and never smaller than `minPixelsPerMeter`.
     static let pixelsPerMeter: CGFloat = 110
@@ -63,10 +61,8 @@ struct TownView: View {
     }
 
     @ViewBuilder private var tip: some View {
-        if scene.ceoAway {
-            if !homeTipClosed { TipBar(text: scene.labels.tipHome) { homeTipClosed = true } }
-        } else if !arrowsTipClosed {
-            TipBar(text: scene.labels.tipArrows) { arrowsTipClosed = true }
+        if showTips {
+            TipBar(text: scene.ceoAway ? scene.labels.tipHome : scene.labels.tipArrows) { showTips = false }
         }
     }
 
@@ -102,8 +98,7 @@ struct TownView: View {
             .onChange(of: geo.size) { proj.apply(to: camera) }
             .onChange(of: scene.officeSize) { projector(geo.size).apply(to: camera) }
             .onChange(of: scene.ceoSpot) { _, spot in follow(spot, size: geo.size) }
-            .onChange(of: scene.ceoAway) { _, away in if away { homeTipClosed = false } }
-            .overlay(alignment: .bottom) { tip.padding(.bottom, 10) }
+            .overlay(alignment: .bottomLeading) { tip.padding([.leading, .bottom], 12) } // clear of the context bar under a block
             .background(KeyCatcher(onKey: { scene.key($0, down: $1) }, onResign: { scene.releaseKeys() }))
             .background(ScrollCatcher { dx, dy in
                 let ppm = Float(pixelsPerMeter(geo.size))
@@ -392,7 +387,7 @@ struct KeyCatcher: NSViewRepresentable {
     }
 }
 
-/// A tip across the bottom of the window, with a button to close it.
+/// A tip in the window's bottom-left corner, with a button to close it.
 struct TipBar: View {
     let text: String
     let close: () -> Void

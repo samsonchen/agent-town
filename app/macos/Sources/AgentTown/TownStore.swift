@@ -8,7 +8,6 @@ import TownCore
 final class TownStore: ObservableObject {
     @Published private(set) var building = Building()
     @Published private(set) var lastEventAt: Date?
-    @Published var paused = false
 
     var sound: SoundSettings {
         get { building.sound }
@@ -54,7 +53,6 @@ final class TownStore: ObservableObject {
     }
 
     private func emit(_ changes: [Change]) {
-        guard !paused else { return }
         for c in changes {
             log("change \(c)")
             onChange?(c)

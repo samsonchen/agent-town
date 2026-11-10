@@ -174,20 +174,31 @@ The default is to be decided (see [roadmap.md](roadmap.md)).
 
 | Level | How |
 |---|---|
-| Pause visuals and sound | Toggle in the app's menu bar |
+| Hide the office, or turn sound off | "Show agent-town" and "Sound" in the app's menu bar; each works alone (sound can play with the window hidden) |
 | Stop sending events from Claude Code | `/town off` and `/town on` in Claude Code. Saved across sessions. |
 | Remove entirely | Disable or uninstall the plugin in `/plugin` |
 
+## Menu bar
+
+The app runs in the menu bar, with no Dock icon. Its menu:
+
+- **Show agent-town** (checked while the office window is open). Closing the window unchecks it; the app keeps running.
+- **Sound** (checked while sounds play). Works whether the window is shown or hidden.
+- **Show tips** (on by default). Shows the closable tips in the window, such as moving the CEO with the arrow keys. Closing a tip turns this off; checking it again brings the tips back.
+- **Settings…**
+- **Quit agent-town**
+
+These choices, and the settings below, are kept when the app or the Mac restarts.
+
 ## Settings (app)
 
-- Language: system, English, 繁體中文
+- Language: system (the default, following macOS), English, 繁體中文. A different choice applies after a restart; a "Restart now" button shows only when the choice differs from the language the app is running in.
 - Window size; bench size (characters waiting per block)
 - Completion sound: on/off, threshold in seconds (default 0: every task), sound file
 - Approval sound: on/off, sound file
 - Master volume, mute
 - Ticket text: full, or task type only
 - Model badges: show or hide
-- Pause (same as the menu bar toggle)
 - Launch at login
 
 ## Where it works

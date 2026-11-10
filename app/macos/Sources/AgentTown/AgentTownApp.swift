@@ -26,7 +26,7 @@ final class TownApp: ObservableObject {
             case "dispatch": ("dispatchSound", "Pop")
             default: ("approvalSound", "Ping")
             }
-            guard UserDefaults.standard.object(forKey: key) as? Bool ?? true else { return }
+            guard Prefs.isOn(Prefs.sound), Prefs.isOn(key) else { return }
             NSSound(named: sound)?.play()
         }
         let thresh = UserDefaults.standard.object(forKey: "completionThreshold") as? Double ?? 0
@@ -58,19 +58,29 @@ struct AgentTownApp: App {
         // One window: the scene's entities can be in only one RealityView at a time, so a second
         // window (⌘N, the Dock icon) would take them from the first and leave it blank.
         Window("agent-town", id: "town") {
-            if CommandLine.arguments.contains("--spike") {
-                SpikeView().frame(minWidth: 900, minHeight: 600)
-            } else {
-                TownView(scene: town.scene).frame(minWidth: 640, minHeight: 480)
+            Group {
+                if CommandLine.arguments.contains("--spike") {
+                    SpikeView().frame(minWidth: 900, minHeight: 600)
+                } else {
+                    TownView(scene: town.scene).frame(minWidth: 640, minHeight: 480)
+                }
             }
+            // Closing the window hides the office; the app keeps running in the menu bar.
+            .onAppear { UserDefaults.standard.set(true, forKey: Prefs.showWindow) }
+            .onDisappear { if !Prefs.quitting { UserDefaults.standard.set(false, forKey: Prefs.showWindow) } }
         }
         // Room for the executive strip and one project block below it.
         .defaultSize(width: 860, height: 720)
-        MenuBarExtra("agent-town", systemImage: "building.2") {
-            Toggle(Labels.text("Pause"), isOn: Binding(get: { town.store.paused }, set: { town.store.paused = $0 }))
-            Divider()
-            Button(Labels.text("Quit agent-town")) { NSApp.terminate(nil) }
-        }
+        // Opens at launch only if it was open when the app last quit.
+        .defaultLaunchBehavior(Prefs.isOn(Prefs.showWindow) ? .presented : .suppressed)
+        .restorationBehavior(.disabled)
+
+        Window(Labels.text("Settings"), id: "settings") { SettingsView() }
+            .windowResizability(.contentSize)
+            .defaultLaunchBehavior(.suppressed)
+            .restorationBehavior(.disabled)
+
+        MenuBarExtra("agent-town", systemImage: "building.2") { TownMenu() }
     }
 }
 
@@ -130,14 +140,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Task { @MainActor in TownApp.shared.startServer() }
         }
 
-        // A SwiftPM executable starts as a background process; make it a regular app with a window.
-        NSApp.setActivationPolicy(.regular)
+        // A menu bar app: no Dock icon and not in ⌘-Tab. The window comes to the front when shown.
+        NSApp.setActivationPolicy(.accessory)
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        MainActor.assumeIsolated { Prefs.quitting = true }
+        return .terminateNow
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         MainActor.assumeIsolated { TownApp.shared.stopServer() }
     }
 
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 }

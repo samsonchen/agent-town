@@ -195,14 +195,18 @@ extension float4x4 {
 /// The language follows macOS (System Settings → General → Language & Region, including a
 /// per-app language). Adding a language means adding an `.lproj` folder and catalog labels.
 struct Labels {
-    /// The first of the user's preferred languages the app has strings for, else English.
-    /// The `language` user default (for example `zh-Hant`) overrides macOS, for testing.
-    static let language: String = {
-        let override = UserDefaults.standard.string(forKey: "language").map { [$0] }
+    /// The language the app runs in, chosen when it starts: the one picked in Settings (the
+    /// `language` user default, for example `zh-Hant`), else the first of the user's preferred
+    /// macOS languages the app has strings for, else English.
+    static let language: String = resolve(UserDefaults.standard.string(forKey: "language"))
+
+    /// The language a Settings choice comes to; nil or empty follows macOS.
+    static func resolve(_ choice: String?) -> String {
+        let override = choice.flatMap { $0.isEmpty ? nil : [$0] }
         let available = Bundle.module.localizations.filter { $0 != "Base" }
         let chosen = Bundle.preferredLocalizations(from: available, forPreferences: override).first
         return chosen.flatMap { c in available.contains(c) ? c : nil } ?? "en"
-    }()
+    }
     /// The `.lproj` bundle for `language`, so every lookup uses the same language.
     private static let strings: Bundle = Bundle.module.path(forResource: language, ofType: "lproj")
         .flatMap(Bundle.init(path:)) ?? .module
