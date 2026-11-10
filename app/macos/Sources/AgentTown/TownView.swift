@@ -88,6 +88,7 @@ struct TownView: View {
                     ZStack(alignment: .topLeading) {
                         CallLines(lines: scene.callLines(), projector: proj)
                         LabelOverlay(items: scene.labelItems(), projector: proj)
+                        MeterOverlay(items: scene.meterItems(), projector: proj)
                     }
                 }
                 .allowsHitTesting(false)
@@ -148,15 +149,96 @@ struct LabelOverlay: View {
             ForEach(items, id: \.id) { item in
                 let p = projector.screen(item.anchor)
                 let isSign = item.lines.first?.1 == .sign
-                VStack(spacing: 2) {
-                    ForEach(Array(item.lines.enumerated()), id: \.offset) { _, line in
-                        Tag(text: line.0, style: line.1)
+                Group {
+                    if item.scroll {
+                        ScrollingSign(text: item.lines.first?.0 ?? "")
+                    } else {
+                        VStack(spacing: 2) {
+                            ForEach(Array(item.lines.enumerated()), id: \.offset) { _, line in
+                                Tag(text: line.0, style: line.1)
+                            }
+                        }
                     }
                 }
                 .fixedSize()
                 // Signs sit on their anchor; tags stack upward from it.
                 .frame(width: 0, height: 0, alignment: isSign ? .center : .bottom)
                 .position(x: p.x, y: isSign ? p.y : p.y - 2)
+            }
+        }
+    }
+}
+
+/// A block sign whose task titles are too wide: the whole sign scrolls sideways in a window
+/// `Labels.titleWidth` columns wide.
+struct ScrollingSign: View {
+    let text: String
+    /// Points per second.
+    static let speed: Double = 28
+
+    var body: some View {
+        let font = Font(Tag.font(.sign))
+        let window = Tag.width(String(repeating: "n", count: Labels.titleWidth), .sign)
+        let loop = text + "      "
+        let loopWidth = Tag.width(loop, .sign)
+        TimelineView(.animation) { tl in
+            let x = (tl.date.timeIntervalSinceReferenceDate * Self.speed).truncatingRemainder(dividingBy: Double(loopWidth))
+            HStack(spacing: 0) {
+                Text(loop).font(font).fixedSize().frame(width: loopWidth, alignment: .leading)
+                Text(loop).font(font).fixedSize().frame(width: loopWidth, alignment: .leading)
+            }
+            .offset(x: -CGFloat(x))
+            .frame(width: window, alignment: .leading)
+            .clipped()
+            .mask(LinearGradient(stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.06),
+                                         .init(color: .black, location: 0.94), .init(color: .clear, location: 1)],
+                                 startPoint: .leading, endPoint: .trailing))
+        }
+        .frame(width: window)
+        .padding(.horizontal, 5)
+        .padding(.vertical, 1.5)
+        .foregroundStyle(Tag.foreground(.sign))
+        .background(RoundedRectangle(cornerRadius: 4).fill(Tag.background(.sign)))
+    }
+}
+
+/// The context bar under each project block: how full the window is, its size, model and effort.
+struct MeterOverlay: View {
+    let items: [TownScene.MeterItem]
+    let projector: Projector
+
+    static let barWidth: CGFloat = 96
+    static let rowHeight: CGFloat = 22
+    static let gap: CGFloat = 8
+    static let font = NSFont.monospacedDigitSystemFont(ofSize: 10.5, weight: .medium)
+
+    /// Green while there is room, amber past 60%, red past 80%.
+    static func color(_ f: Double) -> NSColor {
+        f >= 0.8 ? NSColor(srgbRed: 0.88, green: 0.27, blue: 0.22, alpha: 1)
+            : f >= 0.6 ? NSColor(srgbRed: 0.95, green: 0.65, blue: 0.18, alpha: 1)
+            : NSColor(srgbRed: 0.30, green: 0.72, blue: 0.42, alpha: 1)
+    }
+    static let background = NSColor(srgbRed: 0.20, green: 0.24, blue: 0.30, alpha: 0.92)
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            ForEach(items, id: \.id) { item in
+                let p = projector.screen(item.anchor)
+                HStack(spacing: 7) {
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color.white.opacity(0.22))
+                        Capsule().fill(Color(nsColor: Self.color(item.fraction ?? 0)))
+                            .frame(width: Self.barWidth * CGFloat(item.fraction ?? 0))
+                    }
+                    .frame(width: Self.barWidth, height: 7)
+                    Text(item.text).font(Font(Self.font)).foregroundStyle(.white)
+                }
+                .padding(.horizontal, 8)
+                .frame(height: Self.rowHeight - 4)
+                .background(RoundedRectangle(cornerRadius: 5).fill(Color(nsColor: Self.background)))
+                .fixedSize()
+                .frame(width: 0, height: 0)
+                .position(x: p.x, y: p.y + Self.gap + Self.rowHeight / 2 + CGFloat(item.row) * Self.rowHeight)
             }
         }
     }
@@ -301,7 +383,7 @@ struct TipBar: View {
                 Image(systemName: "xmark").font(.system(size: 10, weight: .bold))
             }
             .buttonStyle(.plain)
-            .help("Close")
+            .help(Labels.text("Close"))
         }
         .foregroundStyle(.white)
         .padding(.horizontal, 12)

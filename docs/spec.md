@@ -37,7 +37,7 @@ Every piece of work starts with a ticket, and every ticket has an issuer. The re
 - **Each project block has a resource bench** (待命室): a lounge where staff and operators wait between jobs. See "Resource bench" below.
 - The whole office is visible at once. There are no tabs. When it does not fit in the window, the view pans with the scroll wheel or trackpad, and it follows the CEO when the user walks the CEO around.
 - The user sets the window size, the block size (number of desks per block), and the bench size (number of characters waiting on each bench). When a block has more staff than desks, the extra staff use hot desks or the meeting room.
-- Each block shows a sign with the project name.
+- Each block shows a sign with the project name. While a typed prompt is being worked on, the sign adds a short title naming the task, written by Haiku from the prompt, for example "agent-town · Fix missing sound" (two tasks at most, by desk). A title is asked to be at most 20 characters, or 10 Chinese characters (a CJK character counts as two). When the titles are wider than that, the whole sign (name and titles) scrolls sideways in a window 20 characters wide. Before the project name is known, the sign shows the project ID, a 16-character hash; with a task running it shows the task title instead.
 
 ## Scenes
 
@@ -52,7 +52,7 @@ Each scene below is triggered by a Claude Code event. The event mapping is in [a
 | 5 | Someone uses a tool | A short activity animation for that character (see "Activities"). |
 | 6 | A tool call needs the user's approval | The character whose call is waiting raises a hand, and the CEO's phone rings until the call is approved or refused. The approval sound plays, except in auto mode, where a classifier rather than the user answers most asks. Then the character returns to work. |
 | 7 | A subagent finishes | The staff member brings a report to the Chief of Staff, then walks back to the resource bench and waits there, still in their role outfit. A failed subagent shows a distinct "failed" report. |
-| 8 | The main task finishes | The Chief of Staff phones the report to the CEO. The completion sound plays if the sound rule below allows it. |
+| 8 | The main task finishes | The Chief of Staff phones the report to the CEO. The completion sound plays as the CEO's phone starts to ring, so the call is on screen when it is heard, if the sound rule below allows it. |
 | 9 | The user interrupts the task | The Chief of Staff stops working. No report call, no sound. |
 | 10 | Session ends | The Chief of Staff is gone from the desk, with no walk-out. Any remaining staff and operators go back to the resource bench. The session's cards are removed from the Dispatcher's board. A block with no sessions left is removed, and the other blocks close up. |
 | 11 | A background task starts | The character that started the task (the Chief of Staff, or a staff member) walks to the resource bench and calls a waiting operator. The operator walks into the machine room and starts work at a console. The name tag shows the background role. If no role is decided yet when the operator leaves the bench, they keep a neutral outfit until it is. |
@@ -72,10 +72,15 @@ The user can walk the CEO around the office with the arrow keys, for fun and to 
 - The CEO walks around furniture and stays on the office floor. Diagonal keys can be held together. The view pans to keep the CEO in sight.
 - A tip at the top of the window says "Move the CEO with the arrow keys" (「用方向鍵 ← ↑ ↓ → 移動執行長」). While the CEO is away from the desk, it says "Press H to send the CEO back to the desk" (「按 H 讓執行長回到座位」). Each tip has a close button. A closed arrow-keys tip stays closed; the H tip shows again each time the CEO walks away from the seat.
 - **Clicking a character** walks the CEO over to that character, around the furniture, to a free spot beside them (across their desk if that is the only way). The CEO turns to them, and they talk (see below). Clicking the name tags just above a character counts too. Clicking the CEO, or empty floor, does nothing.
+- **Back to the desk when the work is done.** When the last task anywhere ends (no open ticket, working staff, background task or approval wait in any block), the CEO stops talking to whoever it was with and walks back to the desk, once the report calls are over. New work, a click or the arrow keys call this off. A CEO the user moves afterwards stays where it is put.
 - H walks the CEO back to the desk, around the furniture. An arrow key during either walk takes control back.
 - When the last project block is removed and only the executive office is left, the CEO walks back to the desk by itself. If the CEO was in a block that went away, the view moves to the executive office and the CEO walks in from the nearest edge of it. If a block is removed while other blocks remain, the CEO can walk back onto the floor from where it was.
 - Away from the desk, the CEO holds a mobile phone. Calls with the Chiefs of Staff, and the ringing for approvals, go to the mobile, and the CEO can keep walking during a call. While the CEO is on the desk phone, the CEO stays at the desk until the call ends.
 - **Talking to a character.** When the CEO stands next to a character (within about a meter, across a desk counts), that character's tags change to a short statement about its work, in its own words. For example, a Chief of Staff says what ticket it is on, for how long, the task type, how many staff and operators are helping, and what it is doing right now. A staff member gives its role, its job and how long it has been at it. An operator says what it is running in the background. A character on the bench says it is waiting, and its last role. Characters waiting for approval say which tool needs it. The Dispatcher talks about the schedules, and the Inspector about returned tickets. Only one character talks: the one the user clicked while the CEO is next to them, else the nearest.
+
+### Context bar
+
+Under each project block, a bar shows each session's context window: how full it is, then the tokens used over the window's size with the percent, then the tokens the last turn added, for example "131k / 200K (66%) · last turn 12.3k" (「上一輪 12.3k」 in Traditional Chinese). The window's size is a whole number (200K, 256K, 1M). The last turn counts only new tokens (new input, cache writes and output), not the conversation re-read from the cache at each step. The bar is green, turns amber past 60% and red past 80%. A block with more than one session has one bar per session, each starting with its desk ("Desk 1"). The figures come from the main conversation only; a subagent's own context is not shown. Before the first response, the bar shows the window's size alone; the last turn shows once a turn has ended.
 
 ### Resource bench
 
@@ -156,6 +161,7 @@ The default is to be decided (see [roadmap.md](roadmap.md)).
 ## Languages
 
 - English and Traditional Chinese (Taiwan) at launch.
+- The app follows the macOS language setting (System Settings → General → Language & Region, including a language set for this app alone). It uses the first of the user's preferred languages it has; if none, English. Simplified Chinese is not provided and falls back to English.
 - All labels (roles, task types, hats, UI) come from translation tables. Adding a language means adding a column, not changing code.
 - Font: 俐方體11號 (Cubic 11, OFL), for both Latin and CJK text.
 - Prompt text on tickets is shown as the user typed it.

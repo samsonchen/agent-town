@@ -9,6 +9,8 @@ public struct Ticket: Sendable, Equatable {
     public let text: String
     public let issuer: Issuer
     public var taskType: String?
+    /// A few words naming the task, written by a small model; absent until it answers.
+    public var title: String?
     public var returnedCount = 0
 }
 
@@ -40,6 +42,27 @@ public struct Approval: Sendable, Equatable {
     public let tool: String
 }
 
+/// The main conversation's context window (protocol: context.update). Each field keeps its last value.
+public struct ContextUsage: Sendable, Equatable {
+    public var tokens: Int64?
+    public var window: Int64?
+    public var percent: Int64?
+    public var effort: String?
+    /// Every token the main conversation's last turn sent, read from cache or generated.
+    public var lastTurnTokens: Int64?
+    public init(tokens: Int64? = nil, window: Int64? = nil, percent: Int64? = nil, effort: String? = nil, lastTurnTokens: Int64? = nil) {
+        self.tokens = tokens; self.window = window; self.percent = percent; self.effort = effort
+        self.lastTurnTokens = lastTurnTokens
+    }
+
+    /// How full the window is, 0 to 1, when known.
+    public var fraction: Double? {
+        if let p = percent { return min(1, max(0, Double(p) / 100)) }
+        if let t = tokens, let w = window, w > 0 { return min(1, Double(t) / Double(w)) }
+        return nil
+    }
+}
+
 public struct Chief: Sendable, Equatable {
     public let sessionId: String
     public var model: String?
@@ -48,6 +71,7 @@ public struct Chief: Sendable, Equatable {
     public var operators: [String: Operator] = [:]
     public var approvals: [String: Approval] = [:]
     public var activity: String?
+    public var context = ContextUsage()
     /// The conversation is being compacted (`/compact`, or the automatic one).
     public var compacting = false
     /// When the app last heard from this session (its own clock).
@@ -105,6 +129,8 @@ public enum Change: Equatable, Sendable {
     case activity(projectId: String, sessionId: String, agentId: String?, kind: String)
     case message(projectId: String, sessionId: String, from: String?, to: String?, broadcast: Bool)
     case model(projectId: String, sessionId: String, agentId: String?, model: String)
+    /// The session's context window or effort changed.
+    case context(projectId: String, sessionId: String)
     /// The main conversation's compaction began; `trigger` is manual, auto or other.
     case compactStarted(projectId: String, sessionId: String, trigger: String)
     /// It ended: `outcome` is done, skipped or failed; the sizes in tokens when known.
@@ -186,6 +212,12 @@ public struct Building: Sendable {
             if let tt = e.string("taskType"), c.ticket?.id == e.string("ticketId") {
                 c.ticket?.taskType = tt
                 out.append(.hat(projectId: p, sessionId: s, taskType: tt))
+            }
+
+        case "ticket.title":
+            if let title = e.string("title")?.trimmingCharacters(in: .whitespacesAndNewlines), !title.isEmpty,
+               c.ticket?.id == e.string("ticketId") {
+                c.ticket?.title = String(title.prefix(60))
             }
 
         case "ticket.return":
@@ -301,6 +333,14 @@ public struct Building: Sendable {
                 c.model = m
             }
             out.append(.model(projectId: p, sessionId: s, agentId: e.string("agentId"), model: m))
+
+        case "context.update":
+            if let v = e.int("tokens") { c.context.tokens = v }
+            if let v = e.int("window") { c.context.window = v }
+            if let v = e.int("percent") { c.context.percent = v }
+            if let v = e.string("effort") { c.context.effort = v }
+            if let v = e.int("lastTurnTokens") { c.context.lastTurnTokens = v }
+            out.append(.context(projectId: p, sessionId: s))
 
         case "compact.start":
             c.compacting = true

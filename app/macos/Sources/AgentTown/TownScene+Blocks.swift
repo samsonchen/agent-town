@@ -11,7 +11,7 @@ extension Change {
              .staffDone(let p, _, _, _), .taskStarted(let p, _, _), .taskRole(let p, _, _, _),
              .taskDone(let p, _, _, _), .approvalWait(let p, _, _, _, _), .approvalEnd(let p, _, _, _),
              .activity(let p, _, _, _), .message(let p, _, _, _, _), .model(let p, _, _, _),
-             .compactStarted(let p, _, _), .compactDone(let p, _, _, _, _):
+             .compactStarted(let p, _, _), .compactDone(let p, _, _, _, _), .context(let p, _):
             return p
         case .scheduleAdded, .scheduleRemoved:
             return nil

@@ -47,12 +47,32 @@ final class TownStore: ObservableObject {
 
     private func apply(_ events: [TownEvent]) {
         let now = Self.nowMs
-        for e in events { emit(building.apply(e, receivedMs: now)) }
+        for e in events {
+            log("event \(e.type) seq=\(e.seq) session=\(e.sessionId.prefix(8)) project=\(e.projectId)")
+            emit(building.apply(e, receivedMs: now))
+        }
     }
 
     private func emit(_ changes: [Change]) {
         guard !paused else { return }
-        for c in changes { onChange?(c) }
+        for c in changes {
+            log("change \(c)")
+            onChange?(c)
+        }
+    }
+
+    /// TOWN_LOG=<file>: appends what arrives and what changes, for debugging the live app.
+    private static let logURL = ProcessInfo.processInfo.environment["TOWN_LOG"].map { URL(fileURLWithPath: $0) }
+    private func log(_ line: String) {
+        guard let url = Self.logURL else { return }
+        let text = "\(ISO8601DateFormatter().string(from: Date())) \(line)\n"
+        if let h = try? FileHandle(forWritingTo: url) {
+            h.seekToEndOfFile()
+            h.write(Data(text.utf8))
+            try? h.close()
+        } else {
+            try? Data(text.utf8).write(to: url)
+        }
     }
 
     static var nowMs: Int64 { Int64(Date().timeIntervalSince1970 * 1000) }

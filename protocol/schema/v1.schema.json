@@ -223,6 +223,36 @@
         }
       ]
     },
+    "ticket.title": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "ticketId",
+            "title"
+          ],
+          "properties": {
+            "type": {
+              "const": "ticket.title"
+            },
+            "ticketId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          }
+        }
+      ]
+    },
     "ticket.done": {
       "allOf": [
         {
@@ -824,6 +854,51 @@
         }
       ]
     },
+    "context.update": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "const": "context.update"
+            },
+            "tokens": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "window": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "percent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "effort": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max"
+              ]
+            },
+            "lastTurnTokens": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      ]
+    },
     "knownEvent": {
       "oneOf": [
         {
@@ -840,6 +915,9 @@
         },
         {
           "$ref": "#/$defs/chief.hat"
+        },
+        {
+          "$ref": "#/$defs/ticket.title"
         },
         {
           "$ref": "#/$defs/ticket.done"
@@ -891,6 +969,9 @@
         },
         {
           "$ref": "#/$defs/compact.end"
+        },
+        {
+          "$ref": "#/$defs/context.update"
         }
       ]
     },

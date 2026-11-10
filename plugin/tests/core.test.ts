@@ -4,7 +4,7 @@
 // (docs/verification.md).
 
 import { describe, expect, test } from 'claude-code/testing'
-import { Town, activityKind, parseNotifications, projectIdentity, shellRole, taskStatus, APPROVAL_DELAY_MS, HOLD_MS } from '../hooks/core'
+import { Town, cleanTitle, TITLE_MAX, activityKind, parseNotifications, projectIdentity, shellRole, taskStatus, APPROVAL_DELAY_MS, HOLD_MS } from '../hooks/core'
 
 const ids = () => {
   let n = 0
@@ -50,6 +50,30 @@ describe('helpers', () => {
     expect(projectIdentity('git@github.com:samsonchen/agent-town.git', '/x')).toEqual({ identity: 'github.com/samsonchen/agent-town', name: 'agent-town' })
     expect(projectIdentity('https://user:secret@example.com/a/b/', '/x').identity).toBe('example.com/a/b')
     expect(projectIdentity(null, '/Users/me/work/site/')).toEqual({ identity: '/Users/me/work/site', name: 'site' })
+  })
+})
+
+describe('task titles', () => {
+  test('a typed prompt asks for a title; the reply is cleaned and kept for a reopen', () => {
+    const t = new Town(ids())
+    t.open({ projectName: 'p', surface: 'terminal', ccVersion: '2' })
+    t.prompt({ text: 'please fix the missing sound', kind: 'composer' }, 1000)
+    t.drain()
+    const job = t.takeJobs().find(j => j.kind === 'task-title')!
+    expect(job.id).toBe('t1')
+    t.classified(job, '"Title: Fix missing sound."\nmore')
+    expect(t.drain()).toEqual([{ type: 'ticket.title', ticketId: 't1', title: 'Fix missing sound' }])
+    t.reopen()
+    expect(t.drain().filter(e => e.type === 'ticket.title')).toEqual([{ type: 'ticket.title', ticketId: 't1', title: 'Fix missing sound' }])
+  })
+
+  test('an empty or failed reply sends nothing; long titles are cut', () => {
+    const t = new Town(ids())
+    t.titled('t1', undefined)
+    t.titled('t1', '  \n ')
+    expect(t.drain()).toEqual([])
+    expect(cleanTitle('「修正音效」')).toBe('修正音效')
+    expect(cleanTitle('x'.repeat(80)).length).toBe(TITLE_MAX)
   })
 })
 
@@ -355,5 +379,42 @@ describe('surviving a reload', () => {
     t.restore({ v: 99, ticket: { id: 'x' } })
     t.turnComplete({ durationMs: 1, isAborted: false }, 1)
     expect(t.drain()).toEqual([])
+  })
+})
+
+describe('context window', () => {
+  test('the last turn\'s new tokens, without cache reads, are sent with the context', () => {
+    const t = new Town(ids())
+    t.context({ tokens: 84000, window: 200000, percent: 42 })
+    t.drain()
+    t.turnTokens({ input_tokens: 500, output_tokens: 2000, cache_read_input_tokens: 130000, cache_creation_input_tokens: 5000 })
+    expect(t.drain()).toEqual([{ type: 'context.update', tokens: 84000, window: 200000, percent: 42, lastTurnTokens: 7500 }])
+    t.turnTokens({ input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 })
+    t.turnTokens(undefined)
+    expect(t.drain()).toEqual([])
+  })
+
+  test('the fill, the window and the effort are sent when a whole percent moves', async () => {
+    const t = new Town(ids())
+    t.context({ window: 200_000 })
+    t.effort('high')
+    t.context({ tokens: 84_100, window: 200_000, percent: 42 })
+    t.context({ tokens: 84_900, window: 200_000, percent: 42 })
+    t.effort(7) // a number budget is not shown
+    expect(t.drain()).toEqual([
+      { type: 'context.update', window: 200_000 },
+      { type: 'context.update', window: 200_000, effort: 'high' },
+      { type: 'context.update', tokens: 84_100, window: 200_000, percent: 42, effort: 'high' },
+    ])
+  })
+
+  test('the app starting late hears the context and the open ticket again', async () => {
+    const t = new Town(ids())
+    t.open({ projectName: 'p', surface: 'terminal', ccVersion: '2' })
+    t.context({ tokens: 10, window: 100, percent: 10 })
+    t.prompt({ text: 'fix it', kind: 'user' }, 0)
+    t.drain()
+    t.reopen()
+    expect(t.drain().map(e => e.type)).toEqual(['session.open', 'context.update', 'ticket.submit'])
   })
 })

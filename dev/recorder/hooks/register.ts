@@ -78,7 +78,12 @@ export const register: Register = on => {
             headers: { Authorization: `Bearer ${info.token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
               protocol: 1,
-              events: [{ type: 'heartbeat', sessionId: sid, seq: 1, ts: Date.now(), projectId: 'recorder-probe' }],
+              // A session ID of its own (town-link sends this session's), closed at once, so the
+              // probe never puts a block or a Chief of Staff in the app.
+              events: [
+                { type: 'heartbeat', sessionId: `recorder-probe-${sid}`, seq: 1, ts: Date.now(), projectId: 'recorder-probe' },
+                { type: 'session.close', sessionId: `recorder-probe-${sid}`, seq: 2, ts: Date.now(), projectId: 'recorder-probe', reason: 'other' },
+              ],
             }),
           })
           .then(r => rec('probe.http', { status: r.status, ok: r.ok, ms: Date.now() - t0 }))

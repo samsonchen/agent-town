@@ -187,3 +187,35 @@ func replay(_ name: String, sound: SoundSettings = SoundSettings()) throws -> (B
     // An end with no start (the app started mid-compaction) changes nothing.
     #expect(b.apply(ev("compact.end", 4, ["outcome": .string("done")])).isEmpty)
 }
+
+@Test func contextUpdatesKeepEachField() {
+    var b = Building()
+    func ev(_ seq: Int, _ f: [String: JSONValue]) -> TownEvent {
+        TownEvent(type: "context.update", sessionId: "s", seq: seq, ts: Int64(seq), projectId: "p", fields: f)
+    }
+    b.apply(ev(1, ["window": .number(200_000)]))
+    b.apply(ev(2, ["effort": .string("high")]))
+    #expect(b.apply(ev(3, ["tokens": .number(84_000), "percent": .number(42)])).last == .context(projectId: "p", sessionId: "s"))
+    let c = b.blocks["p"]?.chiefs["s"]?.context
+    #expect(c == ContextUsage(tokens: 84_000, window: 200_000, percent: 42, effort: "high"))
+    #expect(c?.fraction == 0.42)
+}
+
+@Test func ticketTitleSticksToItsOwnTicket() {
+    var b = Building()
+    func ev(_ seq: Int, _ type: String, _ f: [String: JSONValue]) -> TownEvent {
+        TownEvent(type: type, sessionId: "s", seq: seq, ts: Int64(seq), projectId: "p", fields: f)
+    }
+    b.apply(ev(1, "ticket.submit", ["ticketId": .string("t1"), "text": .string("Fix the sound")]))
+    b.apply(ev(2, "ticket.title", ["ticketId": .string("old"), "title": .string("Stale")]))
+    #expect(b.blocks["p"]?.chiefs["s"]?.ticket?.title == nil)
+    b.apply(ev(3, "ticket.title", ["ticketId": .string("t1"), "title": .string("  Sound fix \n")]))
+    #expect(b.blocks["p"]?.chiefs["s"]?.ticket?.title == "Sound fix")
+}
+
+@Test func contextKeepsTheLastTurnsTokens() {
+    var b = Building()
+    b.apply(TownEvent(type: "context.update", sessionId: "s", seq: 1, ts: 1, projectId: "p",
+                      fields: ["window": .number(1_000_000), "lastTurnTokens": .number(137_500)]))
+    #expect(b.blocks["p"]?.chiefs["s"]?.context.lastTurnTokens == 137_500)
+}

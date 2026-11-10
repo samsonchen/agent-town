@@ -19,7 +19,7 @@ export type Ev = { type: string; [field: string]: unknown }
 
 /** A classification the caller should run in the background. */
 export type ClassifyJob = {
-  kind: 'task-type' | 'staff-role' | 'task-role'
+  kind: 'task-type' | 'staff-role' | 'task-role' | 'task-title'
   /** ticketId, agentId or taskId */
   id: string
   text: string
@@ -38,7 +38,7 @@ const RETURN_DEDUP_MS = 5000
 const cut = (s: unknown, n = TEXT_MAX) => (typeof s === 'string' ? s.slice(0, n) : '')
 
 type Origin = 'user' | 'schedule' | 'task' | 'unknown'
-type Ticket = { id: string; origin: Origin; startTs: number; returned: boolean; lastReturnTs?: number }
+type Ticket = { id: string; origin: Origin; startTs: number; returned: boolean; lastReturnTs?: number; text?: string; title?: string }
 type Staff = { name?: string; hireTs: number }
 type Task = { startTs: number; ticketId?: string }
 type Approval = { tool: string; agentId?: string; askTs: number; waited: boolean; autoMode: boolean }
@@ -46,6 +46,17 @@ type Approval = { tool: string; agentId?: string; askTs: number; waited: boolean
 export type ToolOutcome = { ok: boolean; result: Record<string, unknown> }
 
 // ---- Pure helpers -------------------------------------------------------
+
+/** A hard cap only: Haiku is asked for 20 columns, and the app scrolls a wider title. */
+export const TITLE_MAX = 60
+
+/** A model's title reply as one short line: no quotes, labels or end period. */
+export function cleanTitle(reply: string | undefined): string {
+  let s = (reply ?? '').split(/\r?\n/).map(l => l.trim()).find(Boolean) ?? ''
+  const unquote = (x: string) => x.replace(/^["'“”「『*]+|["'“”」』*]+$/g, '').trim()
+  s = unquote(unquote(s).replace(/^(title|標題)\s*[:：]\s*/i, '')).replace(/[.。]$/, '').trim()
+  return s.length > TITLE_MAX ? s.slice(0, TITLE_MAX - 1) + '…' : s
+}
 
 /** Map a tool name to an activity kind. */
 export function activityKind(tool: string): string {
@@ -155,11 +166,63 @@ export class Town {
     this.emit({ type: 'session.open', ...fields })
   }
 
-  /** The app appeared after this session opened: introduce the session again, with its latest model. */
+  /** The app appeared after this session opened: introduce the session again, with its latest
+   *  model, its context and the ticket it is working on (picked up from the inbox, no call). */
   reopen() {
     if (!this.openFields) return
     const model = this.chiefModel ?? this.openFields.model
     this.emit({ type: 'session.open', ...this.openFields, ...(model ? { model } : {}) })
+    if (this.lastContext) this.emit({ ...this.lastContext })
+    if (this.ticket) this.emit({ type: 'ticket.submit', ticketId: this.ticket.id, text: this.ticket.text ?? '', origin: 'unknown' })
+    if (this.ticket?.title) this.emit({ type: 'ticket.title', ticketId: this.ticket.id, title: this.ticket.title })
+  }
+
+  // -- context window
+
+  private ctx: { tokens?: number; window?: number; percent?: number; effort?: string; lastTurnTokens?: number } = {}
+  private lastContext?: Ev
+
+  /** session.measure: the live context window's fill. */
+  context(c: { tokens?: number; window?: number; percent?: number } | undefined) {
+    if (!c) return
+    const n = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? Math.round(v) : undefined)
+    this.ctx = { ...this.ctx, tokens: n(c.tokens) ?? this.ctx.tokens, window: n(c.window) ?? this.ctx.window, percent: n(c.percent) ?? this.ctx.percent }
+    this.emitContext()
+  }
+
+  /** turn.step on the main loop: the effort the request asks for. */
+  effort(level: unknown) {
+    if (typeof level !== 'string' || !['low', 'medium', 'high', 'xhigh', 'max'].includes(level)) return
+    this.ctx = { ...this.ctx, effort: level }
+    this.emitContext()
+  }
+
+  /** turn.complete on the main loop: the tokens the turn added (new input, cache writes, output); cache reads are left out. */
+  turnTokens(u: { input_tokens?: number; output_tokens?: number; cache_read_input_tokens?: number; cache_creation_input_tokens?: number } | undefined) {
+    if (!u) return
+    const total = [u.input_tokens, u.output_tokens, u.cache_creation_input_tokens]
+      .reduce<number>((a, v) => a + (typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : 0), 0)
+    if (total <= 0) return
+    this.ctx = { ...this.ctx, lastTurnTokens: Math.round(total) }
+    this.emitContext()
+  }
+
+  private emitContext() {
+    const { tokens, window, percent, effort, lastTurnTokens } = this.ctx
+    if (window === undefined && effort === undefined && lastTurnTokens === undefined) return
+    const ev: Ev = {
+      type: 'context.update',
+      ...(tokens !== undefined ? { tokens } : {}),
+      ...(window !== undefined ? { window } : {}),
+      ...(percent !== undefined ? { percent } : {}),
+      ...(effort ? { effort } : {}),
+      ...(lastTurnTokens !== undefined ? { lastTurnTokens } : {}),
+    }
+    const last = this.lastContext
+    // The fill moves by tokens every turn; a whole percent, a new window, effort or last-turn count is news.
+    if (last && last.window === ev.window && last.percent === ev.percent && last.effort === ev.effort && last.lastTurnTokens === ev.lastTurnTokens) return
+    this.lastContext = ev
+    this.emit(ev)
   }
 
   close(reason: string) {
@@ -221,6 +284,7 @@ export class Town {
       const t = this.openTicket('user', text, now)
       if (!e.isMeta && text.trim()) {
         this.jobs.push({ kind: 'task-type', id: t.id, text: text.slice(0, 600), labels: TASK_TYPES, fallback: TASK_FALLBACK })
+        this.jobs.push({ kind: 'task-title', id: t.id, text: text.slice(0, 600), labels: [], fallback: '' })
       }
       return
     }
@@ -233,7 +297,7 @@ export class Town {
   }
 
   private openTicket(origin: Origin, text: string, startTs: number, extra: Record<string, unknown> = {}): Ticket {
-    const t: Ticket = { id: this.newId(), origin, startTs, returned: false }
+    const t: Ticket = { id: this.newId(), origin, startTs, returned: false, text: cut(text) }
     this.ticket = t
     this.emit({ type: 'ticket.submit', ticketId: t.id, text: cut(text), origin, ...extra })
     return t
@@ -464,10 +528,19 @@ export class Town {
   // -- classification results
 
   classified(job: ClassifyJob, label: string | undefined) {
+    if (job.kind === 'task-title') return this.titled(job.id, label)
     const value = label && job.labels.includes(label) ? label : job.fallback
     if (job.kind === 'task-type') this.emit({ type: 'chief.hat', ticketId: job.id, taskType: value })
     else if (job.kind === 'staff-role') this.emit({ type: 'staff.role', agentId: job.id, role: value })
     else this.emit({ type: 'task.role', taskId: job.id, role: value })
+  }
+
+  /** A small model's few words naming a ticket's task. Ignored when empty. */
+  titled(ticketId: string, reply: string | undefined) {
+    const title = cleanTitle(reply)
+    if (!title) return
+    for (const t of [this.ticket, this.lastTicket]) if (t?.id === ticketId) t.title = title
+    this.emit({ type: 'ticket.title', ticketId, title })
   }
 
   // -- surviving a reload
@@ -489,6 +562,8 @@ export class Town {
       counter: this.counter,
       compacting: this.compacting,
       openFields: this.openFields,
+      ctx: this.ctx,
+      lastContext: this.lastContext,
     }
   }
 
@@ -511,6 +586,8 @@ export class Town {
     this.counter = typeof x.counter === 'number' ? x.counter : 0
     this.compacting = x.compacting === true
     this.openFields = obj(x.openFields)
+    this.ctx = obj(x.ctx) ?? {}
+    this.lastContext = obj(x.lastContext)
   }
 
   // -- compaction

@@ -112,6 +112,7 @@ enum Demo {
                             bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue)!
         drawCalls(scene.callLines(), projector: proj, in: ctx, height: CGFloat(h))
         drawLabels(scene.labelItems(), projector: proj, in: ctx, height: CGFloat(h))
+        drawMeters(scene.meterItems(), projector: proj, in: ctx, height: CGFloat(h))
         try NSBitmapImageRep(cgImage: ctx.makeImage()!).representation(using: .png, properties: [:])!.write(to: url)
     }
 
@@ -131,13 +132,43 @@ enum Demo {
     }
 
     /// The same labels as the window's overlay, drawn with AppKit for the snapshot.
+    private static func drawMeters(_ items: [TownScene.MeterItem], projector: Projector, in ctx: CGContext, height: CGFloat) {
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(cgContext: ctx, flipped: false)
+        typealias M = MeterOverlay
+        for item in items {
+            let p = projector.screen(item.anchor)
+            let s = NSAttributedString(string: item.text, attributes: [.font: M.font, .foregroundColor: NSColor.white])
+            let ts = s.size()
+            let w = 8 + M.barWidth + 7 + ceil(ts.width) + 8, h = M.rowHeight - 4
+            let cy = p.y + M.gap + M.rowHeight / 2 + CGFloat(item.row) * M.rowHeight
+            let rect = NSRect(x: p.x - w / 2, y: height - cy - h / 2, width: w, height: h)
+            M.background.setFill()
+            NSBezierPath(roundedRect: rect, xRadius: 5, yRadius: 5).fill()
+            let bar = NSRect(x: rect.minX + 8, y: rect.midY - 3.5, width: M.barWidth, height: 7)
+            NSColor.white.withAlphaComponent(0.22).setFill()
+            NSBezierPath(roundedRect: bar, xRadius: 3.5, yRadius: 3.5).fill()
+            let f = CGFloat(item.fraction ?? 0)
+            if f > 0 {
+                M.color(Double(f)).setFill()
+                NSBezierPath(roundedRect: NSRect(x: bar.minX, y: bar.minY, width: max(7, M.barWidth * f), height: 7), xRadius: 3.5, yRadius: 3.5).fill()
+            }
+            s.draw(at: NSPoint(x: bar.maxX + 7, y: rect.midY - ts.height / 2))
+        }
+        NSGraphicsContext.restoreGraphicsState()
+    }
+
     private static func drawLabels(_ items: [TownScene.LabelItem], projector: Projector, in ctx: CGContext, height: CGFloat) {
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current = NSGraphicsContext(cgContext: ctx, flipped: false)
         for item in items {
             let p = projector.screen(item.anchor)
             let isSign = item.lines.first?.1 == .sign
-            let boxes = item.lines.map { (text, style) -> (NSAttributedString, NSSize, NSSize, TownScene.LabelItem.Style) in
+            // A still image cannot scroll: a scrolling sign shows its start.
+            let lines = item.scroll
+                ? [(Labels.clip(item.lines.first?.0 ?? "", width: Labels.titleWidth), TownScene.LabelItem.Style.sign)]
+                : item.lines
+            let boxes = lines.map { (text, style) -> (NSAttributedString, NSSize, NSSize, TownScene.LabelItem.Style) in
                 let s = NSAttributedString(string: text, attributes: [.font: Tag.font(style), .foregroundColor: NSColor(Tag.foreground(style))])
                 let size = style == .statement
                     ? s.boundingRect(with: NSSize(width: Tag.width(text, style), height: 1000), options: .usesLineFragmentOrigin).size

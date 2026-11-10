@@ -63,9 +63,9 @@ struct AgentTownApp: App {
         // Opens at the size of the executive office alone; project blocks come with tasks.
         .defaultSize(width: 1000, height: 740)
         MenuBarExtra("agent-town", systemImage: "building.2") {
-            Toggle("Pause", isOn: Binding(get: { town.store.paused }, set: { town.store.paused = $0 }))
+            Toggle(Labels.text("Pause"), isOn: Binding(get: { town.store.paused }, set: { town.store.paused = $0 }))
             Divider()
-            Button("Quit agent-town") { NSApp.terminate(nil) }
+            Button(Labels.text("Quit agent-town")) { NSApp.terminate(nil) }
         }
     }
 }

@@ -49,6 +49,7 @@ extension TownScene {
     private func startDriving() {
         guard ceoDriver == nil, let ceo else { return }
         ceoTrip?.cancel() // the user takes over from a walk home
+        ceoHomeTask?.cancel()
         ceoTrip = nil
         ceoVisitee = nil
         ceoDriver = Task { @MainActor [weak self] in
@@ -146,6 +147,35 @@ extension TownScene {
         walkCeo(to: [o.x + Layout.ceoHome.x, o.z + Layout.ceoHome.y])
     }
 
+    /// True when no session has an open ticket, working staff, a background task or a wait.
+    var allWorkDone: Bool {
+        building.blocks.values.allSatisfy { b in
+            b.chiefs.values.allSatisfy { c in
+                c.ticket == nil && c.operators.isEmpty && c.approvals.isEmpty && !c.staff.values.contains { !$0.done }
+            }
+        }
+    }
+
+    /// The last task ended: once the report calls are over, the CEO leaves everyone be and
+    /// walks back to the desk. New work, a click or the arrow keys call it off.
+    func ceoHomeWhenAllDone() {
+        guard ceoAway else { return }
+        ceoHomeTask?.cancel()
+        ceoHomeTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .milliseconds(1500)) // let the report call start
+            for _ in 0..<120 {
+                guard let self, !Task.isCancelled, self.allWorkDone, self.ceoAway, self.ceoDriver == nil else { return }
+                if self.ceo?.onCall == true || !self.pendingCalls.isEmpty {
+                    try? await Task.sleep(for: .milliseconds(500))
+                    continue
+                }
+                self.ceoVisitee = nil
+                self.sendCeoHome()
+                return
+            }
+        }
+    }
+
     /// The character drawn under a click at `point` (window points), if any: the body,
     /// or the tags just above the head. The nearest one to the camera wins.
     func actor(at point: CGPoint, projector: Projector) -> Actor? {
@@ -165,6 +195,7 @@ extension TownScene {
     /// how their work is going. A click on the CEO, or while the arrow keys drive, does nothing.
     func visit(_ a: Actor) {
         guard let ceo, a !== ceo, ceoDriver == nil, onScreen(a), a.root.parent != nil else { return }
+        ceoHomeTask?.cancel()
         let target = a.worldSpot, from = ceo.worldSpot
         let rects = worldObstacles()
         // A free spot next to them, on the side nearest the CEO; across their desk if need be.
@@ -393,18 +424,19 @@ extension TownScene {
             return ""
         case .dispatcher:
             let n = building.schedules.count
-            if n == 0 { return L.t("Nothing scheduled on the board.", "看板上沒有排程工作。") }
-            var s = L.t("\(n) scheduled job\(n == 1 ? "" : "s") on the board.", "看板上有 \(n) 項排程工作。")
+            if n == 0 { return L.t("Nothing scheduled on the board.") }
+            var s = n == 1 ? L.t("\(n) scheduled job on the board.") : L.t("\(n) scheduled jobs on the board.")
             if let next = building.schedules.values.filter({ $0.nextRunTs != nil }).min(by: { $0.nextRunTs! < $1.nextRunTs! }) {
-                s += " " + L.t("Next up: “\(clip(next.text))”.", "下一項：「\(clip(next.text))」。")
+                s += " " + L.t("Next up: \(L.quote(clip(next.text))).")
             }
             return s
         case .inspector:
             let returned = building.blocks.values.flatMap { $0.chiefs.values }.compactMap(\.ticket).reduce(0) { $0 + $1.returnedCount }
             return returned == 0
-                ? L.t("I check returned tickets. All quiet for now.", "我負責檢查退回的工單，目前一切正常。")
-                : L.t("\(returned) ticket\(returned == 1 ? " was" : "s were") sent back. I'm keeping an eye on them.",
-                      "有 \(returned) 張工單被退回，我正在留意。")
+                ? L.t("I check returned tickets. All quiet for now.")
+                : returned == 1
+                ? L.t("\(returned) ticket was sent back. I'm keeping an eye on it.")
+                : L.t("\(returned) tickets were sent back. I'm keeping an eye on them.")
         case .chief:
             return chiefStatement(a)
         case .worker:
@@ -414,39 +446,37 @@ extension TownScene {
 
     private func chiefStatement(_ a: Actor) -> String {
         let L = labels
-        guard let c = building.blocks[a.block]?.chiefs[a.id] else { return L.t("Just got here.", "剛到。") }
+        guard let c = building.blocks[a.block]?.chiefs[a.id] else { return L.t("Just got here.") }
         if let ap = c.approvals.values.first(where: { $0.agentId == nil }) {
-            return L.t("I need your approval to use \(ap.tool).", "我需要你核准使用 \(ap.tool)。")
+            return L.t("I need your approval to use \(ap.tool).")
         }
         if c.compacting {
-            return L.t("I'm tidying our conversation notes to make room. Back to work in a moment.",
-                       "正在整理對話筆記、騰出空間，馬上回來工作。")
+            return L.t("I'm tidying our conversation notes to make room. Back to work in a moment.")
         }
-        guard let t = c.ticket else { return L.t("No ticket right now. Ready for the next one.", "目前沒有工單，隨時待命。") }
+        guard let t = c.ticket else { return L.t("No ticket right now. Ready for the next one.") }
         var parts: [String] = []
         let time = a.since.map { duration(Date().timeIntervalSince($0)) }
         if let time {
-            parts.append(L.t("Working on “\(clip(t.text))” for \(time).", "正在處理「\(clip(t.text))」，已經 \(time)。"))
+            parts.append(L.t("Working on \(L.quote(clip(t.text))) for \(time)."))
         } else {
-            parts.append(L.t("Working on “\(clip(t.text))”.", "正在處理「\(clip(t.text))」。"))
+            parts.append(L.t("Working on \(L.quote(clip(t.text)))."))
         }
         if let type = t.taskType {
-            parts.append(L.t("It's a \(L.taskType(type).lowercased()) job.", "這是「\(L.taskType(type))」類工作。"))
+            parts.append(L.t("It's a \(L.taskType(type).lowercased()) job."))
         }
         if t.returnedCount > 0 {
-            parts.append(L.t("It came back \(t.returnedCount)×, so I'm redoing it.", "被退回 \(t.returnedCount) 次，正在重做。"))
+            parts.append(L.t("It came back \(t.returnedCount)×, so I'm redoing it."))
         }
         let staff = c.staff.values.filter { !$0.done }.count, ops = c.operators.count
         if staff + ops > 0 {
-            parts.append(L.t("\(staff) staff and \(ops) operator\(ops == 1 ? "" : "s") are helping.",
-                             "有 \(staff) 位職員、\(ops) 位作業員協助。"))
+            parts.append(ops == 1 ? L.t("\(staff) staff and \(ops) operator are helping.") : L.t("\(staff) staff and \(ops) operators are helping."))
         }
         let waiting = c.approvals.values.filter { $0.agentId != nil }.count
         if waiting > 0 {
-            parts.append(L.t("\(waiting) of them need\(waiting == 1 ? "s" : "") your approval.", "其中 \(waiting) 位在等你核准。"))
+            parts.append(waiting == 1 ? L.t("\(waiting) of them needs your approval.") : L.t("\(waiting) of them need your approval."))
         }
         if a.working, let kind = a.activity ?? c.activity {
-            parts.append(L.t("Right now I'm \(activity(kind)).", "現在正在\(activity(kind))。"))
+            parts.append(L.t("Right now I'm \(activity(kind))."))
         }
         return parts.joined(separator: " ")
     }
@@ -455,30 +485,29 @@ extension TownScene {
         let L = labels
         guard let job = a.job else {
             if let r = a.role {
-                return L.t("Waiting on the bench. My last job was \(L.role(r)).", "在休息區待命，上一份工作是\(L.role(r))。")
+                return L.t("Waiting on the bench. My last job was \(L.role(r)).")
             }
-            return L.t("Waiting on the bench for a job.", "在休息區等工作。")
+            return L.t("Waiting on the bench for a job.")
         }
         let inf = info(a.block, job)
         let (s, id, isOp) = parse(job)
-        let what = inf.description.isEmpty ? L.t("a job", "一項工作") : "“\(clip(inf.description))”"
-        let whatZh = inf.description.isEmpty ? what : "「\(clip(inf.description))」"
+        let what = inf.description.isEmpty ? L.t("a job") : L.quote(clip(inf.description))
         if !a.atWork {
-            return L.t("On my way to start \(what).", "正要去開始\(whatZh)。")
+            return L.t("On my way to start \(what).")
         }
         if a.awaitingApproval {
             let tool = building.blocks[a.block]?.chiefs[s]?.approvals.values.first { $0.agentId == id }?.tool
-            return tool.map { L.t("I need your approval to use \($0).", "我需要你核准使用 \($0)。") }
-                ?? L.t("I'm waiting for your approval.", "我在等你核准。")
+            return tool.map { L.t("I need your approval to use \($0).") }
+                ?? L.t("I'm waiting for your approval.")
         }
         let time = a.since.map { duration(Date().timeIntervalSince($0)) } ?? ""
         if isOp {
-            return L.t("Running \(what) in the background for \(time).", "在背景執行\(whatZh)，已經 \(time)。")
+            return L.t("Running \(what) in the background for \(time).")
         }
         let role = inf.role.map(L.role) ?? L.staff
-        var out = L.t("\(role) here. On \(what) for \(time).", "我是\(role)，處理\(whatZh)已經 \(time)。")
+        var out = L.t("\(role) here. On \(what) for \(time).")
         if let kind = a.activity {
-            out += " " + L.t("Right now I'm \(activity(kind)).", "現在正在\(activity(kind))。")
+            out += " " + L.t("Right now I'm \(activity(kind)).")
         }
         return out
     }
@@ -486,19 +515,19 @@ extension TownScene {
     private func activity(_ kind: String) -> String {
         let L = labels
         switch kind {
-        case "read": return L.t("reading files", "讀檔案")
-        case "edit": return L.t("editing files", "編輯檔案")
-        case "shell": return L.t("running commands", "執行指令")
-        case "web": return L.t("looking things up on the web", "上網查資料")
-        case "mcp": return L.t("using a connected tool", "使用外部工具")
-        default: return L.t("thinking it through", "思考中")
+        case "read": return L.t("reading files")
+        case "edit": return L.t("editing files")
+        case "shell": return L.t("running commands")
+        case "web": return L.t("looking things up on the web")
+        case "mcp": return L.t("using a connected tool")
+        default: return L.t("thinking it through")
         }
     }
 
     private func duration(_ seconds: TimeInterval) -> String {
         let s = max(0, Int(seconds))
-        if s < 60 { return labels.t("\(s)s", "\(s) 秒") }
-        return labels.t("\(s / 60)m \(s % 60)s", "\(s / 60) 分 \(s % 60) 秒")
+        if s < 60 { return labels.t("\(s)s") }
+        return labels.t("\(s / 60)m \(s % 60)s")
     }
 
     private func clip(_ text: String, _ n: Int = 48) -> String {

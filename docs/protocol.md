@@ -104,6 +104,15 @@ Sent after task-type classification finishes.
 | `ticketId` | string | |
 | `taskType` | string | ID from `catalog/task-types.json` |
 
+### `ticket.title`
+
+Sent when a small model (Haiku) has named a typed prompt's task in a few words. The receiver shows it on the project block's sign while the ticket is open. It may be wrong; it is only a label. Not sent if the model gives no answer.
+
+| Field | Type | Notes |
+|---|---|---|
+| `ticketId` | string | |
+| `title` | string | Asked for at most 20 characters (10 for Chinese, Japanese or Korean), in the prompt's language; never more than 60 characters |
+
 ### `ticket.done`
 
 | Field | Type | Notes |
@@ -259,6 +268,18 @@ The main conversation's compaction began (`/compact`, or the automatic one). A s
 | `outcome` | string | `done`, `skipped` (a hook vetoed it), `failed` |
 | `tokensBefore` | integer, optional | The conversation's size before, when `done` and known |
 | `tokensAfter` | integer, optional | Its size after, when `done` and known |
+
+### `context.update`
+
+The main conversation's context window: sent at session start (the window), when its fill moves by a whole percent, when the effort of the main loop's model requests changes, and when a main-loop turn ends. Every field is optional; the app keeps the last value of each.
+
+| Field | Type | Notes |
+|---|---|---|
+| `tokens` | integer, optional | Input tokens the last response was answered over |
+| `window` | integer, optional | The context window's size, in tokens |
+| `percent` | integer, optional | `tokens` over `window`, 0 to 100 |
+| `effort` | string, optional | `low`, `medium`, `high`, `xhigh`, `max` |
+| `lastTurnTokens` | integer, optional | The tokens the main conversation's last turn added: uncached input, cache writes and output, summed over its requests. Cache reads (the conversation re-sent at each step) are left out. Sent when a turn ends |
 
 ## Example stream
 

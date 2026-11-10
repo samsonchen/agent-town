@@ -2,6 +2,7 @@ import CoreGraphics
 import Foundation
 import RealityKit
 import simd
+import TownCore
 
 /// World layout, in meters, on one flat plane (y up). x runs right and z runs down
 /// the screen. The office is a set of blocks with paths between them, like a
@@ -173,14 +174,34 @@ extension float4x4 {
     }
 }
 
-/// Localized labels for task types and roles, and role colors, from catalog/*.json.
+/// UI text in the user's language, plus task type and role labels and role colors from catalog/*.json.
+///
+/// UI strings are keyed by their English text. Translations live in
+/// `Resources/Localization/<lang>.lproj/Localizable.strings`; a missing one shows the English.
+/// The language follows macOS (System Settings → General → Language & Region, including a
+/// per-app language). Adding a language means adding an `.lproj` folder and catalog labels.
 struct Labels {
+    /// The first of the user's preferred languages the app has strings for, else English.
+    /// The `language` user default (for example `zh-Hant`) overrides macOS, for testing.
+    static let language: String = {
+        let override = UserDefaults.standard.string(forKey: "language").map { [$0] }
+        let available = Bundle.module.localizations.filter { $0 != "Base" }
+        let chosen = Bundle.preferredLocalizations(from: available, forPreferences: override).first
+        return chosen.flatMap { c in available.contains(c) ? c : nil } ?? "en"
+    }()
+    /// The `.lproj` bundle for `language`, so every lookup uses the same language.
+    private static let strings: Bundle = Bundle.module.path(forResource: language, ofType: "lproj")
+        .flatMap(Bundle.init(path:)) ?? .module
+    /// The UI text for an English string (with its interpolations) in the chosen language.
+    static func text(_ english: String.LocalizationValue) -> String { String(localized: english, bundle: strings) }
+
     private var taskTypes: [String: [String: String]] = [:]
     private var roles: [String: [String: String]] = [:]
     private var roleDepartment: [String: String] = [:]
     private var departmentColor: [String: String] = [:]
     let neutralColor: String
-    let locale: String
+    /// The key for `language` in catalog/*.json labels.
+    let locale = ["zh-Hant": "zh-TW"][Labels.language] ?? Labels.language
 
     init() {
         let res = Bundle.module.resourceURL!
@@ -202,8 +223,6 @@ struct Labels {
             neutral = r.neutralColor
         }
         neutralColor = neutral
-        let pref = UserDefaults.standard.string(forKey: "language") ?? Locale.preferredLanguages.first ?? "en"
-        locale = pref.hasPrefix("zh") ? "zh-TW" : "en"
     }
 
     func taskType(_ id: String) -> String { taskTypes[id]?[locale] ?? taskTypes[id]?["en"] ?? id }
@@ -216,27 +235,77 @@ struct Labels {
     func color(department: String?) -> String { department.flatMap { departmentColor[$0] } ?? neutralColor }
     var operatorColor: String { departmentColor["background"] ?? "#FF6B00" }
 
-    func t(_ en: String, _ zh: String) -> String { locale == "zh-TW" ? zh : en }
-    var chiefOfStaff: String { t("Chief of Staff", "幕僚長") }
-    var ceo: String { t("CEO", "執行長") }
-    var dispatcher: String { t("Dispatcher", "調度員") }
-    var inspector: String { t("Inspector", "稽核員") }
-    var returned: String { t("Returned", "退回") }
-    var executive: String { t("Executive office", "執行辦公室") }
-    var ring: String { t("Ring ring", "鈴鈴") }
-    var staff: String { t("Staff", "職員") }
-    var operatorName: String { t("Operator", "作業員") }
-    var needsApproval: String { t("Needs approval", "待核准") }
-    var report: String { t("Report", "報告") }
-    var failed: String { t("Failed", "失敗") }
-    var result: String { t("Result", "結果") }
-    var tipArrows: String { t("Move the CEO with the arrow keys ← ↑ ↓ →", "用方向鍵 ← ↑ ↓ → 移動執行長") }
-    var compacting: String { t("Tidying notes…", "整理筆記中…") }
+    func t(_ english: String.LocalizationValue) -> String { Self.text(english) }
+
+    /// A task title on a sign shows whole up to this width; wider ones scroll.
+    static let titleWidth = 20
+    /// Width in columns: a CJK or full-width character counts 2, others 1.
+    static func displayWidth(_ s: String) -> Int {
+        s.unicodeScalars.reduce(0) { $0 + (isWide($1) ? 2 : 1) }
+    }
+    static func isWide(_ u: Unicode.Scalar) -> Bool {
+        switch u.value {
+        case 0x1100...0x115F, 0x2E80...0xA4CF, 0xAC00...0xD7A3, 0xF900...0xFAFF, 0xFE30...0xFE4F,
+             0xFF00...0xFF60, 0xFFE0...0xFFE6, 0x20000...0x3FFFD: return true
+        default: return false
+        }
+    }
+    /// The start of `s` that fits `width` columns, with "…" when cut.
+    static func clip(_ s: String, width: Int) -> String {
+        guard displayWidth(s) > width else { return s }
+        var out = "", w = 0
+        for ch in s {
+            let cw = displayWidth(String(ch))
+            if w + cw > width - 1 { break }
+            out.append(ch); w += cw
+        }
+        return out + "…"
+    }
+    /// Quoted text from the user or a model: “…” in English, 「…」 in Chinese.
+    func quote(_ s: String) -> String { t("“\(s)”") }
+    var chiefOfStaff: String { t("Chief of Staff") }
+    var ceo: String { t("CEO") }
+    var dispatcher: String { t("Dispatcher") }
+    var inspector: String { t("Inspector") }
+    var returned: String { t("Returned") }
+    var executive: String { t("Executive office") }
+    var ring: String { t("Ring ring") }
+    var staff: String { t("Staff") }
+    var operatorName: String { t("Operator") }
+    var needsApproval: String { t("Needs approval") }
+    var report: String { t("Report") }
+    var failed: String { t("Failed") }
+    var result: String { t("Result") }
+    var tipArrows: String { t("Move the CEO with the arrow keys ← ↑ ↓ →") }
+    var compacting: String { t("Tidying notes…") }
     /// After a compaction: the conversation's size before and after, in tokens, when known.
     func compacted(before: Int64?, after: Int64?) -> String {
-        guard let before, let after else { return t("Notes tidied", "筆記整理完成") }
+        guard let before, let after else { return t("Notes tidied") }
         func k(_ n: Int64) -> String { n >= 1000 ? "\((n + 500) / 1000)k" : "\(n)" }
-        return t("Notes tidied: \(k(before)) → \(k(after)) tokens", "筆記整理完成：\(k(before)) → \(k(after)) tokens")
+        return t("Notes tidied: \(k(before)) → \(k(after)) tokens")
     }
-    var tipHome: String { t("Press H to send the CEO back to the desk", "按 H 讓執行長回到座位") }
+    func desk(_ n: Int) -> String { t("Desk \(n)") }
+    /// "131k / 200K (66%) · last turn 137.5k", or what is known of it. The window's size is
+    /// a whole number (1M, 256K); the last turn, the tokens it added.
+    func contextLine(_ c: ContextUsage) -> String {
+        func used(_ n: Int64) -> String { n >= 1_000_000 ? String(format: "%.1fM", Double(n) / 1e6) : n >= 1000 ? "\((n + 500) / 1000)k" : "\(n)" }
+        func size(_ n: Int64) -> String { n >= 1_000_000 ? "\((n + 500_000) / 1_000_000)M" : n >= 1000 ? "\((n + 500) / 1000)K" : "\(n)" }
+        func oneDecimal(_ n: Int64) -> String {
+            func f(_ v: Double, _ unit: String) -> String {
+                let r = (v * 10).rounded() / 10
+                return (r == r.rounded() ? String(Int64(r)) : String(format: "%.1f", r)) + unit
+            }
+            return n >= 1_000_000 ? f(Double(n) / 1e6, "M") : n >= 1000 ? f(Double(n) / 1e3, "k") : "\(n)"
+        }
+        let pct = c.percent.map { " (\($0)%)" } ?? ""
+        var line: String
+        switch (c.tokens, c.window) {
+        case let (t?, w?): line = "\(used(t)) / \(size(w))\(pct)"
+        case let (nil, w?): line = t("\(size(w)) context")
+        default: line = t("Context —")
+        }
+        if let n = c.lastTurnTokens { line += " · " + t("last turn \(oneDecimal(n))") }
+        return line
+    }
+    var tipHome: String { t("Press H to send the CEO back to the desk") }
 }

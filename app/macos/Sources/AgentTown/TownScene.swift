@@ -51,6 +51,8 @@ final class TownScene: ObservableObject {
     var heldArrows: Set<UInt16> = []
     var ceoDriver: Task<Void, Never>?
     var ceoTrip: Task<Void, Never>?
+    /// Waits for the report calls to end, then walks the CEO home (ceoHomeWhenAllDone).
+    var ceoHomeTask: Task<Void, Never>?
     /// The character the user clicked; the CEO talks to them once there.
     weak var ceoVisitee: Actor?
     var mobilePhone: Phone?
@@ -89,7 +91,9 @@ final class TownScene: ObservableObject {
     // MARK: Changes
 
     func handle(_ change: Change, building: Building) {
+        let wasAllDone = allWorkDone
         self.building = building
+        defer { if !wasAllDone && allWorkDone { ceoHomeWhenAllDone() } }
         if let p = change.projectId, hasWork(p) {
             lastWork[p] = Date()
             if hidden.contains(p) { show(p) }
@@ -120,7 +124,8 @@ final class TownScene: ObservableObject {
             }
 
         case .chiefArrived(let p, let s):
-            guard let node = blocks[p] else { return }
+            // One Chief per session ID; a second project claiming it is ignored.
+            guard let node = blocks[p], actors[s] == nil else { return }
             if let name = building.blocks[p]?.name { node.name = name }
             let slot = BlockNode.free(node.chiefSlots, below: Layout.maxDesks)
             node.chiefSlots[s] = slot
@@ -135,7 +140,8 @@ final class TownScene: ObservableObject {
             chief.settle()
 
         case .chiefLeft(let p, let s):
-            guard let chief = actors[s], let node = blocks[p] else { return }
+            // Only this block's Chief: a session ID seen in two projects must not take the other one.
+            guard let chief = actors[s], chief.block == p, let node = blocks[p] else { return }
             node.chiefSlots[s] = nil
             chief.working = false
             sessionEnded(s, in: node)
@@ -195,8 +201,10 @@ final class TownScene: ObservableObject {
             let receiver = actors[issuer == .dispatcher ? "dispatcher" : "ceo"]!
             chief.enqueue { [weak self] in
                 guard let self else { return }
-                await self.call(from: chief, to: receiver, carrying: nil)
-                if playSound { self.onSound?("completion") }
+                // The sound plays as the report call rings, so the call is on screen when it is heard.
+                await self.call(from: chief, to: receiver, carrying: nil) {
+                    if playSound { self.onSound?("completion") }
+                }
                 chief.settle()
             }
 
@@ -244,6 +252,9 @@ final class TownScene: ObservableObject {
         case .compactDone(let p, let s, let outcome, let before, let after):
             compactDone(p, s, outcome: outcome, before: before, after: after)
 
+        case .context:
+            break // the bar under the block reads the building state
+
         case .scheduleAdded, .scheduleRemoved:
             break // the Dispatcher's board comes in Phase 4
         }
@@ -253,7 +264,8 @@ final class TownScene: ObservableObject {
 
     /// A phone call. The caller lifts the handset, the other phone rings and is answered,
     /// they talk, and the ticket (the caller's, or `text`) passes to the callee.
-    func call(from caller: Actor, to callee: Actor, carrying text: String?) async {
+    /// `ringing` runs as the callee's phone starts to ring, for a sound heard while the call shows.
+    func call(from caller: Actor, to callee: Actor, carrying text: String?, ringing: (() -> Void)? = nil) async {
         while caller.onCall || callee.onCall { try? await Task.sleep(for: .milliseconds(150)) }
         guard let out = caller.phone, let inn = callee.phone else { return }
         caller.onCall = true
@@ -267,6 +279,7 @@ final class TownScene: ObservableObject {
         calls.append((caller, callee))
 
         while inn.ringing { try? await Task.sleep(for: .milliseconds(100)) } // an approval ring in progress
+        ringing?()
         await inn.ring(seconds: 1.2)
         callee.body.play("interact-right", loop: false)
         try? await Task.sleep(for: .seconds(0.35))
@@ -585,6 +598,8 @@ final class TownScene: ObservableObject {
         let id: String
         let anchor: SIMD3<Float>
         let lines: [(String, Style)]
+        /// A sign whose task titles are too wide to show whole: the whole sign scrolls.
+        var scroll = false
     }
 
     /// Lines between the two ends of each call in progress, and from each character
@@ -594,6 +609,36 @@ final class TownScene: ObservableObject {
         if let ceo = actors["ceo"] {
             for a in Set(approvals.values.map(\.id)).compactMap({ actors[$0] }) {
                 out.append((a.head(above: -0.15), ceo.head(above: -0.15)))
+            }
+        }
+        return out
+    }
+
+    /// The context bar under a project block: one per Chief of Staff (session) there.
+    struct MeterItem {
+        let id: String
+        /// The middle of the block's front edge.
+        let anchor: SIMD3<Float>
+        /// Its place in the stack under the block, from 0.
+        let row: Int
+        let fraction: Double?
+        let text: String
+    }
+
+    func meterItems() -> [MeterItem] {
+        var out: [MeterItem] = []
+        for node in blocks.values where node.placed && node.id != Self.executive {
+            guard let block = building.blocks[node.id] else { continue }
+            let o = node.entity.position(relativeTo: nil)
+            let anchor = o + [Layout.blockWidth / 2, 0, Layout.blockDepth]
+            let sessions = block.order.filter { block.chiefs[$0] != nil }
+            for (row, s) in sessions.enumerated() {
+                let c = block.chiefs[s]!
+                var parts: [String] = []
+                if sessions.count > 1, let slot = node.chiefSlots[s] { parts.append(labels.desk(slot + 1)) }
+                parts.append(labels.contextLine(c.context))
+                out.append(MeterItem(id: "meter-\(s)", anchor: anchor, row: row, fraction: c.context.fraction,
+                                     text: parts.joined(separator: " · ")))
             }
         }
         return out
@@ -634,9 +679,27 @@ final class TownScene: ObservableObject {
         }
         for node in blocks.values where node.placed {
             let o = node.entity.position(relativeTo: nil)
-            items.append(LabelItem(id: "block-\(node.id)", anchor: o + [Layout.blockWidth / 2, 0, 0], lines: [(node.name, .sign)]))
+            let sign = sign(node)
+            items.append(LabelItem(id: "block-\(node.id)", anchor: o + [Layout.blockWidth / 2, 0, 0],
+                                   lines: [(sign.text, .sign)], scroll: sign.scroll))
         }
         return items
+    }
+
+    /// The block's sign: the project's name, then the title of each running task, by desk.
+    /// With no name yet (only the project's ID is known), the titles alone. When the titles are
+    /// wider than `Labels.titleWidth`, `scroll` is set and the whole sign scrolls.
+    func sign(_ node: BlockNode) -> (text: String, scroll: Bool) {
+        guard let block = building.blocks[node.id] else { return (node.name, false) }
+        let titles = block.chiefs.values
+            .sorted { (node.chiefSlots[$0.sessionId] ?? .max, $0.sessionId) < (node.chiefSlots[$1.sessionId] ?? .max, $1.sessionId) }
+            .compactMap { $0.ticket?.title }
+            .prefix(2)
+        if titles.isEmpty { return (block.name, false) }
+        let head = block.name != block.projectId ? block.name : ""
+        let title = titles.joined(separator: " · ")
+        let text = [head, title].filter { !$0.isEmpty }.joined(separator: " · ")
+        return (text, Labels.displayWidth(title) > Labels.titleWidth)
     }
 }
 

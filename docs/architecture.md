@@ -96,7 +96,7 @@ Event and field names are checked against Claude Code 2.1.318 and 2.1.319. The m
 |---|---|---|
 | `session.start` | Read the endpoint file, register `/town`, start the outbox and heartbeat timers, work out the project. After a hot reload of the plugin, take back the open ticket, staff, tasks, waits and unsent events from the session's `$.state` (saved every outbox tick and at each `turn.complete`), so a report is not lost | `session.open` |
 | `session.end` | Flush the outbox | `session.close` |
-| `prompt.submit` with `turnId` absent and `origin.kind` `composer` | Start task-type classification in the background; pass the prompt on unchanged | `ticket.submit` (`origin: user`), later `chief.hat` |
+| `prompt.submit` with `turnId` absent and `origin.kind` `composer` | Start task-type classification and a task title (Haiku) in the background; pass the prompt on unchanged | `ticket.submit` (`origin: user`), later `chief.hat` and `ticket.title` |
 | `prompt.submit` with `turnId` absent and `origin.kind` `task-notification` | Parse the task IDs and statuses from the text | `task.done` for each task, then `ticket.submit` (`origin: task`) |
 | `prompt.submit` with `turnId` absent and `origin.kind` `scheduled-trigger` | | `ticket.submit` (`origin: schedule`) |
 | `prompt.submit` with `turnId` absent and `origin.kind` `auto-continuation` | A Stop hook sent the work back. Not a new ticket | `ticket.return` for the last ticket (the app reopens it if `ticket.done` already arrived) |
@@ -109,6 +109,7 @@ Event and field names are checked against Claude Code 2.1.318 and 2.1.319. The m
 | `tool.call` | Map the tool to an activity; send it before the tool runs | `activity` |
 | `tool.check` returning `ask` with `approver === 'person'`, and the call still unsettled 5 s later | In auto mode the classifier settles most asks in 1–4 s with no dialog. The permission mode comes from `classic.PreToolUse`'s `permission_mode` when that hook runs (another plugin may pass classic events on first), from `agent.spawn`'s `permissionMode`, and at session start from the `permissions.defaultMode` setting; in auto mode the event carries `autoMode: true` and the app plays no sound | `approval.wait` |
 | That `tool.call`'s `next` settles | Result means allowed; `deny` or `isError` means refused | `approval.end` |
+| `session.start` (`$.session.usage()`), `session.measure` when `context` changed, and `turn.step` with no `agentId` (its `effort`) | Sent when the window, the whole percent or the effort changes | `context.update` |
 | `session.compact` with no `agentId` and a trigger other than `precompute` | Sent before `next(e)`; the result's `skip` means skipped, a throw means failed, else done with `tokensBefore`/`tokensAfter` | `compact.start`, then `compact.end` |
 | `tool.call` for `Bash` with `run_in_background`, `Monitor`, `Workflow` | `await next(e)`; task ID from `backgroundTaskId` (Bash) or `taskId` (Monitor, Workflow); role by rule or classification | `task.start`, later `task.role` |
 | `tool.call` for `CronCreate` | `await next(e)`; `scheduleId` is the result's `id` | `schedule.create` |
@@ -195,7 +196,7 @@ Registered with `immediate: true` so it works while Claude is busy.
 | Scene | RealityKit in a SwiftUI `RealityView`, orthographic camera looking down at the office (62° from the floor), characters leaned back to face it | Draws the flat blocks and path (unlit tiled planes), furniture, telephones, characters, tickets, hats; plays character animation clips; lays the blocks out in a grid; handles panning |
 | Labels | SwiftUI overlay | Name tags, hats, model badges, ticket text, block signs, ring tags and call lines. Drawn in 2D over the 3D view at each character's projected position, so text stays sharp and uses the Cubic 11 font. |
 | Audio | AVFoundation | Completion and approval sounds; applies the duration gate |
-| Localization | String Catalogs plus `catalog/*.json` | UI strings and role/task labels in English and Traditional Chinese |
+| Localization | `Localizable.strings` per language (`Resources/Localization/<lang>.lproj`) plus `catalog/*.json` | UI strings, keyed by their English text, and role/task labels in English and Traditional Chinese. The language follows macOS; English when none of the user's languages is available |
 
 ### Assets pipeline
 
