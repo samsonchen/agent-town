@@ -85,11 +85,9 @@ struct AgentTownApp: App {
             .defaultLaunchBehavior(.suppressed)
             .restorationBehavior(.disabled)
 
-        MenuBarExtra {
-            TownMenu()
-        } label: {
-            Image(nsImage: MenuBarIcon.image).accessibilityLabel("agent-town")
-        }
+        // The system "building" symbol: macOS sizes it for the menu bar and colors it for light
+        // mode, dark mode and an open menu.
+        MenuBarExtra("agent-town", systemImage: "building.2") { TownMenu() }
     }
 }
 

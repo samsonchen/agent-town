@@ -19,7 +19,6 @@ let package = Package(
                 .copy("Resources/models"), // symlink to assets/models
                 .copy("Resources/catalog"), // symlink to catalog
                 .copy("Resources/colormap.png"), // symlink to the Kenney character texture
-                .copy("Resources/Icons"), // the menu bar icon (menubar.png, menubar@2x.png)
                 .process("Resources/Localization"), // <lang>.lproj/Localizable.strings
             ]
         ),
