@@ -784,7 +784,7 @@ export class Town {
           approvalId: id,
           ...(a.agentId ? { agentId: a.agentId } : {}),
           tool: a.tool,
-          // The mode may arrive after the ask (from the PermissionRequest hook).
+          // The mode may be reported after the ask (a subagent's start, a later hook).
           ...(a.autoMode || this.permissionMode === 'auto' ? { autoMode: true } : {}),
         })
       }

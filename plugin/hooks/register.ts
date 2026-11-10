@@ -471,13 +471,9 @@ export const register: Register = on => {
 
   // Classic hooks carry the session's permission mode; auto mode means a classifier, not the
   // user, answers most permission asks (the app then skips the approval sound). Where an
-  // organization manages Claude Code, PreToolUse passes over plugins the user installed, so the
-  // mode is also read from events that still reach them: each prompt, each finished tool call and
-  // each permission ask.
+  // organization manages Claude Code, every classic hook passes over plugins the user installed;
+  // the mode then comes only from settings at session start and from each subagent's start.
   on('classic.PreToolUse', readMode).catch(passOn)
-  on('classic.UserPromptSubmit', readMode).catch(passOn)
-  on('classic.PostToolUse', readMode).catch(passOn)
-  on('classic.PermissionRequest', readMode).catch(passOn)
 
   on('classic.Stop', async ($, e, next) => {
     const r = await next(e)

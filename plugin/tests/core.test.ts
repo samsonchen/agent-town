@@ -379,7 +379,7 @@ describe('approvals', () => {
     expect(t.drain()).toEqual([{ type: 'approval.wait', approvalId: 'u1', tool: 'Bash', autoMode: true }])
   })
 
-  test('auto mode reported after the ask (a PermissionRequest hook) still marks the wait', async () => {
+  test('auto mode reported after the ask still marks the wait', async () => {
     const t = new Town(ids())
     t.ask({ tool_use_id: 'u1', tool: 'Bash' }, 0)
     t.setPermissionMode('auto')

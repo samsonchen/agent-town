@@ -62,9 +62,10 @@ In a session, `/town` shows whether the plugin is connected, and `/town on` or `
 
 Things you may notice while using agent-town, and what to expect:
 
-- **Where your organization manages Claude Code, two scenes may not show.** Claude Code then passes some events over the plugins you install yourself, and town-link is one of them. You can see this in `/plugin` → Errors.
+- **Where your organization manages Claude Code, some scenes may not show.** Claude Code then passes some events over the plugins you install yourself, and town-link is one of them. You can see this in `/plugin` → Errors.
   - Automatic compaction: when Claude Code compacts the conversation on its own because the context is full, the office shows nothing. Typing `/compact` yourself always shows the scene.
   - Returned work: when a Stop hook sends Claude Code back to work, the Chief of Staff's "Returned" stamp may not appear. The work itself goes on as usual.
+  - The approval sound in auto mode: agent-town normally stays quiet when auto mode's classifier answers an ask. It knows your permission mode only from your settings when a session starts, so if you switch to auto mode with Shift+Tab, a slow ask may still play the approval sound.
 - **Work done while the app is closed is not shown later.** town-link sends events only while the app is running and drops them otherwise. Open the app first; a Claude Code session that is already running shows up within a few seconds of the app starting, from that point on.
 - **A session leaves the office about two minutes after it stops.** When a Claude Code session ends or stops responding, its Chief of Staff stays until the app has heard nothing for two minutes.
 - **Labels can cover someone near the top of a small window.** Name tags and notes slide down to stay inside the window, so in a short window they may sit over the character's head. Make the window taller or scroll to see them clearly.
