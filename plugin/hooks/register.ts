@@ -15,6 +15,9 @@ const FLUSH_MS = 250
 const HEARTBEAT_MS = 30_000
 const ENDPOINT_RETRY_MS = 2_000
 const MAX_QUEUE = 500
+// A batch lost to a dead connection (the app restarted, on a new port) is sent once more after
+// reconnecting, unless it is older than this.
+const RETRY_MAX_AGE_MS = 60_000
 
 // On a failure in our own code before next(e), pass the event on as if we were not here.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,6 +38,7 @@ let sessionId = ''
 let projectId = ''
 let seq = 0
 let queue: Ev[] = []
+let retry: Ev[] = [] // the batch the last failed send lost
 let endpoint: Endpoint | undefined
 let endpointCheckedAt = 0
 let sending = false
@@ -158,6 +162,7 @@ async function flush($: any) {
   // so a session shows up as soon as the app starts rather than at its next event.
   if (queue.length === 0 && (endpoint || Date.now() - endpointCheckedAt < ENDPOINT_RETRY_MS)) return
   sending = true
+  let batchSent: Ev[] = []
   try {
     if (!endpoint) {
       if (Date.now() - endpointCheckedAt < ENDPOINT_RETRY_MS) return
@@ -165,17 +170,24 @@ async function flush($: any) {
       endpoint = await readEndpoint($)
       if (!endpoint) {
         queue = [] // the app is not running: drop, never retry old events
+        retry = []
         dirty = true
         return
       }
-      // Newly connected: the app may have missed this session's session.open.
-      if (!queue.some(ev => ev.type === 'session.open')) {
-        safe(() => town.reopen())
-        collect()
-      }
+      // Newly connected: the app may have missed this session's session.open. Its state goes
+      // first, then the batch the dead connection lost (once, if recent), then what came since,
+      // so a start is never sent after its end (compact.start, compact.end).
+      const lost = retry.filter(ev => Date.now() - Number(ev.ts) < RETRY_MAX_AGE_MS)
+      retry = []
+      const since = queue
+      queue = []
+      if (![...lost, ...since].some(ev => ev.type === 'session.open')) safe(() => town.reopen())
+      collect()
+      queue = [...queue, ...lost, ...since].slice(-MAX_QUEUE)
     }
     if (queue.length === 0) return
     const batch = queue
+    batchSent = batch
     queue = []
     dirty = true
     const ep = endpoint
@@ -184,14 +196,21 @@ async function flush($: any) {
       headers: { Authorization: `Bearer ${ep.token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ protocol: PROTOCOL, events: batch }),
     })
-    if (res.status === 401) endpoint = undefined
-    else if (res.status === 426) {
+    if (res.status === 401) {
+      endpoint = undefined // a new app answers with a new token
+      endpointCheckedAt = 0
+      retry = batch
+    } else if (res.status === 426) {
       refused = true
       queue = []
       $.ui.toast('agent-town: the app needs a newer town-link plugin.')
     }
   } catch {
-    endpoint = undefined // connection refused or timeout: the batch is dropped
+    // Connection refused or timeout: look for the app again now, and send the batch once more if
+    // it is there (it may have restarted on another port).
+    endpoint = undefined
+    endpointCheckedAt = 0
+    retry = batchSent
   } finally {
     sending = false
   }
@@ -368,7 +387,42 @@ export const register: Register = on => {
 
   // A compaction of the main conversation (/compact, or the automatic one): the Chief of Staff
   // tidies its notes until it ends.
+  //
+  // /compact is watched as a command too: when a background precompute already holds the
+  // summary, the engine installs it without raising session.compact again. While the command
+  // runs, a session.compact inside it only records its result for the command to report.
+  let commandCompact: { result?: unknown } | undefined
+  on('command.run', { command: 'compact' }, async ($, e, next) => {
+    let shown = false
+    safe(() => {
+      shown = town.compactStart({ trigger: 'manual' })
+    })
+    collect()
+    if (!shown) return next(e)
+    const mine: { result?: unknown } = {}
+    commandCompact = mine
+    try {
+      const r = await next(e)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      safe(() => town.compactEnd((mine.result ?? {}) as any))
+      collect()
+      return r
+    } catch (err) {
+      safe(() => town.compactEnd(undefined))
+      collect()
+      throw err
+    } finally {
+      if (commandCompact === mine) commandCompact = undefined
+    }
+  }).catch(passOn)
+
   on('session.compact', async ($, e, next) => {
+    const inCommand = commandCompact
+    if (inCommand && !e.agentId && e.trigger !== 'precompute') {
+      const r = await next(e)
+      inCommand.result = r
+      return r
+    }
     let shown = false
     safe(() => {
       shown = town.compactStart({ trigger: e.trigger, agentId: e.agentId })
