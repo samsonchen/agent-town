@@ -6,7 +6,8 @@ import TownCore
 
 /// World layout, in meters, on one flat plane (y up). x runs right and z runs down
 /// the screen. The office is a set of blocks with paths between them, like a
-/// Gather map: the executive block first, then one block per active project.
+/// Gather map: the executive block, a strip along the top, then one block per active
+/// project in a grid below it.
 /// Positions inside a block are local to the block's top-left corner.
 enum Layout {
     static let blockWidth: Float = 7
@@ -20,14 +21,20 @@ enum Layout {
     static let floorThickness: Float = 0.02
     static let walkSpeed: Float = 2.34 // m/s
 
-    // Executive block.
-    static let ceoDesk = SIMD2<Float>(1.3, 1.3)
-    static let ceoHome = SIMD2<Float>(1.3, 0.85)
-    static let receptionDesk = SIMD2<Float>(3.5, 3.5)
-    static let inspectorHome = SIMD2<Float>(3.5, 3.1)
-    static let dispatcherDesk = SIMD2<Float>(5.6, 1.3)
-    static let dispatcherHome = SIMD2<Float>(5.6, 0.85)
-    static let boardCenter = SIMD2<Float>(5.6, 0.2)
+    // Executive block: a strip as wide as a project block and a third as deep, with the CEO,
+    // the Inspector and the Dispatcher in one row along the back, each behind a desk.
+    static let execDepth: Float = blockDepth / 3
+    static let execRowZ: Float = 0.55
+    static let execDeskZ: Float = 1.0
+    static let ceoDesk = SIMD2<Float>(1.3, execDeskZ)
+    static let ceoHome = SIMD2<Float>(1.3, execRowZ)
+    static let receptionDesk = SIMD2<Float>(3.5, execDeskZ)
+    static let inspectorHome = SIMD2<Float>(3.5, execRowZ)
+    static let dispatcherDesk = SIMD2<Float>(5.7, execDeskZ)
+    static let dispatcherHome = SIMD2<Float>(5.7, execRowZ)
+    /// The schedule board, on the back wall between the Inspector and the Dispatcher.
+    static let boardCenter = SIMD2<Float>(4.6, 0.12)
+    static let boardWidth: Float = 1.1
 
     // Project block, back to front: the Chiefs of Staff's row, the staff row,
     // then the machine room (left) and the resource bench (right).
@@ -101,20 +108,25 @@ enum Layout {
         return out
     }
 
-    /// Columns for `count` blocks: side by side while there are few, then a grid.
+    /// Columns for `count` project blocks: side by side while there are few, then a grid.
     static func columns(_ count: Int) -> Int { count <= 2 ? max(1, count) : (count <= 4 ? 2 : 3) }
 
-    /// The top-left corner of block `index` in the office.
+    /// The top-left corner of block `index` of `count` (index 0 is the executive block, above
+    /// the first column of project blocks).
     static func blockOrigin(_ index: Int, count: Int) -> SIMD2<Float> {
-        let cols = columns(count)
-        return [margin + Float(index % cols) * (blockWidth + gap), margin + Float(index / cols) * (blockDepth + gap)]
+        guard index > 0 else { return [margin, margin] }
+        let cols = columns(count - 1), i = index - 1
+        return [margin + Float(i % cols) * (blockWidth + gap),
+                margin + execDepth + gap + Float(i / cols) * (blockDepth + gap)]
     }
 
-    /// The whole office, path margin included.
+    /// The whole office for `count` blocks (the executive block included), path margin included.
     static func officeSize(count: Int) -> SIMD2<Float> {
-        let cols = columns(count), rows = (max(1, count) + cols - 1) / cols
+        let projects = max(0, count - 1)
+        let cols = columns(projects), rows = (projects + cols - 1) / cols
+        let grid = rows == 0 ? 0 : gap + Float(rows) * blockDepth + Float(rows - 1) * gap
         return [2 * margin + Float(cols) * blockWidth + Float(cols - 1) * gap,
-                2 * margin + Float(rows) * blockDepth + Float(rows - 1) * gap]
+                2 * margin + execDepth + grid]
     }
 }
 

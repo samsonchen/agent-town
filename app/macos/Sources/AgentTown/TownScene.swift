@@ -517,8 +517,8 @@ final class TownScene: ObservableObject {
     }
 
     /// The block's floor: a tiled carpet with a darker edge along the front, like a Gather room.
-    private func floor(_ node: BlockNode, colors: (NSColor, NSColor)) {
-        let w = Layout.blockWidth, d = Layout.blockDepth
+    private func floor(_ node: BlockNode, colors: (NSColor, NSColor), depth d: Float = Layout.blockDepth) {
+        let w = Layout.blockWidth
         let carpet = Self.tiles(width: w, depth: d, tile: 0.5, colors: colors)
         carpet.position = [w / 2, Layout.floorThickness, d / 2]
         node.entity.addChild(carpet)
@@ -564,26 +564,21 @@ final class TownScene: ObservableObject {
 
     private func buildExecutiveBlock(_ node: BlockNode) {
         let f = node.entity
-        floor(node, colors: (NSColor(hex: "#9D9FDC")!, NSColor(hex: "#9294D4")!))
-        // The CEO's corner.
-        place("rugRectangle", in: f, at: [Layout.ceoDesk.x, Layout.ceoDesk.y - 0.1], scale: 0.9)
+        floor(node, colors: (NSColor(hex: "#9D9FDC")!, NSColor(hex: "#9294D4")!), depth: Layout.execDepth)
+        // The CEO's desk.
+        place("rugRectangle", in: f, at: [Layout.ceoDesk.x, Layout.ceoDesk.y - 0.25], scale: 0.9)
         if let desk = place("desk", in: f, at: Layout.ceoDesk) {
             place("computerScreen", in: f, at: [Layout.ceoDesk.x - 0.1, Layout.ceoDesk.y - 0.05], scale: 0.8, onTopOf: desk)
             execPhones.ceo = telephone(in: f, at: [Layout.ceoDesk.x + 0.28, Layout.ceoDesk.y + 0.02], on: desk)
         }
-        place("bookcaseClosedWide", in: f, at: [Layout.ceoDesk.x, 0.18])
-        place("pottedPlant", in: f, at: [0.25, 0.3])
         // Reception, where the Inspector stands.
         place("kitchenBar", in: f, at: [Layout.receptionDesk.x - 0.19, Layout.receptionDesk.y])
         place("kitchenBar", in: f, at: [Layout.receptionDesk.x + 0.19, Layout.receptionDesk.y])
-        place("plantSmall1", in: f, at: [0.35, 5.0])
-        place("loungeChair", in: f, at: [1.1, 4.4])
-        place("loungeChair", in: f, at: [1.9, 4.4])
-        place("tableCoffee", in: f, at: [1.5, 4.95], scale: 0.8)
-        // The Dispatcher's desk with the radio, and the schedule board behind.
-        f.addChild(Self.box([1.5, 0.55, 0.04], NSColor(hex: "#2E5244")!, at: [Layout.boardCenter.x, 0.42, Layout.boardCenter.y]))
-        f.addChild(Self.box([1.6, 0.05, 0.05], NSColor(hex: "#7A5A3A")!, at: [Layout.boardCenter.x, 0.16, Layout.boardCenter.y]))
-        node.obstacles.append((min: Layout.boardCenter - [0.8, 0.05], max: Layout.boardCenter + [0.8, 0.05]))
+        // The schedule board on the back wall, and the Dispatcher's desk with the radio.
+        let w = Layout.boardWidth
+        f.addChild(Self.box([w, 0.55, 0.04], NSColor(hex: "#2E5244")!, at: [Layout.boardCenter.x, 0.42, Layout.boardCenter.y]))
+        f.addChild(Self.box([w + 0.1, 0.05, 0.05], NSColor(hex: "#7A5A3A")!, at: [Layout.boardCenter.x, 0.16, Layout.boardCenter.y]))
+        node.obstacles.append((min: Layout.boardCenter - [w / 2 + 0.05, 0.05], max: Layout.boardCenter + [w / 2 + 0.05, 0.05]))
         if let desk = place("desk", in: f, at: Layout.dispatcherDesk),
            let radio = place("radio", in: f, at: [Layout.dispatcherDesk.x + 0.25, Layout.dispatcherDesk.y], onTopOf: desk) {
             // The radio is lifted whole; a holder stays on the desk.
@@ -594,9 +589,8 @@ final class TownScene: ObservableObject {
             holder.addChild(radio)
             execPhones.dispatcher = Phone(device: holder, handset: radio)
         }
-        place("pottedPlant", in: f, at: [6.75, 0.3])
-        place("plantSmall1", in: f, at: [6.7, 5.0])
-        place("bookcaseOpen", in: f, at: [6.4, 3.3], yaw: -.pi / 2)
+        place("pottedPlant", in: f, at: [0.3, 0.3])
+        place("pottedPlant", in: f, at: [6.7, 0.3])
     }
 
     private func buildProjectBlock(_ node: BlockNode, colors: (NSColor, NSColor)) {
@@ -732,7 +726,9 @@ final class TownScene: ObservableObject {
         for node in blocks.values where node.placed {
             let o = node.entity.position(relativeTo: nil)
             let sign = sign(node)
-            items.append(LabelItem(id: "block-\(node.id)", anchor: o + [Layout.blockWidth / 2, 0, 0],
+            // The executive strip's sign sits on its front edge, clear of the three in the back row.
+            let edge: Float = node.id == Self.executive ? Layout.execDepth : 0
+            items.append(LabelItem(id: "block-\(node.id)", anchor: o + [Layout.blockWidth / 2, 0, edge],
                                    lines: [(sign.text, .sign)], scroll: sign.scroll))
         }
         return items

@@ -64,8 +64,8 @@ struct AgentTownApp: App {
                 TownView(scene: town.scene).frame(minWidth: 640, minHeight: 480)
             }
         }
-        // Opens at the size of the executive office alone; project blocks come with tasks.
-        .defaultSize(width: 1000, height: 740)
+        // Room for the executive strip and one project block below it.
+        .defaultSize(width: 860, height: 720)
         MenuBarExtra("agent-town", systemImage: "building.2") {
             Toggle(Labels.text("Pause"), isOn: Binding(get: { town.store.paused }, set: { town.store.paused = $0 }))
             Divider()

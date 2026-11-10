@@ -306,7 +306,7 @@ extension TownScene {
         let local = ceo.worldSpot - origin
         let edge: Float = 0.35 // on the path, just off the carpet
         let entry = SIMD2<Float>(min(Layout.blockWidth + edge, max(-edge, local.x)),
-                                 min(Layout.blockDepth + edge, max(-edge, local.y)))
+                                 min(Layout.execDepth + edge, max(-edge, local.y)))
         if entry != local {
             ceo.steering = false
             ceo.root.stopAllAnimations(recursive: false)
