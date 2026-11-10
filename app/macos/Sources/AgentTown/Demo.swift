@@ -177,7 +177,8 @@ enum Demo {
                 return (s, NSSize(width: ceil(size.width), height: ceil(size.height)), pad, style)
             }
             let total = boxes.reduce(CGFloat(0)) { $0 + $1.1.height + 2 * $1.2.height } + CGFloat(max(0, boxes.count - 1)) * 2
-            var top = height - p.y + (isSign ? total / 2 : total + 2)
+            // As in the window, a stack near the top slides down to stay in view.
+            var top = isSign ? height - p.y + total / 2 : height - max(p.y - 2, total + LabelOverlay.topMargin) + total
             for (s, size, pad, style) in boxes {
                 let rect = NSRect(x: p.x - size.width / 2 - pad.width, y: top - size.height - 2 * pad.height,
                                   width: size.width + 2 * pad.width, height: size.height + 2 * pad.height)

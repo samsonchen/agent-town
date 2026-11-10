@@ -103,7 +103,7 @@ struct TownView: View {
             .onChange(of: scene.officeSize) { projector(geo.size).apply(to: camera) }
             .onChange(of: scene.ceoSpot) { _, spot in follow(spot, size: geo.size) }
             .onChange(of: scene.ceoAway) { _, away in if away { homeTipClosed = false } }
-            .overlay(alignment: .top) { tip.padding(.top, 10) }
+            .overlay(alignment: .bottom) { tip.padding(.bottom, 10) }
             .background(KeyCatcher(onKey: { scene.key($0, down: $1) }, onResign: { scene.releaseKeys() }))
             .background(ScrollCatcher { dx, dy in
                 let ppm = Float(pixelsPerMeter(geo.size))
@@ -144,6 +144,16 @@ struct LabelOverlay: View {
     let items: [TownScene.LabelItem]
     let projector: Projector
 
+    /// Space kept between the window's top and the highest tag.
+    static let topMargin: CGFloat = 6
+
+    /// The height of a stack of tags.
+    static func height(_ item: TownScene.LabelItem) -> CGFloat {
+        if item.scroll { return Tag.height("n", .sign) }
+        let tags = item.lines.map { Tag.height($0.0, $0.1) }.reduce(0, +)
+        return tags + CGFloat(max(0, item.lines.count - 1)) * 2
+    }
+
     var body: some View {
         ZStack(alignment: .topLeading) {
             ForEach(items, id: \.id) { item in
@@ -163,7 +173,8 @@ struct LabelOverlay: View {
                 .fixedSize()
                 // Signs sit on their anchor; tags stack upward from it.
                 .frame(width: 0, height: 0, alignment: isSign ? .center : .bottom)
-                .position(x: p.x, y: isSign ? p.y : p.y - 2)
+                // A stack over someone near the top of the window slides down to stay in view.
+                .position(x: p.x, y: isSign ? p.y : max(p.y - 2, Self.height(item) + Self.topMargin))
             }
         }
     }
@@ -284,6 +295,17 @@ struct Tag: View {
         }
     }
 
+    /// The tag's height, a statement's wrapped lines included.
+    static func height(_ text: String, _ s: TownScene.LabelItem.Style) -> CGFloat {
+        let f = font(s)
+        if s == .statement {
+            let r = NSAttributedString(string: text, attributes: [.font: f])
+                .boundingRect(with: CGSize(width: width(text, s), height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin])
+            return ceil(r.height) + 10
+        }
+        return ceil(f.ascender - f.descender + f.leading) + 3
+    }
+
     /// The text's width on one line, up to the wrap width.
     static func width(_ text: String, _ s: TownScene.LabelItem.Style) -> CGFloat {
         let w = ceil(NSAttributedString(string: text, attributes: [.font: font(s)]).size().width) + 1
@@ -370,7 +392,7 @@ struct KeyCatcher: NSViewRepresentable {
     }
 }
 
-/// A tip across the top of the window, with a button to close it.
+/// A tip across the bottom of the window, with a button to close it.
 struct TipBar: View {
     let text: String
     let close: () -> Void

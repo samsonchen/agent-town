@@ -115,8 +115,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 } catch { print("demo failed: \(error)"); exit(1) }
                 if let out = value("--snapshot") {
                     let at = value("--at").flatMap(Double.init) ?? 3
+                    // --size WIDTHxHEIGHT: the window size to render, 1400x900 when not given.
+                    let wh = (value("--size") ?? "").split(separator: "x").compactMap { Double($0) }
+                    let size = wh.count == 2 ? CGSize(width: wh[0], height: wh[1]) : CGSize(width: 1400, height: 900)
                     do {
-                        try await Demo.snapshot(scene: town.scene, at: at, to: URL(fileURLWithPath: out))
+                        try await Demo.snapshot(scene: town.scene, at: at, to: URL(fileURLWithPath: out), size: size)
                         print("snapshot written")
                     } catch { print("snapshot failed: \(error)") }
                     exit(0)
