@@ -85,7 +85,11 @@ struct AgentTownApp: App {
             .defaultLaunchBehavior(.suppressed)
             .restorationBehavior(.disabled)
 
-        MenuBarExtra("agent-town", systemImage: "building.2") { TownMenu() }
+        MenuBarExtra {
+            TownMenu()
+        } label: {
+            Image(nsImage: MenuBarIcon.image).accessibilityLabel("agent-town")
+        }
     }
 }
 

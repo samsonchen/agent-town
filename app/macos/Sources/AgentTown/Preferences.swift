@@ -148,3 +148,25 @@ struct SettingsView: View {
         }
     }
 }
+
+/// The menu bar icon: Resources/Icons/menubar.png (18 × 18) and menubar@2x.png (36 × 36), drawn
+/// in its own colors. Falls back to the system building symbol if the files are missing.
+enum MenuBarIcon {
+    static let image: NSImage = {
+        let dir = Bundle.module.resourceURL!.appending(path: "Icons")
+        let size = NSSize(width: 18, height: 18)
+        let image = NSImage(size: size)
+        for name in ["menubar.png", "menubar@2x.png"] {
+            if let rep = NSImageRep(contentsOf: dir.appending(path: name)) {
+                rep.size = size
+                image.addRepresentation(rep)
+            }
+        }
+        if image.representations.isEmpty, let symbol = NSImage(systemSymbolName: "building.2", accessibilityDescription: "agent-town") {
+            symbol.isTemplate = true
+            return symbol
+        }
+        image.isTemplate = false
+        return image
+    }()
+}

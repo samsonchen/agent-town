@@ -24,7 +24,7 @@ Check these on the personal account:
 ## 2. Waiting on others
 
 - [ ] **Developer ID Application certificate.** The user's role can't create it. The Account Holder (the product manager) must accept the latest Program License Agreement and issue the certificate. `docs/releasing.md` has the steps, including the request-file route under "If you are not the Account Holder". Parts B and C (app-specific password, `notarytool store-credentials agent-town-notary`) don't need the certificate.
-- [ ] **App icon artwork** from the user: a 1024 px master for the app icon, and a template image for the menu bar (about 18 pt, black on transparent). Until then the app uses the system symbol `building.2`.
+- [x] **App icon and menu bar icon** added (2026-11-11): `assets/icons/app-icon-1024.png` (release.sh makes AppIcon.icns from it) and `Resources/Icons/menubar*.png` (in color, not a template image).
 
 ## 3. Release
 

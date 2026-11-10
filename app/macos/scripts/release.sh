@@ -82,6 +82,17 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/AgentTown" "$APP/Contents/MacOS/AgentTown"
 # The resources, with any symbolic link replaced by what it points to.
 cp -RL "$BIN_DIR/AgentTown_AgentTown.bundle" "$APP/Contents/Resources/"
+# The app icon (Finder, the Apps launcher, About), every size made from the 1024 px master.
+ICON_SRC="$REPO/assets/icons/app-icon-1024.png"
+[ -f "$ICON_SRC" ] || fail "no app icon at $ICON_SRC"
+ICONSET="$OUT/AppIcon.iconset"
+mkdir -p "$ICONSET"
+for s in 16 32 128 256 512; do
+  sips -s format png -z $s $s "$ICON_SRC" --out "$ICONSET/icon_${s}x${s}.png" >/dev/null
+  sips -s format png -z $((s * 2)) $((s * 2)) "$ICON_SRC" --out "$ICONSET/icon_${s}x${s}@2x.png" >/dev/null
+done
+iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
+rm -rf "$ICONSET"
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -91,6 +102,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleName</key><string>AgentTown</string>
   <key>CFBundleDisplayName</key><string>agent-town</string>
   <key>CFBundleExecutable</key><string>AgentTown</string>
+  <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>$VERSION</string>
   <key>CFBundleVersion</key><string>$BUILD_NUMBER</string>

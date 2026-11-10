@@ -1,10 +1,11 @@
+import AppKit
 import SwiftUI
 
 /// The app's version, from Info.plist in the packaged app.
 enum AppInfo {
     /// Used when running from the build folder (swift run), which has no Info.plist.
     /// Keep it the same as the town-link plugin's version.
-    static let fallbackVersion = "0.2.4"
+    static let fallbackVersion = "0.2.5"
 
     static var version: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? fallbackVersion
@@ -52,9 +53,9 @@ struct AboutView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 12) {
-                Image(systemName: "building.2")
-                    .font(.system(size: 34))
-                    .foregroundStyle(.tint)
+                Image(nsImage: NSApp.applicationIconImage)
+                    .resizable()
+                    .frame(width: 56, height: 56)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("agent-town").font(.title2.bold())
                     Text(versionText).foregroundStyle(.secondary).textSelection(.enabled)

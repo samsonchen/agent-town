@@ -225,7 +225,7 @@ async function flush($: any) {
 
 const statusText = () =>
   [
-    `town-link: sending is ${enabled ? 'on' : 'off'}.`,
+    `Sending is ${enabled ? 'on' : 'off'}.`, // Claude Code puts "town-link:" in front
     refused ? 'The agent-town app refused this protocol version; update town-link.' : endpoint ? 'Connected to the agent-town app.' : 'The agent-town app is not running.',
     'Use /town on or /town off to change sending for all sessions.',
   ].join('\n')

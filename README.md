@@ -76,7 +76,7 @@ Or download `AgentTown-<version>.dmg` from [Releases](https://github.com/samsonc
 
 The app is not signed yet, so macOS blocks it the first time it opens. Open System Settings → Privacy & Security, find the message about AgentTown, and click **Open Anyway**. This is needed once. A signed version is planned; it will open without this step.
 
-The app appears in the menu bar as a small building, with no Dock icon. Open it before you start work: town-link sends events only while the app is running. To have it start with your Mac, turn on Settings → Open at login.
+The app appears in the menu bar as a small yellow building, with no Dock icon. Open it before you start work: town-link sends events only while the app is running. To have it start with your Mac, turn on Settings → Open at login.
 
 To update: `brew upgrade --cask agent-town`, or download the new `.dmg`.
 
