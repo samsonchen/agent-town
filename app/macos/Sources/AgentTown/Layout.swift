@@ -279,6 +279,8 @@ struct Labels {
     var dispatcher: String { t("Dispatcher") }
     var inspector: String { t("Inspector") }
     var returned: String { t("Returned") }
+    /// The note for a ticket with no prompt text, such as the turn after a `!` shell command.
+    var continuing: String { t("Continuing") }
     var executive: String { t("Executive office") }
     var ring: String { t("Ring ring") }
     var staff: String { t("Staff") }

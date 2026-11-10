@@ -352,6 +352,16 @@ export class Town {
     this.openTicket('unknown', text, now)
   }
 
+  /**
+   * turn.start. A main-loop turn that begins with no ticket open came without a prompt.submit,
+   * such as Claude Code going on after a `!` shell command: open a ticket for it, so its work
+   * and its report show.
+   */
+  turnStart(e: { text: string; agentId?: string }, now: number) {
+    if (e.agentId || this.ticket) return
+    this.openTicket('unknown', e.text ?? '', now)
+  }
+
   private summaryOf(text: string): string {
     return /<summary>([^<]*)<\/summary>/.exec(text)?.[1]?.trim() ?? ''
   }

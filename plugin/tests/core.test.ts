@@ -189,6 +189,22 @@ describe('tickets', () => {
     expect(types(t)).toEqual(['session.open', 'ticket.submit', 'ticket.done'])
   })
 
+  test('a main-loop turn with no prompt (after a ! command) opens a ticket, and its end reports', async () => {
+    const t = new Town(ids())
+    t.turnStart({ text: '' }, 100)
+    t.turnComplete({ durationMs: 900, isAborted: false }, 1000)
+    const out = t.drain().map(e => e.type)
+    expect(out).toEqual(['ticket.submit', 'ticket.done'])
+  })
+
+  test('turn.start adds no ticket after a prompt, or for a subagent', async () => {
+    const t = new Town(ids())
+    t.prompt({ text: 'fix it', kind: 'composer' }, 100)
+    t.turnStart({ text: 'fix it' }, 110)
+    t.turnStart({ text: 'look', agentId: 'a1' }, 120)
+    expect(t.drain().filter(e => e.type === 'ticket.submit').length).toBe(1)
+  })
+
   test('an auto-continuation returns the last ticket, and the next done covers all the work', async () => {
     const t = new Town(ids())
     t.prompt({ text: 'fix it', kind: 'composer' }, 1000)

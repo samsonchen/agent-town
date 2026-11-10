@@ -185,10 +185,10 @@ final class TownScene: ObservableObject {
                 }
             default:
                 // A follow-up or an untraced turn: the Chief of Staff picks it up from the inbox.
-                chief.enqueue {
+                chief.enqueue { [unowned self] in
                     chief.body.play("pick-up", loop: false)
                     try? await Task.sleep(for: .seconds(0.8))
-                    chief.ticketText = ticket.text
+                    chief.ticketText = ticket.text.isEmpty ? self.labels.continuing : ticket.text
                     chief.working = true
                     chief.settle()
                 }

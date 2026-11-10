@@ -320,6 +320,12 @@ export const register: Register = on => {
     return next(e)
   }).catch(passOn)
 
+  on('turn.start', async ($, e, next) => {
+    safe(() => town.turnStart({ text: e.text, agentId: e.agentId }, Date.now()))
+    collect()
+    return next(e)
+  }).catch(passOn)
+
   on('turn.complete', async ($, e, next) => {
     safe(() =>
       town.turnComplete(
