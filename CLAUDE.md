@@ -9,6 +9,7 @@ A macOS menu bar app (Swift, RealityKit) that draws Claude Code's work as a smal
 - `protocol/`: the JSON schema (`schema/v1.schema.json`), recorded fixtures for demos and tests, and `fixtures/expected/`, the building state each fixture must produce (shared with a future Windows app). After changing how events are applied, regenerate with `UPDATE_EXPECTED=1 swift test --filter fixturesMatchTheirExpectedState` in `app/macos` and review the diff.
 - `tools/debug-receiver.py`: a stand-in for the app that prints events; `--forward --log FILE` records a live run while the app keeps drawing it. On Windows it writes `%APPDATA%\agent-town\endpoint.json`, so a session can be checked there with no app (`claude -p ... --plugin-dir plugin`).
 - `Casks/agent-town.rb`: the Homebrew cask (this repo is the tap).
+- `app/windows/`: the Windows app (Godot 4.7, typed GDScript), in progress; see `docs/windows/`. It keeps copies of `catalog/*.json`, the Kenney models and the macOS app's `Localizable.strings` in `app/windows/shared/`: after changing any of those, run `python tools/sync-windows-assets.py` and commit the copies (`--check` reports stale ones).
 
 ## Checks
 
