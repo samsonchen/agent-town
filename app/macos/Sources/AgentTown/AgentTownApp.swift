@@ -87,7 +87,32 @@ struct AgentTownApp: App {
 
         // The system "building" symbol: macOS sizes it for the menu bar and colors it for light
         // mode, dark mode and an open menu.
-        MenuBarExtra("agent-town", systemImage: "building.2") { TownMenu() }
+        MenuBarExtra {
+            TownMenu()
+        } label: {
+            LaunchOpener()
+        }
+    }
+}
+
+/// The menu bar icon. It also opens the office window at launch when it should be open but is not:
+/// started at login, the app gets no window from `defaultLaunchBehavior(.presented)`, and the user
+/// had to hide and show it. The label is built at launch, unlike the menu, so it can do this.
+private struct LaunchOpener: View {
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some View {
+        Image(systemName: "building.2")
+            .task {
+                let args = CommandLine.arguments
+                guard Prefs.isOn(Prefs.showWindow), !args.contains("--demo"), !args.contains("--spike") else { return }
+                // Give SwiftUI the first chance to present the window itself.
+                try? await Task.sleep(for: .seconds(1.5))
+                let shown = NSApp.windows.contains { $0.isVisible && $0.title == "agent-town" }
+                guard !shown else { return }
+                openWindow(id: "town")
+                NSApp.activate(ignoringOtherApps: true)
+            }
     }
 }
 
