@@ -50,13 +50,18 @@ func tick(now_ms: int) -> void:
 
 func receive(batch: Dictionary, now_ms: int) -> void:
 	last_event_ms = now_ms
-	for e: TownEvent in batch["events"]:
+	var events: Array = batch["events"]
+	_log("batch protocol=%d events=%d" % [int(batch.get("protocol", 0)), events.size()])
+	for e: TownEvent in events:
 		_apply(_sequencer.push(e, now_ms), now_ms)
 
 
 func _apply(events: Array[TownEvent], now_ms: int) -> void:
 	for e in events:
-		_log("event %s seq=%d session=%s project=%s" % [e.type, e.seq, e.session_id.left(8), e.project_id])
+		# The whole event: full session and project IDs, the sender's clock and every field, so a
+		# log shows exactly what town-link sent (for example the projectName of a session.open).
+		_log("event %s seq=%d ts=%d session=%s project=%s fields=%s" % [e.type, e.seq, e.ts, e.session_id,
+			JSON.stringify(e.project_id), JSON.stringify(e.fields)])
 		_emit(building.apply(e, now_ms))
 
 
@@ -73,7 +78,7 @@ func _log(line: String) -> void:
 	if f == null:
 		return
 	f.seek_end()
-	f.store_line("%s %s" % [Time.get_datetime_string_from_system(true), line])
+	f.store_line("%s %s" % [Time.get_datetime_string_from_system(false, true), line])
 	f.close()
 
 
