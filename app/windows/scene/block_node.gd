@@ -22,6 +22,7 @@ var carried: Dictionary = {} ## back-row slot -> desk Node3D carried in and set 
 var active_desk: Dictionary = {} ## session -> job key of the desk worker with the main agent's work now
 var temp_slots: Dictionary = {} ## actor id -> back-row slot, for staff who carry a desk in
 var leaving_slots: Array[int] = [] ## back-row slots whose Chief left but whose desk is not carried out yet
+var obstacles: Array[Rect2] = [] ## furniture footprints (block-local x, z), which the CEO walks around
 
 
 ## A back-row slot with no Chief, no desk carried in, and no one bringing or taking one.

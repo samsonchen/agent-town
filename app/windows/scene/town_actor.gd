@@ -29,6 +29,7 @@ var activity: Variant = null
 var phone: TownPhone = null
 var on_call := false
 var awaiting_approval := false
+var steering := false ## the CEO walks under the user's control; scenes leave its animation alone
 var home := Vector2.ZERO
 var home_facing := Vector2(0, 1)
 
@@ -102,7 +103,7 @@ func play(clip: String, loop: bool = true, blend: float = 0.15) -> void:
 
 ## The looping clip for where the character is now (spec: activities).
 func settle() -> void:
-	if on_call:
+	if on_call or steering:
 		return
 	if awaiting_approval:
 		play("holding-right")

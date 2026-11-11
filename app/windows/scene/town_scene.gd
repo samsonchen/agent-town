@@ -19,6 +19,7 @@ var labels: TownLabels
 var assets := TownAssets.new()
 var building: Building ## the store's building, read for names, roles and context
 var staff: StaffDirector
+var ceo_driver: CeoDriver ## the CEO under the user's control
 var office_size := Layout.office_size(1)
 var blocks: Dictionary = {} ## id -> BlockNode
 var block_order: Array[String] = []
@@ -56,6 +57,9 @@ func _ready() -> void:
 		var a := make_actor(spec[0], spec[0], fixed[spec[0]], "", exec, spec[1], spec[2])
 		a.phone = exec_phones.get(spec[0])
 		a.play("idle")
+	ceo_driver = CeoDriver.new(self)
+	add_child(ceo_driver)
+	ceo_driver.make_mobile()
 	_typing_loop()
 	staff.bench_life_loop()
 
@@ -635,7 +639,30 @@ func place(name: String, parent: Node3D, p: Vector2, yaw: float = 0.0, scale_: f
 	var floor_y := bounds(on_top_of, parent).end.y if on_top_of != null else Layout.FLOOR_THICKNESS
 	var c := b.get_center()
 	e.position += Vector3(p.x - c.x, floor_y - b.position.y, p.y - c.z)
+	# Furniture standing on a block's floor is in the CEO's way (rugs are walked over).
+	if on_top_of == null and not name.begins_with("rug"):
+		for bn: BlockNode in blocks.values():
+			if bn.node == parent:
+				bn.obstacles.append(footprint(e, parent))
 	return e
+
+
+## The footprint of `n` on `relative_to`'s floor, as a Rect2 of (x, z).
+static func footprint(n: Node3D, relative_to: Node3D) -> Rect2:
+	var b := bounds(n, relative_to)
+	return Rect2(Vector2(b.position.x, b.position.z), Vector2(b.size.x, b.size.z))
+
+
+## Furniture footprints on the office floor, every block's moved to where the block is.
+func world_obstacles() -> Array[Rect2]:
+	var out: Array[Rect2] = []
+	for bn: BlockNode in blocks.values():
+		if not bn.placed or not is_instance_valid(bn.node):
+			continue
+		var o := Vector2(bn.node.position.x, bn.node.position.z)
+		for r in bn.obstacles:
+			out.append(Rect2(r.position + o, r.size))
+	return out
 
 
 ## A desk telephone at `p` on top of `desk`.
@@ -667,6 +694,7 @@ func _build_executive_block(b: BlockNode) -> void:
 	var w := Layout.BOARD_WIDTH
 	f.add_child(box(Vector3(w, 0.55, 0.04), "#2E5244", Vector3(Layout.BOARD_CENTER.x, 0.42, Layout.BOARD_CENTER.y)))
 	f.add_child(box(Vector3(w + 0.1, 0.05, 0.05), "#7A5A3A", Vector3(Layout.BOARD_CENTER.x, 0.16, Layout.BOARD_CENTER.y)))
+	b.obstacles.append(Rect2(Layout.BOARD_CENTER - Vector2(w / 2.0 + 0.05, 0.05), Vector2(w + 0.1, 0.1)))
 	var ddesk := place("desk", f, Layout.DISPATCHER_DESK)
 	var radio := place("radio", f, Vector2(Layout.DISPATCHER_DESK.x + 0.25, Layout.DISPATCHER_DESK.y), 0.0, 1.0, ddesk)
 	# The radio is lifted whole; a holder stays on the desk where it stood.
@@ -746,6 +774,7 @@ func put_down(kit: Node3D, a: TownActor, b: BlockNode, slot: int) -> void:
 	kit.transform = Transform3D(Basis.IDENTITY, Vector3(Layout.desk_x(slot), 0, Layout.CHIEF_DESK_Z))
 	a.carrying = null
 	b.carried[slot] = kit
+	b.obstacles.append(footprint(kit, b.node))
 	await wait(0.3)
 
 
@@ -755,6 +784,8 @@ func pick_up(a: TownActor, b: BlockNode, slot: int) -> void:
 	if kit == null:
 		return
 	b.carried.erase(slot)
+	var fp := footprint(kit, b.node)
+	b.obstacles = b.obstacles.filter(func(r: Rect2) -> bool: return not r.is_equal_approx(fp))
 	a.play("pick-up", false)
 	await wait(0.4)
 	if is_instance_valid(kit) and is_instance_valid(a.root):

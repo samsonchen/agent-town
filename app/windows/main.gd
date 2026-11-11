@@ -7,6 +7,7 @@ extends Node
 ## (port of app/macos/Sources/AgentTown/Demo.swift):
 ##   godot --path app/windows -- --demo ../../protocol/fixtures/01-basic-ticket.json [--speed N]
 ##         [--snapshot out.png --at SECONDS[,SECONDS…]] [--language en|zh-Hant] [--open settings|about]
+##         [--keys "down:1.5,right:1,h"]
 ## Gaps between events keep their timing, each capped at 4 s and divided by `--speed`.
 
 const PIXELS_PER_METER := 110.0 ## the office is shown at this size when it fits
@@ -63,6 +64,8 @@ func _ready() -> void:
 	scene.sound.connect(audio.play)
 	scene.office_resized.connect(func(_s: Vector2) -> void: _fit_window())
 	w.size_changed.connect(_update_camera)
+	w.focus_exited.connect(func() -> void: scene.ceo_driver.release_keys())
+	scene.ceo_driver.moved.connect(_follow)
 
 	_restore_window()
 	w.always_on_top = settings.stay_on_top
@@ -90,6 +93,8 @@ func _ready() -> void:
 	else:
 		var version: String = ProjectSettings.get_setting("application/config/version", "0.0.0")
 		store.start(version)
+	if _args.has("keys"):
+		_press_keys(_args["keys"])
 	if _args.has("snapshot"):
 		_snapshot_later(_args["snapshot"], _args.get("at", "3"))
 
@@ -104,6 +109,45 @@ static func _parse_args(args: PackedStringArray) -> Dictionary:
 		else:
 			i += 1
 	return out
+
+
+## The arrow keys and H walk the CEO (spec: walking the CEO); the scroll wheel pans the view
+## when the office does not fit (Shift or a sideways wheel pans across).
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and not (event as InputEventKey).echo:
+		var k := event as InputEventKey
+		if scene.ceo_driver.key(k.keycode, k.pressed):
+			get_viewport().set_input_as_handled()
+	elif event is InputEventMouseButton and (event as InputEventMouseButton).pressed:
+		var mb := event as InputEventMouseButton
+		var step := 0.6
+		match mb.button_index:
+			MOUSE_BUTTON_WHEEL_UP:
+				_pan_by(Vector2(-step, 0) if mb.shift_pressed else Vector2(0, -step))
+			MOUSE_BUTTON_WHEEL_DOWN:
+				_pan_by(Vector2(step, 0) if mb.shift_pressed else Vector2(0, step))
+			MOUSE_BUTTON_WHEEL_LEFT:
+				_pan_by(Vector2(-step, 0))
+			MOUSE_BUTTON_WHEEL_RIGHT:
+				_pan_by(Vector2(step, 0))
+
+
+func _pan_by(d: Vector2) -> void:
+	pan += d
+	_update_camera()
+
+
+## Pans so the CEO stays inside the middle of the window while walking.
+func _follow(spot: Vector2) -> void:
+	var size := Vector2(get_window().size)
+	var p := camera.unproject_position(Vector3(spot.x, 0.3, spot.y))
+	var m := size * 0.2
+	var dx := p.x - m.x if p.x < m.x else (p.x - (size.x - m.x) if p.x > size.x - m.x else 0.0)
+	var dy := p.y - m.y if p.y < m.y else (p.y - (size.y - m.y) if p.y > size.y - m.y else 0.0)
+	if dx == 0.0 and dy == 0.0:
+		return
+	var ppm := pixels_per_meter(size)
+	_pan_by(Vector2(dx / ppm, dy / ppm / sin(TownScene.PITCH)))
 
 
 func _notification(what: int) -> void:
@@ -293,6 +337,25 @@ func _play_demo(path: String, speed: float) -> void:
 			await get_tree().create_timer(minf(4.0, float(e.ts - last) / 1000.0) / maxf(0.01, speed)).timeout
 		last = e.ts
 		store.receive({"protocol": 1, "events": [e] as Array[TownEvent]}, Time.get_ticks_msec())
+
+
+## `--keys "down:1.5,right:1,h"` presses keys through the normal input path, for checking the CEO:
+## each item is a key and how long it is held (H and others are tapped). Starts after 1 s.
+func _press_keys(spec: String) -> void:
+	var names := {"left": KEY_LEFT, "right": KEY_RIGHT, "up": KEY_UP, "down": KEY_DOWN, "h": KEY_H}
+	await get_tree().create_timer(1.0).timeout
+	for item: String in spec.split(","):
+		var parts := item.strip_edges().split(":")
+		var code: int = names.get(parts[0].to_lower(), KEY_NONE)
+		var hold := float(parts[1]) if parts.size() > 1 else 0.05
+		for pressed: bool in [true, false]:
+			var e := InputEventKey.new()
+			e.keycode = code
+			e.pressed = pressed
+			Input.parse_input_event(e)
+			if pressed:
+				await get_tree().create_timer(hold).timeout
+		await get_tree().create_timer(0.2).timeout
 
 
 ## `--at` may list several times ("6,12,21"): each writes out-1.png, out-2.png …; the last quits.
