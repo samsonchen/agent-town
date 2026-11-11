@@ -1,4 +1,4 @@
-# agent-town
+# agent-town: watch your Claude Code agents at work
 
 agent-town shows Claude Code's work as a small office on macOS, seen from above like a Gather Town map, with 3D characters. You are the CEO. Each Claude Code session is a Chief of Staff with a staff of its own, and you can watch them take your tickets, call staff, run background jobs, wait for your approval and phone the report back.
 
@@ -28,7 +28,7 @@ Nothing leaves your Mac except one short request per task: town-link asks Haiku,
 - It does not control Claude Code. You still work in the terminal or the Claude desktop app; agent-town only watches.
 - It is not finished. See [Known issues and limitations](#4-known-issues-and-limitations) and the [roadmap](docs/roadmap.md). If something in the office looks wrong, or you would like a scene that is not there yet, please open an issue on GitHub.
 
-![agent-town: the executive office with the CEO, the Inspector and the Dispatcher, and a project block where the Chief of Staff phones the CEO while a DevOps Engineer works and staff wait on the bench](docs/images/agent-town.png)
+![agent-town at work: the executive office with the CEO, the Inspector and the Dispatcher, and a project block with two Chiefs of Staff, the staff desks, the server room and the resource bench](docs/images/agent-town.gif)
 
 ## 2. Installing
 
