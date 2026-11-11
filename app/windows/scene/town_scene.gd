@@ -805,7 +805,9 @@ func label_items() -> Array[Dictionary]:
 		var b: BlockNode = blocks[id]
 		var o := b.node.position
 		var edge := Layout.EXEC_DEPTH if id == EXECUTIVE else 0.0
-		items.append({"anchor": o + Vector3(Layout.BLOCK_WIDTH / 2.0, 0, edge), "lines": [[_sign(b), "sign"]]})
+		var sign := _sign(b)
+		items.append({"id": "block-" + id, "anchor": o + Vector3(Layout.BLOCK_WIDTH / 2.0, 0, edge), "lines": [[sign[0], "sign"]],
+			"scroll": sign[1]})
 		if id == EXECUTIVE:
 			continue
 		var at := Layout.SERVER_ROOM_LABEL
@@ -859,13 +861,15 @@ func call_lines() -> Array:
 	return out
 
 
-## The block's sign: the project's name, then the title of each running task, by desk.
-func _sign(b: BlockNode) -> String:
+## The block's sign: the project's name, then the title of each running task, by desk (two at
+## most). Returns [text, scroll]: `scroll` when the titles are wider than TownLabels.TITLE_WIDTH
+## columns, so the whole sign scrolls (spec: the office).
+func _sign(b: BlockNode) -> Array:
 	if b.id == EXECUTIVE:
-		return b.name
+		return [b.name, false]
 	var block: Building.Block = building.blocks.get(b.id)
 	if block == null:
-		return b.name
+		return [b.name, false]
 	var titles: Array[String] = []
 	var sessions := block.chiefs.keys()
 	sessions.sort_custom(func(x: String, y: String) -> bool: return int(b.chief_slots.get(x, 99)) < int(b.chief_slots.get(y, 99)))
@@ -874,9 +878,10 @@ func _sign(b: BlockNode) -> String:
 		if c.ticket != null and c.ticket.title != null and titles.size() < 2:
 			titles.append(c.ticket.title)
 	if titles.is_empty():
-		return block.name
+		return [block.name, false]
+	var title := " · ".join(titles)
 	var parts: Array[String] = []
 	if block.name != block.project_id:
 		parts.append(block.name)
-	parts.append(" · ".join(titles))
-	return " · ".join(parts)
+	parts.append(title)
+	return [" · ".join(parts), TownLabels.display_width(title) > TownLabels.TITLE_WIDTH]
