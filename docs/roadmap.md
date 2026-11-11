@@ -58,7 +58,7 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - [x] Agent-to-agent messages: the sender walks over and both show a speech bubble (scene 16)
 - [x] Activities for the Chief of Staff and staff (scene 5)
 - [x] Approval: the waiting character shows "Needs approval", a line runs to the CEO, and the CEO's phone rings until it is answered; approval sound (scene 6)
-- [x] Operators in safety orange at the machine room racks; results back to the Chief of Staff; killed tasks leave with no result (scenes 11, 12)
+- [x] Operators in safety orange at the server room racks; results back to the Chief of Staff; killed tasks leave with no result (scenes 11, 12)
 - [x] Walkways: characters walk along the walkways and between desks, not through them
 - [ ] Props in hand (laptop, clipboard, stopwatch …) and a looping animation per background role
 - [ ] More idle life on the bench (coffee, magazine, darts); sitting on the sofa
@@ -108,4 +108,4 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 | Should `claude -p` and Agent SDK runs appear in the building? | Yes, no, or a setting (default off) |
 | Sound files | Pick from CC0 libraries, or commission original ones |
 | Default bench size, and whether the bench is per block (current spec) or one shared bench | Per block keeps calls fast; a shared bench means walks across the office |
-| Long-lived operators (dev servers) | Stay in the machine room until killed or the session ends (current spec), or move to a smaller "on duty" spot after a few minutes |
+| Long-lived operators (dev servers) | Stay in the server room until killed or the session ends (current spec), or move to a smaller "on duty" spot after a few minutes |

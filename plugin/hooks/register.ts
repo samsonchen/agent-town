@@ -13,6 +13,8 @@ import type { TownSaved } from '../types'
 const PROTOCOL = 1
 const FLUSH_MS = 250
 const HEARTBEAT_MS = 30_000
+/** How often to check whether subagents with open background tasks have finished. */
+const SETTLE_MS = 5_000
 const ENDPOINT_RETRY_MS = 2_000
 const MAX_QUEUE = 500
 // A batch lost to a dead connection (the app restarted, on a new port) is sent once more after
@@ -108,6 +110,19 @@ function collect() {
   }
   if (queue.length > MAX_QUEUE) queue = queue.slice(-MAX_QUEUE)
   dirty = true
+}
+
+/** Ends background tasks whose subagent has finished (see Town.agentsSettled). */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function settleAgentTasks($: any) {
+  if (!town.hasAgentTasks) return
+  try {
+    const agents = (await $.agent.list()) as { id: string; status: string }[]
+    safe(() => town.agentsSettled(agents, Date.now()))
+    collect()
+  } catch {
+    // try again next time
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -291,6 +306,7 @@ export const register: Register = on => {
         safe(() => town.heartbeat())
         collect()
       })
+      $.clock.every(SETTLE_MS, () => void settleAgentTasks($))
     } catch {
       // the session goes on without the town
     }
@@ -388,6 +404,15 @@ export const register: Register = on => {
     collect()
     runJobs($)
     return r
+  }).catch(passOn)
+
+  // A background task started by a subagent notifies that subagent, not the main conversation.
+  on('session.receive', ($, e, next) => {
+    safe(() => {
+      if (e.agentId && e.origin?.kind === 'task-notification') town.subagentNotified(e.text ?? '', Date.now())
+    })
+    collect()
+    return next(e)
   }).catch(passOn)
 
   on('session.send', ($, e, next) => {

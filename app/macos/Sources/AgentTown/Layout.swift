@@ -69,6 +69,8 @@ enum Layout {
     static let consoles = 4
     static func rackX(_ i: Int) -> Float { 0.65 + Float(i) * 0.75 }
     static let rackZ: Float = 3.55
+    /// The "Server room" label, on the room's front edge.
+    static let serverRoomLabel = SIMD2<Float>(1.8, 5.1)
     static func operatorSpot(slot: Int) -> SIMD2<Float> {
         slot < consoles ? [rackX(slot), 4.1] : [rackX(slot % consoles), 4.75]
     }
@@ -282,6 +284,7 @@ struct Labels {
     /// The note for a ticket with no prompt text, such as the turn after a `!` shell command.
     var continuing: String { t("Continuing") }
     var executive: String { t("Executive office") }
+    var serverRoom: String { t("Server room") }
     var ring: String { t("Ring ring") }
     var staff: String { t("Staff") }
     var operatorName: String { t("Operator") }

@@ -36,7 +36,7 @@ Every piece of work starts with a ticket, and every ticket has an issuer. The re
   - the reception desk, with a telephone, where the Inspector stands;
   - the Dispatcher's desk, with a radio, and a board on the back wall beside it that shows one card for each active schedule, in the color of its project's block. The board holds six cards (two rows of three); more schedules are counted but get no card. A line on the floor under the board names the projects with schedules, with a count for a project that has more than one, such as "agent-town ×2 · care-portal".
 - **Telephones** carry tickets and reports. The CEO phones a Chief of Staff with a ticket, and a Chief of Staff phones the CEO with the report. During a call both people hold the handset, the other phone rings first, and a dashed line joins the two. When the CEO is away from the desk, the CEO's calls use a mobile phone instead.
-- **Each project block has a machine room** in one corner, with consoles and server racks. Operators work there, apart from the staff desks.
+- **Each project block has a server room** in one corner, with consoles and server racks. Operators work there, apart from the staff desks.
 - **Each project block has a resource bench** (待命室): a lounge where staff and operators wait between jobs. See "Resource bench" below.
 - The whole office is visible at once. There are no tabs. When it does not fit in the window, the view pans with the scroll wheel or trackpad, and it follows the CEO when the user walks the CEO around.
 - The user sets the window size and the bench size (number of characters waiting on each bench).
@@ -58,7 +58,7 @@ Each scene below is triggered by a Claude Code event. The event mapping is in [a
 | 8 | The main task finishes | The desk workers bring their reports to the Chief of Staff (scene 7), then the Chief of Staff phones the report to the CEO. The completion sound plays as the CEO's phone starts to ring, so the call is on screen when it is heard, if the sound rule below allows it. |
 | 9 | The user interrupts the task | The Chief of Staff stops working. No report call, no sound. |
 | 10 | Session ends | The Chief of Staff is gone from the desk, with no walk-out; a Chief who carried a desk in carries it out along the path. Any remaining staff and operators go back to the resource bench (a newcomer who carried a desk in leaves with it). The session's cards are removed from the Dispatcher's board. A block with no sessions left is removed, and the other blocks close up. |
-| 11 | A background task starts | The character that started the task (the Chief of Staff, or a staff member) pages a waiting operator over the bench speaker. The operator walks into the machine room and starts work at a console. The name tag shows the background role. If no role is decided yet when the operator leaves the bench, they keep a neutral outfit until it is. |
+| 11 | A background task starts | The character that started the task (the Chief of Staff, or a staff member) pages a waiting operator over the bench speaker. The operator walks into the server room and starts work at a console. The name tag shows the background role. If no role is decided yet when the operator leaves the bench, they keep a neutral outfit until it is. |
 | 12 | A background task finishes | The operator brings the result to the Chief of Staff and walks back to the resource bench. If Claude Code then starts a new turn to handle the result, the Chief of Staff works on it as a follow-up ticket. No call comes from the CEO for it. When that turn ends, the report goes to the issuer of the ticket that started the operator (scene 8). A failed task shows a distinct "failed" result. A task that is stopped (killed) leaves with no result. |
 | 13 | A schedule is created or deleted | A card is pinned to the Dispatcher's board, or taken down, and the other cards move left to close the gap. |
 | 14 | A schedule fires | The Dispatcher radios the card's ticket to that session's Chief of Staff, the same way the CEO phones in scene 2. When the turn ends, the Chief of Staff phones the report to the Dispatcher, not to the CEO. |
@@ -107,7 +107,7 @@ The bench has a speaker on a side table beside the sofa. The caller does not wal
    4. anyone waiting, who changes outfit.
 3. If the bench is empty, a new character walks in from the path and comes to the bench to be called.
 4. Subagents or tasks that start within about 1 second of each other are called in one page. The Chief of Staff calls several characters at once.
-5. The called characters stand up and walk straight to free desks (staff) or to the machine room (operators), each carrying a smaller ticket. The caller hangs up. When the five staff desks are taken, a newcomer walks in from the path with a desk instead (see "Six desks per project block").
+5. The called characters stand up and walk straight to free desks (staff) or to the server room (operators), each carrying a smaller ticket. The caller hangs up. When the five staff desks are taken, a newcomer walks in from the path with a desk instead (see "Six desks per project block").
 
 An operator can be called back from the bench as staff, and the other way around. They change outfit on the way.
 
@@ -128,7 +128,7 @@ Each Chief of Staff and staff member can show a small badge with the model it is
 | Read, Grep, Glob | Reading papers or browsing a bookshelf |
 | Edit, Write, NotebookEdit | Typing |
 | Bash | Working at a terminal |
-| Background task (operator) | Working at a console in the machine room, with a looping animation for the role (see [roles.md](roles.md)) until the task ends |
+| Background task (operator) | Working at a console in the server room, with a looping animation for the role (see [roles.md](roles.md)) until the task ends |
 | WebSearch, WebFetch | Looking at a globe or a window |
 | MCP tools | Using the phone |
 | Anything else | Typing |

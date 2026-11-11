@@ -719,6 +719,10 @@ final class TownScene: ObservableObject {
             let edge: Float = node.id == Self.executive ? Layout.execDepth : 0
             items.append(LabelItem(id: "block-\(node.id)", anchor: o + [Layout.blockWidth / 2, 0, edge],
                                    lines: [(sign.text, .sign)], scroll: sign.scroll))
+            if node.id != Self.executive {
+                let at = Layout.serverRoomLabel
+                items.append(LabelItem(id: "servers-\(node.id)", anchor: o + [at.x, 0, at.y], lines: [(labels.serverRoom, .faint)]))
+            }
         }
         items += boardLabels()
         return items

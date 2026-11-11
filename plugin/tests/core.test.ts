@@ -270,6 +270,32 @@ describe('background tasks and schedules', () => {
     expect(t.drain().at(-1)).toEqual({ type: 'task.role', taskId: 'b2', role: 'background-worker' })
   })
 
+  test('a task a subagent started ends by its own notification, by TaskStop, or when the subagent is over', async () => {
+    const t = new Town(ids())
+    t.hire({ subagentType: 'general-purpose', description: 'Accounting', prompt: 'x', background: true }, { agentId: 'a1' }, 0)
+    t.hire({ subagentType: 'general-purpose', description: 'Legal', prompt: 'x', background: true }, { agentId: 'a2' }, 0)
+    const bg = (id: string, agentId: string) =>
+      t.toolEnd({ tool: 'Bash', tool_use_id: `u-${id}`, agentId, input: { command: 'sleep 40', run_in_background: true } }, { ok: true, result: { backgroundTaskId: id } }, 0)
+    bg('b1', 'a1')
+    bg('b2', 'a1')
+    bg('b3', 'a2')
+    t.drain()
+    expect(t.hasAgentTasks).toBe(true)
+
+    t.subagentNotified(NOTE('b1'), 1000)
+    t.toolEnd({ tool: 'TaskStop', tool_use_id: 'u9', agentId: 'a2', input: { task_id: 'b3' } }, { ok: true, result: {} }, 1500)
+    expect(t.drain().map(e => [e.type, e.taskId, e.status])).toEqual([
+      ['task.done', 'b1', 'completed'],
+      ['task.done', 'b3', 'killed'],
+    ])
+
+    t.agentsSettled([{ id: 'a1', status: 'running' }], 2000)
+    expect(t.drain()).toEqual([])
+    t.agentsSettled([{ id: 'a1', status: 'completed' }], 3000)
+    expect(t.drain()).toEqual([{ type: 'task.done', taskId: 'b2', status: 'completed', durationMs: 3000 }])
+    expect(t.hasAgentTasks).toBe(false)
+  })
+
   test('Monitor and Workflow get their roles by tool', async () => {
     const t = new Town(ids())
     t.toolEnd({ tool: 'Monitor', tool_use_id: 'u1', input: { description: 'watch logs' } }, { ok: true, result: { taskId: 'm1' } }, 0)

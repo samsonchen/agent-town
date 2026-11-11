@@ -42,7 +42,7 @@ type Ticket = { id: string; origin: Origin; startTs: number; returned: boolean; 
 /** The staff member the Chief of Staff called to do the main loop's own work on the open ticket. */
 type Desk = { id: string; role: string; firm: boolean; since: number; lastActive: number }
 type Staff = { name?: string; hireTs: number }
-type Task = { startTs: number; ticketId?: string }
+type Task = { startTs: number; ticketId?: string; agentId?: string }
 type Approval = { tool: string; agentId?: string; askTs: number; waited: boolean; autoMode: boolean }
 
 export type ToolOutcome = { ok: boolean; result: Record<string, unknown> }
@@ -585,6 +585,8 @@ export class Town {
     } else if (e.tool === 'Workflow' && str(r.taskId)) {
       const desc = str(r.workflowName) || str(inp.name) || 'Workflow'
       this.taskStart(str(r.taskId)!, 'workflow', e.agentId, desc, 'workflow-coordinator', now)
+    } else if (e.tool === 'TaskStop' && (str(inp.task_id) || str(inp.shell_id))) {
+      this.finishTasks([{ taskId: (str(inp.task_id) || str(inp.shell_id))!, status: 'killed' }], now)
     } else if (e.tool === 'CronCreate' && str(r.id)) {
       const id = str(r.id)!
       const recurring = typeof r.recurring === 'boolean' ? r.recurring : inp.recurring !== false
@@ -625,7 +627,7 @@ export class Town {
   private doneTasks = new Map<string, Task>()
 
   private taskStart(taskId: string, kind: string, agentId: string | undefined, description: string, role: string | undefined, now: number) {
-    this.tasks.set(taskId, { startTs: now, ticketId: this.ticket?.id })
+    this.tasks.set(taskId, { startTs: now, ticketId: this.ticket?.id, ...(agentId ? { agentId } : {}) })
     this.emit({
       type: 'task.start',
       taskId,
@@ -638,6 +640,33 @@ export class Town {
     if (!role) {
       this.jobs.push({ kind: 'task-role', id: taskId, text: description.slice(0, 600), labels: BACKGROUND_ROLES, fallback: BACKGROUND_FALLBACK })
     }
+  }
+
+  /**
+   * A task notification delivered to a subagent (session.receive with its agentId).
+   * The main conversation's come through prompt(), which also opens the follow-up ticket.
+   */
+  subagentNotified(text: string, now: number) {
+    this.finishTasks(parseNotifications(text), now)
+  }
+
+  /** Whether a background task started by a subagent is still open. */
+  get hasAgentTasks(): boolean {
+    for (const t of this.tasks.values()) if (t.agentId) return true
+    return false
+  }
+
+  /**
+   * Ends the open tasks of subagents that have finished. Claude Code keeps a subagent going
+   * until its own background work ends, and that work's notifications go to the subagent,
+   * which town-link may not see. `agents` is $.agent.list(): id and status.
+   */
+  agentsSettled(agents: readonly { id: string; status: string }[], now: number) {
+    const status = new Map(agents.map(a => [a.id, a.status]))
+    const over = (s: string | undefined) => s === undefined || s === 'completed' || s === 'failed' || s === 'killed'
+    const ended: { taskId: string; status: string }[] = []
+    for (const [taskId, t] of this.tasks) if (t.agentId && over(status.get(t.agentId))) ended.push({ taskId, status: 'completed' })
+    this.finishTasks(ended, now)
   }
 
   /** End known tasks; returns the IDs that were known. */

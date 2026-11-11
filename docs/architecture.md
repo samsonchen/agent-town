@@ -102,6 +102,9 @@ Event and field names are checked against Claude Code 2.1.318 and 2.1.319. The m
 | `prompt.submit` with `turnId` absent and `origin.kind` `auto-continuation` | A Stop hook sent the work back. Not a new ticket | `ticket.return` for the last ticket (the app reopens it if `ticket.done` already arrived) |
 | `prompt.submit` with `turnId` absent and any other `origin.kind` | | `ticket.submit` (`origin: unknown`) |
 | `prompt.submit` with `turnId` set (delivered into a running turn) | A `task-notification` still ends its tasks; no new ticket | `task.done` when it is a task notification |
+| `session.receive` with `agentId` set and `origin.kind` `task-notification` | A subagent's own background task finished; its notification goes to the subagent, not the main conversation | `task.done` for each task |
+| `tool.call` for `TaskStop` | The task was stopped | `task.done` (`killed`) |
+| Every 5 s while a subagent's task is open: `$.agent.list()` | A subagent that is `completed`, `failed`, `killed` or gone has no running background work (Claude Code waits for it), so its open tasks are over | `task.done` (`completed`) |
 | `turn.complete` without `agentId` | Read `durationMs`, `isAborted`, `usage?.model` | `ticket.done`; `model.update` when the model changed |
 | `classic.Stop` whose `await next(e)` has `block` set (backup: another plugin can keep this hook from running) | Keep the ticket open; diff `background_tasks` against known tasks | `ticket.return` unless already sent; `task.done` for tasks no longer listed |
 | `agent.spawn` | `await next(e)`; read `agentId` and `model` from the result; start role classification in the background | `staff.hire` (with `model`), later `staff.role` |

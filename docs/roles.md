@@ -226,7 +226,7 @@ Desk work only. No clinical roles.
 
 ## Background roles
 
-Operators stand for background tasks, not agents: shell commands running in the background, monitors, and workflow runs. They work in each project block's machine room. A background subagent is still a staff member, not an operator.
+Operators stand for background tasks, not agents: shell commands running in the background, monitors, and workflow runs. They work in each project block's server room. A background subagent is still a staff member, not an operator.
 
 Roles are chosen by rule where possible (see [architecture.md](architecture.md)), otherwise by Haiku using only the IDs below. Each row lists its rule words in `catalog/roles.json`.
 

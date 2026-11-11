@@ -98,13 +98,13 @@ A strip across the top, with three people at their desks:
 - **The sign** shows the project's name and a short title for the running task. A bar under the block shows the session's context use.
 - **Desks**: one Chief of Staff desk with a telephone, and five staff desks. A second session in the same project brings a second Chief of Staff.
 - **The resource bench** is where staff wait between jobs. The Chief of Staff pages them over the bench speaker.
-- **The machine room** has racks where operators run background tasks.
+- **The server room** has racks where operators run background tasks.
 
 ### The people in a block
 
 - **The Chief of Staff** is one Claude Code session. They take the ticket, put on a hat for the kind of task, and dispatch the work. When the work is done, they phone the report back to whoever issued the ticket.
 - **Staff** do the work. For the main agent's own work, the Chief of Staff calls a staff member whose role fits the files being changed (a TypeScript engineer for `.ts` files, and so on); each subagent is a staff member too. They come from the bench, work at a desk, and report back when done.
-- **Operators**, in safety orange, run background tasks in the machine room, and bring the result back to the Chief of Staff.
+- **Operators**, in safety orange, run background tasks in the server room, and bring the result back to the Chief of Staff.
 - **Compaction**: when Claude Code compacts the conversation, the Chief of Staff tidies a stack of notes on the desk.
 
 ### Sound and settings
