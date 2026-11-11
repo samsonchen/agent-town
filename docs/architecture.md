@@ -185,7 +185,7 @@ These calls use the user's plan or API key. The README must say so. If the role 
 
 | Command | Effect |
 |---|---|
-| `/town` | Show status: connected or not, enabled or not |
+| `/town` | Show status: the town-link version (read from its own `plugin.json`), connected or not, enabled or not |
 | `/town on`, `/town off` | Enable or disable sending, saved in `$.store` (shared by all sessions on the machine) |
 
 Registered with `immediate: true` so it works while Claude is busy.

@@ -21,7 +21,11 @@ function world(on: any) {
   on('session.usage', () => ({ value: undefined }))
   on('command.register', () => ({ value: { command: 'town' } }))
   on('fs.exists', () => ({ value: true }))
-  on('fs.read', () => ({ value: JSON.stringify({ protocol: 1, port: 50000, token: 'test-token' }) }))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  on('fs.read', (_: any, e: any) =>
+    String(e.path).endsWith('.claude-plugin/plugin.json')
+      ? { value: JSON.stringify({ name: 'town-link', version: '9.8.7' }) }
+      : { value: JSON.stringify({ protocol: 1, port: 50000, token: 'test-token' }) })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on('http.fetch', (_: any, e: any) => {
     const body = JSON.parse(String(e.init?.body ?? e.body ?? '{}')) as { events?: Posted[] }
@@ -89,5 +93,16 @@ describe('Stop hook', () => {
 
     const returns = posted.filter(ev => ev.type === 'ticket.return')
     expect(returns.map(ev => ev.reason)).toEqual(['Tests are failing'])
+  })
+})
+
+describe('/town', () => {
+  test('shows the plugin version from plugin.json', async ($, on) => {
+    world(on)
+
+    await $.session.start({ cwd: '/work/town', surface: 'terminal', isInteractive: true })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = (await $.command.run({ command: 'town', args: '' })) as any
+    expect(String(result.text).split('\n')[0]).toBe('Version 9.8.7.')
   })
 })

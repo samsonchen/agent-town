@@ -58,7 +58,7 @@ claude plugin marketplace add samsonchen/agent-town
 claude plugin install town-link@agent-town
 ```
 
-裝完後重新啟動 Claude Code。在 session 裡，`/town` 會顯示 plugin 有沒有連上 app，`/town on` 或 `/town off` 可以替所有 session 開啟或關閉傳送。
+裝完後重新啟動 Claude Code。在 session 裡，`/town` 會顯示已安裝的 town-link 版本，以及 plugin 有沒有連上 app，`/town on` 或 `/town off` 可以替所有 session 開啟或關閉傳送。
 
 這個 marketplace 不會自動更新。更新方式：
 

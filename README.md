@@ -58,7 +58,7 @@ claude plugin marketplace add samsonchen/agent-town
 claude plugin install town-link@agent-town
 ```
 
-Then restart Claude Code. In a session, `/town` shows whether the plugin is connected to the app, and `/town on` or `/town off` turns sending on or off for all sessions.
+Then restart Claude Code. In a session, `/town` shows the installed town-link version and whether the plugin is connected to the app, and `/town on` or `/town off` turns sending on or off for all sessions.
 
 Updates are not automatic for this marketplace. To update:
 

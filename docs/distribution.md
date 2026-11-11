@@ -48,7 +48,7 @@ Code signing and notarization:
 | Step | How |
 |---|---|
 | Pairing | The app writes `endpoint.json` (port and token). The mod reads it. The user does nothing. See [protocol.md](protocol.md). |
-| Status | The app shows which sessions are connected. `/town` in Claude Code shows whether the app is reachable. |
+| Status | The app shows which sessions are connected. `/town` in Claude Code shows the town-link version and whether the app is reachable. |
 
 ## Licenses
 

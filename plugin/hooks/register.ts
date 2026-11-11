@@ -238,9 +238,25 @@ async function flush($: any) {
   }
 }
 
-const statusText = () =>
+/** This plugin's version, read once from its own plugin.json (Claude Code does not pass it). */
+let version: string | undefined
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function pluginVersion($: any): Promise<string> {
+  if (version === undefined) {
+    try {
+      const manifest = JSON.parse(String(await $.fs.read(`${$.plugin.root}/.claude-plugin/plugin.json`))) as { version?: unknown }
+      version = typeof manifest.version === 'string' ? manifest.version : ''
+    } catch {
+      version = ''
+    }
+  }
+  return version
+}
+
+const statusText = (v: string) =>
   [
-    `Sending is ${enabled ? 'on' : 'off'}.`, // Claude Code puts "town-link:" in front
+    v ? `Version ${v}.` : 'Version unknown.', // Claude Code puts "town-link:" in front
+    `Sending is ${enabled ? 'on' : 'off'}.`,
     refused ? 'The agent-town app refused this protocol version; update town-link.' : endpoint ? 'Connected to the agent-town app.' : 'The agent-town app is not running.',
     'Use /town on or /town off to change sending for all sessions.',
   ].join('\n')
@@ -320,7 +336,7 @@ export const register: Register = on => {
       await $.store.set('enabled', enabled)
       if (!enabled) queue = []
     }
-    return { text: statusText(), isTextDisplayOnly: true as const }
+    return { text: statusText(await pluginVersion($)), isTextDisplayOnly: true as const }
   }).catch(passOn)
 
   on('session.end', async ($, e, next) => {

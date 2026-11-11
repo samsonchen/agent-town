@@ -7,7 +7,7 @@ Open items as of 2026-11-11, for the next session to pick up. Everything listed 
 - Work is committed on `main`.
 - Version 1.0.0 (plugin and app share it). town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
 - After a change: raise the version in `plugin/.claude-plugin/plugin.json` and `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push. Then the user runs `app/macos/scripts/release.sh --publish` (auto mode refuses to publish a release): it publishes the release, checks the uploaded `.dmg`'s checksum, and commits and pushes the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town`.
-- Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (48 tests). App checks: `swift build` and `swift test` in `app/macos` (27 tests).
+- Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (49 tests). App checks: `swift build` and `swift test` in `app/macos` (27 tests).
 - Two Swift warnings in the release build, harmless: `TownScene+Staff.swift:89` (a weak self inside a strong one) and `TownView.swift:489` (a non-Sendable observer closure). Clean up when convenient.
 
 ## 1. Check on a personal (non-Team) account
