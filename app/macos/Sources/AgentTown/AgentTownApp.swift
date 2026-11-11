@@ -19,18 +19,10 @@ final class TownApp: ObservableObject {
             guard let self else { return }
             self.scene.handle(change, building: self.store.building)
         }
-        scene.onSound = { name in
-            // Each sound has its own on/off setting (spec: sounds). System sounds for now.
-            let (key, sound) = switch name {
-            case "completion": ("completionSound", "Glass")
-            case "dispatch": ("dispatchSound", "Pop")
-            default: ("approvalSound", "Ping")
-            }
-            guard Prefs.isOn(Prefs.sound), Prefs.isOn(key) else { return }
-            NSSound(named: sound)?.play()
-        }
-        let thresh = UserDefaults.standard.object(forKey: "completionThreshold") as? Double ?? 0
-        store.sound = SoundSettings(thresholdSeconds: thresh)
+        // The menu's Sound item, each sound's switch, its choice and the volume (spec: sound settings).
+        scene.onSound = { name in SoundKind(rawValue: name).map(SoundPlayer.play) }
+        let thresh = UserDefaults.standard.object(forKey: Prefs.completionThreshold) as? Double ?? 0
+        store.sound = SoundSettings(thresholdSeconds: Prefs.clampThreshold(thresh))
     }
 
     func startServer() {
@@ -105,6 +97,7 @@ private struct LaunchOpener: View {
         Image(systemName: "building.2")
             .task {
                 let args = CommandLine.arguments
+                if args.contains("--settings") { openWindow(id: "settings") } // to look at Settings
                 guard Prefs.isOn(Prefs.showWindow), !args.contains("--demo"), !args.contains("--spike") else { return }
                 // Give SwiftUI the first chance to present the window itself.
                 try? await Task.sleep(for: .seconds(1.5))

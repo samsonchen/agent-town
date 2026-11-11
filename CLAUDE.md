@@ -17,7 +17,7 @@ A macOS menu bar app (Swift, RealityKit) that draws Claude Code's work as a smal
 - App: `swift build` and `swift test` in `app/macos`.
 - Windows app: `godot --headless --path app/windows --script res://tests/run_tests.gd` (Godot 4.7.2; on the Windows machine the console build is in `C:\Users\samson\tools\godot-4.7.2\`). When the macOS building state changes and `protocol/fixtures/expected/` is regenerated, the Windows port must change to match.
 - Windows add-on (only after changing `app/windows/native/src/`): `app/windows/native/build.ps1`, run by the user (auto mode refuses to run the `godot-cpp` build). `-Check` checks the prerequisites without building.
-- To see a scene: `app/macos/.build/debug/AgentTown --demo <fixture.json> -showWindow YES`, then `screencapture -l <window id>`. A fixture can be made from a `debug-receiver.py --log` recording.
+- To see a scene: `app/macos/.build/debug/AgentTown --demo <fixture.json> -showWindow YES`, then `screencapture -l <window id>`. A fixture can be made from a `debug-receiver.py --log` recording. Add `--settings` to open the Settings window too (with `--demo`, the app starts no server, so an installed copy keeps working).
 
 ## Working rules
 

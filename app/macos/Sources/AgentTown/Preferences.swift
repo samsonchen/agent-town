@@ -19,6 +19,17 @@ enum Prefs {
     static let windowFrame = "windowFrame"
     /// The office window's opacity, 0.1 to 1. Default 1 (opaque).
     static let opacity = "opacity"
+    /// agent-town's sound volume, 0 to 1. Default 1. Each sound's switch and choice are in SoundKind.
+    static let soundVolume = "soundVolume"
+    /// Seconds a task must take before the completion sound plays, 0 to 3600. Default 0: every task.
+    static let completionThreshold = "completionThreshold"
+
+    static let thresholdRange: ClosedRange<Double> = 0...3600
+
+    static func clampThreshold(_ v: Double) -> Double {
+        guard v.isFinite else { return 0 }
+        return min(thresholdRange.upperBound, max(thresholdRange.lowerBound, v))
+    }
 
     /// The office window never goes below 10%, so it can't vanish; hiding it is in the menu.
     static let opacityRange: ClosedRange<Double> = 0.1...1
@@ -96,7 +107,7 @@ struct TownMenu: View {
     }
 }
 
-/// Settings: Open at login, the language, and the office window's opacity.
+/// Settings: Open at login, the language, the office window's opacity, and the sounds.
 struct SettingsView: View {
     @AppStorage(Prefs.language) private var language = ""
     @AppStorage(Prefs.opacity) private var opacity = 1.0
@@ -137,9 +148,10 @@ struct SettingsView: View {
                         .frame(width: 44, alignment: .trailing)
                 }
             }
+            SoundSettingsView()
         }
         .formStyle(.grouped)
-        .frame(width: 440)
+        .frame(width: 480)
         .fixedSize(horizontal: false, vertical: true)
     }
 }

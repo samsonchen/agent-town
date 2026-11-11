@@ -88,7 +88,8 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - Model badges, with the show/hide setting (default hidden)
 - [x] English and Traditional Chinese string tables, following the macOS language (Simplified Chinese falls back to English)
 - Cubic 11 font
-- Ticket text setting, completion threshold and sound settings, model badge setting
+- [x] Completion threshold and sound settings (Settings → Sounds)
+- Ticket text setting, model badge setting
 - [x] Launch at login (Settings → Open at login)
 - [x] Menu bar menu
 

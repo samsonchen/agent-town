@@ -17,6 +17,16 @@
 "Allow agent-town in System Settings → General → Login Items." = "請在「系統設定」→「一般」→「登入項目」中允許 agent-town。";
 "macOS did not allow it: %@" = "macOS 不允許此設定：%@";
 "Opacity" = "不透明度";
+"Sounds" = "音效";
+"Volume" = "音量";
+"Dispatch" = "派工";
+"Completion" = "完成";
+"Approval" = "待核准";
+"%@ (default)" = "%@（預設）";
+"Choose a file…" = "選擇檔案…";
+"Play" = "播放";
+"Minimum task length" = "最短工作時間";
+"seconds" = "秒";
 "Quit agent-town" = "結束 agent-town";
 "Close" = "關閉";
 

@@ -145,7 +145,6 @@ public enum Change: Equatable, Sendable {
 
 public struct SoundSettings: Sendable, Equatable {
     public var completionOn = true
-    /// Seconds; never below 5 (spec: sounds).
     /// Seconds a task must take before its completion sound plays. 0 (the default): every task.
     public var thresholdSeconds: Double = 0 { didSet { thresholdSeconds = max(0, thresholdSeconds) } }
     public init(completionOn: Bool = true, thresholdSeconds: Double = 0) {
