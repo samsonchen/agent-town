@@ -5,6 +5,7 @@ config_version=5
 [application]
 
 config/name="agent-town"
+config/version="0.1.0"
 run/main_scene="res://dev/taskbar_check.tscn"
 config/features=PackedStringArray("4.7")
 

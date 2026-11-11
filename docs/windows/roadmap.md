@@ -20,7 +20,7 @@ Godot 4.7.2 (4.4 or later works), typed GDScript, in `app/windows/`. Scope: [spe
 ## W1: the first version
 
 - [x] Building state ported (`app/windows/core/`: events, the building, the `seq` sequencer), passing every fixture in `protocol/fixtures/expected/` and the ported unit tests
-- [ ] Loopback server and endpoint file
+- [x] Loopback server, endpoint file and store: a live `claude -p` session with town-link drove the whole story (ticket, hat, desk worker, report, close) through `dev/store_check.gd`
 - [ ] The office: executive block and project blocks in one column, the window growing to fit
 - [ ] Scenes 1 to 12: calls, desk workers, staff and the bench, operators, approvals
 - [ ] Context bar, block signs with task titles
