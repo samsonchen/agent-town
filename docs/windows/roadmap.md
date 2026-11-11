@@ -24,9 +24,9 @@ Godot 4.7.2 (4.4 or later works), typed GDScript, in `app/windows/`. Scope: [spe
 - [x] The office: executive block and project blocks in one column, the window growing to fit; furniture, the fixed characters and the Chiefs of Staff at their desks; signs, name tags and context bars
 - [x] Scenes 1 to 12 and 16: calls from the CEO (and the Dispatcher) and report calls, paging the bench, staff and operators at desks and consoles, reports and results (with "Failed"), approvals with the CEO's phone ringing, messages, desks carried in and out; checked with the fixtures. Desk workers are still to watch in a live session
 - [ ] Context bar, block signs with task titles
-- [ ] Sounds with the duration gate
-- [ ] Tray menu, Settings (language, open at login, stay on top, opacity), About
-- [ ] English and Traditional Chinese, Cubic 11
+- [x] Sounds with the duration gate (wired; still to hear them in a live session)
+- [x] Tray menu, Settings (language, open at login, stay on top, opacity), About; no taskbar button, close hides the window, its place is remembered (checked from outside the app)
+- [x] English and Traditional Chinese, Cubic 11
 
 ## W2: release
 

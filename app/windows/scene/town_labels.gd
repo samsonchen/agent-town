@@ -26,6 +26,8 @@ func _init(choice: String = "") -> void:
 	locale = "zh-TW" if language == "zh-Hant" else "en"
 	if language != "en":
 		_strings = parse_strings(FileAccess.get_file_as_string(SHARED + "strings/%s.lproj/Localizable.strings" % language))
+		# Strings only the Windows app uses, in its own file beside the shared ones.
+		_strings.merge(parse_strings(FileAccess.get_file_as_string("res://strings/%s.lproj/Windows.strings" % language)), true)
 	var tt: Variant = _json(SHARED + "catalog/task-types.json")
 	if tt is Dictionary:
 		for t: Dictionary in tt.get("taskTypes", []):

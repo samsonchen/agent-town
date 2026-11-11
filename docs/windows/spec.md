@@ -15,7 +15,7 @@ Later: the Dispatcher and the Inspector (scenes 13 to 15), messages (16), compac
 | Topic | macOS | Windows |
 |---|---|---|
 | Where the app lives | Menu bar icon, no Dock icon | Tray icon (notification area), no taskbar button. Closing the office window hides it; the app keeps running. |
-| Menu | The menu bar menu | The same items in the tray icon's menu |
+| Menu | The menu bar menu | The same items in the tray icon's menu, except Show tips, which comes with walking the CEO. A left click on the icon shows the window. Windows 11 first puts a new tray icon among the hidden icons (the ^ arrow); it can be dragged out to stay in view. |
 | Sounds | macOS system sounds (Glass, Ping, Pop) | Windows system sounds from `C:\Windows\Media`, played from there and never bundled: completion `Windows Notify System Generic.wav`, approval `Windows Notify Messaging.wav`, dispatch `Windows Navigation Start.wav`. A missing file plays nothing. |
 | Open at login | A login item macOS manages | An entry in the user's startup apps (Settings → Apps → Startup) |
 | Language | Follows the macOS language list | Follows the Windows display language: `zh_TW`, `zh_HK`, `zh_MO` and any `zh_Hant` locale get Traditional Chinese; every other locale, including Simplified Chinese, gets English |

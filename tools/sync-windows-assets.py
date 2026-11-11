@@ -23,6 +23,7 @@ SOURCES = [
     ("assets/kenney/mini-characters", "kenney/mini-characters", "License.txt"),
     ("assets/kenney/furniture-kit", "kenney/furniture-kit", "*.glb"),
     ("assets/kenney/furniture-kit", "kenney/furniture-kit", "License.txt"),
+    ("assets/icons", "icons", "app-icon-1024.png"),
     ("catalog", "catalog", "*.json"),
     ("app/macos/Sources/AgentTown/Resources/Localization/en.lproj", "strings/en.lproj", "*.strings"),
     ("app/macos/Sources/AgentTown/Resources/Localization/zh-Hant.lproj", "strings/zh-Hant.lproj", "*.strings"),

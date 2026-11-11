@@ -1,0 +1,7 @@
+/* Traditional Chinese (Taiwan) for strings only the Windows app uses. The shared strings are in
+   shared/strings/ (copied from the macOS app). Keys are the English text, with %@ for text. */
+
+"System (Windows setting)" = "跟隨系統（Windows 設定）";
+"Windows did not allow it: %@" = "Windows 不允許此設定：%@";
+"Font, license: [%@](%@)" = "字型，授權：[%1$@](%2$@)";
+"Version %@" = "版本 %@";
