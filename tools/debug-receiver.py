@@ -8,10 +8,13 @@ It does what the app's loopback server does (docs/protocol.md):
 
 Standard library only. Usage:
 
-    python3 tools/debug-receiver.py [--port N] [--endpoint PATH] [--log FILE] [--quiet]
+    python3 tools/debug-receiver.py [--port N] [--endpoint PATH] [--log FILE] [--quiet] [--forward]
 
 --log appends every accepted batch as one JSON line, so real event timing can be
 studied later or turned into fixtures.
+
+--forward keeps the running app working: each batch is also sent on to the app found in
+the endpoint file at start, and that app's endpoint file is put back on exit.
 """
 
 import argparse
@@ -23,6 +26,7 @@ import signal
 import sys
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from protocol_check import check_batch, load_schema  # noqa: E402
@@ -54,7 +58,28 @@ def write_endpoint(path, port, token):
     os.replace(tmp, path)
 
 
-def make_handler(token, schema, log_path, quiet):
+def forward_batch(app, body):
+    req = urllib.request.Request(
+        f"http://127.0.0.1:{app['port']}/v1/events",
+        data=body,
+        headers={"Authorization": f"Bearer {app['token']}", "Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        urllib.request.urlopen(req, timeout=2).read()
+    except Exception as e:  # noqa: BLE001 - report and go on
+        print(f"! forward failed: {e}")
+
+
+def write_endpoint_raw(path, content):
+    tmp = path + ".tmp"
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as fh:
+        json.dump(content, fh)
+    os.replace(tmp, path)
+
+
+def make_handler(token, schema, log_path, quiet, app=None):
     class Handler(BaseHTTPRequestHandler):
         server_version = "agent-town-debug"
 
@@ -73,8 +98,9 @@ def make_handler(token, schema, log_path, quiet):
                 print("! 401 wrong or missing token")
                 return self._reply(401)
             length = int(self.headers.get("Content-Length") or 0)
+            body = self.rfile.read(length)
             try:
-                batch = json.loads(self.rfile.read(length))
+                batch = json.loads(body)
             except ValueError:
                 print("! 400 body is not JSON")
                 return self._reply(400)
@@ -82,6 +108,8 @@ def make_handler(token, schema, log_path, quiet):
                 print(f"! 426 protocol {batch.get('protocol')!r}")
                 return self._reply(426)
             self._reply(204)
+            if app:
+                forward_batch(app, body)
 
             received = int(time.time() * 1000)
             errs = check_batch(batch, schema)
@@ -114,12 +142,22 @@ def main():
     ap.add_argument("--endpoint", default=DEFAULT_ENDPOINT)
     ap.add_argument("--log")
     ap.add_argument("--quiet", action="store_true", help="hide event fields")
+    ap.add_argument("--forward", action="store_true", help="also send each batch to the running app")
     args = ap.parse_args()
+
+    app = None
+    if args.forward:
+        try:
+            with open(args.endpoint) as fh:
+                app = json.load(fh)
+        except (OSError, ValueError):
+            sys.exit("--forward: no app endpoint file to forward to; start the app first")
+        print(f"forwarding to the app on port {app['port']}")
 
     token = base64.urlsafe_b64encode(secrets.token_bytes(32)).rstrip(b"=").decode()
     schema = load_schema()
     server = ThreadingHTTPServer(
-        ("127.0.0.1", args.port), make_handler(token, schema, args.log, args.quiet)
+        ("127.0.0.1", args.port), make_handler(token, schema, args.log, args.quiet, app)
     )
     port = server.server_address[1]
     write_endpoint(args.endpoint, port, token)
@@ -139,11 +177,16 @@ def main():
         server.server_close()
         try:
             with open(args.endpoint) as fh:
-                if json.load(fh).get("pid") == os.getpid():
-                    os.remove(args.endpoint)
+                mine = json.load(fh).get("pid") == os.getpid()
         except (OSError, ValueError):
-            pass
-        print("stopped; endpoint file removed")
+            mine = False
+        if mine and app:
+            write_endpoint_raw(args.endpoint, app)
+            print("stopped; the app's endpoint file is back")
+        else:
+            if mine:
+                os.remove(args.endpoint)
+            print("stopped; endpoint file removed")
 
 
 if __name__ == "__main__":

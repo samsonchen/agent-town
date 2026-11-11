@@ -14,6 +14,10 @@ public struct Ticket: Sendable, Equatable {
     public var returnedCount = 0
     /// The hook's reason for the last return, if the plugin could read it.
     public var returnReason: String?
+    /// For a turn that starts with another agent's message: `report` or `message`.
+    public var messageKind: String?
+    /// The staff member that message is from, when known.
+    public var fromAgentId: String?
 }
 
 public struct Staff: Sendable, Equatable {
@@ -201,7 +205,9 @@ public struct Building: Sendable {
             case "task": issuer = e.string("parentTicketId").flatMap { c.issuers[$0] } ?? .ceo
             default: issuer = .ceo
             }
-            let t = Ticket(id: e.string("ticketId") ?? "?", origin: origin, text: e.string("text") ?? "", issuer: issuer)
+            var t = Ticket(id: e.string("ticketId") ?? "?", origin: origin, text: e.string("text") ?? "", issuer: issuer)
+            t.messageKind = e.string("messageKind")
+            t.fromAgentId = e.string("fromAgentId")
             c.ticket = t
             c.issuers[t.id] = issuer
             out.append(.ticketSubmitted(projectId: p, sessionId: s, ticket: t))

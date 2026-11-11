@@ -352,6 +352,33 @@ describe('staff', () => {
     expect(t.drain()).toEqual([{ type: 'staff.role', agentId: 'a1', role: 'code-reviewer' }])
   })
 
+  test("a turn that starts with an agent's message says who it is from", async () => {
+    const t = new Town(ids())
+    t.hire(spawn, { agentId: 'a1' }, 0)
+    t.drain()
+    t.prompt({ text: '<agent-message from="a1">\n[Subagent hand-back] The text below is the final report…', kind: 'peer' }, 10)
+    t.turnComplete({ durationMs: 5, isAborted: false }, 15)
+    t.prompt({ text: '<agent-message from="zzz">\nhello', kind: 'peer' }, 20)
+    expect(t.drain().filter(e => e.type === 'ticket.submit').map(e => [e.text, e.fromAgentId, e.messageKind])).toEqual([
+      ['', 'a1', 'report'],
+      ['', undefined, 'message'],
+    ])
+  })
+
+  test('a resumed agent is hired again with the role it had, and no new classification', async () => {
+    const t = new Town(ids())
+    t.hire(spawn, { agentId: 'a1' }, 0)
+    t.classified(t.takeJobs()[0]!, 'project-manager')
+    t.turnComplete({ agentId: 'a1', durationMs: 10, isAborted: false }, 10)
+    t.drain()
+    t.hire({ ...spawn, parentAgentId: 'a2' }, { agentId: 'a1' }, 20)
+    expect(t.takeJobs()).toEqual([])
+    expect(t.drain().map(e => [e.type, e.role])).toEqual([
+      ['staff.hire', undefined],
+      ['staff.role', 'project-manager'],
+    ])
+  })
+
   test('a custom agent named after a role needs no classification', async () => {
     const t = new Town(ids())
     t.hire({ ...spawn, subagentType: 'security-engineer' }, { agentId: 'a1' }, 0)

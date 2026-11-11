@@ -92,6 +92,8 @@ No extra fields. Sent every 30 seconds while the session is open.
 | `scheduleId` | string, optional | Set when `origin` is `schedule` |
 | `taskIds` | string array, optional | Set when `origin` is `task`. Several tasks can finish before the same turn. |
 | `parentTicketId` | string, optional | For `origin: task`: the ticket that started the first task in `taskIds`. The receiver sends the report to that ticket's issuer. |
+| `messageKind` | string, optional | For `origin: unknown`: the turn starts with another agent's message, `report` (a subagent's final report) or `message` (one sent with SendMessage). `text` is then empty, and the receiver writes the note, such as "Report from planner". |
+| `fromAgentId` | string, optional | With `messageKind`: the staff member the message is from, when the mod knows it; absent for another session or an unknown agent. |
 
 A ticket with `origin` set to `unknown` is a main-agent turn that the mod could not trace to a prompt, a schedule, or a task. The receiver shows the Chief of Staff picking it up from an inbox tray, and the report goes to the CEO.
 
@@ -131,6 +133,8 @@ A hook stopped the main agent from ending its turn and sent it back to work (spe
 | `reason` | string, optional | First 200 characters of the hook's reason, if the mod can read it |
 
 ### `staff.hire`
+
+A message to a finished subagent resumes it, and it is hired again: another `staff.hire` with the same `agentId`, then its own `staff.done`. Receivers treat each hire as a new run of that staff member; a `staff.done` belongs to the latest run. The plugin sends the role the agent already had, with no new classification.
 
 | Field | Type | Notes |
 |---|---|---|

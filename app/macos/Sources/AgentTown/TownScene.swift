@@ -39,6 +39,8 @@ final class TownScene: ObservableObject {
     var approvals: [String: Actor] = [:]
     private var ceoRinging = false
     var pendingCalls: [String: PendingCall] = [:]
+    /// How many times each staff member was hired again (resumed), by base job key.
+    var staffRuns: [String: Int] = [:]
     var nextWorkerId = 0
     private var families: ModelFamilies?
     var execPhones: (ceo: Phone?, dispatcher: Phone?, inspector: Phone?) = (nil, nil, nil)
@@ -168,7 +170,7 @@ final class TownScene: ObservableObject {
                 chief.root.removeFromParent()
             }
 
-        case .ticketSubmitted(_, let s, let ticket):
+        case .ticketSubmitted(let p, let s, let ticket):
             guard let chief = actors[s] else { return }
             chief.hat = nil
             chief.since = Date()
@@ -188,7 +190,7 @@ final class TownScene: ObservableObject {
                 chief.enqueue { [unowned self] in
                     chief.body.play("pick-up", loop: false)
                     try? await Task.sleep(for: .seconds(0.8))
-                    chief.ticketText = ticket.text.isEmpty ? self.labels.continuing : ticket.text
+                    chief.ticketText = self.untracedNote(ticket, p, s)
                     chief.working = true
                     chief.settle()
                 }
@@ -232,20 +234,20 @@ final class TownScene: ObservableObject {
             }
 
         case .activity(let p, let s, let agentId, let kind):
-            guard let a = agentId.map({ worker(p, "a:\(s)/\($0)") }) ?? actors[s] else { return }
+            guard let a = agentId.map({ worker(p, staffJob(s, $0)) }) ?? actors[s] else { return }
             a.activity = kind
-            if let agentId, agentId.hasPrefix("desk-") { focusDesk(p, s, job: "a:\(s)/\(agentId)") }
+            if let agentId, agentId.hasPrefix("desk-") { focusDesk(p, s, job: staffJob(s, agentId)) }
             if !a.isBusy { a.settle() }
 
         case .model(let p, let s, let agentId, let model):
-            (agentId.map { worker(p, "a:\(s)/\($0)") } ?? actors[s])?.model = model
+            (agentId.map { worker(p, staffJob(s, $0)) } ?? actors[s])?.model = model
 
         case .staffHired(let p, let s, let agentId):
-            hire(p, s, job: "a:\(s)/\(agentId)")
+            hire(p, s, job: newStaffRun(s, agentId))
         case .staffRole(let p, let s, let agentId, let role):
-            roleDecided(p, job: "a:\(s)/\(agentId)", role: role)
+            roleDecided(p, job: staffJob(s, agentId), role: role)
         case .staffDone(let p, let s, let agentId, let status):
-            jobDone(p, job: "a:\(s)/\(agentId)", status: status)
+            jobDone(p, job: staffJob(s, agentId), status: status)
         case .taskStarted(let p, let s, let taskId):
             hire(p, s, job: "t:\(s)/\(taskId)")
         case .taskRole(let p, let s, let taskId, let role):
@@ -254,7 +256,7 @@ final class TownScene: ObservableObject {
             jobDone(p, job: "t:\(s)/\(taskId)", status: status)
 
         case .approvalWait(let p, let s, let id, let agentId, let autoMode):
-            guard let a = agentId.flatMap({ worker(p, "a:\(s)/\($0)") }) ?? actors[s] else { return }
+            guard let a = agentId.flatMap({ worker(p, staffJob(s, $0)) }) ?? actors[s] else { return }
             approvals[id] = a
             a.awaitingApproval = true
             if !a.isBusy { a.settle() }
@@ -369,6 +371,22 @@ final class TownScene: ObservableObject {
     }
 
     /// Walks to the character's own spot and settles there.
+    /// The note for a ticket the Chief of Staff picks up from the inbox: its text; for another
+    /// agent's message, who it is from ("Report from planner"); else "Continuing".
+    func untracedNote(_ ticket: Ticket, _ p: String, _ s: String) -> String {
+        if !ticket.text.isEmpty { return ticket.text }
+        guard let kind = ticket.messageKind else { return labels.continuing }
+        let staff = ticket.fromAgentId.flatMap { building.blocks[p]?.chiefs[s]?.staff[$0] }
+        // The name the main agent gave the subagent, when short; else its role.
+        let name = staff.flatMap { st -> String? in
+            let d = st.description.trimmingCharacters(in: .whitespaces)
+            if !d.isEmpty, Labels.displayWidth(d) <= 24 { return d }
+            return st.role.map(labels.role)
+        }
+        guard let name else { return labels.colleagueMessage }
+        return kind == "report" ? labels.report(from: name) : labels.message(from: name)
+    }
+
     func goHome(_ a: Actor) async {
         await walk(a, to: a.home)
         face(a, toward: a.homeFacing)

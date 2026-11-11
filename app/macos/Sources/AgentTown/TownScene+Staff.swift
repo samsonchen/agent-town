@@ -16,12 +16,29 @@ extension TownScene {
 
     func worker(_ p: String, _ job: String) -> Actor? { blocks[p]?.jobs[job] }
 
-    /// The session ID and the agent or task ID in a job key.
+    /// The job key for a staff member's current run: `a:<session>/<agent>`, then `#<n>` from
+    /// the second run on. A message to a finished agent resumes it and it is hired again; each
+    /// run is its own job, so a report never goes to a character called for another run.
+    func staffJob(_ s: String, _ agentId: String) -> String {
+        let base = "a:\(s)/\(agentId)"
+        let n = staffRuns[base] ?? 0
+        return n == 0 ? base : "\(base)#\(n)"
+    }
+
+    /// A hire: the first run of a staff member, or the next one when it was hired before.
+    func newStaffRun(_ s: String, _ agentId: String) -> String {
+        let base = "a:\(s)/\(agentId)"
+        staffRuns[base] = staffRuns[base].map { $0 + 1 } ?? 0
+        return staffJob(s, agentId)
+    }
+
+    /// The session ID and the agent or task ID in a job key (a staff run's `#<n>` left out).
     func parse(_ job: String) -> (session: String, id: String, isOperator: Bool) {
         let isOp = job.hasPrefix("t:")
         let rest = job.dropFirst(2)
         let slash = rest.firstIndex(of: "/") ?? rest.endIndex
-        return (String(rest[..<slash]), String(rest[rest.index(after: slash)...]), isOp)
+        let id = rest[rest.index(after: slash)...].split(separator: "#", maxSplits: 1).first ?? ""
+        return (String(rest[..<slash]), String(id), isOp)
     }
 
     struct JobInfo {
@@ -48,7 +65,7 @@ extension TownScene {
     /// the staff member who started it, or else the Chief of Staff.
     private func boss(_ p: String, _ job: String) -> Actor? {
         let (s, _, _) = parse(job)
-        if let parent = info(p, job).parentAgent, let w = worker(p, "a:\(s)/\(parent)"), w.job != nil { return w }
+        if let parent = info(p, job).parentAgent, let w = worker(p, staffJob(s, parent)), w.job != nil { return w }
         return actors[s]
     }
 
@@ -346,6 +363,7 @@ extension TownScene {
     /// Scene 10: the session's staff and operators go back to the bench.
     func sessionEnded(_ s: String, in node: BlockNode) {
         pendingCalls[s] = nil
+        for key in staffRuns.keys where key.hasPrefix("a:\(s)/") { staffRuns[key] = nil }
         node.activeDesk[s] = nil
         for (job, w) in node.jobs where parse(job).session == s {
             w.enqueue { [weak self] in
@@ -413,13 +431,13 @@ extension TownScene {
 
     func message(_ p: String, _ s: String, from: String?, to: String?, broadcast: Bool) {
         guard let node = blocks[p] else { return }
-        let sender: Actor? = from.map { worker(p, "a:\(s)/\($0)") } ?? actors[s]
+        let sender: Actor? = from.map { worker(p, staffJob(s, $0)) } ?? actors[s]
         guard let sender else { return }
         if sender.kind == .worker, !sender.atWork, let job = sender.job {
             node.deferred[job, default: []].append { [weak self] in self?.message(p, s, from: from, to: to, broadcast: broadcast) }
             return
         }
-        let receiver: Actor? = to.map { worker(p, "a:\(s)/\($0)") } ?? (from != nil ? actors[s] : nil)
+        let receiver: Actor? = to.map { worker(p, staffJob(s, $0)) } ?? (from != nil ? actors[s] : nil)
         guard !broadcast, let receiver, receiver !== sender else {
             sender.speaking = true
             Task { @MainActor in

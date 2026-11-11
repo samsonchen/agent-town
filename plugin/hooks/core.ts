@@ -41,7 +41,7 @@ type Origin = 'user' | 'schedule' | 'task' | 'unknown'
 type Ticket = { id: string; origin: Origin; startTs: number; returned: boolean; lastReturnTs?: number; text?: string; title?: string; taskType?: string }
 /** The staff member the Chief of Staff called to do the main loop's own work on the open ticket. */
 type Desk = { id: string; role: string; firm: boolean; since: number; lastActive: number }
-type Staff = { name?: string; hireTs: number }
+type Staff = { name?: string; hireTs: number; role?: string }
 type Task = { startTs: number; ticketId?: string; agentId?: string }
 type Approval = { tool: string; agentId?: string; askTs: number; waited: boolean; autoMode: boolean }
 
@@ -313,7 +313,7 @@ export class Town {
         })
         return
       }
-      this.openTicket('unknown', this.summaryOf(text) || text, now)
+      this.openUntraced(this.summaryOf(text) || text, now)
       return
     }
 
@@ -349,7 +349,7 @@ export class Town {
       return
     }
 
-    this.openTicket('unknown', text, now)
+    this.openUntraced(text, now)
   }
 
   /**
@@ -359,7 +359,22 @@ export class Town {
    */
   turnStart(e: { text: string; agentId?: string }, now: number) {
     if (e.agentId || this.ticket) return
-    this.openTicket('unknown', e.text ?? '', now)
+    this.openUntraced(e.text ?? '', now)
+  }
+
+  /**
+   * A main-loop turn not traced to a prompt, a schedule or a task. When it starts with another
+   * agent's message (a subagent's report, or a message sent with SendMessage), the ticket says
+   * who it is from instead of the message's markup, and the app writes the note.
+   */
+  private openUntraced(text: string, now: number) {
+    const from = /^\s*<(?:agent-message|cross-session-message)\s+from="([^"]*)"/.exec(text)?.[1]
+    if (from === undefined) {
+      this.openTicket('unknown', text, now)
+      return
+    }
+    const messageKind = text.includes('[Subagent hand-back]') ? 'report' : 'message'
+    this.openTicket('unknown', '', now, { ...(this.staff.has(from) ? { fromAgentId: from } : {}), messageKind })
   }
 
   private summaryOf(text: string): string {
@@ -432,7 +447,10 @@ export class Town {
   ) {
     if (!r.agentId) return
     const agentId = r.agentId
-    this.staff.set(agentId, { name: e.name, hireTs: now })
+    // A message to a finished agent resumes it, and Claude Code raises agent.spawn again: the
+    // same staff member comes back to work, with the role it had.
+    const before = this.staff.get(agentId)
+    this.staff.set(agentId, { name: e.name ?? before?.name, hireTs: now, ...(before?.role ? { role: before.role } : {}) })
     if (r.model) this.staffModels.set(agentId, r.model)
     const parent = e.parentAgentId && this.staff.has(e.parentAgentId) ? e.parentAgentId : undefined
     this.emit({
@@ -447,7 +465,10 @@ export class Town {
       ...(r.model ? { model: r.model } : {}),
     })
     const type = e.subagentType ?? ''
-    if (STAFF_ROLES.includes(type)) {
+    if (before) {
+      if (before.role) this.emit({ type: 'staff.role', agentId, role: before.role })
+    } else if (STAFF_ROLES.includes(type)) {
+      this.staff.get(agentId)!.role = type
       this.emit({ type: 'staff.role', agentId, role: type })
     } else {
       const text = [e.subagentType, e.name, e.description, (e.prompt ?? '').slice(0, 400)].filter(Boolean).join('\n')
@@ -715,7 +736,11 @@ export class Town {
         }
       }
     }
-    else if (job.kind === 'staff-role') this.emit({ type: 'staff.role', agentId: job.id, role: value })
+    else if (job.kind === 'staff-role') {
+      const st = this.staff.get(job.id)
+      if (st) st.role = value
+      this.emit({ type: 'staff.role', agentId: job.id, role: value })
+    }
     else this.emit({ type: 'task.role', taskId: job.id, role: value })
   }
 

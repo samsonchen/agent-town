@@ -283,6 +283,10 @@ struct Labels {
     var returned: String { t("Returned") }
     /// The note for a ticket with no prompt text, such as the turn after a `!` shell command.
     var continuing: String { t("Continuing") }
+    /// The note for a turn that starts with another agent's message.
+    func report(from name: String) -> String { t("Report from \(name)") }
+    func message(from name: String) -> String { t("Message from \(name)") }
+    var colleagueMessage: String { t("Message from a colleague") }
     var executive: String { t("Executive office") }
     var serverRoom: String { t("Server room") }
     var ring: String { t("Ring ring") }

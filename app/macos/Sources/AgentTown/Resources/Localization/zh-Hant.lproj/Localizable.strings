@@ -37,6 +37,9 @@
 "Inspector" = "稽核員";
 "Returned" = "退回";
 "Continuing" = "繼續工作";
+"Report from %@" = "%@ 的回報";
+"Message from %@" = "%@ 傳來的訊息";
+"Message from a colleague" = "同事傳來的訊息";
 "Executive office" = "執行長辦公室";
 "Server room" = "機房";
 "Ring ring" = "鈴鈴";
