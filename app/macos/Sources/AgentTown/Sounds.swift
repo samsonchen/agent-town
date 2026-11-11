@@ -22,9 +22,9 @@ enum SoundKind: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .dispatch: Labels.text("Dispatch")
-        case .completion: Labels.text("Completion")
-        case .approval: Labels.text("Approval")
+        case .dispatch: Labels.text("Ticket dispatched")
+        case .completion: Labels.text("Work done")
+        case .approval: Labels.text("Approval needed")
         }
     }
 }
@@ -102,7 +102,7 @@ struct SoundSettingsView: View {
             ForEach(SoundKind.allCases) { kind in
                 SoundRow(kind: kind)
                 if kind == .completion {
-                    LabeledContent(Labels.text("Minimum task length")) {
+                    LabeledContent(Labels.text("Only when a task takes at least")) {
                         HStack(spacing: 6) {
                             TextField("", value: Binding(get: { Prefs.clampThreshold(threshold) },
                                                          set: { setThreshold($0) }),
@@ -114,7 +114,7 @@ struct SoundSettingsView: View {
                             Stepper("", value: Binding(get: { Prefs.clampThreshold(threshold) }, set: { setThreshold($0) }),
                                     in: Prefs.thresholdRange, step: 5)
                                 .labelsHidden()
-                            Text(Labels.text("seconds"))
+                            Text(Labels.text("seconds (0: every task)"))
                         }
                     }
                 }

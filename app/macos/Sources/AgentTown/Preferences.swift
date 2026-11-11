@@ -151,7 +151,7 @@ struct SettingsView: View {
             SoundSettingsView()
         }
         .formStyle(.grouped)
-        .frame(width: 480)
+        .frame(width: 540)
         .fixedSize(horizontal: false, vertical: true)
     }
 }

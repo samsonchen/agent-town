@@ -19,14 +19,14 @@
 "Opacity" = "不透明度";
 "Sounds" = "音效";
 "Volume" = "音量";
-"Dispatch" = "派工";
-"Completion" = "完成";
-"Approval" = "待核准";
+"Ticket dispatched" = "派發工單";
+"Work done" = "工作完成";
+"Approval needed" = "等待核准";
 "%@ (default)" = "%@（預設）";
 "Choose a file…" = "選擇檔案…";
 "Play" = "播放";
-"Minimum task length" = "最短工作時間";
-"seconds" = "秒";
+"Only when a task takes at least" = "工作至少花了";
+"seconds (0: every task)" = "秒才播放（0：每個工作）";
 "Quit agent-town" = "結束 agent-town";
 "Close" = "關閉";
 
