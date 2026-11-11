@@ -27,6 +27,7 @@ Godot 4.7.2 (4.4 or later works), typed GDScript, in `app/windows/`. Scope: [spe
 - [x] Sounds with the duration gate (wired; still to hear them in a live session)
 - [x] Tray menu, Settings (language, open at login, stay on top, opacity), About; no taskbar button, close hides the window, its place is remembered (checked from outside the app)
 - [x] English and Traditional Chinese, Cubic 11
+- [ ] Sound settings (`docs/spec.md` → Sounds → Sound settings; the Windows choices in [spec.md](spec.md)): volume; per sound an on/off switch, the sound (every WAV in `C:\Windows\Media`, or a WAV, MP3 or Ogg file of the user's own) and a Play button; the completion threshold
 
 ## W2: release
 

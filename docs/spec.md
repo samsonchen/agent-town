@@ -155,7 +155,24 @@ When a session's Chief of Staff has no active subagents, they wear a hat with a 
 | Approval needed | Scene 6 | A different sound from completion. Its own on/off setting. Not gated by duration. |
 | Dispatch | Scene 2 and 14 | A short computer sound as the CEO's (or the Dispatcher's) call with a ticket rings. Its own on/off setting. |
 
-The user can pick the sound file for each, set the volume, or mute all sounds.
+### Sound settings
+
+In Settings, a Sounds section:
+
+- **Volume**: one slider for all three sounds, 0% to 100% (default 100%), showing its value as a percentage. It changes only agent-town's sounds, not the system volume.
+- **One row per sound** (dispatch, completion, approval), each with:
+  - an on/off switch (default on);
+  - the sound: a list of the system's own sounds, with the default first and marked as the default, then **Choose a file…** for a sound file of the user's own; once chosen, that file's name shows in the list;
+  - a **Play** button that plays the chosen sound once, at the current volume, even when the sound's switch or the menu's Sound item is off.
+- **Completion threshold**: how many seconds a task must take before the completion sound plays, 0 to 3600 (default 0: every task). It sits in the completion row.
+- The **Sound** item in the menu mutes or unmutes all three at once, whatever their switches say. The approval sound stays silent in auto mode, whatever its switch says.
+- If the chosen sound cannot be played (its file was moved or deleted, or a system sound is missing), the default sound plays instead; if that is missing too, nothing plays.
+- The choices are kept across restarts, with the other settings.
+
+Which system sounds each app lists, its defaults, and the file types it accepts:
+
+- **macOS**: the sounds in `/System/Library/Sounds` (Basso, Blow, Bottle, Frog, Funk, Glass, Hero, Morse, Ping, Pop, Purr, Sosumi, Submarine, Tink). Defaults: Glass for completion, Ping for approval, Pop for dispatch. Own files: any file macOS plays (such as AIFF, WAV, MP3, M4A, CAF).
+- **Windows**: see [windows/spec.md](windows/spec.md).
 
 ## Privacy
 
@@ -200,9 +217,7 @@ These choices, and the settings below, are kept when the app or the Mac restarts
 
 - Language (built): system (the default, following macOS), English, 繁體中文. A different choice applies after a restart; a "Restart now" button shows only when the choice differs from the language the app is running in.
 - Window size; bench size (characters waiting per block)
-- Completion sound: on/off, threshold in seconds (default 0: every task), sound file
-- Approval sound: on/off, sound file
-- Master volume, mute
+- Sounds: the volume; for dispatch, completion and approval, an on/off switch, the sound and a Play button; the completion threshold. See "Sound settings" above. (Muting all sounds is the menu's Sound item.)
 - Ticket text: full, or task type only
 - Model badges: show or hide
 - Open at login (built): a login item macOS manages, also listed in System Settings → General → Login Items. Available in the installed `.app` only, not when run with `swift run`.
