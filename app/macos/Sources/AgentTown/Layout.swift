@@ -5,9 +5,9 @@ import simd
 import TownCore
 
 /// World layout, in meters, on one flat plane (y up). x runs right and z runs down
-/// the screen. The office is a set of blocks with paths between them, like a
-/// Gather map: the executive block, a strip along the top, then one block per active
-/// project in a grid below it.
+/// the screen. The office is a set of blocks with paths between them, seen from above:
+/// the executive block, a strip along the top, then one block per active project
+/// in a column below it.
 /// Positions inside a block are local to the block's top-left corner.
 enum Layout {
     static let blockWidth: Float = 7

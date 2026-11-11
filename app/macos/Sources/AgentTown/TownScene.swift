@@ -10,7 +10,7 @@ import TownCore
 final class TownScene: ObservableObject {
     static let executive = "executive"
     /// Characters lean back toward the camera so they show their fronts on the top-down map,
-    /// the way Gather draws people standing up on a flat floor.
+    /// standing up on a flat floor.
     static let lean = simd_quatf(angle: -(Projector.pitch - 0.2), axis: [1, 0, 0])
 
     let root = Entity()
@@ -521,7 +521,7 @@ final class TownScene: ObservableObject {
         ground.addChild(plane)
     }
 
-    /// The block's floor: a tiled carpet with a darker edge along the front, like a Gather room.
+    /// The block's floor: a tiled carpet with a darker edge along the front.
     private func floor(_ node: BlockNode, colors: (NSColor, NSColor), depth d: Float = Layout.blockDepth) {
         let w = Layout.blockWidth
         let carpet = Self.tiles(width: w, depth: d, tile: 0.5, colors: colors)

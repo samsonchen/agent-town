@@ -1,6 +1,6 @@
 # agent-town docs
 
-agent-town shows Claude Code's work as a small office seen from above, like a Gather Town map. The user is the CEO. Each Claude Code session is a Chief of Staff. Each subagent is a staff member whose job title matches the work it was given.
+agent-town shows Claude Code's work as a small office seen from above. The top-down view was inspired by Gather Town. The user is the CEO. Each Claude Code session is a Chief of Staff. Each subagent is a staff member whose job title matches the work it was given.
 
 The project has two parts:
 

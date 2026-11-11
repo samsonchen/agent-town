@@ -1,6 +1,6 @@
 # agent-town: watch your Claude Code agents at work
 
-agent-town shows Claude Code's work as a small office on macOS, seen from above like a Gather Town map, with 3D characters. You are the CEO. Each Claude Code session is a Chief of Staff with a staff of its own, and you can watch them take your tickets, call staff, run background jobs, wait for your approval and phone the report back.
+agent-town shows Claude Code's work as a small office on macOS, seen from above, with 3D characters. The top-down view was inspired by Gather Town. You are the CEO. Each Claude Code session is a Chief of Staff with a staff of its own, and you can watch them take your tickets, call staff, run background jobs, wait for your approval and phone the report back.
 
 ## 1. What agent-town is
 
