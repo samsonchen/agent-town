@@ -28,6 +28,10 @@ enum Layout {
     static let execDeskZ: Float = 1.0
     static let ceoDesk = SIMD2<Float>(1.3, execDeskZ)
     static let ceoHome = SIMD2<Float>(1.3, execRowZ)
+    /// The CEO's desk and the spot behind it, seen from above, from the back wall to just past the desk's
+    /// front: a click here sends the CEO back to the desk. A click on the desk top lands on the
+    /// floor behind it (the camera is tilted), so the area reaches back to the wall.
+    static let ceoDeskArea = (min: SIMD2<Float>(ceoDesk.x - 0.6, 0), max: SIMD2<Float>(ceoDesk.x + 0.6, ceoDesk.y + 0.35))
     static let receptionDesk = SIMD2<Float>(3.5, execDeskZ)
     static let inspectorHome = SIMD2<Float>(3.5, execRowZ)
     static let dispatcherDesk = SIMD2<Float>(5.7, execDeskZ)
@@ -147,12 +151,20 @@ struct Projector {
     /// Screen meters per world meter along z (the floor is foreshortened by the tilt).
     static var depthFactor: Float { sin(pitch) }
 
+    /// The same camera as plain math (TownCore), shared by `screen` and `floor`.
+    var view: FloorView {
+        FloorView(pitch: Self.pitch, target: target, scale: scale, size: [Float(size.width), Float(size.height)])
+    }
+
     func screen(_ w: SIMD3<Float>) -> CGPoint {
-        let v = orientation.inverse.act(w - position)
-        let halfH = scale / 2
-        let halfW = halfH * Float(size.width / max(1, size.height))
-        return CGPoint(x: CGFloat((v.x / halfW + 1) / 2) * size.width,
-                       y: CGFloat((1 - v.y / halfH) / 2) * size.height)
+        let p = view.screen(w)
+        return CGPoint(x: CGFloat(p.x), y: CGFloat(p.y))
+    }
+
+    /// The spot on the office floor (x, z) drawn at window point `point`.
+    func floor(at point: CGPoint) -> SIMD2<Float> {
+        let g = view.ground([Float(point.x), Float(point.y)], height: Layout.floorThickness)
+        return [g.x, g.z]
     }
 
     func apply(to camera: Entity) {
@@ -296,7 +308,7 @@ struct Labels {
     var report: String { t("Report") }
     var failed: String { t("Failed") }
     var result: String { t("Result") }
-    var tipArrows: String { t("Move the CEO with the arrow keys ← ↑ ↓ →") }
+    var tipArrows: String { t("Move the CEO with the arrow keys ← ↑ ↓ → or click where to go") }
     var compacting: String { t("Tidying notes…") }
     /// The speaker's line while someone pages the bench: who is called.
     func paging(_ names: [String]) -> String { t("Paging: \(names.joined(separator: ", "))") }
@@ -329,5 +341,5 @@ struct Labels {
         if let n = c.lastTurnTokens { line += " · " + t("last turn \(oneDecimal(n))") }
         return line
     }
-    var tipHome: String { t("Press H to send the CEO back to the desk") }
+    var tipHome: String { t("Press H or click the CEO's desk to send the CEO back") }
 }

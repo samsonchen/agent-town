@@ -10,9 +10,9 @@ extension Actor {
     }
 }
 
-/// The CEO under the user's control: the arrow keys walk the CEO around the office,
-/// H sends the CEO back to the desk, and the character the CEO touches says how its
-/// work is going. Away from the desk, the CEO's calls go to a mobile phone.
+/// The CEO under the user's control: the arrow keys or a click on the floor walk the CEO
+/// around the office, H or a click on the CEO's desk sends the CEO back to the desk, and the
+/// character the CEO touches (or that is clicked) says how its work is going. Away from the desk, the CEO's calls go to a mobile phone.
 extension TownScene {
     /// Key codes: left, right, down, up.
     static let arrowKeys: [UInt16: SIMD2<Float>] = [123: [-1, 0], 124: [1, 0], 125: [0, 1], 126: [0, -1]]
@@ -189,6 +189,35 @@ extension TownScene {
             if depth > (best?.1 ?? -.infinity) { best = (a, depth) }
         }
         return best?.0
+    }
+
+    /// A click in the office at `point` (window points). On a character, the CEO walks over to
+    /// them; on the CEO's desk, the CEO goes back to it, as with H; anywhere else on the floor,
+    /// the CEO walks there. Nothing happens while the arrow keys drive.
+    func click(at point: CGPoint, projector: Projector) {
+        guard ceoDriver == nil, let ceo else { return }
+        if let a = actor(at: point, projector: projector) {
+            visit(a) // a click on the CEO does nothing
+            return
+        }
+        let spot = projector.floor(at: point)
+        if let exec = blocks[Self.executive], exec.placed {
+            let o3 = exec.entity.position(relativeTo: nil)
+            let o = SIMD2<Float>(o3.x, o3.z)
+            let area = Layout.ceoDeskArea
+            if FloorPlan.inside(spot, (area.min + o, area.max + o), pad: 0) {
+                ceoHomeTask?.cancel()
+                sendCeoHome()
+                return
+            }
+        }
+        // Off the floor: the nearest point on it; inside furniture: the nearest free spot beside it.
+        guard let goal = FloorPlan.freeSpot(near: spot, size: officeSize, obstacles: worldObstacles(),
+                                            radius: Self.ceoRadius),
+              simd_distance(goal, ceo.worldSpot) > 0.05 else { return }
+        ceoHomeTask?.cancel()
+        ceoVisitee = nil
+        walkCeo(to: goal)
     }
 
     /// A click on a character: the CEO walks over to them and turns to them, and they say

@@ -116,8 +116,9 @@ struct TownView: View {
             }
             .contentShape(Rectangle())
             .onTapGesture(coordinateSpace: .local) { point in
-                // A click on a character sends the CEO over to talk to them.
-                if let a = scene.actor(at: point, projector: proj) { scene.visit(a) }
+                // A click on a character sends the CEO over to talk to them; on the floor, the CEO
+                // walks there; on the CEO's desk, the CEO goes back to it.
+                scene.click(at: point, projector: proj)
             }
             .onAppear { proj.apply(to: camera) }
             .onChange(of: geo.size) { proj.apply(to: camera) }

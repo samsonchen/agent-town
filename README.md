@@ -90,7 +90,7 @@ The window shows one office building, seen from above. At the top is the executi
 
 A strip across the top, with three people at their desks:
 
-- **The CEO** is you. Each prompt you type becomes a ticket, and the CEO phones it through to the Chief of Staff of that session. Reports come back to the CEO by phone. When Claude Code waits for your approval, the CEO's phone rings until you answer. You can walk the CEO around with the arrow keys (H goes back to the desk); click a character and the CEO walks over, and that character says how its work is going.
+- **The CEO** is you. Each prompt you type becomes a ticket, and the CEO phones it through to the Chief of Staff of that session. Reports come back to the CEO by phone. When Claude Code waits for your approval, the CEO's phone rings until you answer. You can walk the CEO around with the arrow keys or by clicking a spot on the floor (H, or a click on the CEO's desk, goes back to the desk); click a character and the CEO walks over, and that character says how its work is going.
 - **The Dispatcher** handles scheduled work, such as `/loop` and other scheduled prompts. Each active schedule is a card on the board beside the Dispatcher's desk, in the color of its project's block. When a schedule fires, the Dispatcher radios the ticket to the Chief of Staff, and the report comes back to the Dispatcher.
 - **The Inspector** stands at reception. When a hook (such as a check that the tests pass) refuses to let Claude Code finish and sends it back to work, the Chief of Staff's report goes to the Inspector instead of the CEO. The Inspector shows the hook's reason, a "Returned" stamp shows over the Chief of Staff, and the work goes on.
 

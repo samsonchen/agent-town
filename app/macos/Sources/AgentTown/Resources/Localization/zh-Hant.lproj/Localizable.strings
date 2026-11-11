@@ -51,8 +51,8 @@
 "Report" = "報告";
 "Failed" = "失敗";
 "Result" = "結果";
-"Move the CEO with the arrow keys ← ↑ ↓ →" = "用方向鍵 ← ↑ ↓ → 移動執行長";
-"Press H to send the CEO back to the desk" = "按 H 讓執行長回到座位";
+"Move the CEO with the arrow keys ← ↑ ↓ → or click where to go" = "用方向鍵 ← ↑ ↓ → 或點擊地面移動執行長";
+"Press H or click the CEO's desk to send the CEO back" = "按 H 或點執行長的桌子，讓執行長回到座位";
 
 /* Compaction */
 "Tidying notes…" = "整理筆記中…";
