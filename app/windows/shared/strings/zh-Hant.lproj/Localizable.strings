@@ -1,0 +1,105 @@
+/* Traditional Chinese (Taiwan). Keys are the English text in the code, with %@ for text and
+   %lld for whole numbers; use %1$@, %2$@ ... to change their order. */
+
+/* Menu bar and window */
+"Show agent-town" = "顯示 agent-town";
+"Stay on top" = "保持在最上層";
+"Sound" = "聲音";
+"Show tips" = "顯示提示";
+"Settings…" = "設定…";
+"Settings" = "設定";
+"Language" = "語言";
+"System (macOS setting)" = "跟隨系統（macOS 設定）";
+"Restart agent-town to use the new language." = "重新啟動 agent-town 以套用新語言。";
+"Restart now" = "立即重新啟動";
+"Open at login" = "登入時開啟";
+"Available in the installed app only." = "僅限安裝後的 app 使用。";
+"Allow agent-town in System Settings → General → Login Items." = "請在「系統設定」→「一般」→「登入項目」中允許 agent-town。";
+"macOS did not allow it: %@" = "macOS 不允許此設定：%@";
+"Opacity" = "不透明度";
+"Quit agent-town" = "結束 agent-town";
+"Close" = "關閉";
+
+/* About */
+"About agent-town" = "關於 agent-town";
+"Version %@ (build %@)" = "版本 %1$@（建置 %2$@）";
+"Version %@ (development build)" = "版本 %@（開發版）";
+"Shows Claude Code's work as a small office." = "把 Claude Code 的工作畫成一間小辦公室。";
+"By Samson Chen" = "作者：Samson Chen";
+"License" = "授權";
+"agent-town is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)." = "agent-town 以 [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) 授權。";
+"Third-party components" = "第三方元件";
+"3D models, license: [%@](%@)" = "3D 模型，授權：[%1$@](%2$@)";
+"CC0 does not require credit; we credit Kenney (kenney.nl) anyway." = "CC0 不要求標示來源，我們仍在此感謝 Kenney（kenney.nl）。";
+
+/* Names and tags */
+"Chief of Staff" = "幕僚長";
+"CEO" = "執行長";
+"Dispatcher" = "調度員";
+"Inspector" = "稽核員";
+"Returned" = "退回";
+"Continuing" = "繼續工作";
+"Report from %@" = "%@ 的回報";
+"Message from %@" = "%@ 傳來的訊息";
+"Message from a colleague" = "同事傳來的訊息";
+"Executive office" = "執行長辦公室";
+"Server room" = "機房";
+"Ring ring" = "鈴鈴";
+"Staff" = "職員";
+"Operator" = "作業員";
+"Needs approval" = "待核准";
+"Report" = "報告";
+"Failed" = "失敗";
+"Result" = "結果";
+"Move the CEO with the arrow keys ← ↑ ↓ → or click where to go" = "用方向鍵 ← ↑ ↓ → 或點擊地面移動執行長";
+"Press H or click the CEO's desk to send the CEO back" = "按 H 或點執行長的桌子，讓執行長回到座位";
+
+/* Compaction */
+"Tidying notes…" = "整理筆記中…";
+"Paging: %@" = "廣播：%@";
+"Notes tidied" = "筆記整理完成";
+"Notes tidied: %@ → %@ tokens" = "筆記整理完成：%1$@ → %2$@ tokens";
+
+/* Context bar */
+"Desk %lld" = "%lld 號桌";
+"%@ context" = "%@ 上下文";
+"Context —" = "上下文 —";
+"last turn %@" = "上一輪 %@";
+
+/* What characters tell the CEO */
+"“%@”" = "「%@」";
+"Nothing scheduled on the board." = "看板上沒有排程工作。";
+"%lld scheduled job on the board." = "看板上有 %lld 項排程工作。";
+"%lld scheduled jobs on the board." = "看板上有 %lld 項排程工作。";
+"Next up: %@." = "下一項：%@。";
+"I check returned tickets. All quiet for now." = "我負責檢查退回的工單，目前一切正常。";
+"%lld ticket was sent back. I'm keeping an eye on it." = "有 %lld 張工單被退回，我正在留意。";
+"%lld tickets were sent back. I'm keeping an eye on them." = "有 %lld 張工單被退回，我正在留意。";
+"Just got here." = "剛到。";
+"I need your approval to use %@." = "我需要你核准使用 %@。";
+"I'm tidying our conversation notes to make room. Back to work in a moment." = "正在整理對話筆記、騰出空間，馬上回來工作。";
+"No ticket right now. Ready for the next one." = "目前沒有工單，隨時待命。";
+"Working on %@ for %@." = "正在處理%1$@，已經 %2$@。";
+"Working on %@." = "正在處理%@。";
+"It's a %@ job." = "這是「%@」類工作。";
+"It came back %lld×, so I'm redoing it." = "被退回 %lld 次，正在重做。";
+"%lld staff and %lld operator are helping." = "有 %1$lld 位職員、%2$lld 位作業員協助。";
+"%lld staff and %lld operators are helping." = "有 %1$lld 位職員、%2$lld 位作業員協助。";
+"%lld of them needs your approval." = "其中 %lld 位在等你核准。";
+"%lld of them need your approval." = "其中 %lld 位在等你核准。";
+"Right now I'm %@." = "現在正在%@。";
+"Waiting on the bench. My last job was %@." = "在休息區待命，上一份工作是%@。";
+"Waiting on the bench for a job." = "在休息區等工作。";
+"a job" = "一項工作";
+"On my way to start %@." = "正要去開始%@。";
+"I'm waiting for your approval." = "我在等你核准。";
+"Running %@ in the background for %@." = "在背景執行%1$@，已經 %2$@。";
+"%@ here. On %@ for %@." = "我是%1$@，處理%2$@已經 %3$@。";
+"reading files" = "讀檔案";
+"editing files" = "編輯檔案";
+"running commands" = "執行指令";
+"looking things up on the web" = "上網查資料";
+"using a connected tool" = "使用外部工具";
+"thinking it through" = "思考中";
+"%llds" = "%lld 秒";
+"%lldm %llds" = "%1$lld 分 %2$lld 秒";

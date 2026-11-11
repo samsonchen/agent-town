@@ -1,0 +1,1401 @@
+{
+  "version": 1,
+  "fallback": "generalist",
+  "backgroundFallback": "background-worker",
+  "backgroundRuleOrder": [
+    "log-monitor",
+    "workflow-coordinator",
+    "build-operator",
+    "test-runner",
+    "server-operator",
+    "install-operator",
+    "deploy-operator"
+  ],
+  "neutralColor": "#D1D5DB",
+  "departments": [
+    {
+      "id": "software-engineering",
+      "labels": {
+        "en": "Software engineering",
+        "zh-TW": "軟體工程"
+      },
+      "color": "#3B82F6",
+      "defaultProp": "laptop"
+    },
+    {
+      "id": "infrastructure",
+      "labels": {
+        "en": "Infrastructure and operations",
+        "zh-TW": "基礎架構與維運"
+      },
+      "color": "#14B8A6",
+      "defaultProp": "laptop"
+    },
+    {
+      "id": "data-ai",
+      "labels": {
+        "en": "Data and AI",
+        "zh-TW": "資料與 AI"
+      },
+      "color": "#8B5CF6",
+      "defaultProp": "chart"
+    },
+    {
+      "id": "security",
+      "labels": {
+        "en": "Information security",
+        "zh-TW": "資訊安全"
+      },
+      "color": "#334155",
+      "defaultProp": "shield"
+    },
+    {
+      "id": "product-design",
+      "labels": {
+        "en": "Product and design",
+        "zh-TW": "產品與設計"
+      },
+      "color": "#EC4899",
+      "defaultProp": "sketchbook"
+    },
+    {
+      "id": "legal",
+      "labels": {
+        "en": "Legal",
+        "zh-TW": "法務"
+      },
+      "color": "#1E3A8A",
+      "defaultProp": "law-book"
+    },
+    {
+      "id": "risk-compliance",
+      "labels": {
+        "en": "Risk and compliance",
+        "zh-TW": "風險與法遵"
+      },
+      "color": "#64748B",
+      "defaultProp": "clipboard"
+    },
+    {
+      "id": "finance",
+      "labels": {
+        "en": "Finance and accounting",
+        "zh-TW": "財務與會計"
+      },
+      "color": "#15803D",
+      "defaultProp": "calculator"
+    },
+    {
+      "id": "banking",
+      "labels": {
+        "en": "Banking and investment",
+        "zh-TW": "銀行與投資"
+      },
+      "color": "#0F172A",
+      "defaultProp": "briefcase"
+    },
+    {
+      "id": "consulting",
+      "labels": {
+        "en": "Consulting and strategy",
+        "zh-TW": "顧問與策略"
+      },
+      "color": "#B45309",
+      "defaultProp": "briefcase"
+    },
+    {
+      "id": "marketing",
+      "labels": {
+        "en": "Marketing and communications",
+        "zh-TW": "行銷與傳播"
+      },
+      "color": "#E11D48",
+      "defaultProp": "megaphone"
+    },
+    {
+      "id": "sales",
+      "labels": {
+        "en": "Sales and customers",
+        "zh-TW": "業務與客戶"
+      },
+      "color": "#F59E0B",
+      "defaultProp": "phone"
+    },
+    {
+      "id": "people",
+      "labels": {
+        "en": "People",
+        "zh-TW": "人資"
+      },
+      "color": "#10B981",
+      "defaultProp": "folder"
+    },
+    {
+      "id": "operations",
+      "labels": {
+        "en": "Operations and supply chain",
+        "zh-TW": "營運與供應鏈"
+      },
+      "color": "#A16207",
+      "defaultProp": "clipboard"
+    },
+    {
+      "id": "healthcare",
+      "labels": {
+        "en": "Healthcare and life sciences",
+        "zh-TW": "醫療與生技"
+      },
+      "color": "#06B6D4",
+      "defaultProp": "clipboard"
+    },
+    {
+      "id": "administration",
+      "labels": {
+        "en": "Administration",
+        "zh-TW": "行政"
+      },
+      "color": "#6B7280",
+      "defaultProp": "folder"
+    },
+    {
+      "id": "background",
+      "labels": {
+        "en": "Background operations",
+        "zh-TW": "背景作業"
+      },
+      "color": "#FF6B00",
+      "defaultProp": "laptop"
+    },
+    {
+      "id": "general",
+      "labels": {
+        "en": "General",
+        "zh-TW": "一般"
+      },
+      "color": "#94A3B8",
+      "defaultProp": "laptop"
+    }
+  ],
+  "roles": [
+    {
+      "id": "frontend-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Front-end Engineer",
+        "zh-TW": "前端工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "backend-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Back-end Engineer",
+        "zh-TW": "後端工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "fullstack-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Full-stack Engineer",
+        "zh-TW": "全端工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "typescript-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "TypeScript Engineer",
+        "zh-TW": "TypeScript 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "javascript-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "JavaScript Engineer",
+        "zh-TW": "JavaScript 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "python-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Python Engineer",
+        "zh-TW": "Python 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "golang-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Golang Engineer",
+        "zh-TW": "Golang 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "rust-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Rust Engineer",
+        "zh-TW": "Rust 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "java-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Java Engineer",
+        "zh-TW": "Java 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "kotlin-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Kotlin Engineer",
+        "zh-TW": "Kotlin 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "swift-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Swift Engineer",
+        "zh-TW": "Swift 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "csharp-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "C# / .NET Engineer",
+        "zh-TW": "C# / .NET 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "cpp-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "C / C++ Engineer",
+        "zh-TW": "C / C++ 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "php-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "PHP Engineer",
+        "zh-TW": "PHP 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "ruby-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Ruby Engineer",
+        "zh-TW": "Ruby 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "ios-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "iOS Engineer",
+        "zh-TW": "iOS 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "android-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Android Engineer",
+        "zh-TW": "Android 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "embedded-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Embedded / Firmware Engineer",
+        "zh-TW": "嵌入式／韌體工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "game-developer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Game Developer",
+        "zh-TW": "遊戲開發工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "software-architect",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Software Architect",
+        "zh-TW": "軟體架構師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "api-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "API Engineer",
+        "zh-TW": "API 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "database-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Database Engineer",
+        "zh-TW": "資料庫工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "code-reviewer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Code Reviewer",
+        "zh-TW": "程式碼審查員"
+      },
+      "prop": "magnifier"
+    },
+    {
+      "id": "qa-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "QA Engineer",
+        "zh-TW": "品質保證工程師"
+      },
+      "prop": "magnifier"
+    },
+    {
+      "id": "test-automation-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Test Automation Engineer",
+        "zh-TW": "自動化測試工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "performance-engineer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Performance Engineer",
+        "zh-TW": "效能工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "technical-writer",
+      "department": "software-engineering",
+      "labels": {
+        "en": "Technical Writer",
+        "zh-TW": "技術文件工程師"
+      },
+      "prop": "books"
+    },
+    {
+      "id": "devops-engineer",
+      "department": "infrastructure",
+      "labels": {
+        "en": "DevOps Engineer",
+        "zh-TW": "DevOps 工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "sre",
+      "department": "infrastructure",
+      "labels": {
+        "en": "Site Reliability Engineer",
+        "zh-TW": "網站可靠性工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "cloud-engineer",
+      "department": "infrastructure",
+      "labels": {
+        "en": "Cloud Engineer",
+        "zh-TW": "雲端工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "platform-engineer",
+      "department": "infrastructure",
+      "labels": {
+        "en": "Platform Engineer",
+        "zh-TW": "平台工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "release-engineer",
+      "department": "infrastructure",
+      "labels": {
+        "en": "Release Engineer",
+        "zh-TW": "發佈工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "systems-administrator",
+      "department": "infrastructure",
+      "labels": {
+        "en": "Systems Administrator",
+        "zh-TW": "系統管理員"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "network-engineer",
+      "department": "infrastructure",
+      "labels": {
+        "en": "Network Engineer",
+        "zh-TW": "網路工程師"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "it-support",
+      "department": "infrastructure",
+      "labels": {
+        "en": "IT Support Specialist",
+        "zh-TW": "IT 支援專員"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "data-engineer",
+      "department": "data-ai",
+      "labels": {
+        "en": "Data Engineer",
+        "zh-TW": "資料工程師"
+      },
+      "prop": "chart"
+    },
+    {
+      "id": "data-scientist",
+      "department": "data-ai",
+      "labels": {
+        "en": "Data Scientist",
+        "zh-TW": "資料科學家"
+      },
+      "prop": "chart"
+    },
+    {
+      "id": "data-analyst",
+      "department": "data-ai",
+      "labels": {
+        "en": "Data Analyst",
+        "zh-TW": "資料分析師"
+      },
+      "prop": "chart"
+    },
+    {
+      "id": "bi-analyst",
+      "department": "data-ai",
+      "labels": {
+        "en": "BI Analyst",
+        "zh-TW": "商業智慧分析師"
+      },
+      "prop": "chart"
+    },
+    {
+      "id": "ml-engineer",
+      "department": "data-ai",
+      "labels": {
+        "en": "Machine Learning Engineer",
+        "zh-TW": "機器學習工程師"
+      },
+      "prop": "chart"
+    },
+    {
+      "id": "ai-engineer",
+      "department": "data-ai",
+      "labels": {
+        "en": "AI / LLM Engineer",
+        "zh-TW": "AI／LLM 工程師"
+      },
+      "prop": "chart"
+    },
+    {
+      "id": "prompt-engineer",
+      "department": "data-ai",
+      "labels": {
+        "en": "Prompt Engineer",
+        "zh-TW": "提示工程師"
+      },
+      "prop": "chart"
+    },
+    {
+      "id": "statistician",
+      "department": "data-ai",
+      "labels": {
+        "en": "Statistician",
+        "zh-TW": "統計師"
+      },
+      "prop": "chart"
+    },
+    {
+      "id": "research-scientist",
+      "department": "data-ai",
+      "labels": {
+        "en": "Research Scientist",
+        "zh-TW": "研究科學家"
+      },
+      "prop": "chart"
+    },
+    {
+      "id": "security-engineer",
+      "department": "security",
+      "labels": {
+        "en": "Security Engineer",
+        "zh-TW": "資安工程師"
+      },
+      "prop": "shield"
+    },
+    {
+      "id": "security-analyst",
+      "department": "security",
+      "labels": {
+        "en": "Security Analyst",
+        "zh-TW": "資安分析師"
+      },
+      "prop": "shield"
+    },
+    {
+      "id": "penetration-tester",
+      "department": "security",
+      "labels": {
+        "en": "Penetration Tester",
+        "zh-TW": "滲透測試員"
+      },
+      "prop": "magnifier"
+    },
+    {
+      "id": "privacy-engineer",
+      "department": "security",
+      "labels": {
+        "en": "Privacy Engineer",
+        "zh-TW": "隱私工程師"
+      },
+      "prop": "shield"
+    },
+    {
+      "id": "product-manager",
+      "department": "product-design",
+      "labels": {
+        "en": "Product Manager",
+        "zh-TW": "產品經理"
+      },
+      "prop": "sketchbook"
+    },
+    {
+      "id": "project-manager",
+      "department": "product-design",
+      "labels": {
+        "en": "Project Manager",
+        "zh-TW": "專案經理"
+      },
+      "prop": "sketchbook"
+    },
+    {
+      "id": "program-manager",
+      "department": "product-design",
+      "labels": {
+        "en": "Program Manager",
+        "zh-TW": "計畫經理"
+      },
+      "prop": "sketchbook"
+    },
+    {
+      "id": "ux-designer",
+      "department": "product-design",
+      "labels": {
+        "en": "UX Designer",
+        "zh-TW": "UX 設計師"
+      },
+      "prop": "sketchbook"
+    },
+    {
+      "id": "ui-designer",
+      "department": "product-design",
+      "labels": {
+        "en": "UI Designer",
+        "zh-TW": "UI 設計師"
+      },
+      "prop": "sketchbook"
+    },
+    {
+      "id": "ux-researcher",
+      "department": "product-design",
+      "labels": {
+        "en": "UX Researcher",
+        "zh-TW": "使用者研究員"
+      },
+      "prop": "magnifier"
+    },
+    {
+      "id": "ux-writer",
+      "department": "product-design",
+      "labels": {
+        "en": "UX Writer",
+        "zh-TW": "UX 文案"
+      },
+      "prop": "sketchbook"
+    },
+    {
+      "id": "accessibility-specialist",
+      "department": "product-design",
+      "labels": {
+        "en": "Accessibility Specialist",
+        "zh-TW": "無障礙設計專員"
+      },
+      "prop": "sketchbook"
+    },
+    {
+      "id": "graphic-designer",
+      "department": "product-design",
+      "labels": {
+        "en": "Graphic Designer",
+        "zh-TW": "平面設計師"
+      },
+      "prop": "sketchbook"
+    },
+    {
+      "id": "legal-counsel",
+      "department": "legal",
+      "labels": {
+        "en": "Legal Counsel",
+        "zh-TW": "法務顧問"
+      },
+      "prop": "law-book"
+    },
+    {
+      "id": "contract-specialist",
+      "department": "legal",
+      "labels": {
+        "en": "Contract Specialist",
+        "zh-TW": "合約專員"
+      },
+      "prop": "law-book"
+    },
+    {
+      "id": "ip-specialist",
+      "department": "legal",
+      "labels": {
+        "en": "IP / Patent Specialist",
+        "zh-TW": "智慧財產／專利專員"
+      },
+      "prop": "law-book"
+    },
+    {
+      "id": "paralegal",
+      "department": "legal",
+      "labels": {
+        "en": "Paralegal",
+        "zh-TW": "法務助理"
+      },
+      "prop": "law-book"
+    },
+    {
+      "id": "legal-researcher",
+      "department": "legal",
+      "labels": {
+        "en": "Legal Researcher",
+        "zh-TW": "法律研究員"
+      },
+      "prop": "books"
+    },
+    {
+      "id": "litigation-support",
+      "department": "legal",
+      "labels": {
+        "en": "Litigation Support Specialist",
+        "zh-TW": "訴訟支援專員"
+      },
+      "prop": "law-book"
+    },
+    {
+      "id": "data-privacy-specialist",
+      "department": "legal",
+      "labels": {
+        "en": "Data Privacy Specialist",
+        "zh-TW": "個資保護專員"
+      },
+      "prop": "law-book"
+    },
+    {
+      "id": "regulatory-affairs",
+      "department": "legal",
+      "labels": {
+        "en": "Regulatory Affairs Specialist",
+        "zh-TW": "法規事務專員"
+      },
+      "prop": "law-book"
+    },
+    {
+      "id": "compliance-officer",
+      "department": "risk-compliance",
+      "labels": {
+        "en": "Compliance Officer",
+        "zh-TW": "法遵專員"
+      },
+      "prop": "clipboard"
+    },
+    {
+      "id": "aml-kyc-analyst",
+      "department": "risk-compliance",
+      "labels": {
+        "en": "AML / KYC Analyst",
+        "zh-TW": "洗錢防制／KYC 分析師"
+      },
+      "prop": "clipboard"
+    },
+    {
+      "id": "risk-analyst",
+      "department": "risk-compliance",
+      "labels": {
+        "en": "Risk Analyst",
+        "zh-TW": "風險分析師"
+      },
+      "prop": "clipboard"
+    },
+    {
+      "id": "internal-auditor",
+      "department": "risk-compliance",
+      "labels": {
+        "en": "Internal Auditor",
+        "zh-TW": "內部稽核"
+      },
+      "prop": "magnifier"
+    },
+    {
+      "id": "accountant",
+      "department": "finance",
+      "labels": {
+        "en": "Accountant",
+        "zh-TW": "會計人員"
+      },
+      "prop": "calculator"
+    },
+    {
+      "id": "bookkeeper",
+      "department": "finance",
+      "labels": {
+        "en": "Bookkeeper",
+        "zh-TW": "記帳員"
+      },
+      "prop": "calculator"
+    },
+    {
+      "id": "financial-analyst",
+      "department": "finance",
+      "labels": {
+        "en": "Financial Analyst (FP&A)",
+        "zh-TW": "財務分析師"
+      },
+      "prop": "calculator"
+    },
+    {
+      "id": "controller",
+      "department": "finance",
+      "labels": {
+        "en": "Financial Controller",
+        "zh-TW": "財務主管"
+      },
+      "prop": "calculator"
+    },
+    {
+      "id": "tax-specialist",
+      "department": "finance",
+      "labels": {
+        "en": "Tax Specialist",
+        "zh-TW": "稅務專員"
+      },
+      "prop": "calculator"
+    },
+    {
+      "id": "treasury-analyst",
+      "department": "finance",
+      "labels": {
+        "en": "Treasury Analyst",
+        "zh-TW": "資金分析師"
+      },
+      "prop": "calculator"
+    },
+    {
+      "id": "payroll-specialist",
+      "department": "finance",
+      "labels": {
+        "en": "Payroll Specialist",
+        "zh-TW": "薪資專員"
+      },
+      "prop": "calculator"
+    },
+    {
+      "id": "investment-banking-analyst",
+      "department": "banking",
+      "labels": {
+        "en": "Investment Banking Analyst",
+        "zh-TW": "投資銀行分析師"
+      },
+      "prop": "briefcase"
+    },
+    {
+      "id": "equity-research-analyst",
+      "department": "banking",
+      "labels": {
+        "en": "Equity Research Analyst",
+        "zh-TW": "股票研究分析師"
+      },
+      "prop": "briefcase"
+    },
+    {
+      "id": "credit-analyst",
+      "department": "banking",
+      "labels": {
+        "en": "Credit Analyst",
+        "zh-TW": "授信分析師"
+      },
+      "prop": "briefcase"
+    },
+    {
+      "id": "quant-analyst",
+      "department": "banking",
+      "labels": {
+        "en": "Quantitative Analyst",
+        "zh-TW": "量化分析師"
+      },
+      "prop": "briefcase"
+    },
+    {
+      "id": "portfolio-analyst",
+      "department": "banking",
+      "labels": {
+        "en": "Portfolio Analyst",
+        "zh-TW": "投資組合分析師"
+      },
+      "prop": "briefcase"
+    },
+    {
+      "id": "underwriter",
+      "department": "banking",
+      "labels": {
+        "en": "Underwriter",
+        "zh-TW": "核保員"
+      },
+      "prop": "briefcase"
+    },
+    {
+      "id": "actuary",
+      "department": "banking",
+      "labels": {
+        "en": "Actuary",
+        "zh-TW": "精算師"
+      },
+      "prop": "briefcase"
+    },
+    {
+      "id": "management-consultant",
+      "department": "consulting",
+      "labels": {
+        "en": "Management Consultant",
+        "zh-TW": "管理顧問"
+      },
+      "prop": "briefcase"
+    },
+    {
+      "id": "strategy-analyst",
+      "department": "consulting",
+      "labels": {
+        "en": "Strategy Analyst",
+        "zh-TW": "策略分析師"
+      },
+      "prop": "briefcase"
+    },
+    {
+      "id": "business-analyst",
+      "department": "consulting",
+      "labels": {
+        "en": "Business Analyst",
+        "zh-TW": "商業分析師"
+      },
+      "prop": "briefcase"
+    },
+    {
+      "id": "market-research-analyst",
+      "department": "consulting",
+      "labels": {
+        "en": "Market Research Analyst",
+        "zh-TW": "市場研究分析師"
+      },
+      "prop": "briefcase"
+    },
+    {
+      "id": "process-analyst",
+      "department": "consulting",
+      "labels": {
+        "en": "Process Improvement Analyst",
+        "zh-TW": "流程改善分析師"
+      },
+      "prop": "briefcase"
+    },
+    {
+      "id": "marketing-manager",
+      "department": "marketing",
+      "labels": {
+        "en": "Marketing Manager",
+        "zh-TW": "行銷經理"
+      },
+      "prop": "megaphone"
+    },
+    {
+      "id": "copywriter",
+      "department": "marketing",
+      "labels": {
+        "en": "Copywriter",
+        "zh-TW": "文案"
+      },
+      "prop": "megaphone"
+    },
+    {
+      "id": "content-writer",
+      "department": "marketing",
+      "labels": {
+        "en": "Content Writer",
+        "zh-TW": "內容編輯"
+      },
+      "prop": "megaphone"
+    },
+    {
+      "id": "editor",
+      "department": "marketing",
+      "labels": {
+        "en": "Editor / Proofreader",
+        "zh-TW": "編輯／校對"
+      },
+      "prop": "books"
+    },
+    {
+      "id": "translator",
+      "department": "marketing",
+      "labels": {
+        "en": "Translator / Localization Specialist",
+        "zh-TW": "翻譯／在地化專員"
+      },
+      "prop": "books"
+    },
+    {
+      "id": "seo-specialist",
+      "department": "marketing",
+      "labels": {
+        "en": "SEO Specialist",
+        "zh-TW": "SEO 專員"
+      },
+      "prop": "megaphone"
+    },
+    {
+      "id": "social-media-manager",
+      "department": "marketing",
+      "labels": {
+        "en": "Social Media Manager",
+        "zh-TW": "社群經理"
+      },
+      "prop": "megaphone"
+    },
+    {
+      "id": "brand-strategist",
+      "department": "marketing",
+      "labels": {
+        "en": "Brand Strategist",
+        "zh-TW": "品牌策略師"
+      },
+      "prop": "megaphone"
+    },
+    {
+      "id": "pr-specialist",
+      "department": "marketing",
+      "labels": {
+        "en": "Public Relations Specialist",
+        "zh-TW": "公關專員"
+      },
+      "prop": "megaphone"
+    },
+    {
+      "id": "growth-marketer",
+      "department": "marketing",
+      "labels": {
+        "en": "Growth Marketer",
+        "zh-TW": "成長行銷專員"
+      },
+      "prop": "megaphone"
+    },
+    {
+      "id": "solutions-engineer",
+      "department": "sales",
+      "labels": {
+        "en": "Solutions Engineer",
+        "zh-TW": "解決方案工程師"
+      },
+      "prop": "phone"
+    },
+    {
+      "id": "proposal-writer",
+      "department": "sales",
+      "labels": {
+        "en": "Proposal Writer",
+        "zh-TW": "提案撰寫專員"
+      },
+      "prop": "phone"
+    },
+    {
+      "id": "sales-operations-analyst",
+      "department": "sales",
+      "labels": {
+        "en": "Sales Operations Analyst",
+        "zh-TW": "業務營運分析師"
+      },
+      "prop": "phone"
+    },
+    {
+      "id": "customer-support",
+      "department": "sales",
+      "labels": {
+        "en": "Customer Support Specialist",
+        "zh-TW": "客服專員"
+      },
+      "prop": "phone"
+    },
+    {
+      "id": "customer-success-manager",
+      "department": "sales",
+      "labels": {
+        "en": "Customer Success Manager",
+        "zh-TW": "客戶成功經理"
+      },
+      "prop": "phone"
+    },
+    {
+      "id": "recruiter",
+      "department": "people",
+      "labels": {
+        "en": "Recruiter",
+        "zh-TW": "招募專員"
+      },
+      "prop": "phone"
+    },
+    {
+      "id": "hr-generalist",
+      "department": "people",
+      "labels": {
+        "en": "HR Generalist",
+        "zh-TW": "人資專員"
+      },
+      "prop": "folder"
+    },
+    {
+      "id": "learning-specialist",
+      "department": "people",
+      "labels": {
+        "en": "Learning & Development Specialist",
+        "zh-TW": "教育訓練專員"
+      },
+      "prop": "folder"
+    },
+    {
+      "id": "instructional-designer",
+      "department": "people",
+      "labels": {
+        "en": "Instructional Designer",
+        "zh-TW": "教學設計師"
+      },
+      "prop": "folder"
+    },
+    {
+      "id": "compensation-analyst",
+      "department": "people",
+      "labels": {
+        "en": "Compensation Analyst",
+        "zh-TW": "薪酬分析師"
+      },
+      "prop": "folder"
+    },
+    {
+      "id": "operations-analyst",
+      "department": "operations",
+      "labels": {
+        "en": "Operations Analyst",
+        "zh-TW": "營運分析師"
+      },
+      "prop": "clipboard"
+    },
+    {
+      "id": "procurement-specialist",
+      "department": "operations",
+      "labels": {
+        "en": "Procurement Specialist",
+        "zh-TW": "採購專員"
+      },
+      "prop": "clipboard"
+    },
+    {
+      "id": "supply-chain-analyst",
+      "department": "operations",
+      "labels": {
+        "en": "Supply Chain Analyst",
+        "zh-TW": "供應鏈分析師"
+      },
+      "prop": "clipboard"
+    },
+    {
+      "id": "logistics-planner",
+      "department": "operations",
+      "labels": {
+        "en": "Logistics Planner",
+        "zh-TW": "物流規劃師"
+      },
+      "prop": "clipboard"
+    },
+    {
+      "id": "medical-writer",
+      "department": "healthcare",
+      "labels": {
+        "en": "Medical Writer",
+        "zh-TW": "醫學寫作專員"
+      },
+      "prop": "clipboard"
+    },
+    {
+      "id": "clinical-data-analyst",
+      "department": "healthcare",
+      "labels": {
+        "en": "Clinical Data Analyst",
+        "zh-TW": "臨床資料分析師"
+      },
+      "prop": "clipboard"
+    },
+    {
+      "id": "medical-regulatory-specialist",
+      "department": "healthcare",
+      "labels": {
+        "en": "Medical Device Regulatory Specialist",
+        "zh-TW": "醫療器材法規專員"
+      },
+      "prop": "clipboard"
+    },
+    {
+      "id": "executive-assistant",
+      "department": "administration",
+      "labels": {
+        "en": "Executive Assistant",
+        "zh-TW": "行政秘書"
+      },
+      "prop": "folder"
+    },
+    {
+      "id": "office-administrator",
+      "department": "administration",
+      "labels": {
+        "en": "Office Administrator",
+        "zh-TW": "行政專員"
+      },
+      "prop": "folder"
+    },
+    {
+      "id": "generalist",
+      "department": "general",
+      "labels": {
+        "en": "Generalist",
+        "zh-TW": "通才專員"
+      },
+      "prop": "laptop"
+    },
+    {
+      "id": "build-operator",
+      "department": "background",
+      "labels": {
+        "en": "Build Operator",
+        "zh-TW": "建置作業員"
+      },
+      "prop": "hard-hat",
+      "background": true,
+      "rules": {
+        "tools": [],
+        "words": [
+          "build",
+          "make",
+          "compile",
+          "docker build",
+          "cargo build",
+          "xcodebuild",
+          "msbuild",
+          "dotnet build"
+        ]
+      }
+    },
+    {
+      "id": "test-runner",
+      "department": "background",
+      "labels": {
+        "en": "Test Runner",
+        "zh-TW": "測試執行員"
+      },
+      "prop": "stopwatch",
+      "background": true,
+      "rules": {
+        "tools": [],
+        "words": [
+          "test",
+          "pytest",
+          "jest",
+          "vitest",
+          "go test",
+          "dotnet test"
+        ]
+      }
+    },
+    {
+      "id": "server-operator",
+      "department": "background",
+      "labels": {
+        "en": "Server Operator",
+        "zh-TW": "伺服器值班員"
+      },
+      "prop": "headset",
+      "background": true,
+      "rules": {
+        "tools": [],
+        "words": [
+          "dev",
+          "serve",
+          "start",
+          "watch",
+          "run server"
+        ]
+      }
+    },
+    {
+      "id": "log-monitor",
+      "department": "background",
+      "labels": {
+        "en": "Log Monitor",
+        "zh-TW": "監控員"
+      },
+      "prop": "binoculars",
+      "background": true,
+      "rules": {
+        "tools": [
+          "Monitor"
+        ],
+        "words": []
+      }
+    },
+    {
+      "id": "install-operator",
+      "department": "background",
+      "labels": {
+        "en": "Installer",
+        "zh-TW": "安裝作業員"
+      },
+      "prop": "box-cart",
+      "background": true,
+      "rules": {
+        "tools": [],
+        "words": [
+          "npm install",
+          "pnpm add",
+          "pip install",
+          "brew install",
+          "download",
+          "curl -O",
+          "winget install",
+          "choco install",
+          "Invoke-WebRequest"
+        ]
+      }
+    },
+    {
+      "id": "batch-operator",
+      "department": "background",
+      "labels": {
+        "en": "Batch Job Operator",
+        "zh-TW": "批次作業員"
+      },
+      "prop": "punch-cards",
+      "background": true
+    },
+    {
+      "id": "deploy-operator",
+      "department": "background",
+      "labels": {
+        "en": "Deployment Operator",
+        "zh-TW": "部署作業員"
+      },
+      "prop": "clipboard",
+      "background": true,
+      "rules": {
+        "tools": [],
+        "words": [
+          "deploy",
+          "release",
+          "publish"
+        ]
+      }
+    },
+    {
+      "id": "workflow-coordinator",
+      "department": "background",
+      "labels": {
+        "en": "Workflow Coordinator",
+        "zh-TW": "流程協調員"
+      },
+      "prop": "baton",
+      "background": true,
+      "rules": {
+        "tools": [
+          "Workflow"
+        ],
+        "words": []
+      }
+    },
+    {
+      "id": "background-worker",
+      "department": "background",
+      "labels": {
+        "en": "Background Worker",
+        "zh-TW": "背景作業員"
+      },
+      "prop": "laptop",
+      "background": true
+    }
+  ]
+}

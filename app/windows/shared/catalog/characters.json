@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "texture": {
+    "file": "colormap.png",
+    "size": 512,
+    "cellWidth": 32,
+    "cellHeight": 128,
+    "note": "Cells are counted from the top-left: row 0-3 (128 px each), col 0-15 (32 px each)."
+  },
+  "characters": {
+    "male-a": { "model": "character-male-a", "shirt": [{ "row": 2, "col": 3 }] },
+    "male-b": { "model": "character-male-b", "shirt": [{ "row": 2, "col": 9 }] },
+    "male-c": { "model": "character-male-c", "shirt": [{ "row": 2, "col": 11 }] },
+    "male-d": { "model": "character-male-d", "shirt": [{ "row": 3, "col": 1 }] },
+    "male-e": { "model": "character-male-e", "shirt": [{ "row": 3, "col": 9 }] },
+    "male-f": { "model": "character-male-f", "shirt": [{ "row": 2, "col": 3 }] },
+    "female-a": { "model": "character-female-a", "shirt": [{ "row": 2, "col": 15 }] },
+    "female-b": { "model": "character-female-b", "shirt": [{ "row": 2, "col": 5 }] },
+    "female-c": { "model": "character-female-c", "shirt": [{ "row": 2, "col": 11 }] },
+    "female-d": { "model": "character-female-d", "shirt": [{ "row": 3, "col": 3 }] },
+    "female-e": { "model": "character-female-e", "shirt": [{ "row": 3, "col": 9 }] },
+    "female-f": { "model": "character-female-f", "shirt": [{ "row": 2, "col": 5 }] }
+  },
+  "fixed": {
+    "ceo": "male-d",
+    "dispatcher": "female-e",
+    "inspector": "male-c"
+  },
+  "chiefOfStaff": {
+    "exclude": ["male-d", "male-c", "female-e"],
+    "color": "#374151"
+  }
+}
