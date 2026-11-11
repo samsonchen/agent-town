@@ -122,7 +122,8 @@ final class TownScene: ObservableObject {
             // One Chief per session ID; a second project claiming it is ignored.
             guard let node = blocks[p], actors[s] == nil else { return }
             if let name = building.blocks[p]?.name { node.name = name }
-            let slot = BlockNode.free(node.chiefSlots, below: Layout.maxDesks)
+            // The front desk if it is free, else a back-row slot nobody uses or is still clearing.
+            let slot = node.chiefSlots.values.contains(0) ? (node.freeBackSlot() ?? Layout.maxDesks) : 0
             node.chiefSlots[s] = slot
             let carriesDesk = slot > 0
             let chief = makeActor(id: s, kind: .chief, base: chiefBase(node),
@@ -157,12 +158,17 @@ final class TownScene: ObservableObject {
             chief.working = false
             sessionEnded(s, in: node)
             actors[s] = nil
-            if let slot, node.carried[slot] != nil {
-                // A Chief who carried a desk in carries it out again.
+            if let slot, slot > 0 {
+                // A Chief who carried a desk in carries it out again. This waits for the walk-in,
+                // so a session that ends before its desk is set down still takes the desk away.
+                node.leavingSlots.insert(slot)
                 chief.enqueue { [weak self] in
                     guard let self else { return }
-                    await self.walk(chief, to: Layout.chiefSpot(slot: slot))
-                    await self.pickUp(by: chief, in: node, slot: slot)
+                    if node.carried[slot] != nil {
+                        await self.walk(chief, to: Layout.chiefSpot(slot: slot))
+                        await self.pickUp(by: chief, in: node, slot: slot)
+                    }
+                    node.leavingSlots.remove(slot)
                     await self.leave(chief, node)
                 }
             } else {

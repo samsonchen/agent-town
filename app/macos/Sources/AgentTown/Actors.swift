@@ -201,10 +201,13 @@ final class BlockNode {
     var activeDesk: [String: String] = [:]
     /// Staff who carry in a desk because the front desks are taken: actor id → back-row slot.
     var tempSlots: [String: Int] = [:]
-    /// A back-row slot with no Chief, no desk carried in and no one bringing one.
+    /// Back-row slots whose Chief has left but whose desk is not carried out yet.
+    var leavingSlots: Set<Int> = []
+    /// A back-row slot with no Chief, no desk carried in and no one bringing one or taking one away.
     func freeBackSlot() -> Int? {
         (1..<Layout.maxDesks).first { b in
             !chiefSlots.values.contains(b) && !tempSlots.values.contains(b) && carried[b] == nil
+                && !leavingSlots.contains(b)
         }
     }
     /// Furniture footprints (block-local x and z), which the CEO walks around.
