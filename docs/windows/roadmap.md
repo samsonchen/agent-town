@@ -22,7 +22,7 @@ Godot 4.7.2 (4.4 or later works), typed GDScript, in `app/windows/`. Scope: [spe
 - [x] Building state ported (`app/windows/core/`: events, the building, the `seq` sequencer), passing every fixture in `protocol/fixtures/expected/` and the ported unit tests
 - [x] Loopback server, endpoint file and store: a live `claude -p` session with town-link drove the whole story (ticket, hat, desk worker, report, close) through `dev/store_check.gd`
 - [x] The office: executive block and project blocks in one column, the window growing to fit; furniture, the fixed characters and the Chiefs of Staff at their desks; signs, name tags and context bars
-- [ ] Scenes 1 to 12: calls, desk workers, staff and the bench, operators, approvals
+- [x] Scenes 1 to 12 and 16: calls from the CEO (and the Dispatcher) and report calls, paging the bench, staff and operators at desks and consoles, reports and results (with "Failed"), approvals with the CEO's phone ringing, messages, desks carried in and out; checked with the fixtures. Desk workers are still to watch in a live session
 - [ ] Context bar, block signs with task titles
 - [ ] Sounds with the duration gate
 - [ ] Tray menu, Settings (language, open at login, stay on top, opacity), About

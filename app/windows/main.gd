@@ -28,6 +28,9 @@ func _ready() -> void:
 	scene = TownScene.new(labels, store.building)
 	add_child(scene)
 	store.changed.connect(scene.handle)
+	var audio := TownAudio.new()
+	add_child(audio)
+	scene.sound.connect(audio.play)
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	camera.keep_aspect = Camera3D.KEEP_HEIGHT
 	scene.add_child(camera)
@@ -45,7 +48,7 @@ func _ready() -> void:
 		var version: String = ProjectSettings.get_setting("application/config/version", "0.0.0")
 		store.start(version)
 	if _args.has("snapshot"):
-		_snapshot_later(_args["snapshot"], float(_args.get("at", "3")))
+		_snapshot_later(_args["snapshot"], _args.get("at", "3"))
 
 
 static func _parse_args(args: PackedStringArray) -> Dictionary:
@@ -127,10 +130,15 @@ func _play_demo(path: String, speed: float) -> void:
 		store.receive({"protocol": 1, "events": [e] as Array[TownEvent]}, Time.get_ticks_msec())
 
 
-func _snapshot_later(path: String, seconds: float) -> void:
-	await get_tree().create_timer(seconds).timeout
-	await RenderingServer.frame_post_draw
-	var img := get_viewport().get_texture().get_image()
-	img.save_png(path)
-	print("snapshot: ", path)
+## `--at` may list several times ("6,12,21"): each writes out-1.png, out-2.png …; the last quits.
+func _snapshot_later(path: String, at: String) -> void:
+	var times := Array(at.split(",")).map(func(t: String) -> float: return t.to_float())
+	var elapsed := 0.0
+	for i in times.size():
+		await get_tree().create_timer(maxf(0.0, times[i] - elapsed)).timeout
+		elapsed = times[i]
+		await RenderingServer.frame_post_draw
+		var out := path if times.size() == 1 else "%s-%d.%s" % [path.get_basename(), i + 1, path.get_extension()]
+		get_viewport().get_texture().get_image().save_png(out)
+		print("snapshot: ", out)
 	get_tree().quit()

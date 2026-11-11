@@ -108,6 +108,14 @@ func color_for_role(id: Variant) -> String:
 	return _department_color.get(_role_department[id], neutral_color)
 
 
+func department_of(role_id: Variant) -> Variant:
+	return _role_department.get(role_id) if role_id != null else null
+
+
+func color_for_department(department: Variant) -> String:
+	return _department_color.get(department, neutral_color) if department != null else neutral_color
+
+
 func operator_color() -> String:
 	return _department_color.get("background", "#FF6B00")
 

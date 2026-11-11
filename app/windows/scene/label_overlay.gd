@@ -15,6 +15,7 @@ const BACKGROUND := {
 	"faint": Color(0, 0, 0, 0.22), "speech": Color.WHITE, "statement": Color(1, 0.98, 0.92)}
 const DARK_TEXT := ["hat", "ticket", "speech", "statement"]
 const METER_BACKGROUND := Color(0.20, 0.24, 0.30, 0.92)
+const CALL_COLOR := Color(0.95, 0.45, 0.15)
 
 var scene: TownScene
 var camera: Camera3D
@@ -38,6 +39,13 @@ func _process(_delta: float) -> void:
 
 
 func _draw() -> void:
+	# Dashed lines for calls in progress, pages and approval waits, under the tags.
+	for line: Array in scene.call_lines():
+		var a: Vector3 = line[0]
+		var b: Vector3 = line[1]
+		if camera.is_position_behind(a) or camera.is_position_behind(b):
+			continue
+		draw_dashed_line(camera.unproject_position(a), camera.unproject_position(b), CALL_COLOR, 2.0, 6.0)
 	for item: Dictionary in scene.label_items():
 		var anchor: Vector3 = item["anchor"]
 		if camera.is_position_behind(anchor):

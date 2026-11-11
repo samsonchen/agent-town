@@ -7,7 +7,16 @@ extends RefCounted
 const CHARACTERS := "res://shared/kenney/mini-characters/"
 const FURNITURE := "res://shared/kenney/furniture-kit/"
 
+## Clips made from part of another, played back and forth: a hand tapping at the reach of `interact`,
+## for typing (alternating hands) and writing (one hand, slower). name -> [base, from, to, speed].
+const DERIVED := {
+	"type-right": ["interact-right", 0.35, 0.6, 1.4],
+	"type-left": ["interact-left", 0.35, 0.6, 1.4],
+	"write": ["interact-right", 0.4, 0.6, 0.7],
+}
+
 var catalog: Dictionary ## catalog/characters.json
+var _motion: Dictionary = {} ## model name -> [loop library, derived library]
 var _colormap: Image
 var _cell_w := 32
 var _cell_h := 128
@@ -55,6 +64,28 @@ func character(base: String, outfit: String = "") -> Node3D:
 	if outfit != "":
 		dress(model, base, outfit)
 	return model
+
+
+## Gives a character's AnimationPlayer two more libraries, shared by all copies of its model:
+## "loop/<clip>", each clip looping, and "derived/<name>" for DERIVED. The imported clips stay
+## one-shot, so a clip can play either way without changing it for every character.
+func attach_motion(player: AnimationPlayer, model_name: String) -> void:
+	if not _motion.has(model_name):
+		var loops := AnimationLibrary.new()
+		var derived := AnimationLibrary.new()
+		for clip: String in player.get_animation_list():
+			var a := player.get_animation(clip).duplicate() as Animation
+			a.loop_mode = Animation.LOOP_LINEAR
+			loops.add_animation(clip, a)
+		for name: String in DERIVED:
+			var src: String = DERIVED[name][0]
+			if player.has_animation(src):
+				var a := player.get_animation(src).duplicate() as Animation
+				a.loop_mode = Animation.LOOP_PINGPONG
+				derived.add_animation(name, a)
+		_motion[model_name] = [loops, derived]
+	player.add_animation_library("loop", _motion[model_name][0])
+	player.add_animation_library("derived", _motion[model_name][1])
 
 
 ## Changes a character's outfit color (a staff member changing into a role's department color).
