@@ -108,6 +108,6 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 |---|---|
 | Default for ticket text | Full prompt text, or task type only |
 | Should `claude -p` and Agent SDK runs appear in the building? | Yes, no, or a setting (default off) |
-| Sound files | Pick from CC0 libraries, or commission original ones |
+| Sound files | Decided: the macOS app keeps the macOS system sounds; the Windows app picks its own, and the two need not match (see todo.md) |
 | Default bench size, and whether the bench is per block (current spec) or one shared bench | Per block keeps calls fast; a shared bench means walks across the office |
 | Long-lived operators (dev servers) | Stay in the server room until killed or the session ends (current spec), or move to a smaller "on duty" spot after a few minutes |
