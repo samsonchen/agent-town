@@ -233,33 +233,15 @@ Building
 
 The bench belongs to the block, not to a session. Staff and operators are *characters* that move between the bench and a job. A hire or task start takes a character from the bench, and `staff.done` or `task.done` returns it. The protocol knows nothing about the bench. It is purely app-side presentation.
 
-The state is updated from protocol events only. The choreographer reads state changes and schedules animations. Keeping these separate lets the state be tested without RealityKit, and lets the Windows app (below) reuse the same design.
+The state is updated from protocol events only. The choreographer reads state changes and schedules animations. Keeping these separate lets the state be tested without RealityKit, and lets the Windows app ([windows/](windows/README.md)) reuse the same design.
 
 ### Stale sessions
 
 If a session sends no event and no heartbeat for 2 minutes, treat it as closed (scene 10). `Building.expireStale` checks every 5 s. This covers crashed or killed sessions that never sent `session.close`.
 
-## Windows app side (planned)
-
-The Windows app (spec: [The Windows app](spec.md#the-windows-app-planned)) is a Godot 4 project in `app/windows/`, written in typed GDScript (every variable and function typed). It needs Godot 4.4 or later. It reimplements the macOS app's design, not its code: the same split between building state and choreographer, the same protocol, the same shared files.
-
-| Module | Technology | Job |
-|---|---|---|
-| Shell | Godot `StatusIndicator` (tray icon) and a `PopupMenu`; the office in the main window | Tray menu, settings, About. No taskbar button; closing the window hides it |
-| Loopback server | `TCPServer` on 127.0.0.1, with a small HTTP/1.1 reader in GDScript (Godot has no HTTP server class) | Accepts `POST /v1/events`; checks the token and reads `protocol` first (426 if unsupported); writes `%APPDATA%\agent-town\endpoint.json` |
-| Building state | GDScript classes with no scene code | The port of `TownCore/Building.swift`. Tested headless against `protocol/fixtures/` and `protocol/fixtures/expected/`, the same answers the macOS app is tested against |
-| Choreographer and scene | Godot 3D: an orthographic `Camera3D` tilted 62° from the floor, `AnimationPlayer` | Per-character queues and the timing rules, as on macOS |
-| Labels | 2D `Control` nodes over the 3D view, at each character's projected position | Name tags, ticket text, block signs, call lines, in Cubic 11 |
-| Audio | `AudioStreamWAV.load_from_file` on the files in `C:\Windows\Media` | Completion, approval and dispatch sounds, with the duration gate; volume and mute apply |
-| Localization | Parses the macOS app's `Localizable.strings` files (the only source of UI strings) plus `catalog/*.json` | Picks the language by the explicit rule in the spec, not by Godot's nearest-locale match |
-
-- **Models:** Godot imports the Kenney GLB files in `assets/kenney/` directly, with their animation clips, so the Windows app does not use the USDZ files or `clips.json`. Outfits are recolored from the same shared texture and the shirt swatches in `catalog/characters.json`.
-- **Settings** are kept in a file under `%APPDATA%\agent-town\`. Open at login is an entry under the user's `Run` registry key.
-- **Builds:** Godot's export templates for Windows x64, and ARM64 where they work. The installer is made with Inno Setup.
-
 ## Security
 
 - The app listens on 127.0.0.1 only.
-- Every request must carry the token from the endpoint file. On macOS the endpoint file is readable only by the user (mode 0600); on Windows it sits in the user's own `%APPDATA%` (see [protocol.md](protocol.md)).
+- Every request must carry the token from the endpoint file. The endpoint file is readable only by the user (mode 0600).
 - The app treats event text as display text only. It never runs commands or opens URLs from events.
 - The mod sends only the first 200 characters of a prompt or a subagent description. Whether that text is shown is decided by the app's ticket text setting.

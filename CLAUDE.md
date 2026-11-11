@@ -1,6 +1,6 @@
 # agent-town
 
-A macOS menu bar app (Swift, RealityKit) that draws Claude Code's work as a small office, and the Claude Code plugin town-link that sends it events over loopback. The README explains the office; `docs/` has the spec, architecture, protocol and release steps. `todo.md` lists what is open.
+A macOS menu bar app (Swift, RealityKit) that draws Claude Code's work as a small office, and the Claude Code plugin town-link that sends it events over loopback. The README explains the office; `docs/` has the spec, architecture, protocol and release steps; `docs/windows/` has the planned Windows app (Godot), kept apart from the macOS documents. `todo.md` lists what is open.
 
 ## Layout
 
@@ -22,7 +22,7 @@ A macOS menu bar app (Swift, RealityKit) that draws Claude Code's work as a smal
 - End commit messages with the co-author line the session gives.
 - The plugin and the app have separate versions. When the plugin changes, raise `plugin/.claude-plugin/plugin.json` and push: users get plugin changes only through a new version, with no release needed. When the macOS app changes, raise `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`; `release.sh` reads it. Whether a plugin and an app work together depends only on the protocol version (`protocol` in each batch and in the endpoint file); change that only for a breaking protocol change, and update both.
 - A release is `app/macos/scripts/release.sh --publish`, run by the user (auto mode refuses to publish). It publishes the GitHub release and pushes the cask; Homebrew sees a new version only after the cask is on `main`.
-- When behavior changes, update the docs that describe it (README, and `README.zh-TW.md` for sections 1–4, `docs/spec.md`, `docs/protocol.md`, `docs/architecture.md`, `docs/releasing.md`) and `todo.md`.
+- When behavior changes, update the docs that describe it (README, and `README.zh-TW.md` for sections 1–4, `docs/spec.md`, `docs/protocol.md`, `docs/architecture.md`, `docs/releasing.md`; for the Windows app, `docs/windows/`) and `todo.md`.
 - Never commit access tokens, passwords or other credentials. Signing and notarization secrets live only in the keychain or GitHub secrets.
 - Write in American English or Traditional Chinese (Taiwan); never Simplified Chinese. UI strings are keyed by their English text, with the Traditional Chinese in `zh-Hant.lproj/Localizable.strings`.
 - No global installs without asking.

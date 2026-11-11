@@ -19,6 +19,7 @@ The project has two parts:
 | [releasing.md](releasing.md) | How to build, sign, notarize and publish the macOS app |
 | [roadmap.md](roadmap.md) | Build phases, items to verify before coding, and open questions |
 | [verification.md](verification.md) | Phase 0 answers: what the Claude Code mod API provides, checked against the types and a live session |
+| [windows/](windows/README.md) | The Windows app (planned): its spec, architecture, roadmap and checks, kept apart from the macOS documents |
 
 ## Status
 

@@ -75,7 +75,7 @@ From `docs/roadmap.md` and `docs/spec.md`:
 
 ## 9. Before the Windows app: work for the Mac session
 
-A Windows version of the app is planned: Windows 11 on x64, with ARM64 as a nice-to-have. The engine is Godot 4 (see "Windows app: decisions" below). The items below are the groundwork that needs the Mac (`swift build` and `swift test`, the release script) or is best done there. Verifying the plugin on Windows itself is done on the Windows machine: the headless check passed on 2026-11-11 (`docs/verification.md`, section Windows). The Windows app's own steps are W0 to W2 in `docs/roadmap.md`.
+A Windows version of the app is planned: Windows 11 on x64, with ARM64 as a nice-to-have. The engine is Godot 4 (see "Windows app: decisions" below). The items below are the groundwork that needs the Mac (`swift build` and `swift test`, the release script) or is best done there. Verifying the plugin on Windows itself is done on the Windows machine: the headless check passed on 2026-11-11 (`docs/windows/verification.md`). The Windows app's own steps are W0 to W2 in `docs/windows/roadmap.md`; all Windows docs are in `docs/windows/`.
 
 **Versions:** the Windows app has its own version number, separate from the macOS app and from town-link. Compatibility comes only from the protocol version (now 1): the app accepts batches whose `protocol` it speaks and answers 426 to others.
 
