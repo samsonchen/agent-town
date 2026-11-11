@@ -177,7 +177,7 @@ Build the app as a `.app` and `.dmg` (`app/macos/build/release/`), and publish a
 
 ```bash
 app/macos/scripts/release.sh --unsigned   # a local test build, not signed
-app/macos/scripts/release.sh --publish    # signed and notarized, as a draft release on GitHub
+app/macos/scripts/release.sh --publish    # signed and notarized: publish the release and push the Homebrew cask
 ```
 
 Checks: `claude plugin validate plugin` and `claude plugin test plugin` for the plugin; `swift build` and `swift test` in `app/macos` for the app.

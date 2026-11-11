@@ -98,10 +98,10 @@ open AgentTown-<version>.dmg
 app/macos/scripts/release.sh --publish
 ```
 
-- It builds and notarizes again, then creates a draft GitHub release `v<version>` with the `.dmg` attached, tagged on the commit you built from.
-- It refuses to run with uncommitted changes.
-- Check the draft on GitHub → Releases, then click **Publish**.
-- While the repo is private, only people with access to it can download the release.
+- It builds and notarizes again, then publishes GitHub release `v<version>` with the `.dmg` attached, tagged on the commit you built from.
+- It then downloads the uploaded `.dmg`, checks that its checksum matches, and commits and pushes the Homebrew cask with the new version (see [Homebrew](#homebrew)). After that, `brew update && brew upgrade --cask agent-town` installs the new version.
+- It refuses to run with uncommitted changes, from a branch other than `main`, or when `main` differs from `origin/main`.
+- To review the release on GitHub first, add `--draft`: the release is made as a draft, and the cask is updated but not committed. Publish the draft on GitHub → Releases, then commit and push `Casks/agent-town.rb` yourself.
 
 ## Unsigned pre-releases (until the Developer ID exists)
 
@@ -109,7 +109,7 @@ app/macos/scripts/release.sh --publish
 app/macos/scripts/release.sh --unsigned --publish
 ```
 
-- Builds the app without signing or notarization, and publishes GitHub release `v<version>` at once, marked Pre-release, with the `.dmg` attached. A signed release is made as a draft instead, for review.
+- Builds the app without signing or notarization, and publishes GitHub release `v<version>` marked Pre-release, with the `.dmg` attached, then pushes the cask as for a signed release.
 - macOS blocks an unsigned app the first time it opens; users click Open Anyway in System Settings → Privacy & Security once. The README and the cask's message say so.
 
 ## Homebrew
@@ -121,6 +121,6 @@ brew tap samsonchen/agent-town https://github.com/samsonchen/agent-town
 brew install --cask samsonchen/agent-town/agent-town
 ```
 
-- `release.sh --publish` writes the new version and the `.dmg`'s checksum into the cask. Commit and push that change after each release; `brew upgrade` sees a new version only then.
+- Homebrew reads the cask from this repo's `main` branch, not from the Releases page. A published release alone changes nothing for `brew upgrade`; the cask with the new version and checksum has to be pushed too. `release.sh --publish` does both (with `--draft`, push the cask yourself after publishing).
 - Homebrew downloads only from a published release (not a draft) in a public repo.
 - Once the app is signed and notarized, remove the "not signed yet" message from the cask's `caveats`. A signed app could also be submitted to the official Homebrew casks, which accept only signed and notarized apps.

@@ -35,7 +35,7 @@ To check: whether Anthropic offers a public plugin directory that accepts commun
 | Channel | Command or location |
 |---|---|
 | GitHub Releases | `agent-town-<version>.dmg` on the repo's Releases page |
-| Homebrew | `brew install --cask samsonchen/tap/agent-town` (cask in a separate `samsonchen/homebrew-tap` repo) |
+| Homebrew | `brew tap samsonchen/agent-town https://github.com/samsonchen/agent-town`, then `brew install --cask samsonchen/agent-town/agent-town` (the cask is `Casks/agent-town.rb` in this repo) |
 | Updates | Sparkle, with the appcast published on GitHub Pages or in the Releases |
 
 Code signing and notarization:

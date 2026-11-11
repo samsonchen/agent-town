@@ -3,13 +3,19 @@
 # Apple, so it opens on any Mac (macOS 15 or later) without Xcode and without "Open Anyway".
 #
 #   app/macos/scripts/release.sh             build, sign, notarize, make the .dmg
-#   app/macos/scripts/release.sh --publish   the same, then a draft GitHub release v<version>
+#   app/macos/scripts/release.sh --publish   the same, then publish GitHub release v<version> and
+#                                            push the Homebrew cask, so 'brew upgrade' sees it
+#   app/macos/scripts/release.sh --publish --draft
+#                                            a draft release instead, to review on GitHub first;
+#                                            the cask is updated but not committed
 #   app/macos/scripts/release.sh --unsigned  a test build: no Developer ID, no notarization
 #   app/macos/scripts/release.sh --unsigned --publish
-#                                            an unsigned pre-release on GitHub (until the Developer ID exists)
+#                                            an unsigned pre-release on GitHub
 #
-# --publish also writes the new version and the .dmg's checksum into Casks/agent-town.rb
-# (the Homebrew cask); commit that change after the release.
+# --publish writes the new version and the .dmg's checksum into Casks/agent-town.rb (the Homebrew
+# cask; this repo is the tap). Once the release is published and its .dmg's checksum matches,
+# it commits that change and pushes it, from the main branch only. Homebrew reads the cask from
+# the repo, not from Releases: without the push, 'brew upgrade' keeps the old version.
 #
 # One-time setup on the Mac that releases (no secrets are ever stored in the repo):
 #   1. A Developer ID Application certificate (with its private key) in the login keychain,
@@ -27,11 +33,13 @@ set -euo pipefail
 
 MODE=release
 PUBLISH=0
+DRAFT=0
 for arg in "$@"; do
   case "$arg" in
     --publish) PUBLISH=1 ;;
+    --draft) DRAFT=1 ;;
     --unsigned) MODE=unsigned ;;
-    -h|--help) sed -n '2,27p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,32p' "$0"; exit 0 ;;
     *) echo "unknown option: $arg" >&2; exit 2 ;;
   esac
 done
@@ -61,9 +69,16 @@ if [ "$MODE" = release ]; then
   fi
   echo "Signing as: $SIGN_IDENTITY"
 fi
+[ "$DRAFT" -eq 0 ] || [ "$PUBLISH" -eq 1 ] || fail "--draft goes with --publish"
 if [ "$PUBLISH" -eq 1 ]; then
   [ -z "$(git -C "$REPO" status --porcelain)" ] || fail "commit your changes before publishing"
   command -v gh >/dev/null || fail "--publish needs the GitHub CLI (gh)"
+  if [ "$DRAFT" -eq 0 ]; then
+    [ "$(git -C "$REPO" rev-parse --abbrev-ref HEAD)" = main ] || fail "publish from the main branch (or add --draft)"
+    git -C "$REPO" fetch -q origin main
+    [ "$(git -C "$REPO" rev-parse HEAD)" = "$(git -C "$REPO" rev-parse origin/main)" ] \
+      || fail "main is not the same as origin/main: push or pull first"
+  fi
 fi
 
 # -- Build -------------------------------------------------------------------------------------
@@ -162,12 +177,16 @@ fi
 
 # -- Publish -----------------------------------------------------------------------------------
 if [ "$PUBLISH" -eq 1 ]; then
-  if [ "$MODE" = release ]; then
+  if [ "$DRAFT" -eq 1 ]; then
     flags=(--draft)
+  elif [ "$MODE" = release ]; then
+    flags=(--latest)
+  else
+    flags=(--prerelease)
+  fi
+  if [ "$MODE" = release ]; then
     notes="Download AgentTown-$VERSION.dmg, open it, and drag AgentTown into Applications, or install with Homebrew (see the README). Requires macOS 15 or later."
   else
-    # Unsigned: published at once as a pre-release, so Homebrew can download it.
-    flags=(--prerelease)
     notes="Unsigned pre-release: macOS blocks the app the first time it opens. Open System Settings → Privacy & Security and click Open Anyway. Install with Homebrew or download AgentTown-$VERSION.dmg; see the README. Requires macOS 15 or later."
   fi
   step "Creating GitHub release v$VERSION (${flags[*]})"
@@ -177,8 +196,21 @@ if [ "$PUBLISH" -eq 1 ]; then
   CASK="$REPO/Casks/agent-town.rb"
   SHA="$(shasum -a 256 "$DMG" | cut -d' ' -f1)"
   sed -i '' -e "s/^  version \".*\"/  version \"$VERSION\"/" -e "s/^  sha256 \".*\"/  sha256 \"$SHA\"/" "$CASK"
-  echo "Updated $CASK to $VERSION ($SHA). Commit and push it so 'brew upgrade' sees the release."
-  [ "$MODE" = release ] && echo "Review and publish the draft on GitHub; Homebrew can download it only once it is published."
+  if [ "$DRAFT" -eq 1 ]; then
+    echo "Updated $CASK to $VERSION ($SHA), not committed."
+    echo "Review and publish the draft on GitHub, then commit and push the cask: 'brew upgrade' sees the release only then."
+  else
+    step "Checking the uploaded disk image"
+    check="$(mktemp -d)"
+    (cd "$REPO" && gh release download "v$VERSION" --pattern "AgentTown-$VERSION.dmg" --dir "$check")
+    got="$(shasum -a 256 "$check/AgentTown-$VERSION.dmg" | cut -d' ' -f1)"
+    rm -rf "$check"
+    [ "$got" = "$SHA" ] || fail "the uploaded .dmg's checksum ($got) is not the local one ($SHA); the cask is updated but not committed"
+    step "Pushing the Homebrew cask"
+    git -C "$REPO" commit -q -m "Cask: agent-town $VERSION" -- Casks/agent-town.rb
+    git -C "$REPO" push -q origin main
+    echo "Released $VERSION. Users get it with: brew update && brew upgrade --cask agent-town"
+  fi
 fi
 
 step "Done"
