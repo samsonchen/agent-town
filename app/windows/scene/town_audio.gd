@@ -7,7 +7,7 @@ const MEDIA := "C:/Windows/Media/"
 const FILES := {
 	"completion": "Windows Notify System Generic.wav",
 	"approval": "Windows Notify Messaging.wav",
-	"dispatch": "Windows Navigation Start.wav",
+	"dispatch": "Windows Ringout.wav",
 }
 
 var muted := false
