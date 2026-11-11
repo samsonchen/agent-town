@@ -1,6 +1,6 @@
 cask "agent-town" do
-  version "1.0.3"
-  sha256 "f7df83fa8032c81756136ad5cbb42608366d140224f72e29c64a253b7ab08bec"
+  version "1.0.4"
+  sha256 "3c6295bb799978068b3cf31837b7681762c89a0ca77277287ff7c14ed1b066eb"
 
   url "https://github.com/samsonchen/agent-town/releases/download/v#{version}/AgentTown-#{version}.dmg"
   name "agent-town"
