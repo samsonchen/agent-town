@@ -1,0 +1,805 @@
+[
+  {
+    "after" : 0,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "session.open"
+  },
+  {
+    "after" : 1,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "text" : "Add a settings screen with a sound threshold slider",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "ticket.submit"
+  },
+  {
+    "after" : 2,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "coding",
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "coding",
+                "text" : "Add a settings screen with a sound threshold slider",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "chief.hat"
+  },
+  {
+    "after" : 3,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "a1",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "subagentType" : "general-purpose"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "coding",
+                "text" : "Add a settings screen with a sound threshold slider",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "staff.hire"
+  },
+  {
+    "after" : 4,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "a1",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "subagentType" : "general-purpose"
+                },
+                {
+                  "agentId" : "a2",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "haiku",
+                  "subagentType" : "Explore"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "coding",
+                "text" : "Add a settings screen with a sound threshold slider",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "staff.hire"
+  },
+  {
+    "after" : 5,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "a1",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "subagentType" : "general-purpose"
+                },
+                {
+                  "agentId" : "a2",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "haiku",
+                  "role" : "swift-engineer",
+                  "subagentType" : "Explore"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "coding",
+                "text" : "Add a settings screen with a sound threshold slider",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "staff.role"
+  },
+  {
+    "after" : 6,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "a1",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "general-purpose"
+                },
+                {
+                  "agentId" : "a2",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "haiku",
+                  "role" : "swift-engineer",
+                  "subagentType" : "Explore"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "coding",
+                "text" : "Add a settings screen with a sound threshold slider",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "staff.role"
+  },
+  {
+    "after" : 7,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "a1",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "general-purpose"
+                },
+                {
+                  "agentId" : "a2",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "claude-haiku-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "Explore"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "coding",
+                "text" : "Add a settings screen with a sound threshold slider",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "model.update"
+  },
+  {
+    "after" : 9,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "activity" : "edit",
+                  "agentId" : "a1",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "general-purpose"
+                },
+                {
+                  "agentId" : "a2",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "claude-haiku-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "Explore"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "coding",
+                "text" : "Add a settings screen with a sound threshold slider",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "activity"
+  },
+  {
+    "after" : 10,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "activity" : "edit",
+                  "agentId" : "a1",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "general-purpose"
+                },
+                {
+                  "activity" : "read",
+                  "agentId" : "a2",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "claude-haiku-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "Explore"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "coding",
+                "text" : "Add a settings screen with a sound threshold slider",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "activity"
+  },
+  {
+    "after" : 11,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "activity" : "edit",
+                  "agentId" : "a1",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "general-purpose"
+                },
+                {
+                  "agentId" : "a2",
+                  "background" : false,
+                  "done" : true,
+                  "model" : "claude-haiku-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "Explore"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "coding",
+                "text" : "Add a settings screen with a sound threshold slider",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "staff.done"
+  },
+  {
+    "after" : 12,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+                {
+                  "agentId" : "a1",
+                  "approvalId" : "toolu_01",
+                  "tool" : "Bash"
+                }
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "activity" : "edit",
+                  "agentId" : "a1",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "general-purpose"
+                },
+                {
+                  "agentId" : "a2",
+                  "background" : false,
+                  "done" : true,
+                  "model" : "claude-haiku-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "Explore"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "coding",
+                "text" : "Add a settings screen with a sound threshold slider",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "approval.wait"
+  },
+  {
+    "after" : 13,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "activity" : "edit",
+                  "agentId" : "a1",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "general-purpose"
+                },
+                {
+                  "agentId" : "a2",
+                  "background" : false,
+                  "done" : true,
+                  "model" : "claude-haiku-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "Explore"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "coding",
+                "text" : "Add a settings screen with a sound threshold slider",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "approval.end"
+  },
+  {
+    "after" : 14,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "activity" : "shell",
+                  "agentId" : "a1",
+                  "background" : false,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "general-purpose"
+                },
+                {
+                  "agentId" : "a2",
+                  "background" : false,
+                  "done" : true,
+                  "model" : "claude-haiku-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "Explore"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "coding",
+                "text" : "Add a settings screen with a sound threshold slider",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "activity"
+  },
+  {
+    "after" : 15,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "coding",
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "a1",
+                  "background" : false,
+                  "done" : true,
+                  "model" : "claude-opus-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "general-purpose"
+                },
+                {
+                  "agentId" : "a2",
+                  "background" : false,
+                  "done" : true,
+                  "model" : "claude-haiku-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "Explore"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "coding",
+                "text" : "Add a settings screen with a sound threshold slider",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "staff.done"
+  },
+  {
+    "after" : 16,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "a1",
+                  "background" : false,
+                  "done" : true,
+                  "model" : "claude-opus-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "general-purpose"
+                },
+                {
+                  "agentId" : "a2",
+                  "background" : false,
+                  "done" : true,
+                  "model" : "claude-haiku-5-5",
+                  "role" : "swift-engineer",
+                  "subagentType" : "Explore"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "ticket.done"
+  }
+]

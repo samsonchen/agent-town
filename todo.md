@@ -7,7 +7,7 @@ Open items as of 2026-11-11, for the next session to pick up. Everything listed 
 - Work is committed on `main`.
 - Version 1.0.2 (plugin and app share it). town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
 - After a change: raise the version in `plugin/.claude-plugin/plugin.json` and `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push. Then the user runs `app/macos/scripts/release.sh --publish` (auto mode refuses to publish a release): it publishes the release, checks the uploaded `.dmg`'s checksum, and commits and pushes the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town`.
-- Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (52 tests). App checks: `swift build` and `swift test` in `app/macos` (27 tests).
+- Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (52 tests). App checks: `swift build` and `swift test` in `app/macos` (28 tests).
 - Two Swift warnings in the release build, harmless: `TownScene+Staff.swift:89` (a weak self inside a strong one) and `TownView.swift:489` (a non-Sendable observer closure). Clean up when convenient.
 
 ## 1. Check on a personal (non-Team) account
@@ -90,6 +90,6 @@ A Windows version of the app is planned: Windows 11 on x64, with ARM64 as a nice
 
 ### Shared material a second app needs
 
-- [ ] **Expected state for each fixture.** `app/macos/Tests/TownCoreTests/BuildingTests.swift` checks the fixtures in `protocol/fixtures/` with Swift assertions only. Define a small, language-neutral JSON snapshot of the building state (blocks, sessions, open tickets with origin and issuer, staff with role and status, operators, schedules, approvals), write one per fixture to `protocol/fixtures/expected/`, and make `BuildingTests` compare against them. The Windows app then runs the same fixtures against the same answers. Do not dump Swift internals; keep only what any app must agree on.
+- [x] **Expected state for each fixture.** Done (2026-11-11): `protocol/fixtures/expected/`, one file per fixture with the state after each event that changes it; format in its README; checked by `ExpectedStateTests.swift`. The Windows app runs the same fixtures against the same answers.
 - [ ] **Sound files.** The Mac app plays macOS system sounds (`NSSound`), which Windows does not have. Pick CC0 files for completion, approval and dispatch, put them in `assets/sounds/` with entries in `assets/LICENSES.md`, and switch the Mac app to the bundled files. This also settles the "Sound files" open question in `docs/roadmap.md`.
 - [ ] **UI strings: decide, no code yet.** The Windows app needs the strings in `app/macos/Sources/AgentTown/Resources/Localization/`. Simplest: keep the `.strings` files as the source and let the Windows app parse them (the format is simple). Ask the user before moving them to another format.

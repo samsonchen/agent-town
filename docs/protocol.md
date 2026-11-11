@@ -1,6 +1,6 @@
 # Protocol v1
 
-The protocol between the agent-town mod (sender) and a agent-town app (receiver). It has no platform-specific parts except the location of the endpoint file. The JSON Schema for every event goes in `protocol/schema/`, and recorded event streams for tests go in `protocol/fixtures/`.
+The protocol between the agent-town mod (sender) and a agent-town app (receiver). It has no platform-specific parts except the location of the endpoint file. The JSON Schema for every event goes in `protocol/schema/`, and recorded event streams for tests go in `protocol/fixtures/`. `protocol/fixtures/expected/` holds the building state each fixture must produce, so every receiver can check itself against the same answers (see its README).
 
 ## Transport
 

@@ -1,0 +1,195 @@
+[
+  {
+    "after" : 0,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "session.open"
+  },
+  {
+    "after" : 1,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "text" : "Explain the event mapping in architecture.md",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "ticket.submit"
+  },
+  {
+    "after" : 2,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "question",
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "question",
+                "text" : "Explain the event mapping in architecture.md",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "chief.hat"
+  },
+  {
+    "after" : 3,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "activity" : "read",
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "question",
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "question",
+                "text" : "Explain the event mapping in architecture.md",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "activity"
+  },
+  {
+    "after" : 5,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "ticket.done"
+  },
+  {
+    "after" : 6,
+    "state" : {
+      "blocks" : [
+
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "session.close"
+  }
+]

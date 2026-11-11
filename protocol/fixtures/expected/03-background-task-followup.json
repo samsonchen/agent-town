@@ -1,0 +1,562 @@
+[
+  {
+    "after" : 0,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "session.open"
+  },
+  {
+    "after" : 1,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "text" : "Run the full test suite in the background and fix failures",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "ticket.submit"
+  },
+  {
+    "after" : 2,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "testing",
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "testing",
+                "text" : "Run the full test suite in the background and fix failures",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "chief.hat"
+  },
+  {
+    "after" : 3,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "testing",
+              "model" : "claude-opus-5-5",
+              "operators" : [
+                {
+                  "kind" : "shell",
+                  "role" : "test-runner",
+                  "startedTicketId" : "t1",
+                  "taskId" : "bash_1"
+                }
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "testing",
+                "text" : "Run the full test suite in the background and fix failures",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "task.start"
+  },
+  {
+    "after" : 4,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "testing",
+              "model" : "claude-opus-5-5",
+              "operators" : [
+                {
+                  "kind" : "shell",
+                  "role" : "test-runner",
+                  "startedTicketId" : "t1",
+                  "taskId" : "bash_1"
+                },
+                {
+                  "kind" : "shell",
+                  "role" : "server-operator",
+                  "startedTicketId" : "t1",
+                  "taskId" : "bash_2"
+                }
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "testing",
+                "text" : "Run the full test suite in the background and fix failures",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "task.start"
+  },
+  {
+    "after" : 5,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "testing",
+              "model" : "claude-opus-5-5",
+              "operators" : [
+                {
+                  "kind" : "shell",
+                  "role" : "test-runner",
+                  "startedTicketId" : "t1",
+                  "taskId" : "bash_1"
+                },
+                {
+                  "kind" : "shell",
+                  "role" : "server-operator",
+                  "startedTicketId" : "t1",
+                  "taskId" : "bash_2"
+                },
+                {
+                  "kind" : "monitor",
+                  "role" : "log-monitor",
+                  "startedTicketId" : "t1",
+                  "taskId" : "mon_1"
+                }
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "testing",
+                "text" : "Run the full test suite in the background and fix failures",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "task.start"
+  },
+  {
+    "after" : 6,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+                {
+                  "kind" : "shell",
+                  "role" : "test-runner",
+                  "startedTicketId" : "t1",
+                  "taskId" : "bash_1"
+                },
+                {
+                  "kind" : "shell",
+                  "role" : "server-operator",
+                  "startedTicketId" : "t1",
+                  "taskId" : "bash_2"
+                },
+                {
+                  "kind" : "monitor",
+                  "role" : "log-monitor",
+                  "startedTicketId" : "t1",
+                  "taskId" : "mon_1"
+                }
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "ticket.done"
+  },
+  {
+    "after" : 7,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+                {
+                  "kind" : "shell",
+                  "role" : "server-operator",
+                  "startedTicketId" : "t1",
+                  "taskId" : "bash_2"
+                },
+                {
+                  "kind" : "monitor",
+                  "role" : "log-monitor",
+                  "startedTicketId" : "t1",
+                  "taskId" : "mon_1"
+                }
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "task.done"
+  },
+  {
+    "after" : 8,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+                {
+                  "kind" : "shell",
+                  "role" : "server-operator",
+                  "startedTicketId" : "t1",
+                  "taskId" : "bash_2"
+                },
+                {
+                  "kind" : "monitor",
+                  "role" : "log-monitor",
+                  "startedTicketId" : "t1",
+                  "taskId" : "mon_1"
+                }
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "task",
+                "returnedCount" : 0,
+                "text" : "npm test -- --runInBand",
+                "ticketId" : "t2"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "ticket.submit"
+  },
+  {
+    "after" : 9,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "activity" : "edit",
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+                {
+                  "kind" : "shell",
+                  "role" : "server-operator",
+                  "startedTicketId" : "t1",
+                  "taskId" : "bash_2"
+                },
+                {
+                  "kind" : "monitor",
+                  "role" : "log-monitor",
+                  "startedTicketId" : "t1",
+                  "taskId" : "mon_1"
+                }
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "task",
+                "returnedCount" : 0,
+                "text" : "npm test -- --runInBand",
+                "ticketId" : "t2"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "activity"
+  },
+  {
+    "after" : 10,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+                {
+                  "kind" : "shell",
+                  "role" : "server-operator",
+                  "startedTicketId" : "t1",
+                  "taskId" : "bash_2"
+                },
+                {
+                  "kind" : "monitor",
+                  "role" : "log-monitor",
+                  "startedTicketId" : "t1",
+                  "taskId" : "mon_1"
+                }
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "ticket.done"
+  },
+  {
+    "after" : 11,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+                {
+                  "kind" : "monitor",
+                  "role" : "log-monitor",
+                  "startedTicketId" : "t1",
+                  "taskId" : "mon_1"
+                }
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "task.done"
+  },
+  {
+    "after" : 12,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "task.done"
+  }
+]

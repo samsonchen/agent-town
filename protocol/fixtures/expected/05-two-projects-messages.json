@@ -1,0 +1,1262 @@
+[
+  {
+    "after" : 0,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "session.open"
+  },
+  {
+    "after" : 1,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ]
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "session.open"
+  },
+  {
+    "after" : 2,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ]
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "care-portal",
+          "projectId" : "p7c1",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-sonnet-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s3",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "session.open"
+  },
+  {
+    "after" : 3,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "text" : "Review the protocol schema with a team",
+                "ticketId" : "t1"
+              }
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "care-portal",
+          "projectId" : "p7c1",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-sonnet-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s3",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "ticket.submit"
+  },
+  {
+    "after" : 4,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "text" : "Review the protocol schema with a team",
+                "ticketId" : "t1"
+              }
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "care-portal",
+          "projectId" : "p7c1",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-sonnet-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s3",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "text" : "修正登入頁面的錯誤",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "ticket.submit"
+  },
+  {
+    "after" : 5,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "code-review",
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "code-review",
+                "text" : "Review the protocol schema with a team",
+                "ticketId" : "t1"
+              }
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "care-portal",
+          "projectId" : "p7c1",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-sonnet-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s3",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "text" : "修正登入頁面的錯誤",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "chief.hat"
+  },
+  {
+    "after" : 6,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "code-review",
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "code-review",
+                "text" : "Review the protocol schema with a team",
+                "ticketId" : "t1"
+              }
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "care-portal",
+          "projectId" : "p7c1",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "debugging",
+              "model" : "claude-sonnet-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s3",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "debugging",
+                "text" : "修正登入頁面的錯誤",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "chief.hat"
+  },
+  {
+    "after" : 7,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "tm1",
+                  "background" : true,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "subagentType" : "teammate"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "code-review",
+                "text" : "Review the protocol schema with a team",
+                "ticketId" : "t1"
+              }
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "care-portal",
+          "projectId" : "p7c1",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "debugging",
+              "model" : "claude-sonnet-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s3",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "debugging",
+                "text" : "修正登入頁面的錯誤",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "staff.hire"
+  },
+  {
+    "after" : 8,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "tm1",
+                  "background" : true,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "subagentType" : "teammate"
+                },
+                {
+                  "agentId" : "tm2",
+                  "background" : true,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "subagentType" : "teammate"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "code-review",
+                "text" : "Review the protocol schema with a team",
+                "ticketId" : "t1"
+              }
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "care-portal",
+          "projectId" : "p7c1",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "debugging",
+              "model" : "claude-sonnet-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s3",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "debugging",
+                "text" : "修正登入頁面的錯誤",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "staff.hire"
+  },
+  {
+    "after" : 9,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "tm1",
+                  "background" : true,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "code-reviewer",
+                  "subagentType" : "teammate"
+                },
+                {
+                  "agentId" : "tm2",
+                  "background" : true,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "subagentType" : "teammate"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "code-review",
+                "text" : "Review the protocol schema with a team",
+                "ticketId" : "t1"
+              }
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "care-portal",
+          "projectId" : "p7c1",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "debugging",
+              "model" : "claude-sonnet-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s3",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "debugging",
+                "text" : "修正登入頁面的錯誤",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "staff.role"
+  },
+  {
+    "after" : 10,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "tm1",
+                  "background" : true,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "code-reviewer",
+                  "subagentType" : "teammate"
+                },
+                {
+                  "agentId" : "tm2",
+                  "background" : true,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "qa-engineer",
+                  "subagentType" : "teammate"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "code-review",
+                "text" : "Review the protocol schema with a team",
+                "ticketId" : "t1"
+              }
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "care-portal",
+          "projectId" : "p7c1",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "debugging",
+              "model" : "claude-sonnet-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s3",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "debugging",
+                "text" : "修正登入頁面的錯誤",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "staff.role"
+  },
+  {
+    "after" : 14,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "tm1",
+                  "background" : true,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "code-reviewer",
+                  "subagentType" : "teammate"
+                },
+                {
+                  "agentId" : "tm2",
+                  "background" : true,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "qa-engineer",
+                  "subagentType" : "teammate"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "code-review",
+                "text" : "Review the protocol schema with a team",
+                "ticketId" : "t1"
+              }
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "care-portal",
+          "projectId" : "p7c1",
+          "sessions" : [
+            {
+              "activity" : "edit",
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "debugging",
+              "model" : "claude-sonnet-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s3",
+              "staff" : [
+
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "debugging",
+                "text" : "修正登入頁面的錯誤",
+                "ticketId" : "t1"
+              }
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "activity"
+  },
+  {
+    "after" : 15,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "tm1",
+                  "background" : true,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "code-reviewer",
+                  "subagentType" : "teammate"
+                },
+                {
+                  "agentId" : "tm2",
+                  "background" : true,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "qa-engineer",
+                  "subagentType" : "teammate"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "code-review",
+                "text" : "Review the protocol schema with a team",
+                "ticketId" : "t1"
+              }
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "care-portal",
+          "projectId" : "p7c1",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-sonnet-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s3",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "ticket.done"
+  },
+  {
+    "after" : 16,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "tm1",
+                  "background" : true,
+                  "done" : true,
+                  "model" : "claude-opus-5-5",
+                  "role" : "code-reviewer",
+                  "subagentType" : "teammate"
+                },
+                {
+                  "agentId" : "tm2",
+                  "background" : true,
+                  "done" : false,
+                  "model" : "claude-opus-5-5",
+                  "role" : "qa-engineer",
+                  "subagentType" : "teammate"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "code-review",
+                "text" : "Review the protocol schema with a team",
+                "ticketId" : "t1"
+              }
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "care-portal",
+          "projectId" : "p7c1",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-sonnet-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s3",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "staff.done"
+  },
+  {
+    "after" : 17,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "hat" : "code-review",
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "tm1",
+                  "background" : true,
+                  "done" : true,
+                  "model" : "claude-opus-5-5",
+                  "role" : "code-reviewer",
+                  "subagentType" : "teammate"
+                },
+                {
+                  "agentId" : "tm2",
+                  "background" : true,
+                  "done" : true,
+                  "model" : "claude-opus-5-5",
+                  "role" : "qa-engineer",
+                  "subagentType" : "teammate"
+                }
+              ],
+              "ticket" : {
+                "issuer" : "ceo",
+                "origin" : "user",
+                "returnedCount" : 0,
+                "taskType" : "code-review",
+                "text" : "Review the protocol schema with a team",
+                "ticketId" : "t1"
+              }
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "care-portal",
+          "projectId" : "p7c1",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-sonnet-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s3",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "staff.done"
+  },
+  {
+    "after" : 18,
+    "state" : {
+      "blocks" : [
+        {
+          "name" : "agent-town",
+          "projectId" : "p9f2",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-opus-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s1",
+              "staff" : [
+                {
+                  "agentId" : "tm1",
+                  "background" : true,
+                  "done" : true,
+                  "model" : "claude-opus-5-5",
+                  "role" : "code-reviewer",
+                  "subagentType" : "teammate"
+                },
+                {
+                  "agentId" : "tm2",
+                  "background" : true,
+                  "done" : true,
+                  "model" : "claude-opus-5-5",
+                  "role" : "qa-engineer",
+                  "subagentType" : "teammate"
+                }
+              ]
+            },
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "operators" : [
+
+              ],
+              "sessionId" : "s2",
+              "staff" : [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "care-portal",
+          "projectId" : "p7c1",
+          "sessions" : [
+            {
+              "approvals" : [
+
+              ],
+              "compacting" : false,
+              "model" : "claude-sonnet-5-5",
+              "operators" : [
+
+              ],
+              "sessionId" : "s3",
+              "staff" : [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "schedules" : [
+
+      ]
+    },
+    "type" : "ticket.done"
+  }
+]
