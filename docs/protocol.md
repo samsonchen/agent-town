@@ -312,4 +312,4 @@ The main conversation's context window: sent at session start (the window), when
 ## Versioning
 
 - `protocol` is an integer. Adding optional fields or new event types does not change it.
-- Removing or changing the meaning of a field increases it. The app answers 426 to versions it does not support.
+- Removing or changing the meaning of a field increases it. The app answers 426 to versions it does not support. It reads the `protocol` number before the rest of the batch, so a future version gets 426 even if its batch has another shape.

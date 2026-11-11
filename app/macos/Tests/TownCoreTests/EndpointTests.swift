@@ -26,6 +26,9 @@ private let goodBody = #"{"protocol":1,"events":[{"type":"heartbeat","sessionId"
     #expect(status(request(goodBody, token: "wrong")) == 401)
     #expect(status(request(goodBody, path: "/other")) == 404)
     #expect(status(request(#"{"protocol":2,"events":[]}"#)) == 426)
+    // A future version in another shape still gets 426, not 400.
+    #expect(status(request(#"{"protocol":2,"items":{"a":1}}"#)) == 426)
+    #expect(status(request(#"{"events":[]}"#)) == 400)
     #expect(status(request("not json")) == 400)
     // A malformed event is skipped, the rest is kept.
     guard case .complete(let r, _) = HTTPParser.parse(request(goodBody)) else { return }

@@ -101,8 +101,11 @@ public enum EventEndpoint {
         guard req.path == "/v1/events" else { return (404, nil) }
         guard req.method == "POST" else { return (405, nil) }
         guard req.headers["authorization"] == "Bearer \(token)" else { return (401, nil) }
+        // Read the version alone first, so a future version in another shape gets 426, not 400.
+        struct Version: Decodable { let `protocol`: Int }
+        guard let version = try? JSONDecoder().decode(Version.self, from: req.body) else { return (400, nil) }
+        guard version.protocol == EndpointFile.protocolVersion else { return (426, nil) }
         guard let batch = try? Batch.decode(req.body) else { return (400, nil) }
-        guard batch.protocol == EndpointFile.protocolVersion else { return (426, nil) }
         return (204, batch)
     }
 }
