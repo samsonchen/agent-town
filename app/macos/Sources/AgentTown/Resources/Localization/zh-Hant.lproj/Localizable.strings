@@ -3,6 +3,7 @@
 
 /* Menu bar and window */
 "Show agent-town" = "顯示 agent-town";
+"Stay on top" = "保持在最上層";
 "Sound" = "聲音";
 "Show tips" = "顯示提示";
 "Settings…" = "設定…";

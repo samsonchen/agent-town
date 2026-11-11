@@ -46,7 +46,7 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - [x] Completion sound with the duration gate (system sound for now)
 - [x] State tests driven by `protocol/fixtures/` (`swift test` in `app/macos`)
 - [x] Offscreen snapshots for checking scenes: `AgentTown --demo <fixture> --snapshot out.png --at 10`
-- [x] Menu bar app with no Dock icon: About, Show agent-town, Sound, Show tips, Settings…, Quit; choices kept across restarts
+- [x] Menu bar app with no Dock icon: About, Show agent-town, Stay on top, Sound, Show tips, Settings…, Quit; choices kept across restarts
 - [x] Settings window: language (with Restart now) and open at login. Threshold, sounds, ticket text and badges move to Phase 5
 - [x] An `.app` bundle and `.dmg` from `app/macos/scripts/release.sh` (unsigned for now; see [releasing.md](releasing.md))
 - [x] The window opens where it was when the app last quit

@@ -9,6 +9,8 @@ enum Prefs {
     static let showWindow = "showWindow"
     /// Sounds play. Default on; each sound also has its own setting.
     static let sound = "sound"
+    /// The office window floats above other apps' windows. Default off.
+    static let stayOnTop = "stayOnTop"
     /// The closable tips in the office window show. Default on; closing a tip turns it off.
     static let showTips = "showTips"
     /// The UI language (`en`, `zh-Hant`); absent or empty follows macOS.
@@ -44,11 +46,12 @@ enum Prefs {
     }
 }
 
-/// The menu bar menu: About, show the window, sound, tips, Settings and Quit.
+/// The menu bar menu: About, show the window, stay on top, sound, tips, Settings and Quit.
 struct TownMenu: View {
     @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
     @AppStorage(Prefs.showWindow) private var showWindow = true
+    @AppStorage(Prefs.stayOnTop) private var stayOnTop = false
     @AppStorage(Prefs.sound) private var sound = true
     @AppStorage(Prefs.showTips) private var showTips = true
 
@@ -67,6 +70,7 @@ struct TownMenu: View {
             }
             showWindow = on
         }))
+        Toggle(Labels.text("Stay on top"), isOn: $stayOnTop)
         Toggle(Labels.text("Sound"), isOn: $sound)
         Toggle(Labels.text("Show tips"), isOn: $showTips)
         Divider()

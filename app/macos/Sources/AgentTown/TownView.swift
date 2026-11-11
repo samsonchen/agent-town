@@ -9,6 +9,8 @@ struct TownView: View {
     @State private var camera = TownView.makeCamera()
     /// Tips show while "Show tips" is on in the menu; closing one turns it off.
     @AppStorage(Prefs.showTips) private var showTips = true
+    /// "Stay on top" in the menu: the window floats above other apps' windows.
+    @AppStorage(Prefs.stayOnTop) private var stayOnTop = false
     /// The window this view is in, to grow it when a block is added.
     @State private var window: NSWindow?
 
@@ -121,11 +123,13 @@ struct TownView: View {
                 fitWindow()
                 projector(geo.size).apply(to: camera)
             }
+            .onChange(of: stayOnTop) { _, on in window?.level = on ? .floating : .normal }
             .onChange(of: scene.ceoSpot) { _, spot in follow(spot, size: geo.size) }
             .overlay(alignment: .bottomLeading) { tip.padding([.leading, .bottom], 12) } // clear of the context bar under a block
             .background(WindowReader { w in
                 guard let w, w !== window else { return }
                 window = w
+                w.level = stayOnTop ? .floating : .normal
                 WindowPlace.restore(w)
                 fitWindow(in: w) // sessions already open when the window opens
                 WindowPlace.keep(w)
