@@ -6,7 +6,7 @@ enum AppInfo {
     /// The macOS app's version: release.sh reads it from here for the bundle, the .dmg and the
     /// release tag. Used as is when running from the build folder (swift run), which has no
     /// Info.plist. It is separate from town-link's version (plugin.json) and the Windows app's.
-    static let fallbackVersion = "1.0.3"
+    static let fallbackVersion = "1.0.4"
 
     static var version: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? fallbackVersion
