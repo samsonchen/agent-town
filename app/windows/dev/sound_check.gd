@@ -18,8 +18,8 @@ func _initialize() -> void:
 
 func _run() -> void:
 	await process_frame
-	for key: String in TownAudio.FILES:
-		print("%s: file %s, loaded %s" % [key, TownAudio.FILES[key], audio._streams.has(key)])
+	for key: String in TownAudio.DEFAULTS:
+		print("%s: %s, loaded %s" % [key, TownAudio.DEFAULTS[key], audio._streams.has(key)])
 		capture.clear_buffer()
 		audio.play(key)
 		var peak := 0.0

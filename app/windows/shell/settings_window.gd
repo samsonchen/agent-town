@@ -1,20 +1,29 @@
 class_name SettingsWindow
 extends Window
-## Settings: Open at login, the language, and the office window's opacity.
-## Port of `SettingsView` in app/macos/Sources/AgentTown/Preferences.swift.
+## Settings: Open at login, the language, the office window's opacity, and the sounds
+## (spec: sound settings). Port of `SettingsView` in app/macos/Sources/AgentTown/Preferences.swift.
 
 signal opacity_changed(value: float)
+signal sounds_changed
+
+const SOUND_TITLES := {"dispatch": "Ticket dispatched", "completion": "Work done", "approval": "Approval needed"}
 
 var settings: TownSettings
 var labels: TownLabels
+var audio: TownAudio
+var _media: Array[String] = []
+var _file_dialog: FileDialog
+var _file_for := "" ## the sound whose file is being chosen
+var _picks: Dictionary = {} ## sound -> its OptionButton
 var _restart_row: HBoxContainer
 var _login_note: Label
 var _percent: Label
 
 
-func _init(p_settings: TownSettings, p_labels: TownLabels) -> void:
+func _init(p_settings: TownSettings, p_labels: TownLabels, p_audio: TownAudio) -> void:
 	settings = p_settings
 	labels = p_labels
+	audio = p_audio
 	title = labels.t("Settings")
 	transient = true
 	exclusive = false
@@ -104,12 +113,156 @@ func _ready() -> void:
 	slider.drag_ended.connect(func(_changed: bool) -> void: settings.save())
 	_percent.text = "%d%%" % roundi(settings.opacity * 100.0)
 
+	_build_sounds(box)
+
 	var close := Button.new()
 	close.text = labels.t("Close")
 	close.size_flags_horizontal = Control.SIZE_SHRINK_END
 	close.pressed.connect(hide)
 	box.add_child(close)
 	size = Vector2i(margin.get_combined_minimum_size()) + Vector2i(40, 10)
+
+
+# --- Sounds -------------------------------------------------------------------------------
+
+func _build_sounds(box: VBoxContainer) -> void:
+	_media = TownAudio.media_names()
+	box.add_child(HSeparator.new())
+	var heading := Label.new()
+	heading.text = labels.t("Sounds")
+	heading.add_theme_font_size_override("font_size", 16)
+	box.add_child(heading)
+
+	# Volume: agent-town's own sounds, 0% to 100%.
+	var vol_row := HBoxContainer.new()
+	vol_row.add_theme_constant_override("separation", 10)
+	var vol_label := Label.new()
+	vol_label.text = labels.t("Volume")
+	vol_row.add_child(vol_label)
+	var vol := HSlider.new()
+	vol.min_value = 0.0
+	vol.max_value = 1.0
+	vol.step = 0.01
+	vol.value = settings.volume
+	vol.custom_minimum_size = Vector2(200, 0)
+	vol.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	vol_row.add_child(vol)
+	var vol_pct := Label.new()
+	vol_pct.custom_minimum_size = Vector2(48, 0)
+	vol_pct.text = "%d%%" % roundi(settings.volume * 100.0)
+	vol_row.add_child(vol_pct)
+	box.add_child(vol_row)
+	vol.value_changed.connect(func(v: float) -> void:
+		settings.volume = TownSettings.clamp_volume(v)
+		vol_pct.text = "%d%%" % roundi(settings.volume * 100.0)
+		sounds_changed.emit())
+	vol.drag_ended.connect(func(_changed: bool) -> void: settings.save())
+
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 8)
+	box.add_child(grid)
+	for key: String in TownSettings.SOUNDS:
+		var on := CheckBox.new()
+		on.text = labels.t(SOUND_TITLES[key])
+		on.button_pressed = settings.sound_on[key]
+		on.toggled.connect(func(v: bool) -> void:
+			settings.sound_on[key] = v
+			settings.save()
+			sounds_changed.emit())
+		grid.add_child(on)
+		var pick := OptionButton.new()
+		pick.custom_minimum_size = Vector2(260, 0)
+		pick.fit_to_longest_item = false
+		_picks[key] = pick
+		_fill_choices(pick, key)
+		pick.item_selected.connect(func(i: int) -> void: _choice_picked(pick, key, i))
+		grid.add_child(pick)
+		var play := Button.new()
+		play.text = labels.t("Play")
+		play.pressed.connect(func() -> void: audio.preview(key))
+		grid.add_child(play)
+		if key == "completion":
+			# The completion threshold, under its row.
+			grid.add_child(Control.new())
+			var th_row := HBoxContainer.new()
+			th_row.add_theme_constant_override("separation", 6)
+			var before := Label.new()
+			before.text = labels.t("Only when a task takes at least")
+			th_row.add_child(before)
+			var th := SpinBox.new()
+			th.min_value = 0
+			th.max_value = TownSettings.THRESHOLD_MAX
+			th.step = 1
+			th.value = settings.completion_threshold
+			th.value_changed.connect(func(v: float) -> void:
+				settings.completion_threshold = TownSettings.clamp_threshold(v)
+				settings.save()
+				sounds_changed.emit())
+			th_row.add_child(th)
+			var after := Label.new()
+			after.text = labels.t("seconds (0: every task)")
+			th_row.add_child(after)
+			grid.add_child(th_row)
+			grid.add_child(Control.new())
+
+	_file_dialog = FileDialog.new()
+	_file_dialog.use_native_dialog = true
+	_file_dialog.access = FileDialog.ACCESS_FILESYSTEM
+	_file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+	_file_dialog.filters = PackedStringArray(["*.wav, *.mp3, *.ogg ; " + labels.t("Sound files")])
+	_file_dialog.file_selected.connect(_file_chosen)
+	add_child(_file_dialog)
+
+
+## The list for one sound: the default first and marked, every other sound in C:\Windows\Media,
+## the user's own file when one is chosen, then "Choose a file…". Item metadata is the choice.
+func _fill_choices(pick: OptionButton, key: String) -> void:
+	pick.clear()
+	var default_name: String = TownAudio.DEFAULTS[key]
+	pick.add_item(labels.t("%@ (default)", [default_name]))
+	pick.set_item_metadata(0, "")
+	for name in _media:
+		if name == default_name:
+			continue
+		pick.add_item(name)
+		pick.set_item_metadata(pick.item_count - 1, "media:" + name)
+	var choice: String = settings.sound_choice[key]
+	if choice.begins_with("file:"):
+		pick.add_separator()
+		pick.add_item(choice.substr(5).get_file())
+		pick.set_item_metadata(pick.item_count - 1, choice)
+	pick.add_separator()
+	pick.add_item(labels.t("Choose a file…"))
+	pick.set_item_metadata(pick.item_count - 1, "choose")
+	pick.selected = 0
+	for i in pick.item_count:
+		if pick.get_item_metadata(i) == choice:
+			pick.selected = i
+
+
+func _choice_picked(pick: OptionButton, key: String, i: int) -> void:
+	var meta: Variant = pick.get_item_metadata(i)
+	if meta == "choose":
+		_file_for = key
+		_fill_choices(pick, key) # back to the current choice until a file is picked
+		_file_dialog.popup_centered_ratio(0.6)
+		return
+	settings.sound_choice[key] = str(meta)
+	settings.save()
+	sounds_changed.emit()
+	audio.preview(key)
+
+
+func _file_chosen(path: String) -> void:
+	if _file_for == "" or TownAudio.load_stream(path) == null:
+		return
+	settings.sound_choice[_file_for] = "file:" + path
+	settings.save()
+	sounds_changed.emit()
+	audio.preview(_file_for)
+	_fill_choices(_picks[_file_for], _file_for)
 
 
 ## The "Restart now" row shows only when the choice differs from the language the app runs in.

@@ -5,3 +5,16 @@
 "Windows did not allow it: %@" = "Windows 不允許此設定：%@";
 "Font, license: [%@](%@)" = "字型，授權：[%1$@](%2$@)";
 "Version %@" = "版本 %@";
+
+/* Settings → Sounds */
+"Sounds" = "音效";
+"Volume" = "音量";
+"Ticket dispatched" = "派發工單";
+"Work done" = "工作完成";
+"Approval needed" = "等待核准";
+"%@ (default)" = "%@（預設）";
+"Choose a file…" = "選擇檔案…";
+"Play" = "播放";
+"Only when a task takes at least" = "工作至少花了";
+"seconds (0: every task)" = "秒才播放（0：每個工作）";
+"Sound files" = "音效檔";

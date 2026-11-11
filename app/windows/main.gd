@@ -59,7 +59,7 @@ func _ready() -> void:
 	_office.add_child(overlay)
 	store.changed.connect(scene.handle)
 	add_child(audio)
-	audio.muted = not settings.sound
+	_apply_sounds()
 	scene.sound.connect(audio.play)
 	scene.office_resized.connect(func(_s: Vector2) -> void: _fit_window())
 	w.size_changed.connect(_update_camera)
@@ -68,7 +68,8 @@ func _ready() -> void:
 	w.always_on_top = settings.stay_on_top
 	_apply_opacity(settings.opacity)
 	_build_tray()
-	_settings_window = SettingsWindow.new(settings, labels)
+	_settings_window = SettingsWindow.new(settings, labels, audio)
+	_settings_window.sounds_changed.connect(_apply_sounds)
 	_settings_window.visible = false
 	_settings_window.opacity_changed.connect(_apply_opacity)
 	add_child(_settings_window)
@@ -156,8 +157,8 @@ func _on_menu(id: int) -> void:
 			settings.save()
 		Menu.SOUND:
 			settings.sound = not settings.sound
-			audio.muted = not settings.sound
 			settings.save()
+			_apply_sounds()
 		Menu.SETTINGS:
 			_settings_window.popup_centered()
 		Menu.QUIT:
@@ -186,6 +187,17 @@ func _set_shown(on: bool) -> void:
 	settings.save()
 	_call_window("set_shown", [_hwnd(), on])
 	_sync_menu()
+
+
+## The sound settings: the menu's Sound item, the volume, each sound's switch and choice, and the
+## completion threshold (applied where the building decides whether a finished ticket plays it).
+func _apply_sounds() -> void:
+	audio.muted = not settings.sound
+	audio.volume = settings.volume
+	for key: String in TownSettings.SOUNDS:
+		audio.enabled[key] = settings.sound_on[key]
+		audio.choose(key, settings.sound_choice[key])
+	store.building.sound.threshold_seconds = settings.completion_threshold
 
 
 ## The office's opacity (Settings): the window turns see-through below 100%.
