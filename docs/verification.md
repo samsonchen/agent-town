@@ -24,6 +24,18 @@ These answers come from the mod API types that Claude Code 2.1.318 writes (`clau
 | 18 | Agent messages | Yes, through `session.send` (`{ to, text, origin, agentId }`, the sender) and `session.receive` (with the receiver's `agentId`). The `SendMessage` result is untyped. | `message.send` comes from `session.send` (with `origin.kind: 'model'`), not `tool.call`; the receiver is resolved from `to`. `session.receive` is used only for a subagent's task notifications. |
 | 19 | RealityKit | **Confirmed** (macOS 27, Xcode 27.2): a SwiftPM app loads the converted USDZ, cuts clips from the one timeline with `trimStart`/`trimEnd` on the animation definition, gives each instance its own recolored copy of `colormap.png` (shirt cells from `catalog/characters.json`), and draws through `OrthographicCameraComponent`. `RealityRenderer` renders the same scene offscreen to a PNG (`AgentTown --snapshot out.png`), with no window and no screen-recording permission. | Scenes are checked with offscreen snapshots. |
 
+## Windows
+
+Checked 2026-11-11 on Windows 11 Pro (x64) with Claude Code 2.1.322, town-link loaded from the repo with `--plugin-dir plugin`, and `tools/debug-receiver.py` standing in for the app.
+
+| Question | Answer |
+|---|---|
+| Do the plugin checks pass on Windows? | Yes, `claude plugin validate plugin` and all 52 tests of `claude plugin test plugin`, after one test fix: the host hands `$.fs.read` paths with backslashes on Windows, so a test that matched `/.claude-plugin/plugin.json` failed. The plugin code itself was right. |
+| Is `HOME` set? | No. `APPDATA` is (`C:\Users\<user>\AppData\Roaming`), so town-link reads `%APPDATA%\agent-town\endpoint.json`. |
+| Does `$.http.fetch` reach `127.0.0.1`? | Yes. A headless run (`claude -p`, `surface: headless`) sent all 14 events of a ticket with one Bash call; every batch passed the schema. |
+| Project name with no git remote | Only the folder name (`No Remote Project`), not the path. With a remote, the remote's last part (`agent-town`). |
+| Still to check | An interactive terminal session, the Desktop app's Code tab, and VS Code. |
+
 ## Other facts
 
 - **Plugin name:** `claude plugin validate` refuses names that start with `claude-` (also `anthropic-`, `cc-plugin-`, and a few others). The plugin is named **`town-link`** and its marketplace **`agent-town`** (install: `town-link@agent-town`). The app and the repository are named agent-town.

@@ -24,7 +24,7 @@ function world(on: any) {
   on('fs.exists', () => ({ value: true }))
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on('fs.read', (_: any, e: any) =>
-    String(e.path).endsWith('.claude-plugin/plugin.json')
+    /[\\/]\.claude-plugin[\\/]plugin\.json$/.test(String(e.path)) // Windows hosts pass backslash paths
       ? { value: JSON.stringify({ name: 'town-link', version: '9.8.7' }) }
       : { value: JSON.stringify({ protocol: 1, port: 50000, token: 'test-token' }) })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -215,7 +215,27 @@ These choices, and the settings below, are kept when the app or the Mac restarts
 - Not supported: Desktop app WSL sessions (plugins are not loaded there), SSH sessions (they run on another machine), cloud sessions and Claude Code on the web (they cannot reach the app on the user's Mac), and Cowork (it takes plugins from the claude.ai account and runs commands in a Linux VM; plugin modules are not documented to run there).
 - `claude -p` runs also load mods. Whether they appear in the building is a setting to decide (see [roadmap.md](roadmap.md)).
 
+## The Windows app (planned)
+
+A Windows version of the app is being built: Windows 11 on x64, with ARM64 as a nice-to-have (an x64 build also runs on ARM through emulation). It draws the same office from the same protocol and follows this spec, except where this section says otherwise. It has its own version number, separate from the macOS app and from town-link; the protocol version alone decides whether a plugin and an app work together.
+
+**First version.** The office and its blocks, the CEO's and the Chief of Staff's calls, staff and the resource bench, desk workers, operators, approvals, the context bar, the sounds, and the tray menu: about scenes 1 to 12. The Dispatcher and the Inspector (scenes 13 to 15), messages (16), compaction (17) and walking the CEO come later. Until then, a scheduled or returned ticket shows as an ordinary ticket.
+
+**Differences from the macOS app**
+
+| Topic | macOS | Windows |
+|---|---|---|
+| Where the app lives | Menu bar icon, no Dock icon | Tray icon (notification area), no taskbar button. Closing the office window hides it; the app keeps running. |
+| Menu | The menu bar menu | The same items in the tray icon's menu |
+| Sounds | macOS system sounds (Glass, Ping, Pop) | Windows system sounds from `C:\Windows\Media`, played from there and never bundled: completion `Windows Notify System Generic.wav`, approval `Windows Notify Messaging.wav`, dispatch `Windows Navigation Start.wav`. A missing file plays nothing. |
+| Open at login | A login item macOS manages | An entry in the user's startup apps (Settings → Apps → Startup) |
+| Language | Follows the macOS language list | Follows the Windows display language: `zh_TW`, `zh_HK`, `zh_MO` and any `zh_Hant` locale get Traditional Chinese; every other locale, including Simplified Chinese, gets English |
+| Font | System font for now; Cubic 11 planned | Cubic 11 (俐方體11號) from the first version, because Traditional Chinese must show and the engine's default font has no Chinese characters |
+| Install | Homebrew cask or a signed `.dmg` | An installer `.exe` on GitHub Releases (a `winget` package later). Not code-signed at first: Windows shows "Windows protected your PC", and the user clicks More info → Run anyway. Signing must be free (see [roadmap.md](roadmap.md)). |
+
+**Where it works on Windows:** Claude Code run natively on Windows: the terminal (PowerShell, Command Prompt, Git Bash), the Code tab of the Claude Desktop app, and the VS Code extension. Not supported: sessions inside WSL or WSL2 (they cannot see the Windows endpoint file), plus everything listed as unsupported for macOS.
+
 ## Out of scope for the first version
 
-- Windows and Linux apps. The protocol is designed so they can be added later.
+- A Linux app. The protocol is designed so one can be added later.
 - Approving or refusing a tool call from inside the app. The app only shows that approval is needed.
