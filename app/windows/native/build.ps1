@@ -68,13 +68,23 @@ else {
   if (-not (Test-Path $venvPy)) {
     if ($Check) { Write-Host '   not found; a build will install it into native\.venv'; $scons = $null }
     else {
-      $py = Get-Command py, python -ErrorAction SilentlyContinue | Select-Object -First 1
-      if (-not $py) { Fail 'Python is needed to install SCons (python.org or winget install Python.Python.3.12).' }
-      Write-Host "   installing SCons $sconsVersion into native\.venv"
-      & $py.Source -m venv (Join-Path $here '.venv')
-      if ($LASTEXITCODE -ne 0) { Fail 'Could not create the virtual environment.' }
+      # Use the first Python that really runs (a py launcher can point at a removed install),
+      # and take its real path rather than a shim such as pyenv's .bat files.
+      $pyExe = $null
+      foreach ($name in 'python', 'python3', 'py') {
+        $cmd = Get-Command $name -ErrorAction SilentlyContinue | Select-Object -First 1
+        if (-not $cmd) { continue }
+        # No < or > in the code: a .bat shim passes it through cmd.exe, which reads them as redirects.
+        $out = @(& $cmd.Source -c 'import sys; print(sys.version_info[0] * 100 + sys.version_info[1]); print(sys.executable)' 2>$null)
+        if ($LASTEXITCODE -eq 0 -and $out.Count -ge 2 -and [int]$out[0] -ge 308 -and (Test-Path $out[1].Trim())) { $pyExe = $out[1].Trim(); break }
+      }
+      if (-not $pyExe) { Fail 'Python 3.8 or later is needed to install SCons (python.org or winget install Python.Python.3.12).' }
+      Write-Host "   installing SCons $sconsVersion into native\.venv (with $pyExe)"
+      $venv = Join-Path $here '.venv'
+      & $pyExe -m venv $venv
+      if ($LASTEXITCODE -ne 0) { Remove-Item $venv -Recurse -Force -ErrorAction SilentlyContinue; Fail 'Could not create the virtual environment.' }
       & $venvPy -m pip install --quiet --disable-pip-version-check "scons==$sconsVersion"
-      if ($LASTEXITCODE -ne 0) { Fail 'Could not install SCons.' }
+      if ($LASTEXITCODE -ne 0) { Remove-Item $venv -Recurse -Force -ErrorAction SilentlyContinue; Fail 'Could not install SCons.' }
     }
   }
   if (Test-Path $venvPy) { $scons = @($venvPy, '-m', 'SCons') }
