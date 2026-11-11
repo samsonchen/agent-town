@@ -28,7 +28,7 @@ A GDExtension in `app/windows/native/` (C++, built with `godot-cpp` 10.0.0, a su
 | `is_shown(hwnd)` | Whether the window is visible |
 
 - The built DLLs are committed in `app/windows/addons/town_window/bin/` (x64 and ARM64, about 300 KB each), so working on the Godot project needs no C++ compiler.
-- To rebuild after changing `native/src/`: Visual Studio Build Tools 2026 with the C++ x64 and ARM64 tools and the Windows SDK, plus SCons, then `bash app/windows/native/build.sh` (set `SCONS` to a SCons outside `PATH`). Run `git submodule update --init` first in a fresh clone.
+- To rebuild after changing `native/src/`: `app/windows/native/build.ps1` (PowerShell; `build.sh` runs it from Git Bash). It needs Visual Studio Build Tools 2026 with the C++ x64 and ARM64 tools and a Windows SDK, and checks for them first. It fetches the `godot-cpp` submodule if missing, takes SCons from `SCONS` or `PATH` or else installs it into a private `native/.venv`, builds x64 and ARM64 (or one with `-Arch`), and checks each DLL's CPU type. `-Check` only checks the prerequisites.
 - `app/windows/dev/taskbar_check.tscn` checks it in a real window (the project's main scene for now).
 
 ## Shared files

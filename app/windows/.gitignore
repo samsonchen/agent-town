@@ -6,3 +6,4 @@ native/godot-cpp/bin/
 *.exp
 *.lib
 addons/*/bin/~*
+native/.venv/

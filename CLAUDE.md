@@ -14,6 +14,7 @@ A macOS menu bar app (Swift, RealityKit) that draws Claude Code's work as a smal
 
 - Plugin: `claude plugin validate plugin` and `claude plugin test plugin`.
 - App: `swift build` and `swift test` in `app/macos`.
+- Windows add-on (only after changing `app/windows/native/src/`): `app/windows/native/build.ps1`, run by the user (auto mode refuses to run the `godot-cpp` build). `-Check` checks the prerequisites without building.
 - To see a scene: `app/macos/.build/debug/AgentTown --demo <fixture.json> -showWindow YES`, then `screencapture -l <window id>`. A fixture can be made from a `debug-receiver.py --log` recording.
 
 ## Working rules

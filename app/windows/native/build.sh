@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
-# Builds the TownWindow add-on for x64 and ARM64 into ../addons/town_window/bin/.
-# Needs Visual Studio Build Tools (C++ x64 and ARM64, Windows SDK) and SCons.
-# SCONS can point at a SCons outside PATH, for example a private venv.
-set -euo pipefail
-cd "$(dirname "$0")"
-SCONS="${SCONS:-scons}"
-for arch in x86_64 arm64; do
-  "$SCONS" platform=windows target=template_release arch="$arch" -j8
-done
+# Git Bash wrapper for build.ps1, which does the work. Arguments pass through, for example:
+#   bash app/windows/native/build.sh -Arch arm64
+#   bash app/windows/native/build.sh -Check
+exec powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$(cygpath -w "$(dirname "$0")")\\build.ps1" "$@"
