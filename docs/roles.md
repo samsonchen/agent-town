@@ -272,14 +272,14 @@ Characters are Kenney Mini Characters (CC0, 3D). A character's look is a combina
 
 Each role in `catalog/roles.json` names its department (outfit color) and its prop. Operators share one color, safety orange, and their prop tells them apart. A neutral character on the bench wears light gray.
 
-Fixed characters use set base characters so they are easy to spot:
+Fixed characters use set base characters so they are easy to spot. The Kenney CC0 models have no suits, headsets, caps or hand props, so the base character and, for the Chief of Staff, the outfit color are what tell them apart:
 
 | Character | Base character | Look |
 |---|---|---|
-| CEO | `male-d` | Black suit, red tie |
-| Chief of Staff | Any base character except `male-d`, `male-c`, `female-e` | Charcoal gray outfit and a clipboard. Several Chiefs of Staff in one block have different base characters. |
-| Dispatcher | `female-e` | White, with a headset |
-| Inspector | `male-c` | Uniform with a cap, and a stamp |
+| CEO | `male-d` | The base character as it is |
+| Chief of Staff | Any base character except `male-d`, `male-c`, `female-e` | Charcoal gray outfit. Several Chiefs of Staff in one block have different base characters. |
+| Dispatcher | `female-e` | The base character as it is |
+| Inspector | `male-c` | The base character as it is |
 
 ### Animations
 

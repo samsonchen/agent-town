@@ -38,7 +38,7 @@ You need both parts: the plugin in Claude Code, and the app on your Mac.
 
 ### The town-link plugin
 
-Requires Claude Code v2.1.287 or later. In a Claude Code session:
+town-link is built as a Claude Code mod (a plugin with a hooks module), so it needs a Claude Code version that runs mods: v2.1.287 or later. In a Claude Code session:
 
 ```
 /plugin marketplace add samsonchen/agent-town
@@ -135,9 +135,9 @@ A strip across the top, with three people at their desks:
   - The approval sound in auto mode: agent-town normally stays quiet when auto mode's classifier answers an ask. Under an organization it knows your permission mode only from your settings when a session starts, so if you switch to auto mode with Shift+Tab, a slow ask may still play the approval sound.
 - **Work done while the app is closed is not shown later.** town-link sends events only while the app is running and drops them otherwise. A Claude Code session that is already running shows up within a few seconds of the app starting, from that point on.
 - **Commands you run with `!` don't show in the office.** Claude Code runs them in your shell without the model, and tells plugins nothing about them. If Claude goes on working after one, that work shows as usual, with the Chief of Staff's note reading "Continuing".
-- **A session leaves the office about two minutes after it stops.** When a Claude Code session ends or stops responding, its Chief of Staff stays until the app has heard nothing for two minutes.
+- **A session that stops responding leaves the office about two minutes later.** When a Claude Code session ends normally, its Chief of Staff leaves right away. When it stops responding (for example, the terminal was killed), its Chief of Staff stays until the app has heard nothing for two minutes.
 - **Labels can cover someone near the top of a small window.** Name tags and notes slide down to stay inside the window, so in a short window they may sit over the character's head. Make the window taller or scroll.
-- **Task titles and staff roles use your Claude plan.** Each new task makes a short Haiku request on your own plan or API key to pick a title and a role. If that request fails, the sign shows no task title and the hat and roles fall back to defaults.
+- **Task titles and staff roles use your Claude plan.** Each new task makes a few short Haiku requests on your own plan or API key to pick a title, the kind of task and staff roles. If a request fails, the sign shows no task title and the hat and roles fall back to defaults.
 - **macOS only.** The app needs macOS 15 or later.
 
 ## 5. Claude Desktop and Cowork

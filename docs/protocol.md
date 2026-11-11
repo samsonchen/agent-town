@@ -304,7 +304,7 @@ The main conversation's context window: sent at session start (the window), when
 ## Receiver rules
 
 - Ignore unknown event types and unknown fields. This lets the mod add events without breaking older apps.
-- Unknown `role` or `taskType` IDs fall back to `generalist` and `general`. For `task.start` and `task.role`, unknown roles fall back to `background-worker`.
+- An unknown `role` or `taskType` ID is shown as the raw ID, and a character with an unknown role wears the neutral outfit color.
 - Events for a session that has not sent `session.open` create the session (the app may have started after the session).
 - A `ticket.submit` with an unknown `parentTicketId`, or an unknown `scheduleId`, still creates the ticket. The report goes to the CEO.
 - Reorder by `seq` within a short window (about 500 ms). After that, apply events as they arrive.

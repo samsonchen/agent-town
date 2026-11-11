@@ -38,7 +38,7 @@ agent-town 在 macOS 上把 Claude Code 的工作畫成一間小辦公室，從�
 
 ### town-link plugin
 
-需要 Claude Code v2.1.287 以上。在 Claude Code session 裡輸入：
+town-link 是用 Claude Code 的 mod（帶 hooks 模組的 plugin）做的，所以需要能執行 mod 的 Claude Code 版本：v2.1.287 以上。在 Claude Code session 裡輸入：
 
 ```
 /plugin marketplace add samsonchen/agent-town
@@ -135,9 +135,9 @@ App 會以一棟小建築的圖示出現在選單列，Dock 裡沒有圖示。�
   - auto mode 的核准聲：auto mode 的分類器回答核准請求時，agent-town 通常不出聲。在組織管理下，它只能從 session 開始時的設定得知你的權限模式，所以如果你用 Shift+Tab 切到 auto mode，比較慢的核准請求仍可能播放核准聲。
 - **App 關著時做的工作，事後不會補顯示。** town-link 只在 app 執行時傳送事件，其他時候直接丟掉。已經在跑的 Claude Code session 會在 app 啟動後幾秒內出現，從那時開始顯示。
 - **用 `!` 執行的指令不會出現在辦公室裡。** Claude Code 直接在你的 shell 執行這些指令，不經過模型，也不通知 plugin。如果之後 Claude 接著工作，那部分會照常顯示，幕僚長的便條寫著「繼續工作」。
-- **Session 停止後約兩分鐘才離開辦公室。** Claude Code session 結束或沒有回應時，它的幕僚長會留到 app 兩分鐘沒收到任何訊息為止。
+- **沒有回應的 session 約兩分鐘後才離開辦公室。** Claude Code session 正常結束時，它的幕僚長會立刻離開。session 沒有回應時（例如終端機被強制關閉），幕僚長會留到 app 兩分鐘沒收到任何訊息為止。
 - **視窗太小時，標籤可能蓋住靠上方的角色。** 名牌和便條會往下移以留在視窗內，所以在矮的視窗裡可能壓在角色頭上。把視窗拉高或捲動即可。
-- **工作標題和職稱會用到你的 Claude 方案。** 每個新工作會用你自己的方案或 API key 向 Haiku 發一個簡短請求，選標題和職稱。請求失敗時，招牌不顯示工作標題，帽子和職稱改用預設值。
+- **工作標題和職稱會用到你的 Claude 方案。** 每個新工作會用你自己的方案或 API key 向 Haiku 發幾個簡短請求，選標題、工作類型和職稱。請求失敗時，招牌不顯示工作標題，帽子和職稱改用預設值。
 - **只支援 macOS。** App 需要 macOS 15 以上。
 
 Claude Desktop 與 Cowork 的支援情況、文件和開發說明，請看[英文 README](README.md)。

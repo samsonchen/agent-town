@@ -22,7 +22,7 @@ The marketplace name (`agent-town`, after the `@`; it avoids the reserved `claud
 
 Requirements to state in the README:
 
-- Claude Code v2.1.287 or later in the terminal, or a Desktop app version that runs mods (v2.1.286 or later in the Code tab).
+- A Claude Code version that runs mods, since town-link is a mod (a plugin with a hooks module): v2.1.287 or later in the terminal, or a Desktop app version that runs mods (v2.1.286 or later in the Code tab).
 - Mods must not be turned off by the user's settings (`disableAllHooks`) or by an organization policy (`allowManagedModsOnly`, `allowManagedHooksOnly`).
 - Role and task-type classification uses the user's own plan or API key.
 
@@ -48,8 +48,6 @@ Code signing and notarization:
 | Step | How |
 |---|---|
 | Pairing | The app writes `endpoint.json` (port and token). The mod reads it. The user does nothing. See [protocol.md](protocol.md). |
-| App missing | The mod shows one toast per session with the download link, then stays silent. |
-| Plugin missing | The app's first-run screen checks for the `claude` CLI and offers an "Install Claude Code plugin" button that runs the two `claude plugin` commands above. If the CLI is not found, it shows the commands to copy. |
 | Status | The app shows which sessions are connected. `/town` in Claude Code shows whether the app is reachable. |
 
 ## Licenses
