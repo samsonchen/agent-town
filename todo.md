@@ -5,8 +5,8 @@ Open items as of 2026-11-11, for the next session to pick up. Everything listed 
 ## Where things stand
 
 - Work is committed on `main`. The `phase2/app` branch points at an older commit on `main` and can be deleted.
-- Version 0.2.6 (plugin and app share it). town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`), as an unsigned pre-release.
-- After a change: raise the version in `plugin/.claude-plugin/plugin.json` and `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push. Then the user runs `app/macos/scripts/release.sh --unsigned --publish` (auto mode refuses to publish a release); check the uploaded `.dmg`'s checksum against the cask, commit and push the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town`.
+- Version 0.2.8 (plugin and app share it). town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
+- After a change: raise the version in `plugin/.claude-plugin/plugin.json` and `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push. Then the user runs `app/macos/scripts/release.sh --publish` (auto mode refuses to publish a release) and publishes the draft; check the uploaded `.dmg`'s checksum against the cask, commit and push the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town`.
 - Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (45 tests). App checks: `swift build` and `swift test` in `app/macos` (23 tests).
 - Two Swift warnings in the release build, harmless: `TownScene+Staff.swift:72` (a weak self inside a strong one) and `TownView.swift:479` (a non-Sendable observer closure). Clean up when convenient.
 
@@ -24,13 +24,12 @@ Check these on the personal account:
 
 ## 2. Waiting on others
 
-- [ ] **Developer ID Application certificate.** The user's role can't create it. The Account Holder (the product manager) must accept the latest Program License Agreement and issue the certificate. `docs/releasing.md` has the steps, including the request-file route under "If you are not the Account Holder". Parts B and C (app-specific password, `notarytool store-credentials agent-town-notary`) don't need the certificate.
+- [x] **Developer ID Application certificate** (done 2026-11-11). The user's role can't create it. The Account Holder (the product manager) must accept the latest Program License Agreement and issue the certificate. `docs/releasing.md` has the steps, including the request-file route under "If you are not the Account Holder". Parts B and C (app-specific password, `notarytool store-credentials agent-town-notary`) don't need the certificate.
 - [x] **App icon** added (2026-11-11): `assets/icons/app-icon-1024.png`; release.sh makes AppIcon.icns from it. The menu bar keeps the system symbol `building.2`, by the user's choice.
 
 ## 3. Release
 
-- [ ] The first signed and notarized build: `app/macos/scripts/release.sh`, then the downloaded-app test in `docs/releasing.md` Part E.
-- [ ] `release.sh --publish`, which creates a draft GitHub release `v<version>` with the signed `.dmg`; publish it, update the cask, and remove the "not signed yet" caveat from the cask and the README.
+- [x] The first signed and notarized release, v0.2.7 (2026-11-11). The cask's and the README's "not signed yet" notes are gone.
 - [x] Unsigned pre-releases v0.2.3 to v0.2.6 on GitHub Releases.
 - [x] The repo is public (2026-11-11). The history was scanned for secrets first: none found.
 - [x] Homebrew cask in `Casks/agent-town.rb` (this repo is the tap).

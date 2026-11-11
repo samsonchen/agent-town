@@ -74,7 +74,7 @@ brew install --cask samsonchen/agent-town/agent-town
 
 Or download `AgentTown-<version>.dmg` from [Releases](https://github.com/samsonchen/agent-town/releases), open it, and drag AgentTown into Applications.
 
-The app is not signed yet, so macOS blocks it the first time it opens. Open System Settings → Privacy & Security, find the message about AgentTown, and click **Open Anyway**. This is needed once. A signed version is planned; it will open without this step.
+The app is signed with a Developer ID and notarized by Apple, so it opens like any other app. (Versions before 0.2.7 were not signed and needed **Open Anyway** in System Settings → Privacy & Security.)
 
 The app appears in the menu bar as a small building, with no Dock icon. Open it before you start work: town-link sends events only while the app is running. To have it start with your Mac, turn on Settings → Open at login.
 
@@ -124,7 +124,6 @@ A strip across the top, with three people at their desks:
 - **A session leaves the office about two minutes after it stops.** When a Claude Code session ends or stops responding, its Chief of Staff stays until the app has heard nothing for two minutes.
 - **Labels can cover someone near the top of a small window.** Name tags and notes slide down to stay inside the window, so in a short window they may sit over the character's head. Make the window taller or scroll.
 - **Task titles and staff roles use your Claude plan.** Each new task makes a short Haiku request on your own plan or API key to pick a title and a role. If that request fails, the sign shows no task title and the hat and roles fall back to defaults.
-- **The app is not signed yet.** macOS blocks it the first time it opens, until you click Open Anyway in System Settings → Privacy & Security (see [Installing](#2-installing)).
 - **macOS only.** The app needs macOS 15 or later.
 
 ## 5. Claude Desktop and Cowork
@@ -177,8 +176,8 @@ claude --plugin-dir plugin               # in another terminal
 Build the app as a `.app` and `.dmg` (`app/macos/build/release/`), and publish a release: see [releasing.md](docs/releasing.md).
 
 ```bash
-app/macos/scripts/release.sh --unsigned             # a local build
-app/macos/scripts/release.sh --unsigned --publish   # an unsigned pre-release on GitHub
+app/macos/scripts/release.sh --unsigned   # a local test build, not signed
+app/macos/scripts/release.sh --publish    # signed and notarized, as a draft release on GitHub
 ```
 
 Checks: `claude plugin validate plugin` and `claude plugin test plugin` for the plugin; `swift build` and `swift test` in `app/macos` for the app.
