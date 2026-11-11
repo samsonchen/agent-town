@@ -24,7 +24,7 @@
 #      xcrun notarytool store-credentials agent-town-notary --apple-id <email> --team-id <TEAM ID>
 #
 # Settings (environment):
-#   VERSION         default: the town-link plugin's version (plugin/.claude-plugin/plugin.json)
+#   VERSION         default: the macOS app's version (AppInfo.fallbackVersion in Sources/AgentTown/About.swift)
 #   BUNDLE_ID       default: ai.careactive.agenttown
 #   SIGN_IDENTITY   default: the one "Developer ID Application" certificate in the keychain
 #   NOTARY_PROFILE  default: agent-town-notary
@@ -49,7 +49,8 @@ REPO="$(cd "$PKG/../.." && pwd)"
 OUT="$PKG/build/release"
 APP="$OUT/AgentTown.app"
 
-VERSION="${VERSION:-$(/usr/bin/python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$REPO/plugin/.claude-plugin/plugin.json")}"
+VERSION="${VERSION:-$(sed -nE 's/.*static let fallbackVersion = "([^"]+)".*/\1/p' "$REPO/app/macos/Sources/AgentTown/About.swift")}"
+[[ -n "$VERSION" ]] || { echo "release.sh: no version found in About.swift (AppInfo.fallbackVersion)" >&2; exit 1; }
 BUILD_NUMBER="$(git -C "$REPO" rev-list --count HEAD)"
 BUNDLE_ID="${BUNDLE_ID:-ai.careactive.agenttown}"
 NOTARY_PROFILE="${NOTARY_PROFILE:-agent-town-notary}"

@@ -94,6 +94,8 @@ The app appears in the menu bar as a small building, with no Dock icon. Open it 
 
 To update: `brew upgrade --cask agent-town`, or download the new `.dmg`.
 
+The plugin and the app have their own version numbers and are updated separately. `/town` shows the plugin's version, and About shows the app's. The numbers don't need to match: what matters is the protocol between them, which both versions check. If they ever can't work together, `/town` says so.
+
 ## 3. The office
 
 The window shows one office building, seen from above. At the top is the executive office; under it, one office block for each project you have open in Claude Code.

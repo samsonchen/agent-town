@@ -5,8 +5,8 @@ Open items as of 2026-11-11, for the next session to pick up. Everything listed 
 ## Where things stand
 
 - Work is committed on `main`.
-- Version 1.0.2 (plugin and app share it). town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
-- After a change: raise the version in `plugin/.claude-plugin/plugin.json` and `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push. Then the user runs `app/macos/scripts/release.sh --publish` (auto mode refuses to publish a release): it publishes the release, checks the uploaded `.dmg`'s checksum, and commits and pushes the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town`.
+- Version 1.0.2 for both the plugin and the macOS app; they now move separately. town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
+- Versions are separate (since 2026-11-11, both at 1.0.2 then). A plugin change: raise `plugin/.claude-plugin/plugin.json`, commit and push; no release. An app change: raise `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push, then the user runs `app/macos/scripts/release.sh --publish` (auto mode refuses to publish a release): it publishes the release, checks the uploaded `.dmg`'s checksum, and commits and pushes the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town`.
 - Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (52 tests). App checks: `swift build` and `swift test` in `app/macos` (28 tests).
 - Two Swift warnings in the release build, harmless: `TownScene+Staff.swift:89` (a weak self inside a strong one) and `TownView.swift:489` (a non-Sendable observer closure). Clean up when convenient.
 
@@ -76,6 +76,8 @@ From `docs/roadmap.md` and `docs/spec.md`:
 ## 9. Before the Windows app: work for the Mac session
 
 A Windows version of the app is planned: Windows 11 on x64, with ARM64 as a nice-to-have. The stack is not chosen yet; Godot 4 (C#) is the lead candidate. The items below are the groundwork that needs the Mac (`swift build` and `swift test`, the release script) or is best done there. Verifying the plugin on Windows itself (that the mod loads, that `$.http.fetch` reaches `127.0.0.1`, and what `$.env` and `$.session.root()` return) is done later on a Windows machine, not here.
+
+**Versions:** the Windows app has its own version number, separate from the macOS app and from town-link. Compatibility comes only from the protocol version (now 1): the app accepts batches whose `protocol` it speaks and answers 426 to others.
 
 ### town-link: make it work on Windows (done in 1.0.2, 2026-11-11; still to try on a Windows machine)
 

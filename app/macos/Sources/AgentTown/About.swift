@@ -3,8 +3,9 @@ import SwiftUI
 
 /// The app's version, from Info.plist in the packaged app.
 enum AppInfo {
-    /// Used when running from the build folder (swift run), which has no Info.plist.
-    /// Keep it the same as the town-link plugin's version.
+    /// The macOS app's version: release.sh reads it from here for the bundle, the .dmg and the
+    /// release tag. Used as is when running from the build folder (swift run), which has no
+    /// Info.plist. It is separate from town-link's version (plugin.json) and the Windows app's.
     static let fallbackVersion = "1.0.2"
 
     static var version: String {
