@@ -1,6 +1,6 @@
 # Windows app architecture
 
-The Windows app is a Godot 4 project in `app/windows/`, written in typed GDScript (every variable and function typed). It needs Godot 4.4 or later.
+The Windows app is a Godot 4 project in `app/windows/`, written in typed GDScript (every variable and function typed). It is built with Godot 4.7.2 (it needs 4.4 or later), the standard build, with the Compatibility (OpenGL) renderer.
 
 It reimplements the macOS app's design, not its code: the same split between building state and choreographer (see [architecture.md](../architecture.md), "App side"), the same protocol, and the same shared files. town-link is the same plugin on both; on Windows it reads `%APPDATA%\agent-town\endpoint.json` ([protocol.md](../protocol.md)).
 
@@ -8,7 +8,7 @@ It reimplements the macOS app's design, not its code: the same split between bui
 
 | Module | Technology | Job |
 |---|---|---|
-| Shell | Godot `StatusIndicator` (tray icon) and a `PopupMenu`; the office in the main window | Tray menu, settings, About. No taskbar button; closing the window hides it |
+| Shell | Godot `StatusIndicator` (tray icon) and a `PopupMenu`; the office in the main window | Tray menu, settings, About. No taskbar button, and closing the window hides it: Godot cannot do either from GDScript, so this needs a small native add-on that sets the Windows tool-window style on the main window and shows or hides it (not decided yet; see [roadmap.md](roadmap.md)) |
 | Loopback server | `TCPServer` on 127.0.0.1, with a small HTTP/1.1 reader in GDScript (Godot has no HTTP server class) | Accepts `POST /v1/events`; checks the token and reads `protocol` first (426 if unsupported); writes `%APPDATA%\agent-town\endpoint.json` and deletes it on quit if it still holds this app's `pid` |
 | Building state | GDScript classes with no scene code | The port of `app/macos/Sources/TownCore/Building.swift`. Tested headless against `protocol/fixtures/` and `protocol/fixtures/expected/`, the same answers the macOS app is tested against |
 | Choreographer and scene | Godot 3D: an orthographic `Camera3D` tilted 62° from the floor, `AnimationPlayer` | Per-character queues and the timing rules, as on macOS |
