@@ -75,9 +75,24 @@ From `docs/roadmap.md` and `docs/spec.md`:
 
 ## 9. Before the Windows app: work for the Mac session
 
-A Windows version of the app is planned: Windows 11 on x64, with ARM64 as a nice-to-have. The stack is not chosen yet; Godot 4 (C#) is the lead candidate. The items below are the groundwork that needs the Mac (`swift build` and `swift test`, the release script) or is best done there. Verifying the plugin on Windows itself (that the mod loads, that `$.http.fetch` reaches `127.0.0.1`, and what `$.env` and `$.session.root()` return) is done later on a Windows machine, not here.
+A Windows version of the app is planned: Windows 11 on x64, with ARM64 as a nice-to-have. The engine is Godot 4 (see "Windows app: decisions" below). The items below are the groundwork that needs the Mac (`swift build` and `swift test`, the release script) or is best done there. Verifying the plugin on Windows itself (that the mod loads, that `$.http.fetch` reaches `127.0.0.1`, and what `$.env` and `$.session.root()` return) is done later on a Windows machine, not here.
 
 **Versions:** the Windows app has its own version number, separate from the macOS app and from town-link. Compatibility comes only from the protocol version (now 1): the app accepts batches whose `protocol` it speaks and answers 426 to others.
+
+### Windows app: decisions (2026-11-11)
+
+- **Engine:** Godot 4 (4.4 or later). The language is still open: typed GDScript or C# (Godot .NET).
+- **First version:** the blocks, CEO and Chief of Staff calls, staff and the bench, operators, approvals, sounds, the tray menu and the context bar (about scenes 1–12). Later: the Dispatcher, the Inspector, walking the CEO, compaction, messages.
+- **Where it works:** native Windows Claude Code (terminal, the Desktop app's Code tab, VS Code). WSL and WSL2 sessions are not supported.
+- **Chinese:** Traditional Chinese is required from the first version. Bundle the Cubic 11 font (OFL). Pick the language from the Windows locale by explicit rule (`zh_TW`, `zh_HK`, `zh_MO` and any `zh_Hant` → Traditional Chinese; every other `zh`, including `zh_CN`, → English), not by Godot's own nearest-locale match, which could show Traditional Chinese for Simplified.
+- **Tray only:** a tray icon, no taskbar button; closing the office window hides it, as on the Mac.
+- **Signing: free only.** Start unsigned (SmartScreen shows "Windows protected your PC" → More info → Run anyway; the release notes say so). Apply later to the SignPath Foundation, which signs open-source projects for free.
+- **Installer:** an Inno Setup `.exe` on GitHub Releases; a `winget` package later.
+- **Releases in the same repo:** Windows tags are `windows-v<version>` (for example `windows-v0.1.0`), titled "agent-town for Windows <version>", and published with `--latest=false`, so the macOS `v<version>` release stays GitHub's "Latest" and the Homebrew cask is untouched.
+
+### Mac session: keep the cask clear of Windows releases
+
+- [ ] `Casks/agent-town.rb` uses `livecheck` with `strategy :github_releases`, which reads release tags. Add `regex(/^v(\d+(?:\.\d+)+)$/i)` to its `livecheck` block so a `windows-v…` tag is never taken for a macOS version. `release.sh` already passes `--latest` for macOS releases; keep it.
 
 ### town-link: make it work on Windows (done in 1.0.2, 2026-11-11; still to try on a Windows machine)
 
