@@ -22,7 +22,7 @@ While working on the sound, I noticed that Claude Code already says a lot about 
 - **town-link**: a Claude Code plugin that watches what Claude Code does and sends short event messages to the app on your own Mac, over a local connection. It never changes what Claude Code does.
 - **The agent-town app**: a macOS menu bar app that draws the office with RealityKit and plays the sounds.
 
-Nothing leaves your Mac except one short request per task: town-link asks Haiku, on your own Claude plan or API key, for a task title and a staff role. Prompts are shown on tickets as you typed them.
+Nothing leaves your Mac except a few short requests per task: town-link asks Haiku, on your own Claude plan or API key, for a task title, the kind of task, and staff roles. Prompts are shown on tickets as you typed them.
 
 ### What it is not
 

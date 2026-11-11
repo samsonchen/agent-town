@@ -22,7 +22,7 @@ agent-town 在 macOS 上把 Claude Code 的工作畫成一間小辦公室，從�
 - **town-link**：一個 Claude Code plugin。它觀察 Claude Code 在做什麼，透過本機連線把簡短的事件訊息傳給你 Mac 上的 app。它不會改變 Claude Code 的任何行為。
 - **agent-town app**：一個 macOS 選單列 app，用 RealityKit 畫出辦公室，並播放聲音。
 
-除了每個工作一次的簡短請求，沒有任何資料離開你的 Mac：town-link 用你自己的 Claude 方案或 API key 請 Haiku 為工作取一個標題、為職員選一個職稱。工單上顯示的是你輸入的 prompt 原文。
+除了每個工作幾個簡短的請求，沒有任何資料離開你的 Mac：town-link 用你自己的 Claude 方案或 API key 請 Haiku 為工作取一個標題、判斷工作類型，並為職員選職稱。工單上顯示的是你輸入的 prompt 原文。
 
 ### 它不是什麼
 

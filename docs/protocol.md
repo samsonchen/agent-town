@@ -21,15 +21,16 @@ Responses:
 | Status | Meaning | Sender does |
 |---|---|---|
 | 204 | Accepted | Nothing |
-| 401 | Wrong token | Re-read the endpoint file |
+| 400 | Malformed request or batch | Nothing |
+| 401 | Wrong token | Re-read the endpoint file; send the batch once more if the app is there |
 | 426 | Unsupported protocol version | Stop sending for this session; show one toast |
-| Connection refused, timeout | App not running | Drop the batch; re-read the endpoint file on the next flush |
+| Connection refused, timeout | App not running | Re-read the endpoint file at once. If the app is there (it may have restarted on another port), send the batch once more, unless it is older than 60 s; otherwise drop it |
 
-The sender never retries a batch. A lost event is acceptable; the heartbeat and later events correct the state.
+The sender sends a batch at most twice: the one retry above, after reconnecting. Otherwise a lost event is acceptable; the heartbeat and later events correct the state. While not connected, the sender reads the endpoint file every 2 s. On connecting, it sends `session.open` again, with the session's context and open ticket, unless a `session.open` is already queued, so receivers must accept a repeated `session.open`.
 
 ## Endpoint file
 
-The app writes this file when its server starts and deletes it on quit. Mode 0600.
+The app writes this file when its server starts and deletes it on quit (only if the file still holds its own `pid`). Mode 0600. The sender ignores a file whose `protocol` it does not support.
 
 ```json
 {
@@ -67,7 +68,7 @@ Every event has these fields:
 | Field | Type | Notes |
 |---|---|---|
 | `projectName` | string | Repository or folder name |
-| `surface` | string | `terminal`, `desktop`, `vscode`, `headless` |
+| `surface` | string | `terminal`, `desktop`, `vscode`, `mobile`, `headless` |
 | `ccVersion` | string | Claude Code version |
 | `locale` | string, optional | If the mod can read it |
 | `model` | string, optional | The session's model at start, from `$.session.model()` |
@@ -120,7 +121,7 @@ Sent when a small model (Haiku) has named a typed prompt's task in a few words. 
 | Field | Type | Notes |
 |---|---|---|
 | `ticketId` | string | |
-| `durationMs` | integer | End-to-end time for the completion sound gate. For `origin: user`, it is Claude Code's duration for the main turn. For `task`, it is measured from the start of the earliest task in `taskIds`. For `schedule`, it is measured from the time the schedule fired. After `ticket.return`, it covers all of the work on the ticket. |
+| `durationMs` | integer | End-to-end time for the completion sound gate. For `origin: user`, it is Claude Code's duration for the main turn. For `task`, it is measured from the start of the earliest task in `taskIds`. For `schedule`, it is measured from the time the schedule fired, and for `unknown` from the start of the ticket. After `ticket.return`, it covers all of the work on the ticket. |
 | `aborted` | boolean | `true` when the user interrupted |
 
 ### `ticket.return`
@@ -183,7 +184,7 @@ A background task started (spec scene 11).
 | `kind` | string | `shell`, `monitor`, `workflow`, `other` |
 | `agentId` | string, optional | The agent that started it. Absent for the main agent. |
 | `ticketId` | string, optional | The open ticket when the task started |
-| `description` | string | First 200 characters of the description, or of the command when there is no description |
+| `description` | string | First 200 characters of the description, or of the command when there is no description. For a workflow, its name |
 | `role` | string, optional | Set when the mod decided the role by rule. Otherwise `task.role` follows. |
 
 ### `task.role`

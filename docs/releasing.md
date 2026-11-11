@@ -103,14 +103,14 @@ app/macos/scripts/release.sh --publish
 - It refuses to run with uncommitted changes, from a branch other than `main`, or when `main` differs from `origin/main`.
 - To review the release on GitHub first, add `--draft`: the release is made as a draft, and the cask is updated but not committed. Publish the draft on GitHub → Releases, then commit and push `Casks/agent-town.rb` yourself.
 
-## Unsigned pre-releases (until the Developer ID exists)
+## Unsigned pre-releases
 
 ```
 app/macos/scripts/release.sh --unsigned --publish
 ```
 
 - Builds the app without signing or notarization, and publishes GitHub release `v<version>` marked Pre-release, with the `.dmg` attached, then pushes the cask as for a signed release.
-- macOS blocks an unsigned app the first time it opens; users click Open Anyway in System Settings → Privacy & Security once. The README and the cask's message say so.
+- macOS blocks an unsigned app the first time it opens; users click Open Anyway in System Settings → Privacy & Security once. The release notes say so. Versions 0.2.3 to 0.2.6 were published this way; 0.2.7 and later are signed and notarized.
 
 ## Homebrew
 
@@ -123,4 +123,4 @@ brew install --cask samsonchen/agent-town/agent-town
 
 - Homebrew reads the cask from this repo's `main` branch, not from the Releases page. A published release alone changes nothing for `brew upgrade`; the cask with the new version and checksum has to be pushed too. `release.sh --publish` does both (with `--draft`, push the cask yourself after publishing).
 - Homebrew downloads only from a published release (not a draft) in a public repo.
-- Once the app is signed and notarized, remove the "not signed yet" message from the cask's `caveats`. A signed app could also be submitted to the official Homebrew casks, which accept only signed and notarized apps.
+- Since 0.2.7 the app is signed and notarized, and the cask's `caveats` no longer has a "not signed yet" message. A signed app could also be submitted to the official Homebrew casks, which accept only signed and notarized apps.

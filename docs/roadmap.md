@@ -47,8 +47,8 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - [x] State tests driven by `protocol/fixtures/` (`swift test` in `app/macos`)
 - [x] Offscreen snapshots for checking scenes: `AgentTown --demo <fixture> --snapshot out.png --at 10`
 - [x] Menu bar app with no Dock icon: About, Show agent-town, Stay on top, Sound, Show tips, Settings…, Quit; choices kept across restarts
-- [x] Settings window: language (with Restart now) and open at login. Threshold, sounds, ticket text and badges move to Phase 5
-- [x] An `.app` bundle and `.dmg` from `app/macos/scripts/release.sh` (unsigned for now; see [releasing.md](releasing.md))
+- [x] Settings window: language (with Restart now), open at login, and opacity. Threshold, sounds, ticket text and badges move to Phase 5
+- [x] An `.app` bundle and `.dmg` from `app/macos/scripts/release.sh` (signed and notarized since 0.2.7; see [releasing.md](releasing.md))
 - [x] The window opens where it was when the app last quit
 
 ## Phase 3: staff (mostly done)
@@ -95,10 +95,12 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 ## Phase 6: release
 
 - Signing and notarization in GitHub Actions
-- DMG on Releases, Homebrew cask, Sparkle
+- [x] Signed and notarized DMG on Releases (from `app/macos/scripts/release.sh`), Homebrew cask (`Casks/agent-town.rb`)
+- Sparkle
 - [x] `marketplace.json`; README with install steps
 - The list of events the mod handles, in the README or a doc
-- `CONTRIBUTING.md`, `assets/LICENSES.md`
+- `CONTRIBUTING.md`
+- [x] `assets/LICENSES.md`
 
 ## Open questions
 

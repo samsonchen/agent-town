@@ -7,7 +7,7 @@ Open items as of 2026-11-11, for the next session to pick up. Everything listed 
 - Work is committed on `main`. The `phase2/app` branch points at an older commit on `main` and can be deleted.
 - Version 0.3.0 (plugin and app share it). town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
 - After a change: raise the version in `plugin/.claude-plugin/plugin.json` and `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push. Then the user runs `app/macos/scripts/release.sh --publish` (auto mode refuses to publish a release): it publishes the release, checks the uploaded `.dmg`'s checksum, and commits and pushes the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town`.
-- Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (45 tests). App checks: `swift build` and `swift test` in `app/macos` (23 tests).
+- Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (48 tests). App checks: `swift build` and `swift test` in `app/macos` (27 tests).
 - Two Swift warnings in the release build, harmless: `TownScene+Staff.swift:72` (a weak self inside a strong one) and `TownView.swift:479` (a non-Sendable observer closure). Clean up when convenient.
 
 ## 1. Check on a personal (non-Team) account
@@ -37,7 +37,7 @@ Check these on the personal account:
 
 ## 4. README and docs
 
-- [x] README rewritten in the user's order (what it is, installing, the office, known issues, Claude Desktop and Cowork). Still to do: replace the build-from-source steps with the download once the signed app is on Releases. Was: README "Install (planned)" and "No installer yet": the plugin install from GitHub works now. Update both, and the "Status" section, once the signed app is on Releases.
+- [x] README rewritten in the user's order (what it is, installing, the office, known issues, Claude Desktop and Cowork). The install steps now use Homebrew or the `.dmg` from Releases instead of building from source. Was: README "Install (planned)" and "No installer yet": the plugin install from GitHub works now. Update both, and the "Status" section, once the signed app is on Releases.
 - [ ] The Traditional Chinese version of the README story ("Why agent-town exists"): the user hasn't decided yet.
 - [x] Roadmap updated to match what is built. Was: Roadmap Phase 2 still lists "Settings window" and "An `.app` bundle" as open. The `.app`, the menu bar, the language setting and the About window are done, so update those lines. Threshold, sounds, ticket text, badges and the Cubic 11 font are still open.
 

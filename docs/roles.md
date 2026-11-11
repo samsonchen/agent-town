@@ -1,6 +1,6 @@
 # Roles and task types
 
-This document lists the job titles a staff member can have, and the task types a Chief of Staff's hat can show. The lists will move into `catalog/roles.json` and `catalog/task-types.json`, which both the mod and the app read. This file is the reference for that data.
+This document lists the job titles a staff member can have, and the task types a Chief of Staff's hat can show. The lists are kept in `catalog/roles.json` and `catalog/task-types.json`. The app reads them; town-link uses `plugin/hooks/catalog.ts`, which `tools/build-plugin-catalog.py` generates from them. This file is the reference for that data.
 
 ## How roles are chosen
 
@@ -8,16 +8,17 @@ This document lists the job titles a staff member can have, and the task types a
 - For every subagent, Haiku picks one role ID from the catalog (`$.model.classify`). Accuracy is not critical.
 - If the subagent's type is exactly a role ID (a custom agent named `golang-engineer`, for example), that role is used without a model call.
 - If nothing fits, the role is `generalist`.
+- The desk workers who do the main agent's own work (scene 3 in [spec.md](spec.md)) are not classified by Haiku. The role comes from the file being changed, by extension: `.ts`/`.tsx`/`.mts`/`.cts` `typescript-engineer`, `.js`/`.jsx`/`.mjs`/`.cjs` `javascript-engineer`, `.py` `python-engineer`, `.ipynb` `data-scientist`, `.go` `golang-engineer`, `.rs` `rust-engineer`, `.java` `java-engineer`, `.kt`/`.kts` `kotlin-engineer`, `.swift` `swift-engineer`, `.cs` `csharp-engineer`, `.c`/`.cc`/`.cpp`/`.h`/`.hpp` `cpp-engineer`, `.php` `php-engineer`, `.rb` `ruby-engineer`, `.css`/`.scss`/`.html`/`.vue`/`.svelte` `frontend-engineer`, `.sql` `database-engineer`, `.md`/`.mdx`/`.rst` `technical-writer`, `.tf`/`.hcl` and a `Dockerfile` or a file under `.github/workflows/` `devops-engineer`. Otherwise it comes from a file being read (same table), from web research (`research-scientist`), or from the ticket's task type (for example `debugging` → `fullstack-engineer`, `docs` → `technical-writer`), else `generalist`.
 
 ## What goes in the catalog
 
 A role belongs in the catalog when the work can be done with a computer: reading, writing, analyzing, coding, drafting, reviewing, researching. A role does not belong when the job needs a body or a license to act in the physical world, for example pilot, driver, nurse, surgeon, chef, electrician, warehouse worker, security guard.
 
-The list is drawn from how large companies in software, banking, legal, consulting, and finance organize their departments (front, middle, and back office in banking; engineering, product, legal, finance, people, operations in tech companies). It is meant to grow. To add a role: add a row here, add it to `catalog/roles.json` with labels for every locale, and pick its department color and prop.
+The list is drawn from how large companies in software, banking, legal, consulting, and finance organize their departments (front, middle, and back office in banking; engineering, product, legal, finance, people, operations in tech companies). It is meant to grow. To add a role: add a row here, add it to `catalog/roles.json` with labels for every locale, pick its department color and prop, and run `tools/build-plugin-catalog.py`.
 
 ## Role catalog
 
-Each role has an ID (used in the protocol), an English label, and a Traditional Chinese label. The department is used for block layout (staff from the same department sit together) and for the two-step classification fallback.
+Each role has an ID (used in the protocol), an English label, and a Traditional Chinese label. The department sets the outfit color, and the bench uses it to pick who answers a page (someone from the same department comes before a neutral character).
 
 ### Software engineering 軟體工程
 
@@ -228,7 +229,7 @@ Desk work only. No clinical roles.
 
 Operators stand for background tasks, not agents: shell commands running in the background, monitors, and workflow runs. They work in each project block's server room. A background subagent is still a staff member, not an operator.
 
-Roles are chosen by rule where possible (see [architecture.md](architecture.md)), otherwise by Haiku using only the IDs below. Each row lists its rule words in `catalog/roles.json`.
+Roles are chosen by rule where possible (see [architecture.md](architecture.md)), otherwise by Haiku using only the IDs below. Each row lists its rule in `catalog/roles.json`: words in the shell command, or, for `log-monitor` and `workflow-coordinator`, the tool that starts the task (`Monitor`, `Workflow`).
 
 ### Background operations 背景作業
 
@@ -252,7 +253,7 @@ These are not in the catalog and are not classified.
 
 | Character | English | 繁體中文 | Where |
 |---|---|---|---|
-| CEO | CEO | 執行長 | CEO's desk with a telephone, executive block (does not walk) |
+| CEO | CEO | 執行長 | CEO's desk with a telephone, executive block (the user can walk the CEO around) |
 | Chief of Staff | Chief of Staff | 幕僚長 | A desk with a telephone in the project block |
 | Dispatcher | Dispatcher | 調度員 | Dispatcher's desk with a radio and the board, executive block |
 | Inspector | Inspector | 稽核員 | Reception desk, executive block |
@@ -263,7 +264,7 @@ Characters are Kenney Mini Characters (CC0, 3D). A character's look is a combina
 
 | Part | Source |
 |---|---|
-| Base character | One of the 12 Kenney characters (`male-a` … `female-f`), picked at random for staff and operators |
+| Base character | One of the 12 Kenney characters (`male-a` … `female-f`), picked at random for staff and operators from the nine not used by the CEO, the Dispatcher and the Inspector |
 | Outfit color | The department color, applied to the base character's shirt swatch (see [architecture.md](architecture.md)) |
 | Prop | A small model in the hand: from Kenney Furniture Kit where one exists (`laptop`, `books`, `cardboardBoxClosed`), otherwise a simple shape (clipboard, calculator, stopwatch) |
 | Name tag | The localized role label, drawn as a 2D overlay |
@@ -286,14 +287,15 @@ The Kenney characters come with these clips, which the scenes use:
 
 | Scene action | Clip |
 |---|---|
-| Walking | `walk` (`sprint` when a trip is late) |
-| Idle on the bench | `idle`, `sit`, `crouch`, `emote-yes` (chatting) |
-| Working at a desk or console | `sit` with `interact-right` / `interact-left` |
-| Carrying a ticket or report | `holding-right` |
-| Handing over or taking a ticket | `pick-up` |
-| Waiting for approval | `idle` with a raised hand |
-| Inspector returns a report | `emote-no` |
-| CEO accepts a report | `emote-yes` |
+| Walking | `walk` |
+| Idle on the bench | `sit` on the sofa, `idle` standing; now and then `emote-yes` (chatting) or `interact-left` |
+| Typing at a desk | Part of `interact-right` and `interact-left`, switching hands |
+| Writing (a hot desk with no computer, or tidying notes) | A slow part of `interact-right` |
+| Working at the racks (operators) | `interact-right` / `interact-left` |
+| On the phone, or waiting for approval | `holding-right` |
+| Handing over a report | `interact-right`; the receiver plays `pick-up` |
+| Picking up or setting down a carried desk, picking a ticket from the inbox | `pick-up` |
+| CEO when the approval waits are over | `emote-yes` |
 
 ## Task types (Chief of Staff hats)
 

@@ -34,14 +34,14 @@ To check: whether Anthropic offers a public plugin directory that accepts commun
 
 | Channel | Command or location |
 |---|---|
-| GitHub Releases | `agent-town-<version>.dmg` on the repo's Releases page |
+| GitHub Releases | `AgentTown-<version>.dmg` on the repo's Releases page |
 | Homebrew | `brew tap samsonchen/agent-town https://github.com/samsonchen/agent-town`, then `brew install --cask samsonchen/agent-town/agent-town` (the cask is `Casks/agent-town.rb` in this repo) |
 | Updates | Sparkle, with the appcast published on GitHub Pages or in the Releases |
 
 Code signing and notarization:
 
 - Sign with a Developer ID certificate and notarize with Apple, so Gatekeeper opens the app without an "unidentified developer" warning. This needs an Apple Developer Program membership.
-- Do the signing and notarization in GitHub Actions. Keep the certificate, its password, and the App Store Connect API key in GitHub Actions secrets, never in the repo.
+- Signing and notarization run on the Mac that releases, with `app/macos/scripts/release.sh` (see [releasing.md](releasing.md)). The certificate and the notarization login (keychain profile `agent-town-notary`) stay in that Mac's keychain, never in the repo. Moving this to GitHub Actions, with the secrets in GitHub Actions secrets, is still planned.
 
 ## Connecting the two
 
