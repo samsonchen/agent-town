@@ -79,7 +79,7 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 
 - [x] Executive block: the Dispatcher's board and scheduled tickets (scenes 13, 14); the Inspector at reception (scene 15)
 - [ ] Many project blocks: zoom (blocks are one column now; a taller office scrolls)
-- [ ] Several sessions in one block: check the walk-in desk scene and the limit of four (two sessions work)
+- [ ] Several sessions in one block: check the walk-in desk scene and the limit of five, the back row's desk spots (two and three sessions work)
 - [ ] Window and bench size settings
 
 ## Phase 5: polish

@@ -194,11 +194,11 @@ Registered with `immediate: true` so it works while Claude is busy.
 
 | Module | Technology | Job |
 |---|---|---|
-| Shell | SwiftUI, `MenuBarExtra` | Main window, menu bar toggle, settings, first-run screen |
+| Shell | SwiftUI, `MenuBarExtra` | Main window, menu bar menu, settings, About |
 | Loopback server | Network.framework (`NWListener`) | Binds 127.0.0.1 on a random port; checks the token and protocol version; writes the endpoint file |
 | Building state | Swift model | Project blocks, sessions, characters, pending approvals. Pure logic, unit-tested with fixtures. |
 | Choreographer | Swift (`TownScene`, `TownScene+Staff`, `TownScene+CEO`, `TownScene+Blocks`) | Turns state changes into per-character action queues; applies the timing rules. Handles calls, walking along the block walkways, the bench, staff, operators, approvals and messages. `TownScene+CEO` handles the CEO under the user's control: the arrow keys, H and clicks on the floor, walking around furniture (grid path search), the mobile phone, and the statements characters give the CEO. `TownScene+Blocks` places the project blocks: each is on screen from its first session to its last, in one column under the executive block |
-| Scene | RealityKit in a SwiftUI `RealityView`, orthographic camera looking down at the office (62° from the floor), characters leaned back to face it | Draws the flat blocks and path (unlit tiled planes), furniture, telephones, characters, tickets, hats; plays character animation clips; lays the blocks out in a grid; handles panning |
+| Scene | RealityKit in a SwiftUI `RealityView`, orthographic camera looking down at the office (62° from the floor), characters leaned back to face it | Draws the flat blocks and path (unlit tiled planes), furniture, telephones, characters, tickets, hats; plays character animation clips; lays the blocks out in one column; handles panning |
 | Labels | SwiftUI overlay | Name tags, hats, model badges, ticket text, block signs, ring tags and call lines. Drawn in 2D over the 3D view at each character's projected position, so text stays sharp and uses the Cubic 11 font. |
 | Audio | AppKit (`NSSound`, macOS system sounds for now) | Completion, dispatch and approval sounds, each with its own setting; applies the duration gate |
 | Localization | `Localizable.strings` per language (`Resources/Localization/<lang>.lproj`) plus `catalog/*.json` | UI strings, keyed by their English text, and role/task labels in English and Traditional Chinese. The language follows macOS; English when none of the user's languages is available |
