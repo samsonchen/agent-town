@@ -22,7 +22,7 @@ A macOS menu bar app (Swift, RealityKit) that draws Claude Code's work as a smal
 - End commit messages with the co-author line the session gives.
 - When the plugin or the app changes, raise the version in both `plugin/.claude-plugin/plugin.json` and `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift` (they share it). Users get plugin changes only through a new version.
 - A release is `app/macos/scripts/release.sh --publish`, run by the user (auto mode refuses to publish). It publishes the GitHub release and pushes the cask; Homebrew sees a new version only after the cask is on `main`.
-- When behavior changes, update the docs that describe it (README, `docs/spec.md`, `docs/protocol.md`, `docs/architecture.md`, `docs/releasing.md`) and `todo.md`.
+- When behavior changes, update the docs that describe it (README, and `README.zh-TW.md` for sections 1–4, `docs/spec.md`, `docs/protocol.md`, `docs/architecture.md`, `docs/releasing.md`) and `todo.md`.
 - Never commit access tokens, passwords or other credentials. Signing and notarization secrets live only in the keychain or GitHub secrets.
 - Write in American English or Traditional Chinese (Taiwan); never Simplified Chinese. UI strings are keyed by their English text, with the Traditional Chinese in `zh-Hant.lproj/Localizable.strings`.
 - No global installs without asking.
