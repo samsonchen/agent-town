@@ -7,7 +7,7 @@
 // docs/protocol.md and docs/architecture.md in the agent-town repository.
 
 import type { Register } from 'claude-code'
-import { Town, projectIdentity, type ClassifyJob, type Ev } from './core'
+import { Town, endpointFilePath, projectIdentity, type ClassifyJob, type Ev } from './core'
 import type { TownSaved } from '../types'
 
 const PROTOCOL = 1
@@ -253,11 +253,11 @@ async function pluginVersion($: any): Promise<string> {
   return version
 }
 
-const statusText = (v: string) =>
+const statusText = (v: string, reachable: boolean) =>
   [
     v ? `Version ${v}.` : 'Version unknown.', // Claude Code puts "town-link:" in front
     `Sending is ${enabled ? 'on' : 'off'}.`,
-    refused ? 'The agent-town app refused this protocol version; update town-link.' : endpoint ? 'Connected to the agent-town app.' : 'The agent-town app is not running.',
+    refused ? 'The agent-town app refused this protocol version; update town-link.' : reachable ? 'Connected to the agent-town app.' : 'The agent-town app is not running.',
     'Use /town on or /town off to change sending for all sessions.',
   ].join('\n')
 
@@ -270,8 +270,7 @@ export const register: Register = on => {
       endpoint = undefined
       refused = false
       sessionId = await $.session.id()
-      const home = await $.env.get('HOME')
-      endpointPath = `${home}/Library/Application Support/agent-town/endpoint.json`
+      endpointPath = endpointFilePath(await $.env.get('HOME'), await $.env.get('APPDATA'))
       const stored = await $.store.get('enabled')
       enabled = stored !== false
 
@@ -336,7 +335,10 @@ export const register: Register = on => {
       await $.store.set('enabled', enabled)
       if (!enabled) queue = []
     }
-    return { text: statusText(await pluginVersion($)), isTextDisplayOnly: true as const }
+    // Early in a session the outbox may not have looked for the app yet: look now, without
+    // connecting, so the outbox still sends session.open when it connects.
+    const reachable = endpoint !== undefined || (!refused && (await readEndpoint($)) !== undefined)
+    return { text: statusText(await pluginVersion($), reachable), isTextDisplayOnly: true as const }
   }).catch(passOn)
 
   on('session.end', async ($, e, next) => {

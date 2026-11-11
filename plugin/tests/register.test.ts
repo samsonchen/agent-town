@@ -12,7 +12,8 @@ function world(on: any) {
   mock.store(on)
   const posted: Posted[] = []
   on('session.id', () => ({ value: 'session-1' }))
-  on('env.get', () => ({ value: '/home/test' }))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  on('env.get', (_: any, e: any) => ({ value: e.name === 'HOME' ? '/home/test' : undefined }))
   on('session.repo', () => ({ value: { root: '/work/town', remote: 'github.com/example/town' } }))
   on('session.root', () => ({ value: '/work/town' }))
   on('settings.read', () => ({ value: {} }))

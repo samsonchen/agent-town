@@ -5,9 +5,9 @@ Open items as of 2026-11-11, for the next session to pick up. Everything listed 
 ## Where things stand
 
 - Work is committed on `main`.
-- Version 1.0.1 (plugin and app share it). town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
+- Version 1.0.2 (plugin and app share it). town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
 - After a change: raise the version in `plugin/.claude-plugin/plugin.json` and `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push. Then the user runs `app/macos/scripts/release.sh --publish` (auto mode refuses to publish a release): it publishes the release, checks the uploaded `.dmg`'s checksum, and commits and pushes the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town`.
-- Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (49 tests). App checks: `swift build` and `swift test` in `app/macos` (27 tests).
+- Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (52 tests). App checks: `swift build` and `swift test` in `app/macos` (27 tests).
 - Two Swift warnings in the release build, harmless: `TownScene+Staff.swift:89` (a weak self inside a strong one) and `TownView.swift:489` (a non-Sendable observer closure). Clean up when convenient.
 
 ## 1. Check on a personal (non-Team) account
@@ -51,7 +51,7 @@ From `docs/roadmap.md` and `docs/spec.md`:
 - [x] Staff talking to each other directly (scene 16), checked 2026-11-11 with two background subagents, Legal and Accounting, messaging each other with SendMessage: the sender walks to the receiver's desk, with no Chief of Staff in between.
 - [x] Operators stuck in the server room after a subagent's background task ended (fixed in 0.2.7–0.2.8, checked 2026-11-11). The task's notification goes to the subagent, not the main conversation. town-link now also ends a task from `session.receive`, from `TaskStop`, and when the subagent that started it has finished (`$.agent.list()` every 5 s). The server room has a "Server room" (「機房」) label.
 - [x] Stay on top (menu bar toggle), Opacity (Settings, 10%–100%), and clicking the floor to walk the CEO there or the CEO's desk to send the CEO back (0.3.0, 2026-11-11). Checked by tests and a demo window (floating level and alpha read back); clicking tried by hand in the installed app (1.0.1).
-- [ ] Several sessions in one project block: desks and phones, up to four.
+- [ ] Several sessions in one project block: desks and phones, up to five (the back row's desk spots; a sixth stands on the first desk's spot, a known limit in the README).
 - [ ] Settings for window size and bench size.
 - [ ] Zoom, for many project blocks. Blocks are now one column, the window grows up to the screen height, and a taller office scrolls.
 - [ ] Phase 3 leftovers: props in hand, more idle life on the bench, workflow subagents reporting to the coordinator, and name tags that move apart when characters stand close together.
@@ -77,16 +77,16 @@ From `docs/roadmap.md` and `docs/spec.md`:
 
 A Windows version of the app is planned: Windows 11 on x64, with ARM64 as a nice-to-have. The stack is not chosen yet; Godot 4 (C#) is the lead candidate. The items below are the groundwork that needs the Mac (`swift build` and `swift test`, the release script) or is best done there. Verifying the plugin on Windows itself (that the mod loads, that `$.http.fetch` reaches `127.0.0.1`, and what `$.env` and `$.session.root()` return) is done later on a Windows machine, not here.
 
-### town-link: make it work on Windows (do these first, in one plugin release)
+### town-link: make it work on Windows (done in 1.0.2, 2026-11-11; still to try on a Windows machine)
 
-- [ ] **Endpoint path** (`plugin/hooks/register.ts:273–274`). It is built only for macOS from `HOME`, which is often unset on Windows. On Windows read `%APPDATA%\agent-town\endpoint.json`, the path `docs/protocol.md` already names. Find in the installed `claude-code.d.ts` how a mod learns the OS (or fall back to `APPDATA` being set with no `HOME`), and keep the macOS path unchanged.
-- [ ] **Privacy bug: the project name on Windows** (`plugin/hooks/core.ts:167,171`, `projectIdentity`). The name is cut with `split('/')`, so a Windows root such as `C:\Users\me\code\agent-town` with no remote is sent whole as `projectName`. `docs/architecture.md` promises the full path is never sent. Split on both `/` and `\`, and strip a trailing `\` as well as `/`.
-- [ ] **One block per project on Windows.** Before hashing a Windows root into `projectId`, normalize it (backslashes to `/`, lowercase drive letter), so `C:\x` and `c:/x` from different surfaces land in the same block.
-- [ ] **Desk-worker roles from Windows paths** (`core.ts:72`, `fileRole`). The `Dockerfile` and `.github/workflows/` checks fail on backslash paths. Normalize the separators first. Extensions already work.
-- [ ] **Tests**: add Windows-path cases for `projectIdentity` and `fileRole` to `plugin/tests/core.test.ts` (no remote, trailing separator, drive-letter case, a workflow file, a Dockerfile).
-- [ ] **Windows commands in the background-role rules** (`catalog/roles.json`): build words `dotnet build`, `msbuild`; test words `dotnet test`; install words `winget install`, `choco install`, `Invoke-WebRequest`. Then run `tools/build-plugin-catalog.py` (and `--check`).
-- [ ] **Docs**: in `docs/protocol.md`, say how the endpoint file is protected on Windows, where mode 0600 does not apply (the file sits in the user's own `%APPDATA%`, which only that user can read by default). In `docs/architecture.md`, note that paths are normalized before hashing and naming.
-- [ ] Raise the version in `plugin/.claude-plugin/plugin.json` and `AppInfo.fallbackVersion`, run the plugin checks, commit and push. The user releases.
+- [x] **Endpoint path** (`plugin/hooks/register.ts:273–274`). It is built only for macOS from `HOME`, which is often unset on Windows. On Windows read `%APPDATA%\agent-town\endpoint.json`, the path `docs/protocol.md` already names. Find in the installed `claude-code.d.ts` how a mod learns the OS (or fall back to `APPDATA` being set with no `HOME`), and keep the macOS path unchanged. Done: `endpointFilePath` in `core.ts` uses `%APPDATA%\agent-town\endpoint.json` when `APPDATA` is set (a mod can't ask for the OS; macOS never sets it). `/town` now also looks for the app itself, so early in a session it no longer says the app is not running.
+- [x] **Privacy bug: the project name on Windows** (`plugin/hooks/core.ts:167,171`, `projectIdentity`). The name is cut with `split('/')`, so a Windows root such as `C:\Users\me\code\agent-town` with no remote is sent whole as `projectName`. `docs/architecture.md` promises the full path is never sent. Split on both `/` and `\`, and strip a trailing `\` as well as `/`.
+- [x] **One block per project on Windows.** Before hashing a Windows root into `projectId`, normalize it (backslashes to `/`, lowercase drive letter), so `C:\x` and `c:/x` from different surfaces land in the same block.
+- [x] **Desk-worker roles from Windows paths** (`core.ts:72`, `fileRole`). The `Dockerfile` and `.github/workflows/` checks fail on backslash paths. Normalize the separators first. Extensions already work.
+- [x] **Tests**: add Windows-path cases for `projectIdentity` and `fileRole` to `plugin/tests/core.test.ts` (no remote, trailing separator, drive-letter case, a workflow file, a Dockerfile).
+- [x] **Windows commands in the background-role rules** (`catalog/roles.json`): build words `dotnet build`, `msbuild`; test words `dotnet test`; install words `winget install`, `choco install`, `Invoke-WebRequest`. Then run `tools/build-plugin-catalog.py` (and `--check`).
+- [x] **Docs**: in `docs/protocol.md`, say how the endpoint file is protected on Windows, where mode 0600 does not apply (the file sits in the user's own `%APPDATA%`, which only that user can read by default). In `docs/architecture.md`, note that paths are normalized before hashing and naming.
+- [x] Raise the version (1.0.2), run the plugin checks, commit and push. The user releases.
 
 ### Shared material a second app needs
 

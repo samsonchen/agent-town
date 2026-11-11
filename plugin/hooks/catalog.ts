@@ -6,10 +6,10 @@ export const BACKGROUND_ROLES: readonly string[] = ["build-operator", "test-runn
 export const BACKGROUND_FALLBACK = "background-worker"
 /** Shell-command word rules, checked in this order. */
 export const BACKGROUND_RULES: readonly (readonly [string, readonly string[]])[] = [
-  ["build-operator", ["build", "make", "compile", "docker build", "cargo build", "xcodebuild"]],
-  ["test-runner", ["test", "pytest", "jest", "vitest", "go test"]],
+  ["build-operator", ["build", "make", "compile", "docker build", "cargo build", "xcodebuild", "msbuild", "dotnet build"]],
+  ["test-runner", ["test", "pytest", "jest", "vitest", "go test", "dotnet test"]],
   ["server-operator", ["dev", "serve", "start", "watch", "run server"]],
-  ["install-operator", ["npm install", "pnpm add", "pip install", "brew install", "download", "curl -O"]],
+  ["install-operator", ["npm install", "pnpm add", "pip install", "brew install", "download", "curl -O", "winget install", "choco install", "Invoke-WebRequest"]],
   ["deploy-operator", ["deploy", "release", "publish"]],
 ]
 export const TASK_TYPES: readonly string[] = ["coding", "debugging", "refactoring", "testing", "code-review", "devops", "security", "data", "research", "writing", "docs", "translation", "design", "planning", "slides", "spreadsheet", "legal", "finance", "marketing", "question", "general"]

@@ -4,7 +4,7 @@
 // (docs/verification.md).
 
 import { describe, expect, test } from 'claude-code/testing'
-import { Town, cleanTitle, fileRole, DESK_MAX, TITLE_MAX, activityKind, parseNotifications, projectIdentity, shellRole, taskStatus, APPROVAL_DELAY_MS, HOLD_MS } from '../hooks/core'
+import { Town, cleanTitle, endpointFilePath, fileRole, DESK_MAX, TITLE_MAX, activityKind, parseNotifications, projectIdentity, shellRole, taskStatus, APPROVAL_DELAY_MS, HOLD_MS } from '../hooks/core'
 
 const ids = () => {
   let n = 0
@@ -32,6 +32,13 @@ describe('helpers', () => {
     expect(shellRole('npm run dev')).toBe('server-operator')
     expect(shellRole('pip install requests')).toBe('install-operator')
     expect(shellRole('./deploy.sh prod')).toBe('deploy-operator')
+    // Windows commands.
+    expect(shellRole('msbuild App.sln')).toBe('build-operator')
+    expect(shellRole('dotnet build')).toBe('build-operator')
+    expect(shellRole('dotnet test')).toBe('test-runner')
+    expect(shellRole('winget install Git.Git')).toBe('install-operator')
+    expect(shellRole('choco install nodejs')).toBe('install-operator')
+    expect(shellRole('Invoke-WebRequest https://example.com/a.zip -OutFile a.zip')).toBe('install-operator')
     expect(shellRole('git log --latest')).toBe(undefined)
     expect(shellRole('sleep 3; echo done')).toBe(undefined)
   })
@@ -50,6 +57,21 @@ describe('helpers', () => {
     expect(projectIdentity('git@github.com:samsonchen/agent-town.git', '/x')).toEqual({ identity: 'github.com/samsonchen/agent-town', name: 'agent-town' })
     expect(projectIdentity('https://user:secret@example.com/a/b/', '/x').identity).toBe('example.com/a/b')
     expect(projectIdentity(null, '/Users/me/work/site/')).toEqual({ identity: '/Users/me/work/site', name: 'site' })
+  })
+
+  test('project identity from a Windows root', () => {
+    // No remote: only the folder name is the name, never the whole path.
+    expect(projectIdentity(null, 'C:\\Users\\me\\code\\agent-town')).toEqual({ identity: 'c:/Users/me/code/agent-town', name: 'agent-town' })
+    expect(projectIdentity(null, 'C:\\Users\\me\\code\\agent-town\\').name).toBe('agent-town')
+    // The same folder from two surfaces is one project.
+    expect(projectIdentity(null, 'C:\\Users\\me\\site').identity).toBe(projectIdentity(null, 'c:/Users/me/site').identity)
+    expect(projectIdentity('https://github.com/me/site.git', 'C:\\Users\\me\\site').name).toBe('site')
+  })
+
+  test('endpoint file path', () => {
+    expect(endpointFilePath('/Users/me', undefined)).toBe('/Users/me/Library/Application Support/agent-town/endpoint.json')
+    expect(endpointFilePath(undefined, 'C:\\Users\\me\\AppData\\Roaming')).toBe('C:\\Users\\me\\AppData\\Roaming\\agent-town\\endpoint.json')
+    expect(endpointFilePath('/c/Users/me', 'C:\\Users\\me\\AppData\\Roaming\\')).toBe('C:\\Users\\me\\AppData\\Roaming\\agent-town\\endpoint.json')
   })
 })
 
@@ -124,6 +146,12 @@ describe('the desk worker', () => {
     expect(fileRole('/a/App.swift')).toBe('swift-engineer')
     expect(fileRole('/a/Dockerfile')).toBe('devops-engineer')
     expect(fileRole('/a/data.json')).toBeUndefined()
+  })
+
+  test('file roles from Windows paths', () => {
+    expect(fileRole('C:\\a\\App.swift')).toBe('swift-engineer')
+    expect(fileRole('C:\\a\\Dockerfile')).toBe('devops-engineer')
+    expect(fileRole('C:\\repo\\.github\\workflows\\ci.yml')).toBe('devops-engineer')
   })
 })
 

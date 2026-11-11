@@ -5,7 +5,7 @@ import SwiftUI
 enum AppInfo {
     /// Used when running from the build folder (swift run), which has no Info.plist.
     /// Keep it the same as the town-link plugin's version.
-    static let fallbackVersion = "1.0.1"
+    static let fallbackVersion = "1.0.2"
 
     static var version: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? fallbackVersion

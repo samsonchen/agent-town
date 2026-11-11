@@ -154,10 +154,10 @@ Most background tasks can be given a role without a model call:
 |---|---|
 | `Monitor` | `log-monitor` |
 | `Workflow` | `workflow-coordinator` |
-| Shell command matching build words (`build`, `make`, `compile`, `docker build`, `cargo build`, `xcodebuild`) | `build-operator` |
-| Shell command matching test words (`test`, `pytest`, `jest`, `vitest`, `go test`) | `test-runner` |
+| Shell command matching build words (`build`, `make`, `compile`, `docker build`, `cargo build`, `xcodebuild`, `msbuild`, `dotnet build`) | `build-operator` |
+| Shell command matching test words (`test`, `pytest`, `jest`, `vitest`, `go test`, `dotnet test`) | `test-runner` |
 | Shell command matching server words (`dev`, `serve`, `start`, `watch`, `run server`) | `server-operator` |
-| Shell command matching install words (`npm install`, `pnpm add`, `pip install`, `brew install`, `download`, `curl -O`) | `install-operator` |
+| Shell command matching install words (`npm install`, `pnpm add`, `pip install`, `brew install`, `download`, `curl -O`, `winget install`, `choco install`, `Invoke-WebRequest`) | `install-operator` |
 | Shell command matching deploy words (`deploy`, `release`, `publish`) | `deploy-operator` |
 | Anything else | Classify with the background role IDs as labels; fallback `background-worker` |
 
@@ -168,9 +168,9 @@ The word lists live in `catalog/roles.json` with each background role, so they c
 The office block is keyed by the project:
 
 1. `$.session.repo()`, when it returns a repository with a `remote`: use the remote URL, normalized (no scheme, no credentials, no `.git`).
-2. Otherwise the repository `root`, or `$.session.root()` when there is no repository: use the absolute path.
+2. Otherwise the repository `root`, or `$.session.root()` when there is no repository: use the absolute path. A Windows path is normalized first (backslashes become `/`, the drive letter is lowercased), so `C:\x` and `c:/x` from different surfaces are one project.
 
-`projectId` is a hash of that value. The display name is the last path part of the remote, or the folder name of the root. (`repo().name` is only filled for some internal repositories, so it is not used.) The full path is not sent.
+`projectId` is a hash of that value. The display name is the last path part of the remote, or the folder name of the root (split on `/` or `\`). (`repo().name` is only filled for some internal repositories, so it is not used.) The full path is not sent.
 
 ### Classification
 

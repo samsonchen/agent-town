@@ -46,8 +46,12 @@ The app writes this file when its server starts and deletes it on quit (only if 
 | Platform | Path |
 |---|---|
 | macOS | `~/Library/Application Support/agent-town/endpoint.json` |
-| Windows | `%APPDATA%\agent-town\endpoint.json` (future) |
+| Windows | `%APPDATA%\agent-town\endpoint.json` (the Windows app is future; town-link already looks here) |
 | Linux | `$XDG_STATE_HOME/agent-town/endpoint.json` (future) |
+
+A mod cannot ask Claude Code for the OS, so town-link uses the Windows path when `APPDATA` is set, which macOS never sets, and the macOS path otherwise.
+
+On Windows, mode 0600 does not apply. The file is protected by where it is: `%APPDATA%` is in the user's own profile, which by default only that user (and administrators) can read. The Windows app should not loosen the folder's permissions.
 
 ## Event envelope
 

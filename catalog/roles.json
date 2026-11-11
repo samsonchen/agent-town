@@ -1256,7 +1256,9 @@
           "compile",
           "docker build",
           "cargo build",
-          "xcodebuild"
+          "xcodebuild",
+          "msbuild",
+          "dotnet build"
         ]
       }
     },
@@ -1276,7 +1278,8 @@
           "pytest",
           "jest",
           "vitest",
-          "go test"
+          "go test",
+          "dotnet test"
         ]
       }
     },
@@ -1333,7 +1336,10 @@
           "pip install",
           "brew install",
           "download",
-          "curl -O"
+          "curl -O",
+          "winget install",
+          "choco install",
+          "Invoke-WebRequest"
         ]
       }
     },

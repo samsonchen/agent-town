@@ -69,6 +69,7 @@ const EXT_ROLES: Record<string, string> = {
 /** The staff role a file suggests, by its extension (or name, for a Dockerfile). */
 export function fileRole(path: string | undefined): string | undefined {
   if (!path) return undefined
+  path = slashPath(path)
   const name = path.split('/').pop() ?? ''
   if (/^Dockerfile/i.test(name) || /(^|\/)\.github\/workflows\//.test(path)) return 'devops-engineer'
   const ext = /\.([A-Za-z0-9]+)$/.exec(name)?.[1]?.toLowerCase()
@@ -156,8 +157,27 @@ export function taskStatus(s: string): 'completed' | 'failed' | 'killed' {
   return 'completed'
 }
 
+/**
+ * Where the app writes its endpoint file (docs/protocol.md): `%APPDATA%\\agent-town\\endpoint.json`
+ * on Windows, else `~/Library/Application Support/agent-town/endpoint.json` on macOS. A mod cannot
+ * ask for the OS, so `APPDATA` being set is taken to mean Windows; macOS does not set it.
+ */
+export function endpointFilePath(home: string | undefined, appData: string | undefined): string {
+  if (appData) return `${appData.replace(/[\\/]+$/, '')}\\agent-town\\endpoint.json`
+  return `${home ?? ''}/Library/Application Support/agent-town/endpoint.json`
+}
+
+/**
+ * A path with `/` separators: Windows backslashes become `/`, and a drive letter is lowercased,
+ * so `C:\\x` and `c:/x` name the same folder. POSIX paths are unchanged.
+ */
+export function slashPath(path: string): string {
+  return path.replace(/\\/g, '/').replace(/^([A-Za-z]):/, (_, d: string) => `${d.toLowerCase()}:`)
+}
+
 /** The project identity: a normalized remote URL, else the root path. */
 export function projectIdentity(remote: string | null | undefined, root: string): { identity: string; name: string } {
+  root = slashPath(root)
   if (remote) {
     let r = remote.trim()
     const scp = /^[^@/]+@([^:/]+):(.+)$/.exec(r) // git@host:owner/repo
