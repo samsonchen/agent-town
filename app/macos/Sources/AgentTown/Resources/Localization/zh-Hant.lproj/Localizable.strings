@@ -16,6 +16,7 @@
 "Available in the installed app only." = "僅限安裝後的 app 使用。";
 "Allow agent-town in System Settings → General → Login Items." = "請在「系統設定」→「一般」→「登入項目」中允許 agent-town。";
 "macOS did not allow it: %@" = "macOS 不允許此設定：%@";
+"Opacity" = "不透明度";
 "Quit agent-town" = "結束 agent-town";
 "Close" = "關閉";
 

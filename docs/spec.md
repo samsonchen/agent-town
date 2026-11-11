@@ -204,6 +204,7 @@ These choices, and the settings below, are kept when the app or the Mac restarts
 - Ticket text: full, or task type only
 - Model badges: show or hide
 - Open at login (built): a login item macOS manages, also listed in System Settings → General → Login Items. Available in the installed `.app` only, not when run with `swift run`.
+- Opacity (built): a slider from 10% to 100% (default 100%, opaque) that shows its value as a percentage. It sets the office window's opacity, live while dragging; the Settings and About windows stay opaque. The minimum is 10% so the window never vanishes (Show agent-town hides it), and a stored value outside 10%–100% is brought back into that range.
 
 ## Where it works
 

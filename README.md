@@ -113,7 +113,7 @@ A strip across the top, with three people at their desks:
 
 - You hear a sound when a ticket arrives, when work is done, and when Claude Code needs your approval, even with the window hidden.
 - The menu bar menu has About, Show agent-town, Stay on top, Sound, Show tips, Settings… and Quit. Stay on top keeps the office window above other apps' windows, even when another app is in front. Your choices are kept across restarts, and the window opens where you left it.
-- Settings has the language (English or Traditional Chinese, following macOS by default) and Open at login.
+- Settings has the language (English or Traditional Chinese, following macOS by default), Open at login, and Opacity (10% to 100%) for the office window.
 
 ## 4. Known issues and limitations
 
