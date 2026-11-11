@@ -11,6 +11,8 @@ struct TownView: View {
     @AppStorage(Prefs.showTips) private var showTips = true
     /// The window this view is in, to grow it when a block is added.
     @State private var window: NSWindow?
+    /// The window's opacity from Settings; applied to this window only.
+    @AppStorage(Prefs.opacity) private var opacity = 1.0
 
     /// The office is shown at this size when it fits, and never smaller than `minPixelsPerMeter`.
     static let pixelsPerMeter: CGFloat = 110
@@ -122,9 +124,12 @@ struct TownView: View {
                 projector(geo.size).apply(to: camera)
             }
             .onChange(of: scene.ceoSpot) { _, spot in follow(spot, size: geo.size) }
+            .onChange(of: opacity) { _, v in window?.alphaValue = Prefs.clampOpacity(v) } // live while the slider moves
             .overlay(alignment: .bottomLeading) { tip.padding([.leading, .bottom], 12) } // clear of the context bar under a block
             .background(WindowReader { w in
-                guard let w, w !== window else { return }
+                guard let w else { return }
+                w.alphaValue = Prefs.clampOpacity(opacity) // also when the window opens or is made again
+                guard w !== window else { return }
                 window = w
                 WindowPlace.restore(w)
                 fitWindow(in: w) // sessions already open when the window opens

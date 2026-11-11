@@ -15,6 +15,17 @@ enum Prefs {
     static let language = "language"
     /// The office window's frame in screen coordinates, as NSStringFromRect writes it.
     static let windowFrame = "windowFrame"
+    /// The office window's opacity, 0.1 to 1. Default 1 (opaque).
+    static let opacity = "opacity"
+
+    /// The office window never goes below 10%, so it can't vanish; hiding it is in the menu.
+    static let opacityRange: ClosedRange<Double> = 0.1...1
+
+    /// A stored opacity made safe to use: anything outside 0.1...1, or not a number, is brought in.
+    static func clampOpacity(_ v: Double) -> Double {
+        guard v.isFinite else { return opacityRange.upperBound }
+        return min(opacityRange.upperBound, max(opacityRange.lowerBound, v))
+    }
 
     static func isOn(_ key: String) -> Bool {
         let d = UserDefaults.standard
@@ -81,9 +92,10 @@ struct TownMenu: View {
     }
 }
 
-/// Settings. Language is the only one for now; more come later.
+/// Settings: Open at login, the language, and the office window's opacity.
 struct SettingsView: View {
     @AppStorage(Prefs.language) private var language = ""
+    @AppStorage(Prefs.opacity) private var opacity = 1.0
     @State private var openAtLogin = LoginItem.isOn
     @State private var loginNote: String?
 
@@ -109,6 +121,16 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                     Spacer()
                     Button(Labels.text("Restart now")) { Prefs.relaunch() }
+                }
+            }
+            LabeledContent(Labels.text("Opacity")) {
+                HStack {
+                    Slider(value: Binding(get: { Prefs.clampOpacity(opacity) }, set: { opacity = Prefs.clampOpacity($0) }),
+                           in: Prefs.opacityRange)
+                        .labelsHidden()
+                    Text(Prefs.clampOpacity(opacity), format: .percent.precision(.fractionLength(0)))
+                        .monospacedDigit()
+                        .frame(width: 44, alignment: .trailing)
                 }
             }
         }
