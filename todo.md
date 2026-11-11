@@ -50,7 +50,7 @@ From `docs/roadmap.md` and `docs/spec.md`:
 - [x] The Inspector stopping a returned report at reception (scene 15), `TownScene+Inspector.swift`, checked 2026-11-11 with a test Stop hook.
 - [x] Staff talking to each other directly (scene 16), checked 2026-11-11 with two background subagents, Legal and Accounting, messaging each other with SendMessage: the sender walks to the receiver's desk, with no Chief of Staff in between.
 - [x] Operators stuck in the server room after a subagent's background task ended (fixed in 0.2.7–0.2.8, checked 2026-11-11). The task's notification goes to the subagent, not the main conversation. town-link now also ends a task from `session.receive`, from `TaskStop`, and when the subagent that started it has finished (`$.agent.list()` every 5 s). The server room has a "Server room" (「機房」) label.
-- [x] Stay on top (menu bar toggle), Opacity (Settings, 10%–100%), and clicking the floor to walk the CEO there or the CEO's desk to send the CEO back (0.3.0, 2026-11-11). Checked by tests and a demo window (floating level and alpha read back); clicking in the live app still to be tried by hand.
+- [x] Stay on top (menu bar toggle), Opacity (Settings, 10%–100%), and clicking the floor to walk the CEO there or the CEO's desk to send the CEO back (0.3.0, 2026-11-11). Checked by tests and a demo window (floating level and alpha read back); clicking tried by hand in the installed app (1.0.1).
 - [ ] Several sessions in one project block: desks and phones, up to four.
 - [ ] Settings for window size and bench size.
 - [ ] Zoom, for many project blocks. Blocks are now one column, the window grows up to the screen height, and a taller office scrolls.
