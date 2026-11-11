@@ -13,4 +13,4 @@ The Windows version of the agent-town app, planned and in progress. It draws the
 
 ## Status
 
-W0 (verify before building) is nearly done. town-link works on Windows, and the Godot checks passed except two: hiding the taskbar button needs a small native add-on (a decision is open), and the ARM64 build has not been run on an ARM machine yet. See [roadmap.md](roadmap.md).
+W0 (verify before building) is nearly done. town-link works on Windows, and the Godot checks passed, and the native add-on that keeps the window off the taskbar works. What is left: town-link in interactive sessions, and running the ARM64 build on an ARM machine. See [roadmap.md](roadmap.md).

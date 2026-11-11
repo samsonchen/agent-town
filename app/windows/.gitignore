@@ -1,0 +1,8 @@
+.godot/
+/build/
+native/.sconsign*.dblite
+native/src/*.obj
+native/godot-cpp/bin/
+*.exp
+*.lib
+addons/*/bin/~*

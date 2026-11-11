@@ -8,7 +8,7 @@ Godot 4.7.2 (4.4 or later works), typed GDScript, in `app/windows/`. Scope: [spe
 - [ ] town-link in an interactive terminal session, the Desktop app's Code tab and VS Code on Windows
 - [x] Godot: a Kenney GLB character imported with its animation clips, its shirt recolored at run time, drawn by an orthographic camera tilted 62°
 - [x] Godot: a tray icon (`StatusIndicator`) with a menu
-- [ ] No taskbar button, and closing the window hides it: impossible in GDScript (Godot cannot hide its main window). Works with the Windows tool-window style and `ShowWindow`, so it needs a small native add-on (a GDExtension of one C++ file, built for x64 and ARM64). **Decision for the user:** build that add-on, or accept a taskbar button while the window is open
+- [x] No taskbar button, and the window hidden and shown again: the native add-on TownWindow (`app/windows/native/`), built for x64 and ARM64. It keeps the button away even when Godot rebuilds the window's style (stay on top, a title change)
 - [x] Godot: stay on top, and whole-window opacity from 10% to 100%
 - [x] Godot: a `TCPServer` on 127.0.0.1 answering a town-link batch with 204
 - [x] Godot: a WAV from `C:\Windows\Media` loaded at run time (still to hear it played)

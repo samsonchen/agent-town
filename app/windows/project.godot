@@ -1,0 +1,19 @@
+; agent-town for Windows. See docs/windows/.
+
+config_version=5
+
+[application]
+
+config/name="agent-town"
+run/main_scene="res://dev/taskbar_check.tscn"
+config/features=PackedStringArray("4.7")
+
+[display]
+
+window/size/viewport_width=900
+window/size/viewport_height=600
+window/per_pixel_transparency/allowed=true
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"

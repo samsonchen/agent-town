@@ -1,0 +1,11 @@
+[configuration]
+
+entry_symbol = "town_window_init"
+compatibility_minimum = "4.4"
+
+[libraries]
+
+windows.debug.x86_64 = "res://addons/town_window/bin/town_window.windows.template_release.x86_64.dll"
+windows.release.x86_64 = "res://addons/town_window/bin/town_window.windows.template_release.x86_64.dll"
+windows.debug.arm64 = "res://addons/town_window/bin/town_window.windows.template_release.arm64.dll"
+windows.release.arm64 = "res://addons/town_window/bin/town_window.windows.template_release.arm64.dll"

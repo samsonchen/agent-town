@@ -1,0 +1,3 @@
+[submodule "app/windows/native/godot-cpp"]
+	path = app/windows/native/godot-cpp
+	url = https://github.com/godotengine/godot-cpp.git
