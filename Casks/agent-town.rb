@@ -24,10 +24,6 @@ cask "agent-town" do
   ]
 
   caveats <<~EOS
-    agent-town is not signed yet, so macOS blocks it the first time it opens.
-    Open System Settings → Privacy & Security, find the message about AgentTown,
-    and click Open Anyway. This is needed once.
-
     agent-town also needs the town-link plugin in Claude Code:
       claude plugin marketplace add samsonchen/agent-town
       claude plugin install town-link@agent-town

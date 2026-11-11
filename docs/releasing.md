@@ -8,37 +8,31 @@ No secret goes into the repo. The certificate and the notarization login stay in
 
 ## What you need
 
-- A Mac with Xcode installed.
-- An Apple ID in the developer team (Apple Developer Program), with permission to create a Developer ID certificate. The team's Account Holder has it, and can give it to an Admin.
+- A Mac with Xcode installed, to build the app (Part D). It is not needed to create the certificate.
+- An Apple ID in the developer team (Apple Developer Program), with access to the developer website. Creating a Developer ID certificate needs the Account Holder, or an Admin the Account Holder has given the permission; otherwise the Account Holder issues it from your request (Part A).
 - The GitHub CLI (`gh`), signed in, for publishing.
 
-## Part A: Create the certificate in Xcode
+## Part A: Create the certificate on the developer website
 
-No project needs to be open.
+Xcode is not needed for this step. You make a certificate request on the Mac that will release, the developer website issues the certificate, and you install it on the same Mac.
 
-1. In Xcode, choose **Xcode → Settings…** (⌘,) → **Accounts**.
-2. Click **+** at the bottom left → **Apple Account** → **Continue**, and sign in with the Apple ID in the developer team.
-3. Select the Apple ID, find the team on the right, and click **Manage Certificates…**.
-4. Click the **+** menu at the bottom left → **Developer ID Application**. A new row appears after a few seconds. Click **Done**.
-   - If the **+** menu lists only Apple Development, Apple Distribution and Mac Installer Distribution, your role does not allow Developer ID certificates. Use "If you are not the Account Holder" below instead. Apple also blocks new certificates until the Account Holder has accepted the latest Program License Agreement on the developer website.
-5. Back up the certificate. Its private key exists only on this Mac.
+1. Create a certificate signing request. In Keychain Access, choose **Keychain Access → Certificate Assistant → Request a Certificate From a Certificate Authority…**. Enter your Apple ID email and a name such as `Developer ID`, leave the CA email empty, and select **Saved to disk**. This saves a `.certSigningRequest` file and creates the private key in your **login** keychain. The private key exists only on this Mac.
+2. Issue the certificate:
+   - If you are the Account Holder: go to developer.apple.com/account → **Certificates, Identifiers & Profiles** → **Certificates** → **+**. Under Software, choose **Developer ID Application** and click Continue. If asked for a profile type, choose **G2 Sub-CA**. Upload the `.certSigningRequest` file and download the `.cer`.
+   - If you are not the Account Holder: send the `.certSigningRequest` file to the Account Holder, who does the same and sends you the `.cer`. Nothing secret is sent. Only the Account Holder, or an Admin the Account Holder has given the permission, can create Developer ID certificates.
+   - Apple blocks new certificates until the Account Holder has accepted the latest Program License Agreement on the developer website.
+3. Import the `.cer` into the **login** keychain on the same Mac that made the request, so it pairs with the private key from step 1. Do it on another Mac and signing will not work.
+   - Drag the `.cer` onto **login** in the Keychain Access sidebar, or run `security import <file>.cer -k ~/Library/Keychains/login.keychain-db`.
+   - Double-clicking the `.cer` may put it in the **System** keychain instead. There it has no private key: it is missing from **My Certificates** and cannot be exported as `.p12`. If that happened, delete it from System and import it into login.
+4. Back up the certificate. Its private key exists only on this Mac.
    - Open Keychain Access → **login** keychain → **My Certificates**.
    - Right-click "Developer ID Application: …" → **Export…** → save a `.p12` file with a strong password.
    - Keep it in a password manager or another safe place, never in the repo. A team can have only a few Developer ID certificates.
-6. Check it in Terminal:
+5. Check it in Terminal:
    ```
    security find-identity -v -p codesigning
    ```
    You should see one line like `"Developer ID Application: <Team name> (ABCDE12345)"`. The 10 characters in parentheses are the Team ID, used in Part C.
-
-### If you are not the Account Holder
-
-You make the private key on your Mac; the Account Holder only issues the certificate for it. Nothing secret is sent.
-
-1. In Keychain Access, choose **Keychain Access → Certificate Assistant → Request a Certificate From a Certificate Authority…**. Enter your Apple ID email and a name such as `Developer ID`, leave the CA email empty, and select **Saved to disk**. This saves a `.certSigningRequest` file and creates the private key in your keychain.
-2. Send the `.certSigningRequest` file to the Account Holder.
-3. The Account Holder goes to developer.apple.com → **Certificates, Identifiers & Profiles** → **Certificates** → **+** → **Developer ID Application** (G2 Sub-CA if asked), uploads the file, and downloads the `.cer`.
-4. Double-click the `.cer` they send back. It pairs with your private key. Then continue with step 5 above.
 
 ## Part B: Create an app-specific password
 

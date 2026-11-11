@@ -12,8 +12,8 @@
 # (the Homebrew cask); commit that change after the release.
 #
 # One-time setup on the Mac that releases (no secrets are ever stored in the repo):
-#   1. Xcode > Settings > Accounts: add the Apple Account of the developer team;
-#      Manage Certificates > + > Developer ID Application.
+#   1. A Developer ID Application certificate (with its private key) in the login keychain,
+#      made through the developer website; see docs/releasing.md, Part A.
 #   2. An app-specific password from account.apple.com, saved in the keychain with:
 #      xcrun notarytool store-credentials agent-town-notary --apple-id <email> --team-id <TEAM ID>
 #
