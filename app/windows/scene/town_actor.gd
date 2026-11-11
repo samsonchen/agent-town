@@ -44,6 +44,7 @@ var waiting_since := 0
 var sitting := false
 var has_computer := false ## works at a desk with a computer (types); otherwise writes
 var note: Variant = null
+var since := -1 ## when the current ticket or job started (Time.get_ticks_msec), -1 when none
 
 var _queue: Array[Callable] = []
 var _running := false

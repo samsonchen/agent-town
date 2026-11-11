@@ -188,6 +188,7 @@ func _pick(b: BlockNode, role: Variant, is_operator: bool) -> TownActor:
 func _link(w: TownActor, job: String, b: BlockNode) -> void:
 	w.job = job
 	w.at_work = false
+	w.since = Time.get_ticks_msec()
 	b.jobs[job] = w
 	update_delegating(parse(job)[0])
 
@@ -358,6 +359,7 @@ func _release(w: TownActor, b: BlockNode) -> void:
 	b.staff_slots.erase(w.id)
 	b.console_slots.erase(w.id)
 	w.job = null
+	w.since = -1
 	w.at_work = false
 	w.working = false
 	w.activity = null

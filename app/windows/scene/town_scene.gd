@@ -247,6 +247,7 @@ func _ticket_submitted(p: String, s: String, ticket: Building.Ticket) -> void:
 	if chief == null:
 		return
 	chief.hat = null
+	chief.since = Time.get_ticks_msec()
 	if ticket.origin == "user" or ticket.origin == "schedule":
 		# The CEO (or the Dispatcher, for a schedule) phones the Chief of Staff with the ticket.
 		var issuer: TownActor = actors["dispatcher" if ticket.issuer == Building.DISPATCHER else "ceo"]
@@ -272,6 +273,7 @@ func _ticket_done(p: String, s: String, issuer: String, aborted: bool, play_soun
 		return
 	chief.working = false
 	chief.hat = null
+	chief.since = -1
 	if aborted:
 		# Scene 9: stop working; no report call, no sound.
 		chief.ticket_text = null
@@ -799,6 +801,7 @@ func pick_up(a: TownActor, b: BlockNode, slot: int) -> void:
 ## signs, and the context bars ({"meter": true, "anchor", "row", "fraction", "text"}).
 func label_items() -> Array[Dictionary]:
 	var items: Array[Dictionary] = []
+	var touched := ceo_driver.touched() if ceo_driver != null else null
 	for a: TownActor in actors.values():
 		if not is_instance_valid(a.root) or not a.root.is_inside_tree():
 			continue
@@ -824,6 +827,11 @@ func label_items() -> Array[Dictionary]:
 				lines.append([labels.role(a.role), "faint"])
 		else:
 			lines.append([a.name, "name"])
+		if a == touched:
+			# Touched by the CEO: the character says how its work is going (spec: talking).
+			var kept := lines.filter(func(l: Array) -> bool: return l[1] == "name" or l[1] == "faint")
+			lines = [[Statements.for_actor(self, a), "statement"]]
+			lines.append_array(kept)
 		if not lines.is_empty():
 			items.append({"anchor": a.head(0.04), "lines": lines})
 		if a.phone != null and a.phone.ringing and is_instance_valid(a.phone.device):

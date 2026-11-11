@@ -35,9 +35,9 @@ Godot 4.7.2 (4.4 or later works), typed GDScript, in `app/windows/`. Scope: [spe
 Each feature is confirmed by the user in the running app before the release.
 
 - [x] Walking the CEO with the keys: arrow keys (diagonals too), sliding along furniture; H back to the desk on a path around it; the view following the CEO; the mobile phone away from the desk; the scroll wheel panning the view (checked with key presses through the input path; to confirm by hand)
-- [ ] Walking the CEO with the mouse: clicking the floor or the CEO's desk, clicking a character to walk over and talk
+- [x] Walking the CEO with the mouse: clicking the floor (or into furniture: the nearest free spot) or the CEO's desk, clicking a character or its tags to walk over beside them (checked with clicks through the input path; to confirm by hand)
 - [ ] Back to the desk when all work is done; back into the executive office when the last project block goes
-- [ ] Talking to a character: the statement it gives the CEO about its work
+- [x] Talking to a character: the statement it gives the CEO about its work, in a cream bubble with an orange border (the one clicked, else the nearest within 1.1 m)
 - [ ] The tips at the bottom of the window, and Show tips in the tray menu
 - [ ] The Inspector at reception stopping a returned report, with the "Returned" stamp (scene 15)
 - [ ] The Dispatcher's schedule board with its cards and the projects line (scenes 13 and 14)

@@ -16,6 +16,7 @@ const BACKGROUND := {
 const DARK_TEXT := ["hat", "ticket", "speech", "statement"]
 const METER_BACKGROUND := Color(0.20, 0.24, 0.30, 0.92)
 const CALL_COLOR := Color(0.95, 0.45, 0.15)
+const STATEMENT_WIDTH := 230.0 ## a statement wraps at this width
 
 const SCROLL_SPEED := 28.0 ## pixels per second for a sign that scrolls
 
@@ -130,6 +131,8 @@ func _place_scroller(id: String, text: String, at: Vector2) -> void:
 
 ## Draws one tag centered on x; its bottom at `at.y`, or its center there when `centered`. Returns its height.
 func _draw_tag(at: Vector2, text: String, style: String, centered: bool) -> float:
+	if style == "statement":
+		return _draw_statement(at, text)
 	var size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE)
 	var pad := Vector2(5, 2)
 	var rect := Rect2(Vector2(at.x - size.x / 2.0 - pad.x, at.y - size.y - 2.0 * pad.y), size + 2.0 * pad)
@@ -140,6 +143,26 @@ func _draw_tag(at: Vector2, text: String, style: String, centered: bool) -> floa
 	var color := Color.BLACK if style in DARK_TEXT else Color.WHITE
 	draw_string(font, rect.position + Vector2(pad.x, pad.y + font.get_ascent(FONT_SIZE)), text, HORIZONTAL_ALIGNMENT_LEFT, -1,
 		FONT_SIZE, color)
+	return rect.size.y
+
+
+## What a character tells the CEO: wrapped at STATEMENT_WIDTH, on cream with an orange border,
+## centered on x with its bottom at `at.y`. Returns its height.
+func _draw_statement(at: Vector2, text: String) -> float:
+	var one_line := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE).x + 1.0
+	var w := minf(STATEMENT_WIDTH, one_line)
+	var size := font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, w, FONT_SIZE)
+	var pad := Vector2(7, 5)
+	var rect := Rect2(Vector2(at.x - w / 2.0 - pad.x, at.y - size.y - 2.0 * pad.y), Vector2(w, size.y) + 2.0 * pad).abs()
+	rect.position = rect.position.round()
+	if not _boxes.has("statement"):
+		var box := _rounded(BACKGROUND["statement"], 6)
+		box.border_color = CALL_COLOR
+		box.set_border_width_all(2)
+		_boxes["statement"] = box
+	draw_style_box(_boxes["statement"], rect)
+	draw_multiline_string(font, rect.position + Vector2(pad.x, pad.y + font.get_ascent(FONT_SIZE)), text, HORIZONTAL_ALIGNMENT_LEFT,
+		w, FONT_SIZE, -1, Color.BLACK)
 	return rect.size.y
 
 

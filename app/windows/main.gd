@@ -7,7 +7,7 @@ extends Node
 ## (port of app/macos/Sources/AgentTown/Demo.swift):
 ##   godot --path app/windows -- --demo ../../protocol/fixtures/01-basic-ticket.json [--speed N]
 ##         [--snapshot out.png --at SECONDS[,SECONDS…]] [--language en|zh-Hant] [--open settings|about]
-##         [--keys "down:1.5,right:1,h"]
+##         [--keys "down:1.5,right:1,h"] [--clicks "95:270@2,300:500@6"]
 ## Gaps between events keep their timing, each capped at 4 s and divided by `--speed`.
 
 const PIXELS_PER_METER := 110.0 ## the office is shown at this size when it fits
@@ -48,6 +48,7 @@ func _ready() -> void:
 	add_child(_office)
 	_view.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_view.stretch = true
+	_view.mouse_filter = Control.MOUSE_FILTER_IGNORE # clicks reach _unhandled_input, for the CEO
 	_office.add_child(_view)
 	var sub := SubViewport.new()
 	_view.add_child(sub)
@@ -95,6 +96,8 @@ func _ready() -> void:
 		store.start(version)
 	if _args.has("keys"):
 		_press_keys(_args["keys"])
+	if _args.has("clicks"):
+		_click_at(_args["clicks"])
 	if _args.has("snapshot"):
 		_snapshot_later(_args["snapshot"], _args.get("at", "3"))
 
@@ -122,6 +125,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		var mb := event as InputEventMouseButton
 		var step := 0.6
 		match mb.button_index:
+			MOUSE_BUTTON_LEFT:
+				scene.ceo_driver.click(mb.position, camera)
 			MOUSE_BUTTON_WHEEL_UP:
 				_pan_by(Vector2(-step, 0) if mb.shift_pressed else Vector2(0, -step))
 			MOUSE_BUTTON_WHEEL_DOWN:
@@ -356,6 +361,25 @@ func _press_keys(spec: String) -> void:
 			if pressed:
 				await get_tree().create_timer(hold).timeout
 		await get_tree().create_timer(0.2).timeout
+
+
+## `--clicks "95:270@2,300:500@6"` clicks the left mouse button at window pixels x:y at each time
+## in seconds, through the normal input path, for checking the CEO.
+func _click_at(spec: String) -> void:
+	var elapsed := 0.0
+	for item: String in spec.split(","):
+		var at := item.split("@")
+		var xy := at[0].split(":")
+		var t := float(at[1]) if at.size() > 1 else elapsed + 1.0
+		await get_tree().create_timer(maxf(0.0, t - elapsed)).timeout
+		elapsed = t
+		for pressed: bool in [true, false]:
+			var e := InputEventMouseButton.new()
+			e.button_index = MOUSE_BUTTON_LEFT
+			e.position = Vector2(float(xy[0]), float(xy[1]))
+			e.global_position = e.position
+			e.pressed = pressed
+			Input.parse_input_event(e)
 
 
 ## `--at` may list several times ("6,12,21"): each writes out-1.png, out-2.png …; the last quits.

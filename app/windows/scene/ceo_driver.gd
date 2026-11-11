@@ -23,6 +23,7 @@ var _trip: Array[Vector2] = [] ## points still to walk to, on the office floor
 var _arrived := Callable()
 var _stalls := 0
 var _moving := false
+var _visitee: TownActor = null ## the character the user clicked; the CEO talks to them once there
 
 
 func _init(p_scene: TownScene) -> void:
@@ -44,6 +45,7 @@ func key(code: int, pressed: bool) -> bool:
 	if pressed:
 		_held[code] = true
 		_trip.clear() # the user takes over from a walk home
+		_visitee = null
 	else:
 		_held.erase(code)
 	return true
@@ -197,6 +199,7 @@ func sync_phone() -> void:
 func send_home() -> void:
 	if not away or not _held.is_empty():
 		return
+	_visitee = null
 	walk_to(Layout.CEO_HOME + _exec_origin())
 
 
@@ -226,12 +229,16 @@ func make_mobile() -> void:
 	mobile.tag_lift = -0.22 # below the face, by the hand
 
 
-## The character the CEO is touching: the nearest one within reach, while the CEO is away.
+## The character the CEO is touching: the one clicked, once within reach, else the nearest one
+## within reach, while the CEO is away.
 func touched() -> TownActor:
 	var c := ceo()
 	if c == null or not (away or c.steering):
 		return null
 	var at := world_spot(c)
+	if _visitee != null and is_instance_valid(_visitee.root) and _visitee.root.is_inside_tree() \
+			and world_spot(_visitee).distance_to(at) < TOUCH_DISTANCE:
+		return _visitee
 	var best: TownActor = null
 	var best_d := INF
 	for a: TownActor in scene.actors.values():
@@ -242,3 +249,99 @@ func touched() -> TownActor:
 			best = a
 			best_d = d
 	return best
+
+
+# --- Clicks ---------------------------------------------------------------------------------
+
+## A click in the office at `point` (window pixels). On a character, the CEO walks over to them;
+## on the CEO's desk, the CEO goes back to it, as with H; anywhere else on the floor, the CEO walks
+## there. Nothing happens while the arrow keys drive.
+func click(point: Vector2, camera: Camera3D) -> void:
+	var c := ceo()
+	if c == null or not _held.is_empty():
+		return
+	var a := actor_at(point, camera)
+	if a != null:
+		visit(a) # a click on the CEO does nothing
+		return
+	var hit: Variant = floor_at(point, camera)
+	if hit == null:
+		return
+	var spot: Vector2 = hit
+	# The CEO's desk and the spot behind it (a click on the desk top lands on the floor behind it).
+	var o := _exec_origin()
+	var desk := Rect2(Vector2(Layout.CEO_DESK.x - 0.6, 0) + o, Vector2(1.2, Layout.CEO_DESK.y + 0.35))
+	if FloorPlan.inside(spot, desk, 0.0):
+		send_home()
+		return
+	# Off the floor: the nearest point on it; inside furniture: the nearest free spot beside it.
+	var goal: Variant = FloorPlan.free_spot(spot, scene.office_size, scene.world_obstacles(), RADIUS)
+	if goal == null or (goal as Vector2).distance_to(world_spot(c)) <= 0.05:
+		return
+	_visitee = null
+	walk_to(goal)
+
+
+## The spot on the office floor (x, z) drawn at window point `point`, through the tilted camera.
+static func floor_at(point: Vector2, camera: Camera3D) -> Variant:
+	var from := camera.project_ray_origin(point)
+	var dir := camera.project_ray_normal(point)
+	var hit: Variant = Plane(Vector3.UP, Layout.FLOOR_THICKNESS).intersects_ray(from, dir)
+	return Vector2((hit as Vector3).x, (hit as Vector3).z) if hit != null else null
+
+
+## The character drawn under `point`, if any: the body, or the tags just above the head.
+## The one nearest the camera (farthest down the screen) wins.
+func actor_at(point: Vector2, camera: Camera3D) -> TownActor:
+	var best: TownActor = null
+	var best_depth := -INF
+	for a: TownActor in scene.actors.values():
+		if not is_instance_valid(a.root) or not a.root.is_inside_tree():
+			continue
+		var feet := camera.unproject_position(a.root.global_position)
+		var top := camera.unproject_position(a.head(0.0))
+		var half := maxf(14.0, absf(feet.y - top.y) * 0.45)
+		if absf(point.x - feet.x) > half or point.y > feet.y + 6.0 or point.y < top.y - 24.0:
+			continue
+		var depth := world_spot(a).y
+		if depth > best_depth:
+			best = a
+			best_depth = depth
+	return best
+
+
+## A click on a character: the CEO walks to a free spot beside them (across their desk if need
+## be) and turns to them, and they say how their work is going.
+func visit(a: TownActor) -> void:
+	var c := ceo()
+	if c == null or a == c or not _held.is_empty():
+		return
+	var target := world_spot(a)
+	var from := world_spot(c)
+	var rects := scene.world_obstacles()
+	var goal: Variant = null
+	var best := INF
+	for r: float in [0.45, 0.7, 0.95]:
+		for i in 16:
+			var t := float(i) / 16.0 * TAU
+			var p := target + r * Vector2(cos(t), sin(t))
+			if FloorPlan.off_floor(p, scene.office_size, RADIUS) > 0.0:
+				continue
+			var clear := true
+			for rect in rects:
+				if FloorPlan.inside(p, rect, RADIUS):
+					clear = false
+					break
+			var cost := p.distance_to(from) + 2.0 * p.distance_to(target)
+			if clear and cost < best:
+				goal = p
+				best = cost
+	if goal == null:
+		return
+	_visitee = a
+	if from.distance_to(target) < TOUCH_DISTANCE and from.distance_to(goal) < 0.2:
+		scene.face(c, target - from) # already there
+		return
+	walk_to(goal, func() -> void:
+		if is_instance_valid(a.root):
+			scene.face(c, world_spot(a) - world_spot(c)))
