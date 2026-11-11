@@ -8,9 +8,12 @@
   virtual environment in this folder (.venv, git-ignored). Nothing is installed globally.
 
 .EXAMPLE
-  powershell -ExecutionPolicy Bypass -File app\windows\native\build.ps1
-  powershell -ExecutionPolicy Bypass -File app\windows\native\build.ps1 -Arch arm64
-  powershell -ExecutionPolicy Bypass -File app\windows\native\build.ps1 -Check
+  From PowerShell, in the repo folder (the default RemoteSigned policy runs local scripts):
+    .\app\windows\native\build.ps1
+    .\app\windows\native\build.ps1 -Arch arm64
+    .\app\windows\native\build.ps1 -Check
+  From Git Bash or Claude Code's ! prompt: bash app/windows/native/build.sh
+  (In PowerShell, "bash" is usually WSL's, not Git Bash, so use the .ps1 there.)
 #>
 param(
   [ValidateSet('all', 'x86_64', 'arm64')] [string]$Arch = 'all',
