@@ -42,6 +42,9 @@ Requires Claude Code v2.1.287 or later. In a Claude Code session:
 
 ```
 /plugin marketplace add samsonchen/agent-town
+```
+
+```
 /plugin install town-link@agent-town
 ```
 
@@ -49,6 +52,9 @@ Or from a terminal:
 
 ```bash
 claude plugin marketplace add samsonchen/agent-town
+```
+
+```bash
 claude plugin install town-link@agent-town
 ```
 
@@ -58,6 +64,9 @@ Updates are not automatic for this marketplace. To update:
 
 ```bash
 claude plugin marketplace update agent-town
+```
+
+```bash
 claude plugin update town-link@agent-town
 ```
 
@@ -71,6 +80,9 @@ Requires macOS 15 or later. With [Homebrew](https://brew.sh):
 
 ```bash
 brew tap samsonchen/agent-town https://github.com/samsonchen/agent-town
+```
+
+```bash
 brew install --cask samsonchen/agent-town/agent-town
 ```
 

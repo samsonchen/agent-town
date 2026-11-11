@@ -42,6 +42,9 @@ agent-town 在 macOS 上把 Claude Code 的工作畫成一間小辦公室，從�
 
 ```
 /plugin marketplace add samsonchen/agent-town
+```
+
+```
 /plugin install town-link@agent-town
 ```
 
@@ -49,6 +52,9 @@ agent-town 在 macOS 上把 Claude Code 的工作畫成一間小辦公室，從�
 
 ```bash
 claude plugin marketplace add samsonchen/agent-town
+```
+
+```bash
 claude plugin install town-link@agent-town
 ```
 
@@ -58,6 +64,9 @@ claude plugin install town-link@agent-town
 
 ```bash
 claude plugin marketplace update agent-town
+```
+
+```bash
 claude plugin update town-link@agent-town
 ```
 
@@ -71,6 +80,9 @@ claude plugin update town-link@agent-town
 
 ```bash
 brew tap samsonchen/agent-town https://github.com/samsonchen/agent-town
+```
+
+```bash
 brew install --cask samsonchen/agent-town/agent-town
 ```
 
