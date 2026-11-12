@@ -3,7 +3,7 @@ extends Node3D
 ## The office: blocks on one flat floor, furniture and characters, and the choreography that turns
 ## building changes into scenes. Staff, operators and the bench are in staff_director.gd.
 ## Port of app/macos/Sources/AgentTown/TownScene.swift and TownScene+Desks.swift.
-## Still to come: the Dispatcher's board and compaction.
+## The Dispatcher's board and compaction are in board_and_notes.gd.
 
 signal office_resized(size: Vector2)
 signal sound(name: String) ## "dispatch", "approval", "completion"
@@ -19,6 +19,7 @@ var labels: TownLabels
 var assets := TownAssets.new()
 var building: Building ## the store's building, read for names, roles and context
 var staff: StaffDirector
+var notes: BoardAndNotes ## the Dispatcher's board and the compaction notes
 var ceo_driver: CeoDriver ## the CEO under the user's control
 var office_size := Layout.office_size(1)
 var blocks: Dictionary = {} ## id -> BlockNode
@@ -44,6 +45,7 @@ func _init(p_labels: TownLabels, p_building: Building) -> void:
 	labels = p_labels
 	building = p_building
 	staff = StaffDirector.new(self)
+	notes = BoardAndNotes.new(self)
 
 
 func _ready() -> void:
@@ -174,6 +176,14 @@ func _handle(change: Dictionary) -> void:
 					a.awaiting_approval = false
 					if not a.is_busy():
 						a.settle()
+		"scheduleAdded":
+			notes.schedule_added(change["scheduleId"])
+		"scheduleRemoved":
+			notes.schedule_removed(change["scheduleId"])
+		"compactStarted":
+			notes.compact_started(p, s)
+		"compactDone":
+			notes.compact_done(p, s, change["outcome"], change["tokensBefore"], change["tokensAfter"])
 		"message":
 			staff.message(p, s, change["from"], change["to"], change["broadcast"])
 
@@ -195,6 +205,7 @@ func _add_block(p: String) -> void:
 	blocks[p] = b
 	var colors: Array = BLOCK_COLORS[_color_index % BLOCK_COLORS.size()]
 	_color_index += 1
+	b.color = colors[0]
 	_build_project_block(b, colors)
 	# A new block goes under the last one, unless idle blocks hide and it has no work yet.
 	if hide_idle and not has_work(p):
@@ -935,6 +946,7 @@ func _build_project_block(b: BlockNode, colors: Array) -> void:
 	# second session's Chief, or staff past the front desks, set down a desk they carry in.
 	var x0 := Layout.desk_x(0)
 	var desk := place("desk", f, Vector2(x0, Layout.CHIEF_DESK_Z))
+	b.desk_top = bounds(desk, f).end.y
 	place("computerScreen", f, Vector2(x0 - 0.1, Layout.CHIEF_DESK_Z - 0.05), 0.0, 0.8, desk)
 	b.desk_phones[0] = telephone(f, Vector2(x0 + 0.28, Layout.CHIEF_DESK_Z + 0.02), desk)
 	for slot in Layout.MAX_DESKS:
@@ -1082,6 +1094,7 @@ func label_items() -> Array[Dictionary]:
 			items.append({"meter": true, "anchor": o + Vector3(Layout.BLOCK_WIDTH / 2.0, 0, Layout.BLOCK_DEPTH), "row": row,
 				"fraction": c.context.fraction(), "text": text})
 			row += 1
+	items.append_array(notes.board_label())
 	# Hidden blocks keep their bars, named by project, under the executive block, so idle sessions
 	# can still be seen; the project blocks move down to make room (relayout).
 	var exec: BlockNode = blocks[EXECUTIVE]

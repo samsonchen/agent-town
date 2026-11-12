@@ -43,6 +43,8 @@ var at_work := false
 var waiting_since := 0
 var sitting := false
 var has_computer := false ## works at a desk with a computer (types); otherwise writes
+var compacting := false ## a Chief of Staff going through the notes (scene 17)
+var papers: Node3D = null ## the stack of notes on the desk while compacting
 var note: Variant = null
 var since := -1 ## when the current ticket or job started (Time.get_ticks_msec), -1 when none
 
@@ -108,6 +110,8 @@ func settle() -> void:
 		return
 	if awaiting_approval:
 		play("holding-right")
+	elif compacting:
+		play("write") # going through the notes
 	elif working and not delegating:
 		if is_operator:
 			play("interact-left" if activity == "shell" else "interact-right") # hands on the racks

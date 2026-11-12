@@ -25,4 +25,4 @@ Options, any number and in any order: `-Demo 01`…`05` (or a path), `-Live`, `-
 
 ## Status
 
-W0 (verify before building) is nearly done. town-link works on Windows, and the Godot checks passed, and the native add-on that keeps the window off the taskbar works. What is left: town-link in interactive sessions, and running the ARM64 build on an ARM machine. W2 (parity with the macOS app) is nearly done; the Dispatcher's board and compaction are left. See [roadmap.md](roadmap.md).
+W0 (verify before building) is nearly done. town-link works on Windows, and the Godot checks passed, and the native add-on that keeps the window off the taskbar works. What is left: town-link in interactive sessions, and running the ARM64 build on an ARM machine. W2 (parity with the macOS app) is built; each feature is to be confirmed by hand before W3, the installer and the release. See [roadmap.md](roadmap.md).
