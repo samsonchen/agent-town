@@ -204,6 +204,7 @@ The default is to be decided (see [roadmap.md](roadmap.md)).
 
 The app runs in the menu bar, with no Dock icon. Its menu:
 
+- **agent-town X is available…** and **town-link X is available…** at the top, only while there is an update (see "Updates" below). Each opens the Updates window.
 - **About agent-town** opens a window with the version and build number, the author (Samson Chen), the license (Apache 2.0) with a link, the repository link, and the third-party components with links to each one and its license (Kenney Mini Characters and Kenney Furniture Kit, CC0 1.0).
 - **Show agent-town** (checked while the office window is open). Closing the window unchecks it; the app keeps running.
 - **Stay on top** (off by default). Keeps the office window above other apps' windows (floating level), even when another app is in front.
@@ -222,7 +223,43 @@ These choices, and the settings below, are kept when the app or the Mac restarts
 - Ticket text: full, or task type only
 - Model badges: show or hide
 - Open at login (built): a login item macOS manages, also listed in System Settings → General → Login Items. Available in the installed `.app` only, not when run with `swift run`.
+- Updates (built): **Check for updates automatically** (on by default), **Check now**, and when the last check ran. See "Updates" below.
 - Opacity (built): a slider from 10% to 100% (default 100%, opaque) that shows its value as a percentage. It sets the office window's opacity, live while dragging; the Settings and About windows stay opaque. The minimum is 10% so the window never vanishes (Show agent-town hides it), and a stored value outside 10%–100% is brought back into that range.
+
+## Updates
+
+The app tells the user when a newer agent-town or a newer town-link is available. It does not install anything itself: Homebrew, the `.dmg` (or the Windows installer) and Claude Code's plugin commands do the upgrade.
+
+**What is checked.** Once shortly after launch and then once a day, while **Check for updates automatically** (Settings → Updates, on by default) is on; **Check now** checks at any time. Two public GitHub addresses are read, with nothing about the user sent:
+
+- The app: the releases of `samsonchen/agent-town` (`https://api.github.com/repos/samsonchen/agent-town/releases`). Drafts and pre-releases are skipped. The macOS app takes the highest version among tags `v<version>`; the Windows app the highest among tags `windows-v<version>`. Each matches tags, never GitHub's "Latest" flag (the macOS release keeps it; Windows releases are published with `--latest=false`).
+- town-link: `plugin/.claude-plugin/plugin.json` on `main` (`https://raw.githubusercontent.com/samsonchen/agent-town/main/plugin/.claude-plugin/plugin.json`), which is what `claude plugin update` installs.
+
+Versions are compared number by number (`1.0.10` is newer than `1.0.9`). A failed check changes nothing and is tried again at the next check.
+
+**town-link's version.** Each session sends its town-link version in `session.open` (`pluginVersion`, since town-link 1.0.3; see [protocol.md](protocol.md)). A session that sends none runs town-link 1.0.2 or older. The town-link notice is shown while at least one open session runs an older town-link than the one on `main`, and goes away once none does. A Claude Code session keeps the town-link it started with, so an updated plugin reaches a session only after that session restarts. Whether the app and town-link work together still depends only on the protocol version (a 426 and a toast, as before); the plugin version only drives this notice.
+
+**Where the user sees it.**
+
+- A dot on the menu bar icon (on Windows, on the tray icon) while either update is available.
+- A line at the top of the menu, "agent-town X is available…" or "town-link X is available…", which opens the Updates window.
+- One system notification per new version (one for the app, one for town-link), never repeated for the same version. Clicking it opens the Updates window. If the user does not allow notifications, the dot and the menu line still work.
+
+**The Updates window** shows, for each of the two:
+
+- agent-town: the version running and the newest version, the release notes (from the GitHub release), a "View release" link, and the steps for how it was installed:
+  - Installed with Homebrew (the cask's folder `Caskroom/agent-town` exists under `/opt/homebrew` or `/usr/local`): `brew update && brew upgrade --cask samsonchen/agent-town/agent-town`, with a Copy button.
+  - Otherwise (from the `.dmg`): a Download button for the release's `.dmg`, and "Quit agent-town, open the downloaded file and drag agent-town to Applications, replacing the old copy."
+  - Windows: a Download button for the installer; running it replaces the installed app.
+- town-link: the newest version and the open sessions that run an older one (project name and version, or "1.0.2 or older"), then the commands, each with a Copy button:
+  ```
+  claude plugin marketplace update agent-town
+  claude plugin update town-link@agent-town
+  ```
+  and "Then restart those Claude Code sessions: a session keeps the town-link it started with."
+- When the last check ran, and Check now.
+
+When nothing is newer, the window says each is up to date.
 
 ## Where it works
 

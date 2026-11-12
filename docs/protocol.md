@@ -76,6 +76,7 @@ Every event has these fields:
 | `ccVersion` | string | Claude Code version |
 | `locale` | string, optional | If the mod can read it |
 | `model` | string, optional | The session's model at start, from `$.session.model()` |
+| `pluginVersion` | string, optional | town-link's version, from its `plugin.json` (since town-link 1.0.3). The app tells the user when a session's town-link is older than the newest one ([spec.md](spec.md) → Updates); a session without it runs 1.0.2 or older |
 
 ### `session.close`
 

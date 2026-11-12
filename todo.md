@@ -55,6 +55,7 @@ From `docs/roadmap.md` and `docs/spec.md`:
 - [x] **Hide idle project blocks** (macOS app 1.0.5, 2026-11-12; `docs/spec.md` → The office, and Settings): a Settings switch, off by default; with it on, a project block shows only while it has work and hides after its work has settled for N seconds (1–3600, default 5, set beside the switch). Checked with the two-project demo (`-hideIdleBlocks YES -idleHideSeconds 1`), and by the user in the released 1.0.5. Code: `TownScene+Blocks.swift`.
 - [x] **Context bars of hidden blocks stay on screen** (macOS app 1.0.6, 2026-11-12): with Hide idle project blocks on, each session in a hidden block keeps its context bar, named by project, always under the executive office; the project blocks move down to make room. Checked with the two-project demo; the first version put them under the last block shown, which the user found wrong while testing.
 - [x] **Show tips moved from the menu bar menu to Settings** (macOS app 1.0.5, 2026-11-12; checked by the user).
+- [ ] **Update notices** (macOS app 1.0.8 and town-link 1.0.3, 2026-11-12; `docs/spec.md` → Updates): once a day the app reads the newest `v*` release and town-link's `plugin.json` on `main` from GitHub; a dot on the menu bar icon, a menu line, one notification per version, and an Updates window with the steps for Homebrew or the `.dmg`, and for town-link the sessions running an older one. town-link sends `pluginVersion` in `session.open`. Self-update (Sparkle) stays for later (section 3).
 - [ ] Settings for window size and bench size.
 - [ ] Zoom, for many project blocks. Blocks are now one column, the window grows up to the screen height, and a taller office scrolls.
 - [ ] Phase 3 leftovers: props in hand, more idle life on the bench, workflow subagents reporting to the coordinator, and name tags that move apart when characters stand close together.
@@ -97,7 +98,7 @@ A Windows version of the app is planned: Windows 11 on x64, with ARM64 as a nice
 
 ### Mac session: keep the cask clear of Windows releases
 
-- [ ] `Casks/agent-town.rb` uses `livecheck` with `strategy :github_releases`, which reads release tags. Add `regex(/^v(\d+(?:\.\d+)+)$/i)` to its `livecheck` block so a `windows-v…` tag is never taken for a macOS version. `release.sh` already passes `--latest` for macOS releases; keep it.
+- [x] `Casks/agent-town.rb` uses `livecheck` with `strategy :github_releases`, which reads release tags. Add `regex(/^v(\d+(?:\.\d+)+)$/i)` to its `livecheck` block so a `windows-v…` tag is never taken for a macOS version. `release.sh` already passes `--latest` for macOS releases; keep it. Done (2026-11-12).
 
 ### town-link: make it work on Windows (done in 1.0.2, 2026-11-11; still to try on a Windows machine)
 
@@ -118,6 +119,16 @@ Built in the macOS app 1.0.5; the Windows app should do the same. `docs/spec.md`
 - [x] **Show tips moves from the tray menu to Settings → Office**, as a switch (on by default; closing a tip still turns it off).
 - [x] Strings, in the shared `Localizable.strings` (synced to `app/windows/shared/`): "Office" (辦公室), "Hide idle project blocks" (隱藏閒置的專案區塊), "Hide after" (閒置多久後隱藏), "seconds" (秒), and the existing "Show tips" (顯示提示).
 - [ ] **Context bars of hidden blocks stay on screen** (macOS app 1.0.6, placement fixed in 1.0.7 and confirmed by the user 2026-11-12; `docs/windows/roadmap.md`): with the switch on, each session in a hidden block keeps its context bar, labeled "<project> · Context …" (with "Desk N" when the project has several sessions). The bars are always listed under the executive office, in the order the projects opened, even while other project blocks are shown; the project blocks move down to make room (the Mac adds `Layout.execExtra(rows:)` to the gap under the executive block), so the office and the window grow. This lets the user see idle sessions. Mac code: `meterItems()`, `relayout()` and `updateOfficeSize()` in `app/macos/Sources/AgentTown/TownScene.swift`; `docs/spec.md` → The office.
+
+### Windows app: update notices (2026-11-12)
+
+Built in the macOS app 1.0.8; `docs/spec.md` → Updates has the details. The Windows app should do the same:
+
+- [ ] Settings → Updates: **Check for updates automatically** (on by default), **Check now**, and when the last check ran. Check shortly after launch and once a day.
+- [ ] The app's newest version: list `https://api.github.com/repos/samsonchen/agent-town/releases`, skip drafts and pre-releases, and take the highest version among tags `windows-v<version>`. Do not use GitHub's "Latest": it stays on the macOS release.
+- [ ] town-link's newest version: `version` in `https://raw.githubusercontent.com/samsonchen/agent-town/main/plugin/.claude-plugin/plugin.json`. Each session's own version is `pluginVersion` in `session.open` (town-link 1.0.3 or later); a session without it runs 1.0.2 or older.
+- [ ] Compare versions number by number. Show a dot on the tray icon and a line at the top of the tray menu ("agent-town X is available…", "town-link X is available…") while there is an update, one Windows notification per new version, and an Updates window: for the app, the release notes and a Download button for the installer (running it replaces the installed app); for town-link, the sessions with an older one, the two `claude plugin` commands with Copy buttons, and "Then restart those Claude Code sessions".
+- [ ] Strings: in the shared `Localizable.strings` (the macOS app adds them; sync with `tools/sync-windows-assets.py`).
 
 ### Shared material a second app needs
 

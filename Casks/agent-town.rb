@@ -10,6 +10,7 @@ cask "agent-town" do
   livecheck do
     url :url
     strategy :github_releases
+    regex(/^v(\d+(?:\.\d+)+)$/i)
   end
 
   depends_on macos: :sequoia

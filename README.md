@@ -96,6 +96,8 @@ To update: `brew upgrade --cask agent-town`, or download the new `.dmg`.
 
 The plugin and the app have their own version numbers and are updated separately. `/town` shows the plugin's version, and About shows the app's. The numbers don't need to match: what matters is the protocol between them, which both versions check. If they ever can't work together, `/town` says so.
 
+The app checks GitHub once a day for a newer app and a newer town-link (Settings → Updates; it sends nothing about you). When one is out, a dot appears on the menu bar icon, the menu says which, and the Updates window shows the commands for how you installed it. A Claude Code session keeps the town-link it started with, so restart your sessions after updating the plugin.
+
 ## 3. The office
 
 The window shows one office building, seen from above. At the top is the executive office; under it, one office block for each project you have open in Claude Code.
