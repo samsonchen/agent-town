@@ -88,7 +88,7 @@ brew install --cask samsonchen/agent-town/agent-town
 
 Or download `AgentTown-<version>.dmg` from [Releases](https://github.com/samsonchen/agent-town/releases), open it, and drag AgentTown into Applications.
 
-The app is signed with a Developer ID and notarized by Apple, so it opens like any other app. (Versions before 0.2.7 were not signed and needed **Open Anyway** in System Settings → Privacy & Security.)
+The app is signed with a Developer ID and notarized by Apple, so it opens like any other app.
 
 The app appears in the menu bar as a small building, with no Dock icon. Open it before you start work: town-link sends events only while the app is running. To have it start with your Mac, turn on Settings → Open at login.
 

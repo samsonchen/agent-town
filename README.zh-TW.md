@@ -88,7 +88,7 @@ brew install --cask samsonchen/agent-town/agent-town
 
 或從 [Releases](https://github.com/samsonchen/agent-town/releases) 下載 `AgentTown-<版本>.dmg`，打開後把 AgentTown 拖進「應用程式」。
 
-App 有 Developer ID 簽章並經過 Apple 公證，可以像一般 app 一樣直接打開。（0.2.7 以前的版本沒有簽章，第一次打開要到「系統設定」→「隱私權與安全性」按 **強制打開**。）
+App 有 Developer ID 簽章並經過 Apple 公證，可以像一般 app 一樣直接打開。
 
 App 會以一棟小建築的圖示出現在選單列，Dock 裡沒有圖示。開始工作前先打開它：town-link 只在 app 執行時傳送事件。要讓它開機時自動啟動，打開「設定」→「登入時開啟」。
 
