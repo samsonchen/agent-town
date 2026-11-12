@@ -10,7 +10,7 @@ The Windows app has its own version number, `config/version` in `app/windows/pro
 
 ## Making a release
 
-1. Raise the version in two places, to the same number: `config/version` in `app/windows/project.godot`, and `application/file_version` and `application/product_version` in `app/windows/export_presets.cfg` (with a fourth part, `.0`: `0.1.1.0`). `release.ps1` stops if they differ.
+1. Raise the version in two places, to the same number: `config/version` in `app/windows/project.godot`, and `application/file_version` and `application/product_version` in `app/windows/export_presets.cfg` (with a fourth part, `.0`: `1.0.1.0`). `release.ps1` stops if they differ.
 2. Build and try it:
    ```powershell
    .\app\windows\scripts\release.ps1

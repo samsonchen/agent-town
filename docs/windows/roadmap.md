@@ -53,6 +53,6 @@ Each feature is confirmed by the user in the running app before the release.
 ## W3: release (last, once every feature is confirmed)
 
 
-- [ ] An Inno Setup installer `.exe` on GitHub Releases (built: `scripts/release.ps1`, `installer/agent-town.iss`, [releasing.md](releasing.md); 0.1.0 waits for the user to try it and publish), tagged `windows-v<version>`, titled "agent-town for Windows <version>", published with `--latest=false` so the macOS release stays "Latest"
+- [ ] An Inno Setup installer `.exe` on GitHub Releases (built: `scripts/release.ps1`, `installer/agent-town.iss`, [releasing.md](releasing.md); 1.0.0 waits for the user to try it and publish), tagged `windows-v<version>`, titled "agent-town for Windows <version>", published with `--latest=false` so the macOS release stays "Latest"
 - [ ] Code signing, free only (for example the SignPath Foundation's program for open-source projects); unsigned until then
 - [ ] A `winget` package

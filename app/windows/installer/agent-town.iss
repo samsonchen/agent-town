@@ -1,5 +1,5 @@
 ; The agent-town for Windows installer (Inno Setup 6). scripts/release.ps1 builds it:
-;   ISCC.exe /DAppVersion=0.1.0 /DSourceDir=<export folder> /DOutputDir=<folder> installer\agent-town.iss
+;   ISCC.exe /DAppVersion=1.0.0 /DSourceDir=<export folder> /DOutputDir=<folder> installer\agent-town.iss
 ; It installs for the current user only (no administrator prompt), into
 ; %LOCALAPPDATA%\Programs\agent-town, with a Start menu shortcut and an uninstaller. Running a newer
 ; installer replaces the installed app; settings in %APPDATA%\agent-town are kept.

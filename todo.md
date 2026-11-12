@@ -96,8 +96,8 @@ A Windows version of the app is planned: Windows 11 on x64, with ARM64 as a nice
 - **Tray only, with native code:** Godot cannot hide its main window or its taskbar button, so the small native add-on TownWindow (`app/windows/native/`, C++, built with Visual Studio Build Tools 2026) does it. Works, checked 2026-11-11 (`docs/windows/verification.md`).
 - **Signing: free only.** Start unsigned (SmartScreen shows "Windows protected your PC" → More info → Run anyway; the release notes say so). Deal with signing later; whatever is chosen must be free (for example the SignPath Foundation, which signs open-source projects for free).
 - **Installer:** an Inno Setup `.exe` on GitHub Releases; a `winget` package later.
-- **Release tooling (2026-11-13):** `app/windows/scripts/release.ps1` builds the installer (tests, Godot export, Inno Setup) and with `-Publish` publishes `windows-v<version>`; see `docs/windows/releasing.md`. Inno Setup 6.7.3 is installed for the user (winget, approved). Next: the user tries `agent-town-setup-0.1.0.exe`, then runs `release.ps1 -Publish`.
-- **Releases in the same repo:** Windows tags are `windows-v<version>` (for example `windows-v0.1.0`), titled "agent-town for Windows <version>", and published with `--latest=false`, so the macOS `v<version>` release stays GitHub's "Latest" and the Homebrew cask is untouched.
+- **Release tooling (2026-11-13):** `app/windows/scripts/release.ps1` builds the installer (tests, Godot export, Inno Setup) and with `-Publish` publishes `windows-v<version>`; see `docs/windows/releasing.md`. Inno Setup 6.7.3 is installed for the user (winget, approved). Next: the user tries `agent-town-setup-1.0.0.exe` (the first Windows version is 1.0.0, by the user's choice), then runs `release.ps1 -Publish`.
+- **Releases in the same repo:** Windows tags are `windows-v<version>` (for example `windows-v1.0.0`), titled "agent-town for Windows <version>", and published with `--latest=false`, so the macOS `v<version>` release stays GitHub's "Latest" and the Homebrew cask is untouched.
 
 ### Mac session: keep the cask clear of Windows releases
 
