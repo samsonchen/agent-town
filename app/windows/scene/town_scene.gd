@@ -32,6 +32,7 @@ var hide_idle := false ## Settings → Hide idle project blocks
 var idle_seconds := 5 ## Settings → Hide after
 var hidden: Dictionary = {} ## project id -> true: blocks kept off screen while idle
 var idle_since: Dictionary = {} ## project id -> msec when a shown block's work settled
+var hidden_meter_rows := 0 ## context bars of hidden blocks under the executive block, at the last layout
 
 var _ground := Node3D.new()
 var _ground_size := Vector2.ZERO
@@ -86,6 +87,9 @@ func wait(seconds: float) -> void:
 func handle(change: Dictionary) -> void:
 	var was_all_done := all_work_done()
 	_handle(change)
+	# A session opening or closing in a hidden block changes the bars under the executive block.
+	if hidden_meter_sessions().size() != hidden_meter_rows:
+		relayout()
 	# The last task anywhere ended: the CEO walks back to the desk once the calls are over.
 	if not was_all_done and all_work_done() and ceo_driver != null:
 		ceo_driver.home_when_all_done()
@@ -509,6 +513,21 @@ func settled(p: String) -> bool:
 	return true
 
 
+## Sessions in hidden blocks, as [project, session], in the order their projects and sessions opened.
+func hidden_meter_sessions() -> Array:
+	var out: Array = []
+	for p: String in building.block_order:
+		if not hidden.has(p):
+			continue
+		var block: Building.Block = building.blocks.get(p)
+		if block == null:
+			continue
+		for s: String in block.order:
+			if block.chiefs.has(s):
+				out.append([p, s])
+	return out
+
+
 ## True for characters on screen.
 func on_screen(a: TownActor) -> bool:
 	return not hidden.has(a.block_id)
@@ -688,9 +707,11 @@ func _chief_base(b: BlockNode) -> String:
 
 ## Places the blocks in one column and sizes the path around them.
 func relayout() -> void:
+	hidden_meter_rows = hidden_meter_sessions().size()
+	var extra := Layout.exec_extra(hidden_meter_rows)
 	for i in block_order.size():
 		var b: BlockNode = blocks[block_order[i]]
-		var o := Layout.block_origin(i)
+		var o := Layout.block_origin(i, extra)
 		var to := Vector3(o.x, 0, o.y)
 		if b.placed:
 			create_tween().tween_property(b.node, "position", to, 0.6).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
@@ -698,7 +719,7 @@ func relayout() -> void:
 			b.node.position = to
 			add_child(b.node)
 			b.placed = true
-	office_size = Layout.office_size(block_order.size())
+	office_size = Layout.office_size(block_order.size(), extra)
 	_build_ground()
 	office_resized.emit(office_size)
 
@@ -1048,6 +1069,22 @@ func label_items() -> Array[Dictionary]:
 			items.append({"meter": true, "anchor": o + Vector3(Layout.BLOCK_WIDTH / 2.0, 0, Layout.BLOCK_DEPTH), "row": row,
 				"fraction": c.context.fraction(), "text": text})
 			row += 1
+	# Hidden blocks keep their bars, named by project, under the executive block, so idle sessions
+	# can still be seen; the project blocks move down to make room (relayout).
+	var exec: BlockNode = blocks[EXECUTIVE]
+	var under := exec.node.position + Vector3(Layout.BLOCK_WIDTH / 2.0, 0, Layout.EXEC_DEPTH)
+	var i := 0
+	for ps: Array in hidden_meter_sessions():
+		var block: Building.Block = building.blocks[ps[0]]
+		var c: Building.Chief = block.chiefs[ps[1]]
+		var parts: Array[String] = [block.name]
+		var b: BlockNode = blocks.get(ps[0])
+		var count := block.order.filter(func(x: String) -> bool: return block.chiefs.has(x)).size()
+		if count > 1 and b != null and b.chief_slots.has(ps[1]):
+			parts.append(labels.desk(int(b.chief_slots[ps[1]]) + 1))
+		parts.append(labels.context_line(c.context))
+		items.append({"meter": true, "anchor": under, "row": i, "fraction": c.context.fraction(), "text": " · ".join(parts)})
+		i += 1
 	return items
 
 

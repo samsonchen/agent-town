@@ -135,15 +135,28 @@ static func _lane(z: float) -> float:
 	return best
 
 
+## Floor depth one context bar row takes on screen at the smallest scale (22 px at 70 px/m, tilted).
+## In compact view the bars are 75% as tall on an office drawn at half scale, so a row takes 1.5
+## times the floor.
+static func meter_row_depth() -> float:
+	return 0.36 * ViewScale.text / ViewScale.world
+
+
+## Room under the executive block for `rows` context bars of hidden blocks.
+static func exec_extra(rows: int) -> float:
+	return 0.0 if rows == 0 else float(rows) * meter_row_depth() + 0.15
+
+
 ## The top-left corner of block `index` (0 is the executive block; project blocks stack under it).
-static func block_origin(index: int) -> Vector2:
+## `extra` is room under the executive block for the context bars of hidden blocks.
+static func block_origin(index: int, extra: float = 0.0) -> Vector2:
 	if index <= 0:
 		return Vector2(MARGIN, MARGIN)
-	return Vector2(MARGIN, MARGIN + EXEC_DEPTH + GAP + float(index - 1) * (BLOCK_DEPTH + GAP))
+	return Vector2(MARGIN, MARGIN + EXEC_DEPTH + extra + GAP + float(index - 1) * (BLOCK_DEPTH + GAP))
 
 
 ## The whole office for `count` blocks (the executive block included), path margin included.
-static func office_size(count: int) -> Vector2:
+static func office_size(count: int, extra: float = 0.0) -> Vector2:
 	var projects := maxi(0, count - 1)
 	var column := 0.0 if projects == 0 else float(projects) * (GAP + BLOCK_DEPTH)
-	return Vector2(2.0 * MARGIN + BLOCK_WIDTH, 2.0 * MARGIN + EXEC_DEPTH + column)
+	return Vector2(2.0 * MARGIN + BLOCK_WIDTH, 2.0 * MARGIN + EXEC_DEPTH + extra + column)
