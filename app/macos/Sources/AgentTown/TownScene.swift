@@ -28,6 +28,10 @@ final class TownScene: ObservableObject {
     var blocks: [String: BlockNode] = [:]
     /// The blocks on screen, executive first, then each open project in the order it opened.
     var blockOrder: [String] = []
+    /// Project blocks kept off-screen while idle (Settings → Hide idle offices).
+    var hidden: Set<String> = []
+    /// When each shown block's work settled, for the idle delay.
+    var idleSince: [String: Date] = [:]
     /// The Dispatcher's board: scheduleId → card, and the cards in the order they were pinned.
     var boardCards: [String: Entity] = [:]
     var boardOrder: [String] = []
@@ -87,6 +91,7 @@ final class TownScene: ObservableObject {
         inspector.phone = execPhones.inspector
         for a in [ceo, dispatcher, inspector] { a.body.play("idle") }
         startBenchLife()
+        startIdleWatch()
         startTyping()
     }
 
@@ -96,6 +101,8 @@ final class TownScene: ObservableObject {
         let wasAllDone = allWorkDone
         self.building = building
         defer { if !wasAllDone && allWorkDone { ceoHomeWhenAllDone() } }
+        // A hidden block with work comes back before its scene plays.
+        showIfWorking(change)
         switch change {
         case .blockAdded(let p):
             let node = BlockNode(id: p, name: building.blocks[p]?.name ?? p)
@@ -112,6 +119,8 @@ final class TownScene: ObservableObject {
             node.entity.removeFromParent()
             for (id, a) in actors where a.block == p { actors[id] = nil }
             for (id, c) in pendingCalls where c.node === node { pendingCalls[id] = nil }
+            hidden.remove(p)
+            idleSince[p] = nil
             if blockOrder.contains(p) {
                 blockOrder.removeAll { $0 == p }
                 relayout()
@@ -365,6 +374,12 @@ final class TownScene: ObservableObject {
         var t = a.root.transform
         t.translation = [p.x, Layout.floorThickness, p.y]
         let seconds = Double(d / speed)
+        guard onScreen(a) else {
+            // A hidden block is out of the scene, where animations do not run: arrive at once,
+            // so everyone is in place when the block comes back.
+            a.root.transform = t
+            return
+        }
         a.root.move(to: t, relativeTo: a.root.parent, duration: seconds, timingFunction: .linear)
         try? await Task.sleep(for: .seconds(seconds))
     }

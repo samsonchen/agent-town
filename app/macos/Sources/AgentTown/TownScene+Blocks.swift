@@ -19,8 +19,10 @@ extension Change {
     }
 }
 
-/// Project blocks. Each open project has its block on screen from the moment its first session
-/// opens until its last session ends, stacked in one column under the executive block.
+/// Project blocks. Each open project has a block from the moment its first session opens until
+/// its last session ends, stacked in one column under the executive block. With Settings → "Hide
+/// idle offices" on, a block is on screen only while it has work: it appears when work begins and
+/// leaves once everything in it has settled for the chosen number of seconds (spec: the office).
 extension TownScene {
     /// Work in the building state: a ticket, a compaction, staff still working, operators, or approvals.
     func hasWork(_ p: String) -> Bool {
@@ -29,17 +31,83 @@ extension TownScene {
         } ?? false
     }
 
+    /// No work, and no one in the block still on a call, on the way somewhere, or waiting to be called.
+    private func settled(_ p: String) -> Bool {
+        guard let node = blocks[p], !hasWork(p), node.jobs.isEmpty else { return false }
+        if pendingCalls.values.contains(where: { $0.node === node }) { return false }
+        // Bench characters play idle animations through their queues; those do not count.
+        return !actors.values.contains { a in
+            a.block == p && (a.onCall || (a.isBusy && !node.bench.contains { $0 === a }))
+        }
+    }
+
     /// Project blocks on screen, top to bottom.
     var shownProjects: [String] { blockOrder.filter { $0 != Self.executive } }
 
-    /// A new block goes under the last one.
+    /// A new block goes under the last one, unless idle offices are hidden and it has no work yet.
     func placeNewBlock(_ p: String) {
+        if Prefs.hideIdleBlocks && !hasWork(p) {
+            hidden.insert(p)
+        } else {
+            blockOrder.append(p)
+            relayout()
+        }
+    }
+
+    /// Brings a hidden block back, under the others.
+    func show(_ p: String) {
+        guard hidden.remove(p) != nil else { return }
+        idleSince[p] = nil
         blockOrder.append(p)
         relayout()
     }
 
-    /// True for characters on screen: every block that exists is shown.
-    func onScreen(_ a: Actor) -> Bool { true }
+    func hide(_ p: String) {
+        guard let node = blocks[p], blockOrder.contains(p) else { return }
+        blockOrder.removeAll { $0 == p }
+        hidden.insert(p)
+        idleSince[p] = nil
+        node.entity.removeFromParent()
+        node.placed = false
+        relayout()
+    }
+
+    /// Called with each change: a block with work comes on screen.
+    func showIfWorking(_ change: Change) {
+        if let p = change.projectId, hidden.contains(p), hasWork(p) { show(p) }
+    }
+
+    /// True for characters on screen.
+    func onScreen(_ a: Actor) -> Bool { !hidden.contains(a.block) }
+
+    /// Twice a second: with the setting on, hides blocks settled for long enough; with it off,
+    /// brings every hidden block back. No block hides while the user has walked the CEO away from
+    /// the desk, so the floor never goes or slides from under the CEO.
+    func startIdleWatch() {
+        Task { @MainActor [weak self] in
+            while true {
+                try? await Task.sleep(for: .milliseconds(500))
+                guard let self else { return }
+                guard Prefs.hideIdleBlocks else {
+                    for p in self.blockOrderOfHidden() { self.show(p) }
+                    self.idleSince.removeAll()
+                    continue
+                }
+                let now = Date(), wait = Prefs.idleHideDelay
+                for p in self.shownProjects {
+                    guard self.settled(p) else { self.idleSince[p] = nil; continue }
+                    let since = self.idleSince[p] ?? now
+                    self.idleSince[p] = since
+                    if now.timeIntervalSince(since) >= wait && !self.ceoAway { self.hide(p) }
+                }
+            }
+        }
+    }
+
+    /// Hidden blocks in the order their projects opened.
+    private func blockOrderOfHidden() -> [String] {
+        building.blockOrder.filter { hidden.contains($0) }
+    }
 }
 
 extension TownScene {

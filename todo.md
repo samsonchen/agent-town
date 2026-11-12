@@ -5,7 +5,7 @@ Open items as of 2026-11-11, for the next session to pick up. Everything listed 
 ## Where things stand
 
 - Work is committed on `main`.
-- town-link 1.0.2; the macOS app 1.0.4 (sound settings), not yet released; 1.0.3 is the latest release. They move separately. town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
+- town-link 1.0.2; the macOS app 1.0.5 (hide idle project blocks, Show tips in Settings), not yet released; 1.0.4 (sound settings) is the latest release. They move separately. town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
 - Versions are separate (since 2026-11-11, both at 1.0.2 then). A plugin change: raise `plugin/.claude-plugin/plugin.json`, commit and push; no release. An app change: raise `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push, then the user runs `app/macos/scripts/release.sh --publish` (auto mode refuses to publish a release): it publishes the release, checks the uploaded `.dmg`'s checksum, and commits and pushes the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town`.
 - Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (52 tests). App checks: `swift build` and `swift test` in `app/macos` (28 tests).
 - Two Swift warnings in the release build, harmless: `TownScene+Staff.swift:89` (a weak self inside a strong one) and `TownView.swift:489` (a non-Sendable observer closure). Clean up when convenient.
@@ -52,15 +52,17 @@ From `docs/roadmap.md` and `docs/spec.md`:
 - [x] Operators stuck in the server room after a subagent's background task ended (fixed in 0.2.7–0.2.8, checked 2026-11-11). The task's notification goes to the subagent, not the main conversation. town-link now also ends a task from `session.receive`, from `TaskStop`, and when the subagent that started it has finished (`$.agent.list()` every 5 s). The server room has a "Server room" (「機房」) label.
 - [x] Stay on top (menu bar toggle), Opacity (Settings, 10%–100%), and clicking the floor to walk the CEO there or the CEO's desk to send the CEO back (0.3.0, 2026-11-11). Checked by tests and a demo window (floating level and alpha read back); clicking tried by hand in the installed app (1.0.1).
 - [ ] Several sessions in one project block: desks and phones, up to five (the back row's desk spots; a sixth stands on the first desk's spot, a known limit in the README).
+- [x] **Hide idle project blocks** (macOS app 1.0.5, 2026-11-12; `docs/spec.md` → The office, and Settings): a Settings switch, off by default; with it on, a project block shows only while it has work and hides after its work has settled for N seconds (1–3600, default 5, set beside the switch). Checked with the two-project demo (`-hideIdleBlocks YES -idleHideSeconds 1`). Code: `TownScene+Blocks.swift`.
+- [x] **Show tips moved from the menu bar menu to Settings** (macOS app 1.0.5, 2026-11-12).
 - [ ] Settings for window size and bench size.
 - [ ] Zoom, for many project blocks. Blocks are now one column, the window grows up to the screen height, and a taller office scrolls.
 - [ ] Phase 3 leftovers: props in hand, more idle life on the bench, workflow subagents reporting to the coordinator, and name tags that move apart when characters stand close together.
-- [x] **Sound settings (built in the macOS app 1.0.4, 2026-11-12; Settings → Sounds, `Sounds.swift`; same labels as the Windows app's). Specified 2026-11-11, `docs/spec.md` → Sounds → Sound settings):** in Settings, a volume slider for agent-town's own sounds; for dispatch, completion and approval an on/off switch, a list of the sounds in `/System/Library/Sounds` (the default first: Glass, Ping, Pop) plus Choose a file…, and a Play button; the completion threshold (0–3600 s, default 0) in the completion row. The menu's Sound item still mutes all three; a sound that cannot be played falls back to its default. The Windows app builds the same (`docs/windows/roadmap.md`).
+- [x] **Sound settings (released in the macOS app 1.0.4, 2026-11-12; Settings → Sounds, `Sounds.swift`; same labels as the Windows app's). Specified 2026-11-11, `docs/spec.md` → Sounds → Sound settings):** in Settings, a volume slider for agent-town's own sounds; for dispatch, completion and approval an on/off switch, a list of the sounds in `/System/Library/Sounds` (the default first: Glass, Ping, Pop) plus Choose a file…, and a Play button; the completion threshold (0–3600 s, default 0) in the completion row. The menu's Sound item still mutes all three; a sound that cannot be played falls back to its default. The Windows app builds the same (`docs/windows/roadmap.md`).
 - [ ] Phase 5: hats, model badges with a show or hide setting, the Cubic 11 font, the ticket text setting. Launch at login is done (Settings → Open at login); check it in the packaged app.
 
 ## 6. To check by hand
 
-- [ ] Click through every menu bar item in the packaged app: About, Show agent-town, Sound, Show tips, Settings…, Quit. The About window was checked only as a rendered image.
+- [ ] Click through every menu bar item in the packaged app: About, Show agent-town, Stay on top, Sound, Settings…, Quit. The About window was checked only as a rendered image.
 - [ ] Office blocks: a second project's block appears before its first prompt, stacks under the first one, and the window grows. It goes when that project's last session ends.
 - [ ] The window opens where it was after a restart, on the same display.
 
@@ -106,6 +108,14 @@ A Windows version of the app is planned: Windows 11 on x64, with ARM64 as a nice
 - [x] **Windows commands in the background-role rules** (`catalog/roles.json`): build words `dotnet build`, `msbuild`; test words `dotnet test`; install words `winget install`, `choco install`, `Invoke-WebRequest`. Then run `tools/build-plugin-catalog.py` (and `--check`).
 - [x] **Docs**: in `docs/protocol.md`, say how the endpoint file is protected on Windows, where mode 0600 does not apply (the file sits in the user's own `%APPDATA%`, which only that user can read by default). In `docs/architecture.md`, note that paths are normalized before hashing and naming.
 - [x] Raise the version (1.0.2), run the plugin checks, commit and push. The user releases.
+
+### Windows app: new settings from the Mac (2026-11-12)
+
+Built in the macOS app 1.0.5; the Windows app should do the same. `docs/spec.md` → The office ("Hide idle project blocks") and → Settings has the details.
+
+- [ ] **Hide idle project blocks**: a switch in Settings → Office, off by default. With it on, a project block shows only while it has work (a ticket, a compaction, staff still working, operators, approvals) and hides once everything in it has settled (no work, no calls, nobody walking except bench idle life) for N seconds, set beside the switch (1 to 3600, default 5). The window shrinks and grows with it. A block that opens with no work starts hidden. While hidden, the block keeps its state and its characters still move, but they arrive at once (no animation); the Mac does this in `move()` with `onScreen`. No block hides while the user has walked the CEO away from the desk. Turning the switch off brings every hidden block back. Mac code: `app/macos/Sources/AgentTown/TownScene+Blocks.swift` (`settled`, `startIdleWatch`, `show`, `hide`).
+- [ ] **Show tips moves from the tray menu to Settings → Office**, as a switch (on by default; closing a tip still turns it off).
+- [ ] Strings, in the shared `Localizable.strings`: "Office" (辦公室), "Hide idle project blocks" (隱藏閒置的專案區塊), "Hide after" (閒置多久後隱藏), "seconds" (秒), and the existing "Show tips" (顯示提示).
 
 ### Shared material a second app needs
 

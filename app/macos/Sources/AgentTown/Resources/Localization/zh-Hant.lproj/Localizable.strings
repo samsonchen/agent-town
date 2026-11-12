@@ -17,6 +17,10 @@
 "Allow agent-town in System Settings → General → Login Items." = "請在「系統設定」→「一般」→「登入項目」中允許 agent-town。";
 "macOS did not allow it: %@" = "macOS 不允許此設定：%@";
 "Opacity" = "不透明度";
+"Office" = "辦公室";
+"Hide idle project blocks" = "隱藏閒置的專案區塊";
+"Hide after" = "閒置多久後隱藏";
+"seconds" = "秒";
 "Sounds" = "音效";
 "Volume" = "音量";
 "Ticket dispatched" = "派發工單";

@@ -7,7 +7,7 @@ struct TownView: View {
     @ObservedObject var scene: TownScene
     @State private var pan: SIMD2<Float> = .zero
     @State private var camera = TownView.makeCamera()
-    /// Tips show while "Show tips" is on in the menu; closing one turns it off.
+    /// Tips show while "Show tips" is on in Settings; closing one turns it off.
     @AppStorage(Prefs.showTips) private var showTips = true
     /// "Stay on top" in the menu: the window floats above other apps' windows.
     @AppStorage(Prefs.stayOnTop) private var stayOnTop = false

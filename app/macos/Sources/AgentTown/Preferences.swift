@@ -13,6 +13,24 @@ enum Prefs {
     static let stayOnTop = "stayOnTop"
     /// The closable tips in the office window show. Default on; closing a tip turns it off.
     static let showTips = "showTips"
+    /// Project blocks show only while they have work. Default off: every open project shows.
+    static let hideIdle = "hideIdleBlocks"
+    /// Seconds a block's work must have settled before it hides, 1 to 3600. Default 5.
+    static let idleHideSeconds = "idleHideSeconds"
+
+    static let idleHideRange: ClosedRange<Double> = 1...3600
+
+    static func clampIdleHide(_ v: Double) -> Double {
+        guard v.isFinite else { return 5 }
+        return min(idleHideRange.upperBound, max(idleHideRange.lowerBound, v))
+    }
+
+    static var hideIdleBlocks: Bool { UserDefaults.standard.bool(forKey: hideIdle) }
+
+    static var idleHideDelay: Double {
+        let d = UserDefaults.standard // double(forKey:) also reads a number given as a launch argument
+        return clampIdleHide(d.object(forKey: idleHideSeconds) == nil ? 5 : d.double(forKey: idleHideSeconds))
+    }
     /// The UI language (`en`, `zh-Hant`); absent or empty follows macOS.
     static let language = "language"
     /// The office window's frame in screen coordinates, as NSStringFromRect writes it.
@@ -68,14 +86,13 @@ enum Prefs {
     }
 }
 
-/// The menu bar menu: About, show the window, stay on top, sound, tips, Settings and Quit.
+/// The menu bar menu: About, show the window, stay on top, sound, Settings and Quit.
 struct TownMenu: View {
     @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
     @AppStorage(Prefs.showWindow) private var showWindow = true
     @AppStorage(Prefs.stayOnTop) private var stayOnTop = false
     @AppStorage(Prefs.sound) private var sound = true
-    @AppStorage(Prefs.showTips) private var showTips = true
 
     var body: some View {
         Button(Labels.text("About agent-town")) {
@@ -94,7 +111,6 @@ struct TownMenu: View {
         }))
         Toggle(Labels.text("Stay on top"), isOn: $stayOnTop)
         Toggle(Labels.text("Sound"), isOn: $sound)
-        Toggle(Labels.text("Show tips"), isOn: $showTips)
         Divider()
         Button(Labels.text("Settings…")) {
             openWindow(id: "settings")
@@ -107,10 +123,13 @@ struct TownMenu: View {
     }
 }
 
-/// Settings: Open at login, the language, the office window's opacity, and the sounds.
+/// Settings: Open at login, the language, the office window (opacity, idle blocks, tips), and the sounds.
 struct SettingsView: View {
     @AppStorage(Prefs.language) private var language = ""
     @AppStorage(Prefs.opacity) private var opacity = 1.0
+    @AppStorage(Prefs.hideIdle) private var hideIdle = false
+    @AppStorage(Prefs.idleHideSeconds) private var idleSeconds = 5.0
+    @AppStorage(Prefs.showTips) private var showTips = true
     @State private var openAtLogin = LoginItem.isOn
     @State private var loginNote: String?
 
@@ -147,6 +166,27 @@ struct SettingsView: View {
                         .monospacedDigit()
                         .frame(width: 44, alignment: .trailing)
                 }
+            }
+            Section(Labels.text("Office")) {
+                Toggle(Labels.text("Hide idle project blocks"), isOn: $hideIdle)
+                LabeledContent(Labels.text("Hide after")) {
+                    HStack(spacing: 6) {
+                        TextField("", value: Binding(get: { Prefs.clampIdleHide(idleSeconds) },
+                                                     set: { idleSeconds = Prefs.clampIdleHide($0.rounded()) }),
+                                  format: .number.precision(.fractionLength(0)))
+                            .labelsHidden()
+                            .textFieldStyle(.roundedBorder)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 60)
+                        Stepper("", value: Binding(get: { Prefs.clampIdleHide(idleSeconds) },
+                                                   set: { idleSeconds = Prefs.clampIdleHide($0) }),
+                                in: Prefs.idleHideRange)
+                            .labelsHidden()
+                        Text(Labels.text("seconds"))
+                    }
+                }
+                .disabled(!hideIdle)
+                Toggle(Labels.text("Show tips"), isOn: $showTips)
             }
             SoundSettingsView()
         }

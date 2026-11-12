@@ -110,7 +110,7 @@ A strip across the top, with three people at their desks:
 
 ### The project blocks
 
-- **One block per project.** A block appears when a Claude Code session opens in that project, before any prompt, and leaves when its last session ends. Blocks stack under the executive office, and the window grows to fit them.
+- **One block per project.** A block appears when a Claude Code session opens in that project, before any prompt, and leaves when its last session ends. Blocks stack under the executive office, and the window grows to fit them. To keep the window small, turn on Settings → Hide idle project blocks: a block then shows only while its project has work, and hides a few seconds (5 by default, adjustable) after the work is done.
 - **The sign** shows the project's name and a short title for the running task. A bar under the block shows the session's context use.
 - **Desks**: one Chief of Staff desk with a telephone, and five staff desks. A second session in the same project brings a second Chief of Staff.
 - **The resource bench** is where staff wait between jobs. The Chief of Staff pages them over the bench speaker.
@@ -126,8 +126,8 @@ A strip across the top, with three people at their desks:
 ### Sound and settings
 
 - You hear a sound when a ticket arrives, when work is done, and when Claude Code needs your approval, even with the window hidden.
-- The menu bar menu has About, Show agent-town, Stay on top, Sound, Show tips, Settings… and Quit. Stay on top keeps the office window above other apps' windows, even when another app is in front. Your choices are kept across restarts, and the window opens where you left it.
-- Settings has the language (English or Traditional Chinese, following macOS by default), Open at login, and Opacity (10% to 100%) for the office window.
+- The menu bar menu has About, Show agent-town, Stay on top, Sound, Settings… and Quit. Stay on top keeps the office window above other apps' windows, even when another app is in front. Your choices are kept across restarts, and the window opens where you left it.
+- Settings has the language (English or Traditional Chinese, following macOS by default), Open at login, Opacity (10% to 100%) for the office window, Hide idle project blocks (with how many seconds to wait), and Show tips.
 - Settings → Sounds has a volume for agent-town's sounds, and for each sound (dispatch, completion, approval) an on/off switch, the sound (a macOS sound or a file of your own) and a Play button. Under completion, set a minimum task length in seconds so that only longer tasks play it.
 
 ## 4. Known issues and limitations
