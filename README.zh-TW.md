@@ -1,6 +1,6 @@
 # Agent-Town for Claude Code
 
-看 Claude Code 的 agent 怎麼工作。（與其他名為 agent-town 的專案無關。）
+看 Claude Code 的 agent 怎麼工作：一個 Claude Code plugin 加上一個 macOS 選單列 app（現在也有 Windows 版），把你的 session、subagent、背景工作和待核准的操作畫成一間小小的 3D 辦公室。（與其他名為 agent-town 的專案無關。）
 
 [English](README.md)
 

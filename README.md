@@ -1,6 +1,6 @@
 # Agent-Town for Claude Code
 
-Watch your Claude Code agents at work. (Not related to other projects named agent-town.)
+Watch your Claude Code agents at work: a Claude Code plugin and a macOS menu bar app (now on Windows too) that show your sessions, subagents, background tasks and approvals as a small 3D office. (Not related to other projects named agent-town.)
 
 [繁體中文說明](README.zh-TW.md)
 
