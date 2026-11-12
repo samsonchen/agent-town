@@ -185,17 +185,23 @@ if [ "$PUBLISH" -eq 1 ]; then
   else
     flags=(--prerelease)
   fi
+  # The notes follow the Windows release's: what it is, how to install, and the download's checksum.
+  SHA="$(shasum -a 256 "$DMG" | cut -d' ' -f1)"
   if [ "$MODE" = release ]; then
-    notes="Download AgentTown-$VERSION.dmg, open it, and drag AgentTown into Applications, or install with Homebrew (see the README). Requires macOS 15 or later."
+    install="Download AgentTown-$VERSION.dmg, open it, and drag AgentTown into Applications, or install with Homebrew (see the README). Requires macOS 15 or later. Install the town-link plugin in Claude Code as the README says."
   else
-    notes="Unsigned pre-release: macOS blocks the app the first time it opens. Open System Settings → Privacy & Security and click Open Anyway. Install with Homebrew or download AgentTown-$VERSION.dmg; see the README. Requires macOS 15 or later."
+    install="Unsigned pre-release: macOS blocks the app the first time it opens. Open System Settings → Privacy & Security and click Open Anyway. Install with Homebrew or download AgentTown-$VERSION.dmg; see the README. Requires macOS 15 or later."
   fi
+  notes="agent-town for macOS $VERSION: the office for Claude Code, in the menu bar.
+
+$install
+
+SHA-256 of AgentTown-$VERSION.dmg: $SHA"
   step "Creating GitHub release v$VERSION (${flags[*]})"
   (cd "$REPO" && gh release create "v$VERSION" "$DMG" "${flags[@]}" --target "$(git rev-parse HEAD)" \
     --title "agent-town for macOS $VERSION" --notes "$notes")
 
   CASK="$REPO/Casks/agent-town.rb"
-  SHA="$(shasum -a 256 "$DMG" | cut -d' ' -f1)"
   sed -i '' -e "s/^  version \".*\"/  version \"$VERSION\"/" -e "s/^  sha256 \".*\"/  sha256 \"$SHA\"/" "$CASK"
   if [ "$DRAFT" -eq 1 ]; then
     echo "Updated $CASK to $VERSION ($SHA), not committed."
