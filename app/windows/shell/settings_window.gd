@@ -83,9 +83,7 @@ func _ready() -> void:
 	_restart_row.add_child(note)
 	var restart := Button.new()
 	restart.text = labels.t("Restart now")
-	restart.pressed.connect(func() -> void:
-		OS.set_restart_on_exit(true, OS.get_cmdline_args())
-		get_tree().quit())
+	restart.pressed.connect(_restart)
 	_restart_row.add_child(restart)
 	box.add_child(_restart_row)
 	lang.item_selected.connect(func(i: int) -> void:
@@ -139,6 +137,26 @@ func _build_office(box: VBoxContainer) -> void:
 	heading.text = labels.t("Office")
 	heading.add_theme_font_size_override("font_size", 16)
 	box.add_child(heading)
+	# Compact view: the scale is set when the window is made, so a change needs a restart.
+	var compact := CheckBox.new()
+	compact.text = labels.t("Compact view")
+	compact.button_pressed = settings.compact_view
+	box.add_child(compact)
+	var restart_row := HBoxContainer.new()
+	restart_row.add_theme_constant_override("separation", 10)
+	var note := Label.new()
+	note.text = labels.t("Restart agent-town to change the view.")
+	restart_row.add_child(note)
+	var restart := Button.new()
+	restart.text = labels.t("Restart now")
+	restart.pressed.connect(_restart)
+	restart_row.add_child(restart)
+	box.add_child(restart_row)
+	restart_row.visible = settings.compact_view != ViewScale.compact
+	compact.toggled.connect(func(on: bool) -> void:
+		settings.compact_view = on
+		settings.save()
+		restart_row.visible = on != ViewScale.compact)
 	var hide_idle := CheckBox.new()
 	hide_idle.text = labels.t("Hide idle project blocks")
 	hide_idle.button_pressed = settings.hide_idle_blocks
@@ -318,6 +336,14 @@ func _file_chosen(path: String) -> void:
 	sounds_changed.emit()
 	audio.preview(_file_for)
 	_fill_choices(_picks[_file_for], _file_for)
+
+
+## Restart now (language, compact view): the app's Quit, then a new run with the same arguments.
+signal restart_requested
+
+
+func _restart() -> void:
+	restart_requested.emit()
 
 
 ## The "Restart now" row shows only when the choice differs from the language the app runs in.

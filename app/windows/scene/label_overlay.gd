@@ -4,10 +4,12 @@ extends Control
 ## projected position so text stays sharp. Port of the label views in
 ## app/macos/Sources/AgentTown/TownView.swift (Tag, MeterOverlay).
 
-const FONT_SIZE := 12 ## Cubic 11 is drawn at its own pixel size, or a multiple of it
-const BAR_WIDTH := 96.0
-const ROW_HEIGHT := 22.0
-const METER_GAP := 8.0
+# Sizes, scaled to 75% in compact view (ViewScale.text) when the overlay is made.
+static var FONT_SIZE := 12 ## Cubic 11 is drawn at its own pixel size, or a multiple of it
+static var BAR_WIDTH := 96.0
+static var ROW_HEIGHT := 22.0
+static var METER_GAP := 8.0
+static var K := 1.0 ## ViewScale.text, for paddings
 
 const BACKGROUND := {
 	"name": Color(0, 0, 0, 0.55), "hat": Color(0.98, 0.80, 0.25), "ticket": Color.WHITE, "bubble": Color(0.86, 0.15, 0.15),
@@ -16,7 +18,7 @@ const BACKGROUND := {
 const DARK_TEXT := ["hat", "ticket", "speech", "statement"]
 const METER_BACKGROUND := Color(0.20, 0.24, 0.30, 0.92)
 const CALL_COLOR := Color(0.95, 0.45, 0.15)
-const STATEMENT_WIDTH := 230.0 ## a statement wraps at this width
+static var STATEMENT_WIDTH := 230.0 ## a statement wraps at this width
 
 const SCROLL_SPEED := 28.0 ## pixels per second for a sign that scrolls
 
@@ -43,7 +45,7 @@ class ScrollingSign:
 	func _draw() -> void:
 		var f := overlay.font
 		var fs := LabelOverlay.FONT_SIZE
-		var pad := Vector2(5, 2)
+		var pad := Vector2(5, 2) * LabelOverlay.K
 		var loop := text + "      "
 		var loop_w := f.get_string_size(loop, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		var bg: Color = LabelOverlay.BACKGROUND["sign"]
@@ -63,6 +65,12 @@ class ScrollingSign:
 func _init(p_scene: TownScene, p_camera: Camera3D) -> void:
 	scene = p_scene
 	camera = p_camera
+	K = ViewScale.text
+	FONT_SIZE = roundi(12 * K)
+	BAR_WIDTH = 96.0 * K
+	ROW_HEIGHT = 22.0 * K
+	METER_GAP = 8.0 * K
+	STATEMENT_WIDTH = 230.0 * K
 	font = load("res://fonts/Cubic_11.ttf")
 	font.antialiasing = TextServer.FONT_ANTIALIASING_NONE
 	font.hinting = TextServer.HINTING_NONE
@@ -89,6 +97,10 @@ func _draw() -> void:
 		if camera.is_position_behind(anchor):
 			continue
 		var p := camera.unproject_position(anchor).round()
+		# A tag whose character is well above the window (scrolled out of view) is not shown; one
+		# just above slides down to stay in view.
+		if p.y <= -20.0 and not item.get("meter", false):
+			continue
 		if item.get("scroll", false):
 			seen.append(item["id"])
 			_place_scroller(item["id"], item["lines"][0][0], p)
@@ -101,7 +113,7 @@ func _draw() -> void:
 			_draw_tag(p, lines[0][0], "sign", true)
 			continue
 		# Tags stack upward from the anchor, the last line nearest the head.
-		var y := p.y
+		var y := maxf(p.y, _stack_height(lines) + 2.0)
 		for i in range(lines.size() - 1, -1, -1):
 			var h := _draw_tag(Vector2(p.x, y), lines[i][0], lines[i][1], false)
 			y -= h + 2.0
@@ -110,6 +122,19 @@ func _draw() -> void:
 		if not seen.has(id):
 			(_scrollers[id] as Node).queue_free()
 			_scrollers.erase(id)
+
+
+## The height of a stack of tags, for keeping its top in the window.
+func _stack_height(lines: Array) -> float:
+	var h := 0.0
+	for l: Array in lines:
+		if l[1] == "statement":
+			var one_line := font.get_string_size(l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE).x + 1.0
+			h += font.get_multiline_string_size(l[0], HORIZONTAL_ALIGNMENT_LEFT, minf(STATEMENT_WIDTH, one_line), FONT_SIZE).y + 10.0 * K
+		else:
+			h += font.get_height(FONT_SIZE) + 4.0 * K
+		h += 2.0
+	return h
 
 
 ## Keeps a scrolling sign's control centered on `at`, the width of TITLE_WIDTH columns.
@@ -134,7 +159,7 @@ func _draw_tag(at: Vector2, text: String, style: String, centered: bool) -> floa
 	if style == "statement":
 		return _draw_statement(at, text)
 	var size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE)
-	var pad := Vector2(5, 2)
+	var pad := Vector2(5, 2) * K
 	var rect := Rect2(Vector2(at.x - size.x / 2.0 - pad.x, at.y - size.y - 2.0 * pad.y), size + 2.0 * pad)
 	if centered:
 		rect.position.y = at.y - rect.size.y / 2.0
@@ -152,7 +177,7 @@ func _draw_statement(at: Vector2, text: String) -> float:
 	var one_line := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE).x + 1.0
 	var w := minf(STATEMENT_WIDTH, one_line)
 	var size := font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, w, FONT_SIZE)
-	var pad := Vector2(7, 5)
+	var pad := Vector2(7, 5) * K
 	var rect := Rect2(Vector2(at.x - w / 2.0 - pad.x, at.y - size.y - 2.0 * pad.y), Vector2(w, size.y) + 2.0 * pad).abs()
 	rect.position = rect.position.round()
 	if not _boxes.has("statement"):
@@ -170,18 +195,19 @@ func _draw_statement(at: Vector2, text: String) -> float:
 func _draw_meter(at: Vector2, item: Dictionary) -> void:
 	var text: String = item["text"]
 	var tsize := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE)
-	var w := 8.0 + BAR_WIDTH + 7.0 + tsize.x + 8.0
-	var h := ROW_HEIGHT - 4.0
+	var w := (8.0 + 7.0 + 8.0) * K + BAR_WIDTH + tsize.x
+	var h := ROW_HEIGHT - 4.0 * K
+	var bh := 7.0 * K
 	var top := at.y + METER_GAP + float(item["row"]) * ROW_HEIGHT
 	var rect := Rect2(Vector2(at.x - w / 2.0, top), Vector2(w, h)).abs()
 	rect.position = rect.position.round()
 	draw_style_box(_rounded(METER_BACKGROUND, 5), rect)
-	var bar := Rect2(rect.position + Vector2(8, (h - 7) / 2.0), Vector2(BAR_WIDTH, 7))
+	var bar := Rect2(rect.position + Vector2(8 * K, (h - bh) / 2.0), Vector2(BAR_WIDTH, bh))
 	draw_style_box(_rounded(Color(1, 1, 1, 0.22), 3), bar)
 	var f: Variant = item["fraction"]
 	if f != null and float(f) > 0.0:
-		draw_style_box(_rounded(meter_color(float(f)), 3), Rect2(bar.position, Vector2(BAR_WIDTH * float(f), 7)))
-	draw_string(font, Vector2(bar.end.x + 7, rect.position.y + (h - tsize.y) / 2.0 + font.get_ascent(FONT_SIZE)), text,
+		draw_style_box(_rounded(meter_color(float(f)), 3), Rect2(bar.position, Vector2(BAR_WIDTH * float(f), bh)))
+	draw_string(font, Vector2(bar.end.x + 7 * K, rect.position.y + (h - tsize.y) / 2.0 + font.get_ascent(FONT_SIZE)), text,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE, Color.WHITE)
 
 

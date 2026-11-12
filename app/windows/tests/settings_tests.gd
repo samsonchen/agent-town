@@ -62,3 +62,30 @@ func test_office_settings_survive_a_restart_and_stay_in_range() -> void:
 		TownSettings.clamp_idle_hide("x")], [1, 3600, 8, 5], "hide-after range")
 	DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(path.get_base_dir())
+
+
+func test_compact_view_keeps_its_own_window_size() -> void:
+	var path := OS.get_temp_dir().path_join("agent-town-test-%d" % randi()).path_join("settings.cfg")
+	var a := TownSettings.new(path)
+	check_eq(a.compact_view, false, "off by default")
+	a.window_position = Vector2i(100, 50)
+	a.window_width = 968
+	a.window_height = 900
+	a.window_screen = 0
+	a.compact_view = true
+	a.save()
+	var b := TownSettings.new(path)
+	b.use_view(true, 484)
+	check_eq([b.compact_view, b.window_position, b.window_width, b.window_height], [true, Vector2i(100, 50), 484, 450],
+		"first time compact: half the height, wide enough for the office at the compact scale")
+	b.window_width = 500
+	b.window_height = 300
+	b.save()
+	var c := TownSettings.new(path)
+	c.use_view(true, 484)
+	check_eq([c.window_width, c.window_height], [500, 300], "compact keeps its own size")
+	var d := TownSettings.new(path)
+	d.use_view(false, 968)
+	check_eq([d.window_width, d.window_height], [968, 900], "the normal size is untouched")
+	DirAccess.remove_absolute(path)
+	DirAccess.remove_absolute(path.get_base_dir())

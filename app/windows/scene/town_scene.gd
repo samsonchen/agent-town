@@ -528,6 +528,19 @@ func hidden_meter_sessions() -> Array:
 	return out
 
 
+## Every character in a shown block, for auto-scroll: {"id", "local" (its position in its block),
+## "floor" (its spot on the office floor)}. The CEO while the user walks it is left out: the view
+## already follows the CEO then.
+func character_spots() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for a: TownActor in actors.values():
+		if not on_screen(a) or a.steering or not is_instance_valid(a.root) or not a.root.is_inside_tree():
+			continue
+		var g := a.root.global_position
+		out.append({"id": a.id, "local": a.root.position, "floor": Vector2(g.x, g.z)})
+	return out
+
+
 ## True for characters on screen.
 func on_screen(a: TownActor) -> bool:
 	return not hidden.has(a.block_id)

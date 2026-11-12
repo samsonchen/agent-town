@@ -8,7 +8,7 @@ It has its own version number, separate from the macOS app and from town-link. T
 
 Included: the office and its blocks, the CEO's and the Chief of Staff's calls, staff and the resource bench, desk workers, operators, approvals, the context bar, the sounds, and the tray menu. That is about scenes 1 to 12 of the main spec.
 
-Next, before any release (W2 in [roadmap.md](roadmap.md)): the Dispatcher's board (scenes 13 and 14) and compaction (17). Walking the CEO, with the tips, Hide idle project blocks, the Inspector (15) and messages (16) are in. The installer and signing come last, once every feature is confirmed.
+Next, before any release (W2 in [roadmap.md](roadmap.md)): the Dispatcher's board (scenes 13 and 14) and compaction (17). Walking the CEO, with the tips, Hide idle project blocks (with the hidden blocks' context bars), compact view, small windows, auto-scroll, the Inspector (15) and messages (16) are in. The installer and signing come last, once every feature is confirmed.
 
 ## Differences from the macOS app
 
@@ -18,6 +18,7 @@ Next, before any release (W2 in [roadmap.md](roadmap.md)): the Dispatcher's boar
 | Menu | The menu bar menu | The same items in the tray icon's menu (Show tips is in Settings → Office, as on the Mac). A left click on the icon shows the window. Windows 11 first puts a new tray icon among the hidden icons (the ^ arrow); it can be dragged out to stay in view. |
 | Sounds | macOS system sounds (Glass, Ping, Pop) | Windows system sounds from `C:\Windows\Media`, played from there and never bundled: completion `Windows Notify System Generic.wav`, approval `Windows Notify Messaging.wav`, dispatch `Windows Ringout.wav` (an outgoing ring). A missing file plays nothing. |
 | Sound choices (spec: sound settings) | The sounds in `/System/Library/Sounds` | Every WAV file in `C:\Windows\Media` (70 on Windows 11), listed by name without `.wav`, sorted, with the default first. Defaults: completion `Windows Notify System Generic`, approval `Windows Notify Messaging`, dispatch `Windows Ringout`. Own files: WAV, MP3 or Ogg Vorbis (what Godot loads at run time); the path is kept, the file is not copied. |
+| Window sizes | Points; the smallest window is 320 × 240 | Pixels; the smallest window is 320 × 240. Compact view keeps its own window size, saved in its own section of `settings.cfg` |
 | Open at login | A login item macOS manages | An entry in the user's startup apps (Settings → Apps → Startup) |
 | Language | Follows the macOS language list | Follows the Windows display language: `zh_TW`, `zh_HK`, `zh_MO` and any `zh_Hant` locale get Traditional Chinese; every other locale, including Simplified Chinese, gets English |
 | Font | System font for now; Cubic 11 planned | Cubic 11 (俐方體11號) from the first version, because Traditional Chinese must show and the engine's default font has no Chinese characters |

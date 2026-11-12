@@ -8,12 +8,18 @@ extends Node
 ##   godot --path app/windows -- --demo ../../protocol/fixtures/01-basic-ticket.json [--speed N]
 ##         [--snapshot out.png --at SECONDS[,SECONDS…]] [--language en|zh-Hant] [--open settings|about]
 ##         [--keys "down:1.5,right:1,h"] [--clicks "95:270@2,300:500@6"] [--hide-idle SECONDS]
+##         [--compact yes] [--resize WxH]
+## --compact yes shows compact view for this run; --resize shrinks the window 8 s in, as a drag would.
 ## A run with --snapshot never starts the server, so it cannot take the endpoint from the running app.
 ## Gaps between events keep their timing, each capped at 4 s and divided by `--speed`.
 
-const PIXELS_PER_METER := 110.0 ## the office is shown at this size when it fits
-const MIN_PIXELS_PER_METER := 70.0
-const MIN_HEIGHT := 480
+## The office is shown at 110 pixels per meter when it fits, never under 70; half that in compact view.
+static var PIXELS_PER_METER := 110.0
+static var MIN_PIXELS_PER_METER := 70.0
+static var MIN_HEIGHT := 480
+## The smallest window: a corner of a laptop screen. A window smaller than the office scrolls.
+const MIN_SIZE := Vector2i(320, 240)
+const AUTO_SCROLL_PAUSE := 10000 ## msec the user's own scrolling, or walking the CEO, holds auto-scroll off
 
 enum Menu { ABOUT, SHOW, ON_TOP, SOUND, SETTINGS, QUIT }
 
@@ -35,14 +41,29 @@ var _about_window: AboutWindow
 var _args: Dictionary = {}
 var _tip: PanelContainer
 var _tip_label: Label
+var _last_office := Vector2.ZERO ## the office size the window was last fitted to
+# Auto-scroll (spec: the office): where each character was, which ones walk, and when the user
+# last took the view.
+var _seen_spots: Dictionary = {} ## id -> Vector3, position in its block at the last look
+var _moving_until: Dictionary = {} ## id -> msec it still counts as walking
+var _auto_paused_until := 0
+var _auto_target: Variant = null ## Vector2 pan, or null
+var _auto_clock := 0.0
 
 
 func _ready() -> void:
 	_args = _parse_args(OS.get_cmdline_user_args())
 	# --language en|zh-Hant overrides the setting for this run (for checking screens).
 	labels = TownLabels.new(_args.get("language", settings.language))
+	# Compact view is read once here, so a change in Settings applies after a restart.
+	ViewScale.set_compact(settings.compact_view or _args.get("compact", "") == "yes")
+	PIXELS_PER_METER = 110.0 * ViewScale.world
+	MIN_PIXELS_PER_METER = 70.0 * ViewScale.world
+	MIN_HEIGHT = roundi(480 * ViewScale.world)
+	settings.use_view(ViewScale.compact, ceili((2.0 * Layout.MARGIN + Layout.BLOCK_WIDTH) * PIXELS_PER_METER))
 	var w := get_window()
 	w.title = "agent-town"
+	w.min_size = MIN_SIZE
 	get_tree().auto_accept_quit = false # closing the window hides it; Quit is in the tray menu
 
 	add_child(store)
@@ -68,7 +89,9 @@ func _ready() -> void:
 	_apply_sounds()
 	_apply_office()
 	scene.sound.connect(audio.play)
-	scene.office_resized.connect(func(_s: Vector2) -> void: _fit_window())
+	scene.office_resized.connect(func(_s: Vector2) -> void:
+		_fit_window(_last_office)
+		_last_office = scene.office_size)
 	w.size_changed.connect(_update_camera)
 	w.focus_exited.connect(func() -> void: scene.ceo_driver.release_keys())
 	scene.ceo_driver.moved.connect(_follow)
@@ -81,6 +104,11 @@ func _ready() -> void:
 	_settings_window = SettingsWindow.new(settings, labels, audio)
 	_settings_window.sounds_changed.connect(_apply_sounds)
 	_settings_window.office_changed.connect(_apply_office)
+	_settings_window.restart_requested.connect(func() -> void:
+		_remember_window()
+		settings.save()
+		OS.set_restart_on_exit(true, OS.get_cmdline_args())
+		get_tree().quit())
 	_settings_window.visible = false
 	_settings_window.opacity_changed.connect(_apply_opacity)
 	add_child(_settings_window)
@@ -88,7 +116,11 @@ func _ready() -> void:
 	_about_window.visible = false
 	add_child(_about_window)
 	_call_window("hide_from_taskbar", [_hwnd()])
-	_fit_window()
+	# Sessions already open; a restored height the user made shorter than the office stays.
+	_fit_window(scene.office_size if settings.window_height > 0 else null)
+	_last_office = scene.office_size
+	if _args.has("resize"):
+		_resize_later(_args["resize"])
 	if not settings.show_window and not _args.has("snapshot"):
 		_set_shown(false)
 
@@ -131,6 +163,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventMouseButton and (event as InputEventMouseButton).pressed:
 		var mb := event as InputEventMouseButton
 		var step := 0.6
+		if mb.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN, MOUSE_BUTTON_WHEEL_LEFT, MOUSE_BUTTON_WHEEL_RIGHT]:
+			_pause_auto_scroll() # the user's own scrolling holds for a while
 		match mb.button_index:
 			MOUSE_BUTTON_LEFT:
 				scene.ceo_driver.click(mb.position, camera)
@@ -151,6 +185,7 @@ func _pan_by(d: Vector2) -> void:
 
 ## Pans so the CEO stays inside the middle of the window while walking.
 func _follow(spot: Vector2) -> void:
+	_pause_auto_scroll() # the user is walking the CEO
 	var size := Vector2(get_window().size)
 	var p := camera.unproject_position(Vector3(spot.x, 0.3, spot.y))
 	var m := size * 0.2
@@ -343,8 +378,9 @@ func _restore_window() -> void:
 	var pos: Vector2i = settings.window_position
 	if not rect.has_point(pos + Vector2i(40, 10)):
 		return
-	if settings.window_width >= 320:
-		w.size = Vector2i(mini(settings.window_width, rect.size.x), w.size.y)
+	var width := mini(maxi(settings.window_width, MIN_SIZE.x), rect.size.x) if settings.window_width > 0 else w.size.x
+	var height := mini(maxi(settings.window_height, MIN_SIZE.y), rect.size.y) if settings.window_height > 0 else w.size.y
+	w.size = Vector2i(width, height)
 	w.position = pos
 
 
@@ -352,6 +388,7 @@ func _remember_window() -> void:
 	var w := get_window()
 	settings.window_position = w.position
 	settings.window_width = w.size.x
+	settings.window_height = w.size.y
 	settings.window_screen = w.current_screen
 
 
@@ -390,20 +427,100 @@ func _update_camera() -> void:
 
 ## Makes the window as tall as the office at the current width's scale, keeping its top edge and
 ## staying on the screen (spec: the window grows with the office). A taller office scrolls.
-func _fit_window() -> void:
+## A window the user made shorter than the office (`before`, the office it was showing) keeps its
+## height and auto-scrolls instead, so a small window on a laptop stays small.
+func _fit_window(before: Variant = null) -> void:
 	var w := get_window()
 	if w.mode != Window.MODE_WINDOWED:
 		_update_camera()
 		return
 	var ppm := minf(PIXELS_PER_METER, maxf(MIN_PIXELS_PER_METER, float(w.size.x) / maxf(1.0, scene.office_size.x)))
-	var wanted := maxi(MIN_HEIGHT, ceili(_office_pixels(ppm).y))
 	var usable := DisplayServer.screen_get_usable_rect(w.current_screen)
+	if before != null and (before as Vector2) != Vector2.ZERO:
+		var shown := (before as Vector2).y * sin(TownScene.PITCH) * ppm
+		if w.size.y < shown - 2.0 and w.size.y < usable.size.y - 42:
+			_update_camera()
+			return
+	var wanted := maxi(MIN_HEIGHT, ceili(_office_pixels(ppm).y))
 	var height := mini(wanted, usable.size.y - 40)
 	if absi(w.size.y - height) > 1:
 		var top := w.position.y
 		w.size = Vector2i(w.size.x, height)
 		w.position = Vector2i(w.position.x, maxi(usable.position.y + 30, mini(top, usable.end.y - height)))
 	_update_camera()
+
+
+# --- Auto-scroll ----------------------------------------------------------------------------
+
+func _process(delta: float) -> void:
+	_auto_clock += delta
+	if _auto_clock >= 0.033: # about 30 times a second
+		_auto_clock = 0.0
+		_auto_scroll_step()
+
+
+func _pause_auto_scroll() -> void:
+	_auto_paused_until = Time.get_ticks_msec() + AUTO_SCROLL_PAUSE
+	_auto_target = null
+
+
+## The floor spots of characters walking now: those whose position in their block changed since
+## the last look (a block moving down when another is added does not count). A walker stays counted
+## 0.6 s after stopping, so a pause between legs of a walk does not drop it.
+func _movers(now: int) -> Array[Vector2]:
+	var seen: Dictionary = {}
+	var out: Array[Vector2] = []
+	for c: Dictionary in scene.character_spots():
+		var id: String = c["id"]
+		seen[id] = c["local"]
+		if _seen_spots.has(id) and (_seen_spots[id] as Vector3).distance_to(c["local"]) > 0.002:
+			_moving_until[id] = now + 600
+		if int(_moving_until.get(id, 0)) > now:
+			out.append(c["floor"])
+	_seen_spots = seen
+	for id: String in _moving_until.keys():
+		if not seen.has(id) or int(_moving_until[id]) <= now:
+			_moving_until.erase(id)
+	return out
+
+
+## One step of auto-scroll: when the office does not fit, ease the view toward the window-sized
+## area with the most walking characters. Walking the CEO and the user's own scrolling come first.
+## Port of `autoScrollStep` in app/macos/Sources/AgentTown/TownView.swift.
+func _auto_scroll_step() -> void:
+	var size := Vector2(get_window().size)
+	var lim := _pan_limit(size)
+	if lim.x <= 0.01 and lim.y <= 0.01:
+		return # the whole office is in view
+	var now := Time.get_ticks_msec()
+	var movers := _movers(now)
+	if now < _auto_paused_until:
+		return
+	var ppm := pixels_per_meter(size)
+	var half := Vector2(size.x / ppm / 2.0, size.y / ppm / 2.0 / sin(TownScene.PITCH))
+	var middle := scene.office_size / 2.0
+	var current := middle + pan.clamp(-lim, lim)
+	var center: Variant = ViewFocus.best_center(movers, current, half * 0.8)
+	if center != null:
+		_auto_target = ((center as Vector2) - middle).clamp(-lim, lim)
+	if _auto_target == null:
+		return
+	var from := pan.clamp(-lim, lim)
+	var d: Vector2 = (_auto_target as Vector2) - from
+	if d.length() <= 0.01:
+		return
+	pan = from + d * 0.12 # eases in over about half a second
+	_update_camera()
+
+
+## --resize WxH: 8 seconds in, once the demo's blocks are open, shrink the window as a user's drag
+## would, to see auto-scroll.
+func _resize_later(spec: String) -> void:
+	var wh := spec.split("x")
+	if wh.size() != 2:
+		return
+	await get_tree().create_timer(8.0).timeout
+	get_window().size = Vector2i(maxi(int(wh[0]), MIN_SIZE.x), maxi(int(wh[1]), MIN_SIZE.y))
 
 
 # --- Demo -----------------------------------------------------------------------------------
