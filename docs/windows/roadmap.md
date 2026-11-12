@@ -46,6 +46,8 @@ Each feature is confirmed by the user in the running app before the release.
 - [ ] The Dispatcher's schedule board with its cards and the projects line (scenes 13 and 14)
 - [ ] Compaction: the stack of notes and "Notes tidied" (scene 17)
 
+- [ ] `app/windows/scripts/run-local.ps1` (and `run-local.sh` for Git Bash), like the Mac's `app/macos/scripts/run-local.sh`: build-free runs from the checkout for the user to try a change before a release; a demo by default, `-Live` for real sessions (quits and later restarts an installed copy), and the options listed in `todo.md` section 9 ("a script to try a build before releasing")
+
 ## W3: release (last, once every feature is confirmed)
 
 

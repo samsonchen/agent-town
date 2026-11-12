@@ -136,6 +136,26 @@ Built in the macOS app 1.0.8; `docs/spec.md` → Updates has the details. The Wi
   - **Dev flags** on the Mac, worth copying: `--updates` opens the Updates window, `--fake-update` makes up a newer app and town-link (99.0.0) without the network, `--check-now` makes a real check even in a demo (a demo makes no automatic check).
   - **Mac code:** `app/macos/Sources/TownCore/Updates.swift` (version comparison, picking the release by tag prefix, reading plugin.json; tests in `Tests/TownCoreTests/UpdatesTests.swift`), `app/macos/Sources/AgentTown/Updates.swift` (`Updater`: the daily check, the session list, `MenuIcon`, `UpdatesView`), and `TownStore.pluginVersions` (each open session's version from `session.open`).
 
+### Windows app: a script to try a build before releasing (2026-11-12)
+
+The Mac has `app/macos/scripts/run-local.sh` (added 2026-11-12; read it for the behavior to match). The Windows app should have the same, so the user can try a change from the checkout without making the installer:
+
+- [ ] `app/windows/scripts/run-local.ps1` (PowerShell), plus a `run-local.sh` that runs it from Git Bash, as `native/build.sh` does for `build.ps1`. Usage text at the top, shown by `-Help`.
+- [ ] Finds Godot 4.7.2 from `GODOT`, else `godot` on `PATH`, else fails with a message saying how to set `GODOT`. Never a path with a user name written into the script. Runs `--path app/windows` with the options after `--`, so the app reads them from `OS.get_cmdline_user_args()`.
+- [ ] Default, with no options: the demo `protocol/fixtures/05-two-projects-messages.json`, the office window shown, no sounds. A demo starts no server, so an installed agent-town keeps working beside it.
+- [ ] Options, any number, in any order, matching the Mac's:
+  - `-Demo 01`…`05`, or a path to a fixture; a fixture that isn't there fails with a message.
+  - `-Live`: real Claude Code sessions instead of a demo (see below).
+  - `-FakeUpdate`, `-CheckNow`, `-Updates`: the update notices' dev flags (`todo.md` → "Windows app: update notices"); add them to the app with that feature.
+  - `-Settings`: open the Settings window (the app's `--open settings`).
+  - `-Sound`: play the demo's sounds.
+  - `-Zh`, `-En`: the language (the app's `--language zh-Hant` or `en`).
+  - `-Speed N`: play the demo N times as fast.
+  - Anything after `--` goes to the app as is.
+- [ ] `-Live`: the installed agent-town and this run would both write `%APPDATA%\agent-town\endpoint.json`. If the installed app is running, quit it first and start it again when this run ends, also after Ctrl+C. Until the installer exists there is nothing to quit; then use the path the installer writes.
+- [ ] The run keeps its own settings, apart from the installed app's, as on the Mac. If the Godot project and the exported app share `user://`, give the run a separate settings file (for example through a flag the script passes).
+- [ ] Docs: the usage in `docs/windows/README.md` (or wherever the Windows dev steps are), and a line in `CLAUDE.md` next to the Mac's, so a session points the user to it for testing.
+
 ### Shared material a second app needs
 
 - [x] **Expected state for each fixture.** Done (2026-11-11): `protocol/fixtures/expected/`, one file per fixture with the state after each event that changes it; format in its README; checked by `ExpectedStateTests.swift`. The Windows app runs the same fixtures against the same answers.
