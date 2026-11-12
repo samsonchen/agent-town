@@ -237,9 +237,9 @@ export class Town {
 
   // -- session
 
-  private openFields?: { projectName: string; surface: string; ccVersion: string; model?: string }
+  private openFields?: { projectName: string; surface: string; ccVersion: string; model?: string; pluginVersion?: string }
 
-  open(fields: { projectName: string; surface: string; ccVersion: string; model?: string }) {
+  open(fields: { projectName: string; surface: string; ccVersion: string; model?: string; pluginVersion?: string }) {
     this.openFields = fields
     this.chiefModel = fields.model
     this.emit({ type: 'session.open', ...fields })

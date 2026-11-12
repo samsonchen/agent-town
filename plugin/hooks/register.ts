@@ -299,11 +299,13 @@ export const register: Register = on => {
 
       const version = await $.session.version()
       const model = await $.session.model()
+      const plugin = await pluginVersion($) // so the app can tell the user about a newer town-link
       town.open({
         projectName: name,
         surface: e.isInteractive === false ? 'headless' : (e.surface ?? 'terminal'),
         ccVersion: version.version,
         ...(model ? { model } : {}),
+        ...(plugin ? { pluginVersion: plugin } : {}),
       })
       // The context window's size before the first response fills it.
       const usage = await $.session.usage().catch(() => undefined)

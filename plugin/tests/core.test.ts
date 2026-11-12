@@ -467,6 +467,16 @@ describe('reconnecting', () => {
   })
 })
 
+describe('plugin version', () => {
+  test('session.open carries town-link\'s version, again when reopened', async () => {
+    const t = new Town(ids())
+    t.open({ projectName: 'demo', surface: 'terminal', ccVersion: '2.1.319', pluginVersion: '1.0.3' })
+    expect(t.drain()).toEqual([{ type: 'session.open', projectName: 'demo', surface: 'terminal', ccVersion: '2.1.319', pluginVersion: '1.0.3' }])
+    t.reopen()
+    expect(t.drain()).toEqual([{ type: 'session.open', projectName: 'demo', surface: 'terminal', ccVersion: '2.1.319', pluginVersion: '1.0.3' }])
+  })
+})
+
 describe('approvals', () => {
   test('a wait in auto mode is marked so the app stays quiet', async () => {
     const t = new Town(ids())
