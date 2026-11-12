@@ -71,6 +71,11 @@ if (-not $iscc) {
 }
 if (-not $iscc) { Fail 'Inno Setup 6 not found: install it (winget install JRSoftware.InnoSetup) or set $env:ISCC' }
 
+# From here on, outside programs (git, gh, Godot, Inno Setup) are judged by their exit codes. With
+# 'Stop', Windows PowerShell 5.1 turns anything they print to stderr (such as gh's "release not
+# found") into a fatal error.
+$ErrorActionPreference = 'Continue'
+
 if ($Draft -and -not $Publish) { Fail '-Draft goes with -Publish' }
 if ($Publish) {
   if (-not (Get-Command gh -ErrorAction SilentlyContinue)) { Fail '-Publish needs the GitHub CLI (gh)' }
@@ -82,6 +87,8 @@ if ($Publish) {
   }
   gh release view $tag --repo samsonchen/agent-town *> $null
   if ($LASTEXITCODE -eq 0) { Fail "the release $tag already exists: raise config/version first" }
+  gh auth status *> $null
+  if ($LASTEXITCODE -ne 0) { Fail 'gh is not signed in: run gh auth login' }
 }
 
 # -- Tests -------------------------------------------------------------------------------------
