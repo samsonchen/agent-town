@@ -32,6 +32,34 @@
 "Only when a task takes at least" = "工作至少花了";
 "seconds (0: every task)" = "秒才播放（0：每個工作）";
 "Quit agent-town" = "結束 agent-town";
+
+/* Updates */
+"Updates" = "更新";
+"Check for updates automatically" = "自動檢查更新";
+"Check now" = "立即檢查";
+"Checking…" = "檢查中…";
+"Last checked: %@" = "上次檢查：%@";
+"Not checked yet." = "尚未檢查。";
+"The last check failed. It will try again later." = "上次檢查失敗，稍後會再試。";
+"agent-town %@ is available…" = "agent-town %@ 已推出…";
+"town-link %@ is available…" = "town-link %@ 已推出…";
+"agent-town %@ is available" = "agent-town %@ 已推出";
+"town-link %@ is available" = "town-link %@ 已推出";
+"Click to see how to update." = "點一下查看更新方式。";
+"agent-town: an update is available" = "agent-town：有新版本";
+"You have %@." = "你目前的版本是 %@。";
+"agent-town %@ is up to date." = "agent-town %@ 已是最新版本。";
+"View release" = "查看版本頁面";
+"Installed with Homebrew. Run:" = "這是用 Homebrew 安裝的，請執行：";
+"Download" = "下載";
+"Quit agent-town, open the downloaded file and drag agent-town to Applications, replacing the old copy." = "結束 agent-town，打開下載的檔案，把 agent-town 拖到「應用程式」，取代舊的版本。";
+"These sessions use an older town-link:" = "這些 session 使用舊版的 town-link：";
+"1.0.2 or older" = "1.0.2 或更舊";
+"(%lld sessions)" = "（%lld 個 session）";
+"Then restart those Claude Code sessions: a session keeps the town-link it started with." = "接著重新啟動這些 Claude Code session：session 會沿用它啟動時的 town-link。";
+"town-link %@ is the newest. No open session uses an older one." = "town-link 最新版本是 %@，沒有開啟中的 session 使用舊版。";
+"Copy" = "拷貝";
+"Copied" = "已拷貝";
 "Close" = "關閉";
 
 /* About */

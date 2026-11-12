@@ -31,6 +31,14 @@ enum Prefs {
         let d = UserDefaults.standard // double(forKey:) also reads a number given as a launch argument
         return clampIdleHide(d.object(forKey: idleHideSeconds) == nil ? 5 : d.double(forKey: idleHideSeconds))
     }
+    /// Check GitHub for a newer app and town-link once a day. Default on (spec: Updates).
+    static let checkForUpdatesKey = "checkForUpdates"
+    static var checkForUpdates: Bool { isOn(checkForUpdatesKey) }
+    /// When the last update check got an answer.
+    static let lastUpdateCheck = "lastUpdateCheck"
+    /// The app and town-link versions a notification was already posted for.
+    static let notifiedAppVersion = "notifiedAppVersion"
+    static let notifiedPluginVersion = "notifiedPluginVersion"
     /// The UI language (`en`, `zh-Hant`); absent or empty follows macOS.
     static let language = "language"
     /// The office window's frame in screen coordinates, as NSStringFromRect writes it.
@@ -86,15 +94,23 @@ enum Prefs {
     }
 }
 
-/// The menu bar menu: About, show the window, stay on top, sound, Settings and Quit.
+/// The menu bar menu: any update notices, About, show the window, stay on top, sound, Settings and Quit.
 struct TownMenu: View {
     @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
     @AppStorage(Prefs.showWindow) private var showWindow = true
     @AppStorage(Prefs.stayOnTop) private var stayOnTop = false
     @AppStorage(Prefs.sound) private var sound = true
+    @ObservedObject private var updater = Updater.shared
 
     var body: some View {
+        if let r = updater.appUpdate {
+            Button(String(format: Labels.text("agent-town %@ is available…"), r.version)) { updater.showWindow() }
+        }
+        if let v = updater.pluginUpdate {
+            Button(String(format: Labels.text("town-link %@ is available…"), v)) { updater.showWindow() }
+        }
+        if updater.hasUpdate { Divider() }
         Button(Labels.text("About agent-town")) {
             openWindow(id: "about")
             NSApp.activate(ignoringOtherApps: true)
@@ -123,13 +139,14 @@ struct TownMenu: View {
     }
 }
 
-/// Settings: Open at login, the language, the office window (opacity, idle blocks, tips), and the sounds.
+/// Settings: Open at login, the language, the office window (opacity, idle blocks, tips), the sounds and updates.
 struct SettingsView: View {
     @AppStorage(Prefs.language) private var language = ""
     @AppStorage(Prefs.opacity) private var opacity = 1.0
     @AppStorage(Prefs.hideIdle) private var hideIdle = false
     @AppStorage(Prefs.idleHideSeconds) private var idleSeconds = 5.0
     @AppStorage(Prefs.showTips) private var showTips = true
+    @AppStorage(Prefs.checkForUpdatesKey) private var checkUpdates = true
     @State private var openAtLogin = LoginItem.isOn
     @State private var loginNote: String?
 
@@ -189,6 +206,10 @@ struct SettingsView: View {
                 Toggle(Labels.text("Show tips"), isOn: $showTips)
             }
             SoundSettingsView()
+            Section(Labels.text("Updates")) {
+                Toggle(Labels.text("Check for updates automatically"), isOn: $checkUpdates)
+                CheckRow()
+            }
         }
         .formStyle(.grouped)
         .frame(width: 540)

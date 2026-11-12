@@ -72,6 +72,11 @@ struct AgentTownApp: App {
             .defaultLaunchBehavior(.suppressed)
             .restorationBehavior(.disabled)
 
+        Window(Labels.text("Updates"), id: "updates") { UpdatesView() }
+            .windowResizability(.contentSize)
+            .defaultLaunchBehavior(.suppressed)
+            .restorationBehavior(.disabled)
+
         Window(Labels.text("Settings"), id: "settings") { SettingsView() }
             .windowResizability(.contentSize)
             .defaultLaunchBehavior(.suppressed)
@@ -87,17 +92,22 @@ struct AgentTownApp: App {
     }
 }
 
-/// The menu bar icon. It also opens the office window at launch when it should be open but is not:
+/// The menu bar icon, with a dot while an update is available. It also opens the office window at launch when it should be open but is not:
 /// started at login, the app gets no window from `defaultLaunchBehavior(.presented)`, and the user
 /// had to hide and show it. The label is built at launch, unlike the menu, so it can do this.
 private struct LaunchOpener: View {
     @Environment(\.openWindow) private var openWindow
+    @ObservedObject private var updater = Updater.shared
 
     var body: some View {
-        Image(systemName: "building.2")
+        // With a dot while an update is available (spec: Updates).
+        Image(nsImage: MenuIcon.image(dot: updater.hasUpdate))
             .task {
                 let args = CommandLine.arguments
+                let open = openWindow
+                updater.openWindow = { open(id: $0) }
                 if args.contains("--settings") { openWindow(id: "settings") } // to look at Settings
+                if args.contains("--updates") { openWindow(id: "updates") } // to look at the Updates window
                 guard Prefs.isOn(Prefs.showWindow), !args.contains("--demo"), !args.contains("--spike") else { return }
                 // Give SwiftUI the first chance to present the window itself.
                 try? await Task.sleep(for: .seconds(1.5))
@@ -155,6 +165,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 exit(0)
             }
             return
+        }
+
+        // Update notices; a demo makes no automatic check, so a check stays quiet and offline.
+        Updater.installNotificationHandler()
+        Task { @MainActor in
+            Updater.shared.start(store: TownApp.shared.store, automatic: value("--demo") == nil && value("--snapshot") == nil)
         }
 
         if let fixture = value("--demo") {

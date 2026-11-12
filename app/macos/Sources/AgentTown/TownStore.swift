@@ -8,6 +8,9 @@ import TownCore
 final class TownStore: ObservableObject {
     @Published private(set) var building = Building()
     @Published private(set) var lastEventAt: Date?
+    /// Each open session's town-link version from its `session.open`; "" when it sent none
+    /// (town-link 1.0.2 or older). For the update notice (spec: Updates).
+    @Published private(set) var pluginVersions: [String: String] = [:]
 
     var sound: SoundSettings {
         get { building.sound }
@@ -41,6 +44,7 @@ final class TownStore: ObservableObject {
         if Date().timeIntervalSince(lastExpiry) > 5 {
             lastExpiry = Date()
             emit(building.expireStale(nowMs: Self.nowMs))
+            prunePluginVersions()
         }
     }
 
@@ -48,8 +52,25 @@ final class TownStore: ObservableObject {
         let now = Self.nowMs
         for e in events {
             log("event \(e.type) seq=\(e.seq) session=\(e.sessionId.prefix(8)) project=\(e.projectId)")
+            if e.type == "session.open", pluginVersions[e.sessionId] != (e.string("pluginVersion") ?? "") {
+                pluginVersions[e.sessionId] = e.string("pluginVersion") ?? ""
+            }
             emit(building.apply(e, receivedMs: now))
         }
+        if !events.isEmpty { prunePluginVersions() }
+    }
+
+    /// Forgets the versions of sessions that have closed or expired.
+    private func prunePluginVersions() {
+        let open = Set(building.blocks.values.flatMap { $0.chiefs.keys })
+        if pluginVersions.keys.contains(where: { !open.contains($0) }) {
+            pluginVersions = pluginVersions.filter { open.contains($0.key) }
+        }
+    }
+
+    /// The project name of an open session.
+    func projectName(ofSession id: String) -> String? {
+        building.blocks.values.first { $0.chiefs[id] != nil }?.name
     }
 
     private func emit(_ changes: [Change]) {
