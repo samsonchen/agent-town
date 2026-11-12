@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-agent-town 在 macOS 上把 Claude Code 的工作畫成一間小辦公室，從上往下看，裡面是 3D 角色。俯視的畫面受到 Gather Town 的啟發。你是執行長。每個 Claude Code session 是一位幕僚長，各自帶著自己的職員。你可以看著他們接你的工單、找職員來做事、在背景跑工作、等你核准，最後打電話回報。
+agent-town 在 macOS 和 Windows 上把 Claude Code 的工作畫成一間小辦公室，從上往下看，裡面是 3D 角色。俯視的畫面受到 Gather Town 的啟發。你是執行長。每個 Claude Code session 是一位幕僚長，各自帶著自己的職員。你可以看著他們接你的工單、找職員來做事、在背景跑工作、等你核准，最後打電話回報。
 
 ## 1. agent-town 是什麼
 
@@ -19,8 +19,8 @@ agent-town 在 macOS 上把 Claude Code 的工作畫成一間小辦公室，從�
 
 ### 由什麼組成
 
-- **town-link**：一個 Claude Code plugin。它觀察 Claude Code 在做什麼，透過本機連線把簡短的事件訊息傳給你 Mac 上的 app。它不會改變 Claude Code 的任何行為。
-- **agent-town app**：一個 macOS 選單列 app，用 RealityKit 畫出辦公室，並播放聲音。
+- **town-link**：一個 Claude Code plugin。它觀察 Claude Code 在做什麼，透過本機連線把簡短的事件訊息傳給你電腦上的 app。它不會改變 Claude Code 的任何行為。
+- **agent-town app**：在 macOS 上是選單列 app，用 RealityKit 畫出辦公室，並播放聲音；在 Windows 上是用 Godot 做的系統匣 app，畫出同樣的辦公室。
 
 除了每個工作幾個簡短的請求，沒有任何資料離開你的 Mac：town-link 用你自己的 Claude 方案或 API key 請 Haiku 為工作取一個標題、判斷工作類型，並為職員選職稱。工單上顯示的是你輸入的 prompt 原文。
 
@@ -74,7 +74,7 @@ claude plugin update town-link@agent-town
 
 和所有帶 hooks 模組的 plugin 一樣，town-link 以你的使用者權限執行。安裝前想看它處理哪些事件、呼叫哪些功能，可以在這個 repo 的 clone 裡執行 `claude plugin validate plugin`。
 
-### App
+### macOS 上的 App
 
 需要 macOS 15 以上。用 [Homebrew](https://brew.sh)：
 
@@ -142,8 +142,8 @@ Claude Code 要直接在 Windows 上執行（終端機、Desktop app 的 Code �
 
 - 工單送達、工作完成、Claude Code 需要你核准時，都會有聲音，視窗隱藏時也一樣。
 - 選單列選單有「關於 agent-town」、「顯示 agent-town」、「保持在最上層」、「聲音」、「設定…」和「結束 agent-town」。「保持在最上層」會讓辦公室視窗留在其他 app 的視窗上方，即使你正在使用別的 app 也一樣。你的選擇在重新啟動後會保留，視窗也會在上次的位置打開。
-- 「設定」裡有語言（英文或繁體中文，預設跟隨 macOS）、「登入時開啟」、辦公室視窗的「不透明度」（10% 到 100%）、「精簡檢視」、「隱藏閒置的專案區塊」（可設定等幾秒）、「顯示提示」、音效和檢查更新。
-- 「設定」→「音效」可以調整 agent-town 的音量；派工、完成、待核准三種聲音各有開關、聲音選擇（macOS 內建聲音或你自己的檔案）和播放按鈕。「完成」下方可以設定最短工作時間（秒），只有超過這個時間的工作才會播放完成聲。
+- 「設定」裡有語言（英文或繁體中文，預設跟隨 macOS 或 Windows）、「登入時開啟」、辦公室視窗的「不透明度」（10% 到 100%）、「精簡檢視」、「隱藏閒置的專案區塊」（可設定等幾秒）、「顯示提示」、音效和檢查更新。
+- 「設定」→「音效」可以調整 agent-town 的音量；派工、完成、待核准三種聲音各有開關、聲音選擇（macOS 或 Windows 的系統聲音，或你自己的檔案）和播放按鈕。「完成」下方可以設定最短工作時間（秒），只有超過這個時間的工作才會播放完成聲。
 
 ## 4. 已知問題與限制
 
@@ -158,6 +158,6 @@ Claude Code 要直接在 Windows 上執行（終端機、Desktop app 的 Code �
 - **精簡檢視裡標籤可能重疊。** 辦公室是一半大小，文字是原本的 75%，所以並排角色的標籤（例如兩位幕僚長）可能重疊，視窗窄的時候比較明顯。
 - **工作標題和職稱會用到你的 Claude 方案。** 每個新工作會用你自己的方案或 API key 向 Haiku 發幾個簡短請求，選標題、工作類型和職稱。請求失敗時，招牌不顯示工作標題，帽子和職稱改用預設值。
 - **一個專案區塊最多顯示五個 session。** 後排有五個桌位，由幕僚長和前排坐滿時搬桌子進來的職員共用。五個桌位都有人時，再來的幕僚長會站在第一張桌子的位置，和原本的幕僚長疊在一起。
-- **只支援 macOS。** App 需要 macOS 15 以上。
+- **macOS 15 或 Windows 11。** macOS 版需要 macOS 15 以上；Windows 版需要 Windows 11（x64），而且 Claude Code 要直接在 Windows 上執行（不支援 WSL）。
 
 Claude Desktop 與 Cowork 的支援情況、文件和開發說明，請看[英文 README](README.md)。

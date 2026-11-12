@@ -2,7 +2,7 @@
 
 [繁體中文說明](README.zh-TW.md)
 
-agent-town shows Claude Code's work as a small office on macOS, seen from above, with 3D characters. The top-down view was inspired by Gather Town. You are the CEO. Each Claude Code session is a Chief of Staff with a staff of its own, and you can watch them take your tickets, call staff, run background jobs, wait for your approval and phone the report back.
+agent-town shows Claude Code's work as a small office on macOS and Windows, seen from above, with 3D characters. The top-down view was inspired by Gather Town. You are the CEO. Each Claude Code session is a Chief of Staff with a staff of its own, and you can watch them take your tickets, call staff, run background jobs, wait for your approval and phone the report back.
 
 ## 1. What agent-town is
 
@@ -19,8 +19,8 @@ While working on the sound, I noticed that Claude Code already says a lot about 
 
 ### What it is made of
 
-- **town-link**: a Claude Code plugin that watches what Claude Code does and sends short event messages to the app on your own Mac, over a local connection. It never changes what Claude Code does.
-- **The agent-town app**: a macOS menu bar app that draws the office with RealityKit and plays the sounds.
+- **town-link**: a Claude Code plugin that watches what Claude Code does and sends short event messages to the app on your own computer, over a local connection. It never changes what Claude Code does.
+- **The agent-town app**: on macOS, a menu bar app that draws the office with RealityKit and plays the sounds; on Windows, a tray app built with Godot that draws the same office.
 
 Nothing leaves your Mac except a few short requests per task: town-link asks Haiku, on your own Claude plan or API key, for a task title, the kind of task, and staff roles. Prompts are shown on tickets as you typed them.
 
@@ -74,7 +74,7 @@ claude plugin update town-link@agent-town
 
 Like every plugin with a hooks module, town-link runs with your user's permissions. To see every event it handles and every call it makes before you install it, run `claude plugin validate plugin` in a clone of this repo.
 
-### The app
+### The app on macOS
 
 Requires macOS 15 or later. With [Homebrew](https://brew.sh):
 
@@ -142,8 +142,8 @@ A strip across the top, with three people at their desks:
 
 - You hear a sound when a ticket arrives, when work is done, and when Claude Code needs your approval, even with the window hidden.
 - The menu bar menu has About, Show agent-town, Stay on top, Sound, Settings… and Quit. Stay on top keeps the office window above other apps' windows, even when another app is in front. Your choices are kept across restarts, and the window opens where you left it.
-- Settings has the language (English or Traditional Chinese, following macOS by default), Open at login, Opacity (10% to 100%) for the office window, Compact view, Hide idle project blocks (with how many seconds to wait), Show tips, the sounds, and update checks.
-- Settings → Sounds has a volume for agent-town's sounds, and for each sound (dispatch, completion, approval) an on/off switch, the sound (a macOS sound or a file of your own) and a Play button. Under completion, set a minimum task length in seconds so that only longer tasks play it.
+- Settings has the language (English or Traditional Chinese, following macOS or Windows by default), Open at login, Opacity (10% to 100%) for the office window, Compact view, Hide idle project blocks (with how many seconds to wait), Show tips, the sounds, and update checks.
+- Settings → Sounds has a volume for agent-town's sounds, and for each sound (dispatch, completion, approval) an on/off switch, the sound (a system sound of macOS or Windows, or a file of your own) and a Play button. Under completion, set a minimum task length in seconds so that only longer tasks play it.
 
 ## 4. Known issues and limitations
 
@@ -158,7 +158,7 @@ A strip across the top, with three people at their desks:
 - **Tags can overlap in compact view.** The text is 75% of its normal size on an office at half size, so tags of characters side by side (two Chiefs of Staff, for example) can overlap, mostly in a narrow window.
 - **Task titles and staff roles use your Claude plan.** Each new task makes a few short Haiku requests on your own plan or API key to pick a title, the kind of task and staff roles. If a request fails, the sign shows no task title and the hat and roles fall back to defaults.
 - **One project block shows up to five sessions.** The back row has five desk spots, shared by the Chiefs of Staff and by staff who carry in a desk when the front desks are full. A Chief of Staff who arrives when all five are taken stands on the first desk's spot, over the Chief already there.
-- **macOS only.** The app needs macOS 15 or later.
+- **macOS 15 or Windows 11.** The macOS app needs macOS 15 or later; the Windows app needs Windows 11 (x64) and native Windows Claude Code sessions (not WSL).
 
 ## 5. Claude Desktop and Cowork
 
