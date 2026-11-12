@@ -44,8 +44,10 @@ LicenseFile=..\..\..\LICENSE
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
-; The app keeps running in the tray when its window is closed; a newer installer stops it first.
-CloseApplications=force
+; A running copy can't be closed by Windows' Restart Manager: asked to close, the app hides in the
+; tray, so Setup reports it could not close it. Setup stops it itself instead (PrepareToInstall
+; below), and "Open agent-town" at the end starts the new one.
+CloseApplications=no
 RestartApplications=no
 
 [Languages]
@@ -72,3 +74,16 @@ Type: files; Name: "{userappdata}\agent-town\endpoint.json"
 [Registry]
 ; Settings → Open at login writes this value; the uninstaller removes it.
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: none; ValueName: "agent-town"; Flags: uninsdeletevalue dontcreatekey
+
+[Code]
+// Before the files are replaced: stop a running agent-town (the installed one; a copy run from
+// Godot is a different program), and give Windows a moment to release its files.
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  ResultCode: Integer;
+begin
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/IM agent-town.exe /F', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  if ResultCode = 0 then
+    Sleep(1000);
+  Result := '';
+end;
