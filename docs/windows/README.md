@@ -9,6 +9,7 @@ The Windows version of the agent-town app, planned and in progress. It draws the
 | [spec.md](spec.md) | What the first version includes, and how it differs from the macOS app |
 | [architecture.md](architecture.md) | The Godot app: its modules and how it uses the shared files |
 | [roadmap.md](roadmap.md) | Phases W0 to W2 |
+| [releasing.md](releasing.md) | Building the installer and publishing a `windows-v` release |
 | [verification.md](verification.md) | What was checked on Windows, and what is still to check |
 
 ## Trying a change

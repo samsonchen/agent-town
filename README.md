@@ -34,7 +34,7 @@ Nothing leaves your Mac except a few short requests per task: town-link asks Hai
 
 ## 2. Installing
 
-You need both parts: the plugin in Claude Code, and the app on your Mac.
+You need both parts: the plugin in Claude Code, and the app on your Mac or Windows PC.
 
 ### The town-link plugin
 
@@ -97,6 +97,18 @@ To update: `brew upgrade --cask agent-town`, or download the new `.dmg`.
 The plugin and the app have their own version numbers and are updated separately. `/town` shows the plugin's version, and About shows the app's. The numbers don't need to match: what matters is the protocol between them, which both versions check. If they ever can't work together, `/town` says so.
 
 The app checks GitHub once a day for a newer app and a newer town-link (Settings → Updates; it sends nothing about you). When one is out, a dot appears on the menu bar icon, the menu says which, and the Updates window shows the commands for how you installed it. A Claude Code session keeps the town-link it started with, so restart your sessions after updating the plugin.
+
+### The app on Windows
+
+Requires Windows 11 (x64). Download `agent-town-setup-<version>.exe` from the newest **agent-town for Windows** release on [Releases](https://github.com/samsonchen/agent-town/releases) (tags `windows-v<version>`) and run it. It installs for your user only, with no administrator prompt, and adds agent-town to the Start menu.
+
+The installer is not code-signed yet, so Windows shows "Windows protected your PC" the first time: click **More info**, then **Run anyway**.
+
+The app lives in the tray (the notification area), with no taskbar button; closing the office window hides it. Windows 11 first puts a new tray icon among the hidden icons (the **^** arrow); drag it out to keep it in view. To have it start when you sign in, turn on Settings → Open at login.
+
+To update, run the newer installer: it replaces the installed app and keeps your settings. Settings → Updates checks for a newer Windows release once a day, as on the Mac. To remove it: Settings → Apps → Installed apps → agent-town → Uninstall.
+
+Claude Code must run natively on Windows (the terminal, the Desktop app's Code tab, or VS Code). Sessions inside WSL can't reach the app.
 
 ## 3. The office
 

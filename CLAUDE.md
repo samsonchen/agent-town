@@ -27,6 +27,7 @@ A macOS menu bar app (Swift, RealityKit) that draws Claude Code's work as a smal
 - `app/macos/scripts/run-local.sh` builds and runs the app for the user to try a change before a release (a demo by default, `--live` for real sessions; `--help`). Point the user to it when they want to test.
 - `app/windows/scripts/run-local.ps1` (or `run-local.sh` from Git Bash) runs the Windows app from the checkout with Godot for the user to try a change (a demo by default, `-Live` for real sessions; `-Help`). Point the user to it when they want to test on Windows.
 - A release is `app/macos/scripts/release.sh --publish`, run by the user (auto mode refuses to publish). It publishes the GitHub release and pushes the cask; Homebrew sees a new version only after the cask is on `main`.
+- A Windows release is `app/windows/scripts/release.ps1 -Publish`, run by the user (see `docs/windows/releasing.md`); without `-Publish` it only builds the installer.
 - When behavior changes, update the docs that describe it (README, and `README.zh-TW.md` for sections 1–4, `docs/spec.md`, `docs/protocol.md`, `docs/architecture.md`, `docs/releasing.md`; for the Windows app, `docs/windows/`) and `todo.md`.
 - Never commit access tokens, passwords or other credentials. Signing and notarization secrets live only in the keychain or GitHub secrets.
 - Write in American English or Traditional Chinese (Taiwan); never Simplified Chinese. UI strings are keyed by their English text, with the Traditional Chinese in `zh-Hant.lproj/Localizable.strings`.
