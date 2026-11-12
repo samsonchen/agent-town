@@ -28,6 +28,8 @@ final class TownScene: ObservableObject {
     var blocks: [String: BlockNode] = [:]
     /// The blocks on screen, executive first, then each open project in the order it opened.
     var blockOrder: [String] = []
+    /// How many hidden blocks' context bars the layout has room for under the executive block.
+    var hiddenMeterRows = 0
     /// Project blocks kept off-screen while idle (Settings → Hide idle offices).
     var hidden: Set<String> = []
     /// When each shown block's work settled, for the idle delay.
@@ -460,9 +462,11 @@ final class TownScene: ObservableObject {
     /// Places the blocks in their grid and sizes the path around them.
     func relayout() {
         let n = blockOrder.count
+        hiddenMeterRows = hiddenMeterSessions().count
+        let extra = Layout.execExtra(rows: hiddenMeterRows)
         for (i, id) in blockOrder.enumerated() {
             guard let node = blocks[id] else { continue }
-            let o = Layout.blockOrigin(i, count: n)
+            let o = Layout.blockOrigin(i, count: n, execExtra: extra)
             var t = node.entity.transform
             t.translation = [o.x, 0, o.y]
             if node.placed {
@@ -473,21 +477,18 @@ final class TownScene: ObservableObject {
                 node.placed = true
             }
         }
-        updateOfficeSize()
+        let size = Layout.officeSize(count: n, execExtra: extra)
+        if size != officeSize {
+            officeSize = size
+            buildGround()
+        }
     }
 
-    /// The office's size for the blocks on screen, plus room under the last one for the context
-    /// bars of hidden blocks (Settings → Hide idle project blocks).
+    /// Re-places the blocks when the number of hidden blocks' context bars changes, since they
+    /// take room under the executive block.
     func updateOfficeSize() {
-        var size = Layout.officeSize(count: blockOrder.count)
-        let hiddenRows = hiddenMeterSessions().count
-        if hiddenRows > 0 {
-            let rows = Float(lastShownMeterRows + hiddenRows)
-            size.y += max(0, rows * Layout.meterRowDepth + 0.25 - Layout.margin)
-        }
-        guard size != officeSize else { return }
-        officeSize = size
-        buildGround()
+        guard hiddenMeterSessions().count != hiddenMeterRows else { return }
+        relayout()
     }
 
     /// Sessions in hidden blocks, in the order their projects and sessions opened.
@@ -496,12 +497,6 @@ final class TownScene: ObservableObject {
             guard let b = building.blocks[p] else { return [] }
             return b.order.filter { b.chiefs[$0] != nil }.map { (p, $0) }
         }
-    }
-
-    /// How many context bars sit under the last block on screen (none under the executive block).
-    private var lastShownMeterRows: Int {
-        guard let p = blockOrder.last, p != Self.executive, let b = building.blocks[p] else { return 0 }
-        return b.order.filter { b.chiefs[$0] != nil }.count
     }
 
     private func addLight() {
@@ -738,20 +733,18 @@ final class TownScene: ObservableObject {
                                      text: parts.joined(separator: " · ")))
             }
         }
-        // Hidden blocks keep their bars, named by project, listed under the last block on screen,
-        // so idle sessions can still be seen.
+        // Hidden blocks keep their bars, named by project, under the executive block, so idle
+        // sessions can still be seen; the project blocks move down to make room (relayout).
         let hiddenSessions = hiddenMeterSessions()
-        guard !hiddenSessions.isEmpty, let last = blockOrder.last, let lastNode = blocks[last] else { return out }
-        let o = lastNode.entity.position(relativeTo: nil)
-        let depth = last == Self.executive ? Layout.execDepth : Layout.blockDepth
-        let anchor = o + [Layout.blockWidth / 2, 0, depth]
+        guard !hiddenSessions.isEmpty, let exec = blocks[Self.executive] else { return out }
+        let anchor = exec.entity.position(relativeTo: nil) + [Layout.blockWidth / 2, 0, Layout.execDepth]
         for (i, (p, s)) in hiddenSessions.enumerated() {
             guard let block = building.blocks[p], let c = block.chiefs[s] else { continue }
             var parts = [block.name]
             let count = block.order.filter { block.chiefs[$0] != nil }.count
             if count > 1, let slot = blocks[p]?.chiefSlots[s] { parts.append(labels.desk(slot + 1)) }
             parts.append(labels.contextLine(c.context))
-            out.append(MeterItem(id: "meter-\(s)", anchor: anchor, row: lastShownMeterRows + i,
+            out.append(MeterItem(id: "meter-\(s)", anchor: anchor, row: i,
                                  fraction: c.context.fraction, text: parts.joined(separator: " · ")))
         }
         return out

@@ -21,6 +21,9 @@ enum Layout {
     static let floorThickness: Float = 0.02
     /// Floor depth one context bar row takes on screen at the smallest scale (22 px at 70 px/m, tilted).
     static let meterRowDepth: Float = 0.36
+
+    /// Room under the executive block for `rows` context bars of hidden blocks.
+    static func execExtra(rows: Int) -> Float { rows == 0 ? 0 : Float(rows) * meterRowDepth + 0.15 }
     static let walkSpeed: Float = 2.34 // m/s
 
     // Executive block: a strip as wide as a project block and a third as deep, with the CEO,
@@ -118,16 +121,17 @@ enum Layout {
 
     /// The top-left corner of block `index` (index 0 is the executive block; project blocks are
     /// stacked under it in one column).
-    static func blockOrigin(_ index: Int, count: Int) -> SIMD2<Float> {
+    /// `execExtra` is room under the executive block for the context bars of hidden blocks.
+    static func blockOrigin(_ index: Int, count: Int, execExtra: Float = 0) -> SIMD2<Float> {
         guard index > 0 else { return [margin, margin] }
-        return [margin, margin + execDepth + gap + Float(index - 1) * (blockDepth + gap)]
+        return [margin, margin + execDepth + execExtra + gap + Float(index - 1) * (blockDepth + gap)]
     }
 
     /// The whole office for `count` blocks (the executive block included), path margin included.
-    static func officeSize(count: Int) -> SIMD2<Float> {
+    static func officeSize(count: Int, execExtra: Float = 0) -> SIMD2<Float> {
         let projects = max(0, count - 1)
         let column = projects == 0 ? 0 : Float(projects) * (gap + blockDepth)
-        return [2 * margin + blockWidth, 2 * margin + execDepth + column]
+        return [2 * margin + blockWidth, 2 * margin + execDepth + execExtra + column]
     }
 }
 
