@@ -8,7 +8,7 @@ const MEDIA := "C:/Windows/Media/"
 const DEFAULTS := {
 	"completion": "Windows Notify",
 	"approval": "Windows Exclamation",
-	"dispatch": "Windows Battery Low",
+	"dispatch": "Speech Disambiguation",
 }
 const FILE_TYPES: Array[String] = ["wav", "mp3", "ogg"]
 
