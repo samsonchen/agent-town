@@ -168,7 +168,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         // Update notices; a demo makes no automatic check, so a check stays quiet and offline.
-        Updater.installNotificationHandler()
         Task { @MainActor in
             Updater.shared.start(store: TownApp.shared.store, automatic: value("--demo") == nil && value("--snapshot") == nil)
         }

@@ -36,9 +36,6 @@ enum Prefs {
     static var checkForUpdates: Bool { isOn(checkForUpdatesKey) }
     /// When the last update check got an answer.
     static let lastUpdateCheck = "lastUpdateCheck"
-    /// The app and town-link versions a notification was already posted for.
-    static let notifiedAppVersion = "notifiedAppVersion"
-    static let notifiedPluginVersion = "notifiedPluginVersion"
     /// The UI language (`en`, `zh-Hant`); absent or empty follows macOS.
     static let language = "language"
     /// The office window's frame in screen coordinates, as NSStringFromRect writes it.

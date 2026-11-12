@@ -243,7 +243,7 @@ Versions are compared number by number (`1.0.10` is newer than `1.0.9`). A faile
 
 - A dot on the menu bar icon (on Windows, on the tray icon) while either update is available.
 - A line at the top of the menu, "agent-town X is available…" or "town-link X is available…", which opens the Updates window.
-- One system notification per new version (one for the app, one for town-link), never repeated for the same version. Clicking it opens the Updates window. If the user does not allow notifications, the dot and the menu line still work.
+- No system notifications (macOS or Windows): the icon and the menu are enough, by the user's choice (2026-11-12).
 
 **The Updates window** shows, for each of the two:
 

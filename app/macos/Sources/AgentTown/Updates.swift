@@ -2,10 +2,9 @@ import AppKit
 import Combine
 import SwiftUI
 import TownCore
-import UserNotifications
 
-/// Tells the user about a newer agent-town or town-link (docs/spec.md: Updates). It installs
-/// nothing: Homebrew, the .dmg and Claude Code's plugin commands do that.
+/// Tells the user about a newer agent-town or town-link (docs/spec.md: Updates), with the menu bar
+/// icon and menu only: no system notifications. It installs nothing: Homebrew, the .dmg and Claude Code's plugin commands do that.
 @MainActor final class Updater: ObservableObject {
     static let shared = Updater()
 
@@ -101,7 +100,6 @@ import UserNotifications
             UserDefaults.standard.set(lastChecked, forKey: Prefs.lastUpdateCheck)
         }
         refreshSessions(store?.pluginVersions ?? [:])
-        notifyIfNew()
     }
 
     private static func fetch(_ url: URL) async -> Data? {
@@ -131,66 +129,11 @@ import UserNotifications
         }
         list.sort { ($0.project, $0.id) < ($1.project, $1.id) }
         if list != outdatedSessions { outdatedSessions = list }
-        notifyIfNew()
-    }
-
-    // MARK: notifications
-
-    /// Only the packaged app can post notifications; the build folder's executable has no bundle.
-    private static var canNotify: Bool { Bundle.main.bundleURL.pathExtension == "app" && Bundle.main.bundleIdentifier != nil }
-
-    /// One notification per new version of each, never repeated for the same version.
-    private func notifyIfNew() {
-        guard Self.canNotify else { return }
-        let d = UserDefaults.standard
-        if let r = appUpdate, d.string(forKey: Prefs.notifiedAppVersion) != r.version {
-            d.set(r.version, forKey: Prefs.notifiedAppVersion)
-            post(String(format: Labels.text("agent-town %@ is available"), r.version))
-        }
-        if let v = pluginUpdate, d.string(forKey: Prefs.notifiedPluginVersion) != v {
-            d.set(v, forKey: Prefs.notifiedPluginVersion)
-            post(String(format: Labels.text("town-link %@ is available"), v))
-        }
-    }
-
-    private func post(_ title: String) {
-        let center = UNUserNotificationCenter.current()
-        let body = Labels.text("Click to see how to update.")
-        center.requestAuthorization(options: [.alert]) { granted, _ in
-            guard granted else { return }
-            let center = UNUserNotificationCenter.current()
-            let content = UNMutableNotificationContent()
-            content.title = title
-            content.body = body
-            center.add(UNNotificationRequest(identifier: "update-\(title)", content: content, trigger: nil))
-        }
-    }
-
-    /// Clicking a notification opens the Updates window.
-    static func installNotificationHandler() {
-        guard canNotify else { return }
-        UNUserNotificationCenter.current().delegate = NotificationHandler.shared
     }
 
     func showWindow() {
         openWindow?("updates")
         NSApp.activate(ignoringOtherApps: true)
-    }
-}
-
-private final class NotificationHandler: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
-    static let shared = NotificationHandler()
-
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
-                                withCompletionHandler done: @escaping () -> Void) {
-        Task { @MainActor in Updater.shared.showWindow() }
-        done()
-    }
-
-    /// Shown even while agent-town is the active app.
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
-                                withCompletionHandler done: @escaping (UNNotificationPresentationOptions) -> Void) {
-        done([.banner, .list])
     }
 }
 

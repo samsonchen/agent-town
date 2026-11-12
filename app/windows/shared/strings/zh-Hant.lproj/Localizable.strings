@@ -45,7 +45,6 @@
 "town-link %@ is available…" = "town-link %@ 已推出…";
 "agent-town %@ is available" = "agent-town %@ 已推出";
 "town-link %@ is available" = "town-link %@ 已推出";
-"Click to see how to update." = "點一下查看更新方式。";
 "agent-town: an update is available" = "agent-town：有新版本";
 "You have %@." = "你目前的版本是 %@。";
 "agent-town %@ is up to date." = "agent-town %@ 已是最新版本。";
