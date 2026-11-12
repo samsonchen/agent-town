@@ -193,6 +193,16 @@ python3 tools/debug-receiver.py          # keep it running
 claude --plugin-dir plugin               # in another terminal
 ```
 
+To try a change before releasing it, build and run the app from your checkout. Nothing is signed, installed or published, and the run keeps its own settings:
+
+```bash
+app/macos/scripts/run-local.sh                 # a demo with two projects, no sounds
+app/macos/scripts/run-local.sh --live          # real Claude Code sessions (quits the installed app, reopens it after)
+app/macos/scripts/run-local.sh --fake-update --updates   # the update notices, with a made-up new version
+```
+
+`--help` lists the other options (another fixture, `--check-now`, `--settings`, `--sound`, `--zh`).
+
 Build the app as a `.app` and `.dmg` (`app/macos/build/release/`), and publish a release: see [releasing.md](docs/releasing.md).
 
 ```bash

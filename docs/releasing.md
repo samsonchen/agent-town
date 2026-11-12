@@ -78,6 +78,8 @@ xcrun notarytool log <submission ID> --keychain-profile agent-town-notary
 
 Other options of the script, and its settings (version, bundle ID, signing identity), are listed at the top of `app/macos/scripts/release.sh`. `--unsigned` makes a test build with no certificate; it opens on the Mac that built it, but is blocked on other Macs.
 
+To try a change before building a release at all, `app/macos/scripts/run-local.sh` builds and runs the app from the checkout (a demo, or `--live` with real sessions); `--help` lists its options.
+
 ## Part E: Test it as a downloaded app
 
 macOS checks only files that came from the internet. Mark the `.dmg` as downloaded, then open it:
