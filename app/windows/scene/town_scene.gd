@@ -71,6 +71,26 @@ func wait(seconds: float) -> void:
 # --- Changes --------------------------------------------------------------------------------
 
 func handle(change: Dictionary) -> void:
+	var was_all_done := all_work_done()
+	_handle(change)
+	# The last task anywhere ended: the CEO walks back to the desk once the calls are over.
+	if not was_all_done and all_work_done() and ceo_driver != null:
+		ceo_driver.home_when_all_done()
+
+
+## True when no session has an open ticket, working staff, a background task or a wait.
+func all_work_done() -> bool:
+	for b: Building.Block in building.blocks.values():
+		for c: Building.Chief in b.chiefs.values():
+			if c.ticket != null or not c.operators.is_empty() or not c.approvals.is_empty():
+				return false
+			for st: Building.Staff in c.staff.values():
+				if not st.done:
+					return false
+	return true
+
+
+func _handle(change: Dictionary) -> void:
 	var p: String = change.get("projectId", "")
 	var s: String = change.get("sessionId", "")
 	match change["kind"]:
@@ -172,6 +192,8 @@ func _remove_block(p: String) -> void:
 	block_order.erase(p)
 	b.node.queue_free()
 	relayout()
+	if ceo_driver != null:
+		ceo_driver.back_if_office_empty()
 
 
 func _chief_arrived(p: String, s: String) -> void:

@@ -24,6 +24,7 @@ var _arrived := Callable()
 var _stalls := 0
 var _moving := false
 var _visitee: TownActor = null ## the character the user clicked; the CEO talks to them once there
+var _user_moves := 0 ## counts arrow keys and clicks; a change calls off the walk home when all work is done
 
 
 func _init(p_scene: TownScene) -> void:
@@ -46,6 +47,7 @@ func key(code: int, pressed: bool) -> bool:
 		_held[code] = true
 		_trip.clear() # the user takes over from a walk home
 		_visitee = null
+		_user_moves += 1
 	else:
 		_held.erase(code)
 	return true
@@ -260,6 +262,7 @@ func click(point: Vector2, camera: Camera3D) -> void:
 	var c := ceo()
 	if c == null or not _held.is_empty():
 		return
+	_user_moves += 1
 	var a := actor_at(point, camera)
 	if a != null:
 		visit(a) # a click on the CEO does nothing
@@ -345,3 +348,46 @@ func visit(a: TownActor) -> void:
 	walk_to(goal, func() -> void:
 		if is_instance_valid(a.root):
 			scene.face(c, world_spot(a) - world_spot(c)))
+
+
+# --- Going home on its own -------------------------------------------------------------------
+
+## The last task ended: once the report calls are over, the CEO stops talking to whoever it was
+## with and walks back to the desk. New work, a click or an arrow key calls it off; a CEO the user
+## moves afterwards stays where it is put (spec: walking the CEO).
+func home_when_all_done() -> void:
+	if not away:
+		return
+	var moves := _user_moves
+	await scene.wait(1.5) # let the report call start
+	for i in 120:
+		if moves != _user_moves or not scene.all_work_done() or not away or not _held.is_empty():
+			return
+		var c := ceo()
+		if c != null and (c.on_call or not scene.staff.pending_calls.is_empty()):
+			await scene.wait(0.5)
+			continue
+		_visitee = null
+		send_home()
+		return
+
+
+## The last project block went: nothing is left to visit, so the CEO walks back to the seat. A CEO
+## who was in another block shows up on the path at the nearest edge of the executive office and
+## walks in from there.
+func back_if_office_empty() -> void:
+	var c := ceo()
+	if c == null or not away or scene.block_order.size() != 1:
+		return
+	_held.clear()
+	_trip.clear()
+	_moving = false
+	c.steering = false
+	var origin := _exec_origin()
+	var local := world_spot(c) - origin
+	var edge := 0.35 # on the path, just off the carpet
+	var entry := Vector2(clampf(local.x, -edge, Layout.BLOCK_WIDTH + edge), clampf(local.y, -edge, Layout.EXEC_DEPTH + edge))
+	if not entry.is_equal_approx(local):
+		_place(c, origin + entry)
+		_moved()
+	send_home()

@@ -12,6 +12,7 @@ var path: String
 var language := "" ## "", "en" or "zh-Hant"; "" follows Windows
 var stay_on_top := false
 var sound := true
+var show_tips := true ## the closable tips in the window
 var show_window := true
 var opacity := 1.0
 var window_position: Variant = null ## Vector2i, or null before the first save
@@ -36,6 +37,7 @@ func _init(p_path: String = "") -> void:
 		language = ""
 	stay_on_top = bool(_cfg.get_value("app", "stay_on_top", stay_on_top))
 	sound = bool(_cfg.get_value("app", "sound", sound))
+	show_tips = bool(_cfg.get_value("app", "show_tips", show_tips))
 	show_window = bool(_cfg.get_value("app", "show_window", show_window))
 	opacity = clamp_opacity(_cfg.get_value("app", "opacity", opacity))
 	# A null default means "none given" to ConfigFile, which logs an error, so check first.
@@ -79,6 +81,7 @@ func save() -> void:
 	_cfg.set_value("app", "language", language)
 	_cfg.set_value("app", "stay_on_top", stay_on_top)
 	_cfg.set_value("app", "sound", sound)
+	_cfg.set_value("app", "show_tips", show_tips)
 	_cfg.set_value("app", "show_window", show_window)
 	_cfg.set_value("app", "opacity", opacity)
 	_cfg.set_value("sounds", "volume", volume)

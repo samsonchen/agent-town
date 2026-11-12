@@ -14,7 +14,7 @@ const PIXELS_PER_METER := 110.0 ## the office is shown at this size when it fits
 const MIN_PIXELS_PER_METER := 70.0
 const MIN_HEIGHT := 480
 
-enum Menu { ABOUT, SHOW, ON_TOP, SOUND, SETTINGS, QUIT }
+enum Menu { ABOUT, SHOW, ON_TOP, SOUND, TIPS, SETTINGS, QUIT }
 
 var settings := TownSettings.new()
 var labels: TownLabels
@@ -32,6 +32,8 @@ var _menu := PopupMenu.new()
 var _settings_window: SettingsWindow
 var _about_window: AboutWindow
 var _args: Dictionary = {}
+var _tip: PanelContainer
+var _tip_label: Label
 
 
 func _ready() -> void:
@@ -59,6 +61,7 @@ func _ready() -> void:
 	scene.add_child(camera)
 	overlay = LabelOverlay.new(scene, camera)
 	_office.add_child(overlay)
+	_build_tip()
 	store.changed.connect(scene.handle)
 	add_child(audio)
 	_apply_sounds()
@@ -67,6 +70,7 @@ func _ready() -> void:
 	w.size_changed.connect(_update_camera)
 	w.focus_exited.connect(func() -> void: scene.ceo_driver.release_keys())
 	scene.ceo_driver.moved.connect(_follow)
+	scene.ceo_driver.away_changed.connect(func(_away: bool) -> void: _update_tip())
 
 	_restore_window()
 	w.always_on_top = settings.stay_on_top
@@ -160,6 +164,66 @@ func _notification(what: int) -> void:
 		_set_shown(false) # the app keeps running in the tray
 
 
+# --- The tip --------------------------------------------------------------------------------
+
+## The tip at the bottom of the window (spec: walking the CEO): how to move the CEO, or while the
+## CEO is away, how to send it back. Closing it turns off Show tips. Port of `TipBar` in
+## app/macos/Sources/AgentTown/TownView.swift.
+func _build_tip() -> void:
+	_tip = PanelContainer.new()
+	_tip.theme = SettingsWindow.ui_theme()
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(0, 0, 0, 0.7)
+	box.set_corner_radius_all(14)
+	box.content_margin_left = 12
+	box.content_margin_right = 8
+	box.content_margin_top = 4
+	box.content_margin_bottom = 4
+	_tip.add_theme_stylebox_override("panel", box)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	_tip.add_child(row)
+	_tip_label = Label.new()
+	_tip_label.add_theme_font_size_override("font_size", 13)
+	_tip_label.add_theme_color_override("font_color", Color.WHITE)
+	row.add_child(_tip_label)
+	var close := Button.new()
+	close.text = "✕"
+	close.flat = true
+	close.tooltip_text = labels.t("Close")
+	close.add_theme_color_override("font_color", Color.WHITE)
+	close.add_theme_font_size_override("font_size", 11)
+	close.pressed.connect(func() -> void:
+		settings.show_tips = false
+		settings.save()
+		_update_tip()
+		_sync_menu())
+	row.add_child(close)
+	_office.add_child(_tip)
+	_tip.resized.connect(_place_tip)
+	get_window().size_changed.connect(_place_tip)
+	_update_tip()
+
+
+func _update_tip() -> void:
+	if _tip == null:
+		return
+	_tip.visible = settings.show_tips
+	var away := scene.ceo_driver != null and scene.ceo_driver.away
+	_tip_label.text = labels.t("Press H or click the CEO's desk to send the CEO back" if away
+		else "Move the CEO with the arrow keys ← ↑ ↓ → or click where to go")
+	_tip.reset_size()
+	_place_tip()
+
+
+## Centered along the bottom of the window.
+func _place_tip() -> void:
+	if _tip == null:
+		return
+	var size := Vector2(get_window().size)
+	_tip.position = Vector2(roundf((size.x - _tip.size.x) / 2.0), size.y - _tip.size.y - 10.0)
+
+
 # --- The tray and the window ------------------------------------------------------------------
 
 func _build_tray() -> void:
@@ -169,6 +233,7 @@ func _build_tray() -> void:
 	_menu.add_check_item(labels.t("Show agent-town"), Menu.SHOW)
 	_menu.add_check_item(labels.t("Stay on top"), Menu.ON_TOP)
 	_menu.add_check_item(labels.t("Sound"), Menu.SOUND)
+	_menu.add_check_item(labels.t("Show tips"), Menu.TIPS)
 	_menu.add_separator()
 	_menu.add_item(labels.t("Settings…"), Menu.SETTINGS)
 	_menu.add_separator()
@@ -192,6 +257,7 @@ func _sync_menu() -> void:
 	_menu.set_item_checked(_menu.get_item_index(Menu.SHOW), settings.show_window)
 	_menu.set_item_checked(_menu.get_item_index(Menu.ON_TOP), settings.stay_on_top)
 	_menu.set_item_checked(_menu.get_item_index(Menu.SOUND), settings.sound)
+	_menu.set_item_checked(_menu.get_item_index(Menu.TIPS), settings.show_tips)
 
 
 func _on_menu(id: int) -> void:
@@ -208,6 +274,10 @@ func _on_menu(id: int) -> void:
 			settings.sound = not settings.sound
 			settings.save()
 			_apply_sounds()
+		Menu.TIPS:
+			settings.show_tips = not settings.show_tips
+			settings.save()
+			_update_tip()
 		Menu.SETTINGS:
 			_settings_window.popup_centered()
 		Menu.QUIT:
