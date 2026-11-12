@@ -1,4 +1,6 @@
-# agent-town：看 Claude Code 的 agent 怎麼工作
+# Agent-Town for Claude Code
+
+看 Claude Code 的 agent 怎麼工作。（與其他名為 agent-town 的專案無關。）
 
 [English](README.md)
 

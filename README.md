@@ -1,4 +1,6 @@
-# agent-town: watch your Claude Code agents at work
+# Agent-Town for Claude Code
+
+Watch your Claude Code agents at work. (Not related to other projects named agent-town.)
 
 [繁體中文說明](README.zh-TW.md)
 
