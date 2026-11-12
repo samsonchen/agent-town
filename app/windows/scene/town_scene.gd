@@ -28,6 +28,10 @@ var calls: Array = [] ## [caller, callee] pairs on a call now
 var pages: Array = [] ## [caller, BlockNode, text]: pages in progress over a bench speaker
 var approvals: Dictionary = {} ## approval_id -> TownActor waiting
 var exec_phones: Dictionary = {} ## "ceo", "inspector", "dispatcher" -> TownPhone
+var hide_idle := false ## Settings → Hide idle project blocks
+var idle_seconds := 5 ## Settings → Hide after
+var hidden: Dictionary = {} ## project id -> true: blocks kept off screen while idle
+var idle_since: Dictionary = {} ## project id -> msec when a shown block's work settled
 
 var _ground := Node3D.new()
 var _ground_size := Vector2.ZERO
@@ -61,7 +65,16 @@ func _ready() -> void:
 	add_child(ceo_driver)
 	ceo_driver.make_mobile()
 	_typing_loop()
+	_idle_watch()
 	staff.bench_life_loop()
+
+
+## Hidden blocks are out of the tree, so they are not freed with it.
+func _exit_tree() -> void:
+	for p: String in hidden:
+		var b: BlockNode = blocks.get(p)
+		if b != null and is_instance_valid(b.node) and not b.node.is_inside_tree():
+			b.node.free()
 
 
 func wait(seconds: float) -> void:
@@ -93,6 +106,9 @@ func all_work_done() -> bool:
 func _handle(change: Dictionary) -> void:
 	var p: String = change.get("projectId", "")
 	var s: String = change.get("sessionId", "")
+	# A hidden block with work comes back before its scene plays.
+	if hidden.has(p) and has_work(p):
+		show_block(p)
 	match change["kind"]:
 		"blockAdded":
 			_add_block(p)
@@ -171,11 +187,15 @@ func _add_block(p: String) -> void:
 	var block: Building.Block = building.blocks.get(p)
 	b.name = block.name if block != null else p
 	blocks[p] = b
-	block_order.append(p)
 	var colors: Array = BLOCK_COLORS[_color_index % BLOCK_COLORS.size()]
 	_color_index += 1
 	_build_project_block(b, colors)
-	relayout()
+	# A new block goes under the last one, unless idle blocks hide and it has no work yet.
+	if hide_idle and not has_work(p):
+		hidden[p] = true
+	else:
+		block_order.append(p)
+		relayout()
 	staff.fill_bench(b)
 
 
@@ -189,9 +209,12 @@ func _remove_block(p: String) -> void:
 			actors.erase(id)
 	staff.block_removed(b)
 	blocks.erase(p)
-	block_order.erase(p)
+	hidden.erase(p)
+	idle_since.erase(p)
 	b.node.queue_free()
-	relayout()
+	if block_order.has(p):
+		block_order.erase(p)
+		relayout()
 	if ceo_driver != null:
 		ceo_driver.back_if_office_empty()
 
@@ -409,6 +432,94 @@ func _ring_ceo_for_approvals() -> void:
 			ceo.settle()
 
 
+# --- Idle blocks ----------------------------------------------------------------------------
+# With Settings → Hide idle project blocks on, a project block is on screen only while it has work:
+# it appears when work begins and hides once everything in it has settled for `idle_seconds`
+# (spec: the office). Port of app/macos/Sources/AgentTown/TownScene+Blocks.swift.
+
+## Work in the building state: a ticket, a compaction, staff still working, operators, or approvals.
+func has_work(p: String) -> bool:
+	var block: Building.Block = building.blocks.get(p)
+	if block == null:
+		return false
+	for c: Building.Chief in block.chiefs.values():
+		if c.ticket != null or c.compacting or not c.approvals.is_empty() or not c.operators.is_empty():
+			return true
+		for st: Building.Staff in c.staff.values():
+			if not st.done:
+				return true
+	return false
+
+
+## No work, and no one in the block still on a call, on the way somewhere, or waiting to be called.
+func settled(p: String) -> bool:
+	var b: BlockNode = blocks.get(p)
+	if b == null or has_work(p) or not b.jobs.is_empty():
+		return false
+	for call: Dictionary in staff.pending_calls.values():
+		if call["node"] == b:
+			return false
+	# Bench characters play idle animations through their queues; those do not count.
+	for a: TownActor in actors.values():
+		if a.block_id == p and (a.on_call or (a.is_busy() and not b.bench.has(a))):
+			return false
+	return true
+
+
+## True for characters on screen.
+func on_screen(a: TownActor) -> bool:
+	return not hidden.has(a.block_id)
+
+
+## Brings a hidden block back, under the others.
+func show_block(p: String) -> void:
+	if not hidden.has(p):
+		return
+	hidden.erase(p)
+	idle_since.erase(p)
+	block_order.append(p)
+	relayout()
+
+
+func hide_block(p: String) -> void:
+	var b: BlockNode = blocks.get(p)
+	if b == null or not block_order.has(p):
+		return
+	block_order.erase(p)
+	hidden[p] = true
+	idle_since.erase(p)
+	if b.node.is_inside_tree():
+		remove_child(b.node)
+	b.placed = false
+	relayout()
+
+
+## Twice a second: with the setting on, hides blocks settled for long enough; with it off, brings
+## every hidden block back. No block hides while the user has walked the CEO away from the desk, so
+## the floor never goes or slides from under the CEO.
+func _idle_watch() -> void:
+	while is_inside_tree():
+		await wait(0.5)
+		if not hide_idle:
+			for p in building.block_order:
+				if hidden.has(p):
+					show_block(p)
+			idle_since.clear()
+			continue
+		var now := Time.get_ticks_msec()
+		var away := ceo_driver != null and ceo_driver.away
+		for p in block_order.duplicate():
+			if p == EXECUTIVE:
+				continue
+			if not settled(p):
+				idle_since.erase(p)
+				continue
+			var since: int = idle_since.get(p, now)
+			idle_since[p] = since
+			if now - since >= idle_seconds * 1000 and not away:
+				hide_block(p)
+
+
 # --- Motion ---------------------------------------------------------------------------------
 
 func move(a: TownActor, p: Vector2, speed: float = Layout.WALK_SPEED) -> void:
@@ -419,6 +530,13 @@ func move(a: TownActor, p: Vector2, speed: float = Layout.WALK_SPEED) -> void:
 	if d <= 0.01:
 		return
 	face(a, p - from)
+	if not on_screen(a):
+		# A hidden block is out of the scene, where tweens do not run: arrive at once, so everyone
+		# is in place when the block comes back.
+		a.root.position = Vector3(p.x, Layout.FLOOR_THICKNESS, p.y)
+		if a.shadow != null and is_instance_valid(a.shadow):
+			a.shadow.position = Vector3(p.x, Layout.FLOOR_THICKNESS + 0.003, p.y)
+		return
 	a.play("walk")
 	var seconds := d / speed
 	var tw := a.root.create_tween()
@@ -463,7 +581,7 @@ func _typing_loop() -> void:
 	while is_inside_tree():
 		await wait(0.45)
 		for a: TownActor in actors.values():
-			if a.is_busy() or a.on_call:
+			if a.is_busy() or a.on_call or not on_screen(a):
 				continue
 			if a.current_clip == "type-right":
 				a.play("type-left", true, 0.12)
@@ -856,7 +974,7 @@ func label_items() -> Array[Dictionary]:
 			lines.append_array(kept)
 		if not lines.is_empty():
 			items.append({"anchor": a.head(0.04), "lines": lines})
-		if a.phone != null and a.phone.ringing and is_instance_valid(a.phone.device):
+		if a.phone != null and a.phone.ringing and is_instance_valid(a.phone.device) and a.phone.device.is_inside_tree():
 			items.append({"anchor": a.phone.anchor(), "lines": [[labels.t("Ring ring"), "ring"]]})
 	for page: Array in pages:
 		var top: Variant = _speaker_top(page[1])
@@ -892,7 +1010,7 @@ func label_items() -> Array[Dictionary]:
 
 ## The top of a block's bench speaker, in this scene's space, or null.
 func _speaker_top(b: BlockNode) -> Variant:
-	if b.speaker == null or not is_instance_valid(b.speaker):
+	if b.speaker == null or not is_instance_valid(b.speaker) or not b.speaker.is_inside_tree():
 		return null
 	var box_ := bounds(b.speaker, self)
 	return Vector3(box_.get_center().x, box_.end.y, box_.get_center().z)
@@ -905,18 +1023,18 @@ func call_lines() -> Array:
 	for c: Array in calls:
 		var a: TownActor = c[0]
 		var b: TownActor = c[1]
-		if is_instance_valid(a.root) and is_instance_valid(b.root):
+		if is_instance_valid(a.root) and is_instance_valid(b.root) and a.root.is_inside_tree() and b.root.is_inside_tree():
 			out.append([a.head(-0.15), b.head(-0.15)])
 	for page: Array in pages:
 		var caller: TownActor = page[0]
 		var top: Variant = _speaker_top(page[1])
-		if top != null and is_instance_valid(caller.root):
+		if top != null and is_instance_valid(caller.root) and caller.root.is_inside_tree():
 			out.append([caller.head(-0.15), top])
 	var ceo: TownActor = actors.get("ceo")
 	if ceo != null:
 		var seen: Array = []
 		for a: TownActor in approvals.values():
-			if not seen.has(a) and is_instance_valid(a.root):
+			if not seen.has(a) and is_instance_valid(a.root) and a.root.is_inside_tree():
 				seen.append(a)
 				out.append([a.head(-0.15), ceo.head(-0.15)])
 	return out

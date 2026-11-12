@@ -38,7 +38,8 @@ Each feature is confirmed by the user in the running app before the release.
 - [x] Walking the CEO with the mouse: clicking the floor (or into furniture: the nearest free spot) or the CEO's desk, clicking a character or its tags to walk over beside them (checked with clicks through the input path; to confirm by hand)
 - [x] Back to the desk when all work is done (after the report calls; an arrow key, a click or new work calls it off); back into the executive office when the last project block goes
 - [x] Talking to a character: the statement it gives the CEO about its work, in a cream bubble with an orange border (the one clicked, else the nearest within 1.1 m)
-- [x] The tips at the bottom of the window (the H tip while the CEO is away), and Show tips in the tray menu; closing a tip turns Show tips off
+- [x] The tips at the bottom of the window (the H tip while the CEO is away), and Show tips in Settings → Office (it was in the tray menu until the macOS app 1.0.5 moved it); closing a tip turns Show tips off
+- [x] Hide idle project blocks (Settings → Office, off by default) with Hide after N seconds (1 to 3600, default 5), as in the macOS app 1.0.5: a block shows only while it has work and hides once it has settled; characters in a hidden block arrive at once; no block hides while the CEO is away (checked with the two-project demo and `--hide-idle 1`; to confirm by hand)
 - [ ] The Inspector at reception stopping a returned report, with the "Returned" stamp (scene 15)
 - [ ] The Dispatcher's schedule board with its cards and the projects line (scenes 13 and 14)
 - [ ] Compaction: the stack of notes and "Notes tidied" (scene 17)

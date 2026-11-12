@@ -1,10 +1,11 @@
 class_name SettingsWindow
 extends Window
-## Settings: Open at login, the language, the office window's opacity, and the sounds
-## (spec: sound settings). Port of `SettingsView` in app/macos/Sources/AgentTown/Preferences.swift.
+## Settings: Open at login, the language, the office window (opacity, idle blocks, tips), and the
+## sounds (spec: sound settings). Port of `SettingsView` in app/macos/Sources/AgentTown/Preferences.swift.
 
 signal opacity_changed(value: float)
 signal sounds_changed
+signal office_changed ## Hide idle project blocks, Hide after, or Show tips
 
 const SOUND_TITLES := {"dispatch": "Ticket dispatched", "completion": "Work done", "approval": "Approval needed"}
 
@@ -18,6 +19,7 @@ var _picks: Dictionary = {} ## sound -> its OptionButton
 var _restart_row: HBoxContainer
 var _login_note: Label
 var _percent: Label
+var _tips: CheckBox
 
 
 func _init(p_settings: TownSettings, p_labels: TownLabels, p_audio: TownAudio) -> void:
@@ -30,6 +32,10 @@ func _init(p_settings: TownSettings, p_labels: TownLabels, p_audio: TownAudio) -
 	unresizable = true
 	theme = ui_theme()
 	close_requested.connect(hide)
+	# Closing a tip in the office window turns Show tips off: show the current value.
+	about_to_popup.connect(func() -> void:
+		if _tips != null:
+			_tips.set_pressed_no_signal(settings.show_tips))
 
 
 func _ready() -> void:
@@ -113,6 +119,7 @@ func _ready() -> void:
 	slider.drag_ended.connect(func(_changed: bool) -> void: settings.save())
 	_percent.text = "%d%%" % roundi(settings.opacity * 100.0)
 
+	_build_office(box)
 	_build_sounds(box)
 
 	var close := Button.new()
@@ -121,6 +128,54 @@ func _ready() -> void:
 	close.pressed.connect(hide)
 	box.add_child(close)
 	size = Vector2i(margin.get_combined_minimum_size()) + Vector2i(40, 10)
+
+
+# --- Office -------------------------------------------------------------------------------
+
+## Hide idle project blocks, with Hide after N seconds beside it, and Show tips (spec: settings).
+func _build_office(box: VBoxContainer) -> void:
+	box.add_child(HSeparator.new())
+	var heading := Label.new()
+	heading.text = labels.t("Office")
+	heading.add_theme_font_size_override("font_size", 16)
+	box.add_child(heading)
+	var hide_idle := CheckBox.new()
+	hide_idle.text = labels.t("Hide idle project blocks")
+	hide_idle.button_pressed = settings.hide_idle_blocks
+	box.add_child(hide_idle)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	var before := Label.new()
+	before.text = labels.t("Hide after")
+	row.add_child(before)
+	var secs := SpinBox.new()
+	secs.min_value = TownSettings.IDLE_HIDE_MIN
+	secs.max_value = TownSettings.IDLE_HIDE_MAX
+	secs.step = 1
+	secs.value = settings.idle_hide_seconds
+	secs.editable = settings.hide_idle_blocks
+	row.add_child(secs)
+	var after := Label.new()
+	after.text = labels.t("seconds")
+	row.add_child(after)
+	box.add_child(row)
+	hide_idle.toggled.connect(func(on: bool) -> void:
+		settings.hide_idle_blocks = on
+		secs.editable = on
+		settings.save()
+		office_changed.emit())
+	secs.value_changed.connect(func(v: float) -> void:
+		settings.idle_hide_seconds = TownSettings.clamp_idle_hide(v)
+		settings.save()
+		office_changed.emit())
+	_tips = CheckBox.new()
+	_tips.text = labels.t("Show tips")
+	_tips.button_pressed = settings.show_tips
+	_tips.toggled.connect(func(on: bool) -> void:
+		settings.show_tips = on
+		settings.save()
+		office_changed.emit())
+	box.add_child(_tips)
 
 
 # --- Sounds -------------------------------------------------------------------------------

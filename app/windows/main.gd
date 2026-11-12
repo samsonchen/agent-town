@@ -7,14 +7,15 @@ extends Node
 ## (port of app/macos/Sources/AgentTown/Demo.swift):
 ##   godot --path app/windows -- --demo ../../protocol/fixtures/01-basic-ticket.json [--speed N]
 ##         [--snapshot out.png --at SECONDS[,SECONDS…]] [--language en|zh-Hant] [--open settings|about]
-##         [--keys "down:1.5,right:1,h"] [--clicks "95:270@2,300:500@6"]
+##         [--keys "down:1.5,right:1,h"] [--clicks "95:270@2,300:500@6"] [--hide-idle SECONDS]
+## A run with --snapshot never starts the server, so it cannot take the endpoint from the running app.
 ## Gaps between events keep their timing, each capped at 4 s and divided by `--speed`.
 
 const PIXELS_PER_METER := 110.0 ## the office is shown at this size when it fits
 const MIN_PIXELS_PER_METER := 70.0
 const MIN_HEIGHT := 480
 
-enum Menu { ABOUT, SHOW, ON_TOP, SOUND, TIPS, SETTINGS, QUIT }
+enum Menu { ABOUT, SHOW, ON_TOP, SOUND, SETTINGS, QUIT }
 
 var settings := TownSettings.new()
 var labels: TownLabels
@@ -65,6 +66,7 @@ func _ready() -> void:
 	store.changed.connect(scene.handle)
 	add_child(audio)
 	_apply_sounds()
+	_apply_office()
 	scene.sound.connect(audio.play)
 	scene.office_resized.connect(func(_s: Vector2) -> void: _fit_window())
 	w.size_changed.connect(_update_camera)
@@ -78,6 +80,7 @@ func _ready() -> void:
 	_build_tray()
 	_settings_window = SettingsWindow.new(settings, labels, audio)
 	_settings_window.sounds_changed.connect(_apply_sounds)
+	_settings_window.office_changed.connect(_apply_office)
 	_settings_window.visible = false
 	_settings_window.opacity_changed.connect(_apply_opacity)
 	add_child(_settings_window)
@@ -95,7 +98,7 @@ func _ready() -> void:
 		"about": _about_window.popup_centered.call_deferred()
 	if _args.has("demo"):
 		_play_demo(_args["demo"], float(_args.get("speed", "1")))
-	else:
+	elif not _args.has("snapshot"): # a check run never takes the endpoint from the running app
 		var version: String = ProjectSettings.get_setting("application/config/version", "0.0.0")
 		store.start(version)
 	if _args.has("keys"):
@@ -196,8 +199,7 @@ func _build_tip() -> void:
 	close.pressed.connect(func() -> void:
 		settings.show_tips = false
 		settings.save()
-		_update_tip()
-		_sync_menu())
+		_update_tip())
 	row.add_child(close)
 	_office.add_child(_tip)
 	_tip.resized.connect(_place_tip)
@@ -233,7 +235,6 @@ func _build_tray() -> void:
 	_menu.add_check_item(labels.t("Show agent-town"), Menu.SHOW)
 	_menu.add_check_item(labels.t("Stay on top"), Menu.ON_TOP)
 	_menu.add_check_item(labels.t("Sound"), Menu.SOUND)
-	_menu.add_check_item(labels.t("Show tips"), Menu.TIPS)
 	_menu.add_separator()
 	_menu.add_item(labels.t("Settings…"), Menu.SETTINGS)
 	_menu.add_separator()
@@ -257,7 +258,6 @@ func _sync_menu() -> void:
 	_menu.set_item_checked(_menu.get_item_index(Menu.SHOW), settings.show_window)
 	_menu.set_item_checked(_menu.get_item_index(Menu.ON_TOP), settings.stay_on_top)
 	_menu.set_item_checked(_menu.get_item_index(Menu.SOUND), settings.sound)
-	_menu.set_item_checked(_menu.get_item_index(Menu.TIPS), settings.show_tips)
 
 
 func _on_menu(id: int) -> void:
@@ -274,10 +274,6 @@ func _on_menu(id: int) -> void:
 			settings.sound = not settings.sound
 			settings.save()
 			_apply_sounds()
-		Menu.TIPS:
-			settings.show_tips = not settings.show_tips
-			settings.save()
-			_update_tip()
 		Menu.SETTINGS:
 			_settings_window.popup_centered()
 		Menu.QUIT:
@@ -306,6 +302,17 @@ func _set_shown(on: bool) -> void:
 	settings.save()
 	_call_window("set_shown", [_hwnd(), on])
 	_sync_menu()
+
+
+## Settings → Office: the tips, and whether idle project blocks hide. `--hide-idle N` turns hiding
+## on for this run with N seconds, without saving (for checking it with a demo).
+func _apply_office() -> void:
+	_update_tip()
+	scene.hide_idle = settings.hide_idle_blocks
+	scene.idle_seconds = settings.idle_hide_seconds
+	if _args.has("hide-idle"):
+		scene.hide_idle = true
+		scene.idle_seconds = TownSettings.clamp_idle_hide(float(_args["hide-idle"]))
 
 
 ## The sound settings: the menu's Sound item, the volume, each sound's switch and choice, and the
@@ -463,4 +470,9 @@ func _snapshot_later(path: String, at: String) -> void:
 		var out := path if times.size() == 1 else "%s-%d.%s" % [path.get_basename(), i + 1, path.get_extension()]
 		get_viewport().get_texture().get_image().save_png(out)
 		print("snapshot: ", out)
+		for w: Window in [_settings_window, _about_window]:
+			if w.visible: # an open window from --open is saved beside it
+				var extra := "%s-%s.png" % [out.get_basename(), w.title.to_lower().replace(" ", "-")]
+				w.get_texture().get_image().save_png(extra)
+				print("snapshot: ", extra)
 	get_tree().quit()

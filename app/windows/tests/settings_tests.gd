@@ -46,3 +46,19 @@ func test_sound_settings_survive_a_restart_and_stay_in_range() -> void:
 	check_eq([TownSettings.clamp_threshold(99999), TownSettings.clamp_threshold(-5), TownSettings.clamp_threshold(12.7)], [3600, 0, 12], "threshold range")
 	DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(path.get_base_dir())
+
+
+func test_office_settings_survive_a_restart_and_stay_in_range() -> void:
+	var path := OS.get_temp_dir().path_join("agent-town-test-%d" % randi()).path_join("settings.cfg")
+	var a := TownSettings.new(path)
+	check_eq([a.hide_idle_blocks, a.idle_hide_seconds, a.show_tips], [false, 5, true], "defaults")
+	a.hide_idle_blocks = true
+	a.idle_hide_seconds = 30
+	a.show_tips = false
+	a.save()
+	var b := TownSettings.new(path)
+	check_eq([b.hide_idle_blocks, b.idle_hide_seconds, b.show_tips], [true, 30, false], "read back")
+	check_eq([TownSettings.clamp_idle_hide(0), TownSettings.clamp_idle_hide(99999), TownSettings.clamp_idle_hide(7.6),
+		TownSettings.clamp_idle_hide("x")], [1, 3600, 8, 5], "hide-after range")
+	DirAccess.remove_absolute(path)
+	DirAccess.remove_absolute(path.get_base_dir())
