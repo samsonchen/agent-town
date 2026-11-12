@@ -129,6 +129,12 @@ Built in the macOS app 1.0.8; `docs/spec.md` → Updates has the details. The Wi
 - [ ] town-link's newest version: `version` in `https://raw.githubusercontent.com/samsonchen/agent-town/main/plugin/.claude-plugin/plugin.json`. Each session's own version is `pluginVersion` in `session.open` (town-link 1.0.3 or later); a session without it runs 1.0.2 or older.
 - [ ] Compare versions number by number. Show a red dot on the tray icon and a line at the top of the tray menu ("agent-town X is available…", "town-link X is available…") while there is an update, and an Updates window (no Windows notifications: the user does not want system notifications on either platform): for the app, the release notes and a Download button for the installer (running it replaces the installed app); for town-link, the sessions with an older one, the two `claude plugin` commands with Copy buttons, and "Then restart those Claude Code sessions".
 - [ ] Strings: the macOS app 1.0.8 added them to the shared `Localizable.strings` under `/* Updates */` (already synced to `app/windows/shared/`).
+- [ ] Details from the Mac, to match:
+  - **The red dot:** the dot is red, about half the icon's height, in the top-right corner, with a thin transparent ring cut around it so it stands apart from the building. Without an update the icon is the normal one.
+  - **The session list** is grouped by project and version, one line each: "agent-town: 1.0.2 or older (2 sessions)". A session's line goes when it closes; the town-link notice goes when no open session is older.
+  - **A failed check** (no network, GitHub's rate limit of 60 requests an hour without login, a 20-second timeout) changes nothing shown, says "The last check failed. It will try again later." next to Check now, and is tried again at the next check. Only an answered check updates "Last checked".
+  - **Dev flags** on the Mac, worth copying: `--updates` opens the Updates window, `--fake-update` makes up a newer app and town-link (99.0.0) without the network, `--check-now` makes a real check even in a demo (a demo makes no automatic check).
+  - **Mac code:** `app/macos/Sources/TownCore/Updates.swift` (version comparison, picking the release by tag prefix, reading plugin.json; tests in `Tests/TownCoreTests/UpdatesTests.swift`), `app/macos/Sources/AgentTown/Updates.swift` (`Updater`: the daily check, the session list, `MenuIcon`, `UpdatesView`), and `TownStore.pluginVersions` (each open session's version from `session.open`).
 
 ### Shared material a second app needs
 
