@@ -46,7 +46,7 @@ Each feature is confirmed by the user in the running app before the release.
 - [ ] The Dispatcher's schedule board with its cards and the projects line (scenes 13 and 14)
 - [ ] Compaction: the stack of notes and "Notes tidied" (scene 17)
 
-- [ ] `app/windows/scripts/run-local.ps1` (and `run-local.sh` for Git Bash), like the Mac's `app/macos/scripts/run-local.sh`: runs the project from the checkout with Godot (no export, no installer), so the user can try a change before a release; a demo by default, `-Live` for real sessions (quits and later restarts an installed copy), and the options listed in `todo.md` section 9 ("a script to try a build before releasing")
+- [x] `app/windows/scripts/run-local.ps1` (and `run-local.sh` for Git Bash), like the Mac's `app/macos/scripts/run-local.sh`: runs the project from the checkout with Godot (no export, no installer), so the user can try a change before a release; a demo by default, `-Live` for real sessions (quits and later restarts an installed copy), and the options listed in `todo.md` section 9 ("a script to try a build before releasing")
 
 - [x] Compact view, small windows (down to 320 × 240) and auto-scroll (checked with `--compact yes` and `--resize 400x300` demos; to confirm by hand), as in the macOS app 1.0.8 (`docs/spec.md` → The office; `todo.md` section 9)
 

@@ -9,6 +9,8 @@ extends Node
 ##         [--snapshot out.png --at SECONDS[,SECONDS…]] [--language en|zh-Hant] [--open settings|about]
 ##         [--keys "down:1.5,right:1,h"] [--clicks "95:270@2,300:500@6"] [--hide-idle SECONDS]
 ##         [--compact yes] [--resize WxH] [--fake-update yes] [--check-now yes] [--open updates]
+## [--sound no] keeps this run quiet; [--settings-file PATH] uses its own settings; --open takes
+## several windows, comma-separated (settings,updates).
 ## --fake-update makes up a newer app and town-link (99.0.0) without the network; --check-now makes a
 ## real update check, even in a demo (a demo or a snapshot makes no automatic check).
 ## --compact yes shows compact view for this run; --resize shrinks the window 8 s in, as a drag would.
@@ -25,7 +27,7 @@ const AUTO_SCROLL_PAUSE := 10000 ## msec the user's own scrolling, or walking th
 
 enum Menu { ABOUT, SHOW, ON_TOP, SOUND, SETTINGS, QUIT, APP_UPDATE, PLUGIN_UPDATE }
 
-var settings := TownSettings.new()
+var settings: TownSettings ## made in _ready, from --settings-file when given
 var labels: TownLabels
 var store := TownStore.new()
 var scene: TownScene
@@ -58,6 +60,8 @@ var _auto_clock := 0.0
 
 func _ready() -> void:
 	_args = _parse_args(OS.get_cmdline_user_args())
+	# --settings-file PATH: a run from the checkout (scripts/run-local.ps1) keeps its own settings.
+	settings = TownSettings.new(_args.get("settings-file", ""))
 	# --language en|zh-Hant overrides the setting for this run (for checking screens).
 	labels = TownLabels.new(_args.get("language", settings.language))
 	# Compact view is read once here, so a change in Settings applies after a restart.
@@ -139,10 +143,11 @@ func _ready() -> void:
 		_set_shown(false)
 
 	# --open settings|about pops that window up at start (for checking screens).
-	match _args.get("open", ""):
-		"settings": _settings_window.popup_centered.call_deferred()
-		"about": _about_window.popup_centered.call_deferred()
-		"updates": _updates_window.popup_centered.call_deferred()
+	for name: String in str(_args.get("open", "")).split(",", false):
+		match name:
+			"settings": _settings_window.popup_centered.call_deferred()
+			"about": _about_window.popup_centered.call_deferred()
+			"updates": _updates_window.popup_centered.call_deferred()
 	if _args.has("demo"):
 		_play_demo(_args["demo"], float(_args.get("speed", "1")))
 	elif not _args.has("snapshot"): # a check run never takes the endpoint from the running app
@@ -409,7 +414,7 @@ func _apply_office() -> void:
 ## The sound settings: the menu's Sound item, the volume, each sound's switch and choice, and the
 ## completion threshold (applied where the building decides whether a finished ticket plays it).
 func _apply_sounds() -> void:
-	audio.muted = not settings.sound
+	audio.muted = not settings.sound or _args.get("sound", "") == "no" # --sound no: quiet for this run
 	audio.volume = settings.volume
 	for key: String in TownSettings.SOUNDS:
 		audio.enabled[key] = settings.sound_on[key]
