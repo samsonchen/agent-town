@@ -46,3 +46,9 @@ func test_layout_matches_the_mac() -> void:
 	check_eq(Layout.block_origin(2), Vector2(0.9, 0.9 + 1.8 + 1.4 + 5.4 + 1.4), "second project block")
 	check_eq(Layout.route(Vector2(1.1, 0.55), Vector2(2.3, 1.95)),
 		[Vector2(1.7, 0.55), Vector2(1.7, 1.6), Vector2(2.3, 1.6), Vector2(2.3, 1.95)], "walks along the walkways, crossing between desks")
+
+
+func test_clip_width_counts_cjk_as_two() -> void:
+	check_eq(TownLabels.clip_width("short", 40), "short", "fits")
+	check_eq(TownLabels.clip_width("abcdefghij", 5), "abcd…", "cut")
+	check_eq(TownLabels.clip_width("測試測試測試", 7), "測試測…", "wide characters")

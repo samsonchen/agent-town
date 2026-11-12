@@ -3,7 +3,7 @@ extends Node3D
 ## The office: blocks on one flat floor, furniture and characters, and the choreography that turns
 ## building changes into scenes. Staff, operators and the bench are in staff_director.gd.
 ## Port of app/macos/Sources/AgentTown/TownScene.swift and TownScene+Desks.swift.
-## Still to come: the Inspector and the Dispatcher's board, compaction, walking the CEO.
+## Still to come: the Dispatcher's board and compaction.
 
 signal office_resized(size: Vector2)
 signal sound(name: String) ## "dispatch", "approval", "completion"
@@ -123,6 +123,8 @@ func _handle(change: Dictionary) -> void:
 		"hat":
 			if actors.has(s):
 				(actors[s] as TownActor).hat = labels.task_type(change["taskType"])
+		"ticketReturned":
+			_ticket_returned(p, s)
 		"ticketDone":
 			_ticket_done(p, s, change["issuer"], change["aborted"], change["playSound"])
 		"activity":
@@ -308,6 +310,47 @@ func _ticket_submitted(p: String, s: String, ticket: Building.Ticket) -> void:
 			chief.ticket_text = _untraced_note(ticket, p, s)
 			chief.working = true
 			chief.settle())
+
+
+## Scene 15: a hook sends the main agent back to work. The Chief of Staff phones the report in, but
+## the Inspector at reception takes the call instead of the CEO and stops it: the Inspector says why
+## (the hook's reason, when known), a "Returned" stamp shows over the Chief of Staff, and the Chief
+## of Staff goes back to work on the same ticket. A later report that gets past the Inspector goes
+## to the issuer as usual (ticketDone). Port of app/macos/Sources/AgentTown/TownScene+Inspector.swift.
+const RETURNED_SHOWN := 4.0 ## seconds the stamp and the Inspector's reason stay up after the call
+
+
+func _ticket_returned(p: String, s: String) -> void:
+	var chief: TownActor = actors.get(s)
+	var inspector: TownActor = actors.get("inspector")
+	if chief == null or inspector == null:
+		return
+	chief.working = true
+	var reason: Variant = null
+	var block: Building.Block = building.blocks.get(p)
+	if block != null and block.chiefs.has(s):
+		var t: Building.Ticket = (block.chiefs[s] as Building.Chief).ticket
+		if t != null:
+			reason = t.return_reason
+	chief.enqueue(func() -> void:
+		var ticket: Variant = chief.ticket_text
+		await call_between(chief, inspector, null)
+		chief.ticket_text = ticket # still the same ticket: the note stays
+		var stamp := labels.t("Returned")
+		chief.bubble = stamp
+		var said: String = stamp if reason == null or str(reason) == "" 			else TownLabels.clip_width(str(reason).replace("
+", " "), 40)
+		inspector.bubble = said
+		chief.settle()
+		_clear_returned(chief, inspector, stamp, said))
+
+
+func _clear_returned(chief: TownActor, inspector: TownActor, stamp: String, said: String) -> void:
+	await wait(RETURNED_SHOWN)
+	if chief.bubble == stamp:
+		chief.bubble = null
+	if inspector.bubble == said:
+		inspector.bubble = null
 
 
 func _ticket_done(p: String, s: String, issuer: String, aborted: bool, play_sound: bool) -> void:

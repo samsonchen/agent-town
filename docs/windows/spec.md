@@ -8,7 +8,7 @@ It has its own version number, separate from the macOS app and from town-link. T
 
 Included: the office and its blocks, the CEO's and the Chief of Staff's calls, staff and the resource bench, desk workers, operators, approvals, the context bar, the sounds, and the tray menu. That is about scenes 1 to 12 of the main spec.
 
-Next, before any release (W2 in [roadmap.md](roadmap.md)): the Dispatcher's board and the Inspector (scenes 13 to 15) and compaction (17). Walking the CEO, with the tips, and Hide idle project blocks are in. Messages (16) are already in. Until then, a returned ticket shows as an ordinary ticket. The installer and signing come last, once every feature is confirmed.
+Next, before any release (W2 in [roadmap.md](roadmap.md)): the Dispatcher's board (scenes 13 and 14) and compaction (17). Walking the CEO, with the tips, Hide idle project blocks, the Inspector (15) and messages (16) are in. The installer and signing come last, once every feature is confirmed.
 
 ## Differences from the macOS app
 

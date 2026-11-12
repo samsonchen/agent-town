@@ -133,6 +133,21 @@ func desk(n: int) -> String: return t("Desk %lld", [n])
 
 
 ## Width in columns: a CJK or full-width character counts 2, others 1.
+## `s` cut to `width` columns (Chinese characters count two), with "…" when cut.
+static func clip_width(s: String, width: int) -> String:
+	if display_width(s) <= width:
+		return s
+	var out := ""
+	var w := 0
+	for i in s.length():
+		var cw := 2 if is_wide(s.unicode_at(i)) else 1
+		if w + cw > width - 1:
+			break
+		out += s[i]
+		w += cw
+	return out + "…"
+
+
 static func display_width(s: String) -> int:
 	var w := 0
 	for i in s.length():

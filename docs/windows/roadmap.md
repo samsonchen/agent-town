@@ -40,7 +40,7 @@ Each feature is confirmed by the user in the running app before the release.
 - [x] Talking to a character: the statement it gives the CEO about its work, in a cream bubble with an orange border (the one clicked, else the nearest within 1.1 m)
 - [x] The tips at the bottom of the window (the H tip while the CEO is away), and Show tips in Settings → Office (it was in the tray menu until the macOS app 1.0.5 moved it); closing a tip turns Show tips off
 - [x] Hide idle project blocks (Settings → Office, off by default) with Hide after N seconds (1 to 3600, default 5), as in the macOS app 1.0.5: a block shows only while it has work and hides once it has settled; characters in a hidden block arrive at once; no block hides while the CEO is away (checked with the two-project demo and `--hide-idle 1`; confirmed by the user 2026-11-12)
-- [ ] The Inspector at reception stopping a returned report, with the "Returned" stamp (scene 15)
+- [x] The Inspector at reception stopping a returned report, with the "Returned" stamp and the hook's reason (scene 15; checked with fixture 04; to confirm by hand)
 - [ ] The Dispatcher's schedule board with its cards and the projects line (scenes 13 and 14)
 - [ ] Compaction: the stack of notes and "Notes tidied" (scene 17)
 
