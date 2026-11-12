@@ -6,9 +6,9 @@ extends Node
 
 const MEDIA := "C:/Windows/Media/"
 const DEFAULTS := {
-	"completion": "Windows Notify System Generic",
-	"approval": "Windows Notify Messaging",
-	"dispatch": "Windows Ringout",
+	"completion": "Windows Notify",
+	"approval": "Windows Exclamation",
+	"dispatch": "Windows Battery Low",
 }
 const FILE_TYPES: Array[String] = ["wav", "mp3", "ogg"]
 
