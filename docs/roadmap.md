@@ -81,6 +81,8 @@ Answers: [verification.md](verification.md). Most items are answered by the API 
 - [ ] Many project blocks: zoom (blocks are one column now; a taller office scrolls)
 - [ ] Several sessions in one block: check the walk-in desk scene and the limit of five, the back row's desk spots (two and three sessions work)
 - [ ] Window and bench size settings
+- [x] Compact view (half size, text at 75%), windows down to 320 × 240, and auto-scroll to walking characters (macOS app 1.0.8)
+- [ ] Compact view with a tighter layout (desks, paths and margins closer together); deferred until half size has been tried (`todo.md` section 5)
 
 ## Phase 5: polish
 

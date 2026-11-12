@@ -11,6 +11,8 @@
 #   --check-now     a real update check against GitHub (a demo makes no automatic check)
 #   --updates       open the Updates window
 #   --settings      open the Settings window
+#   --compact       compact view (the office at half size), without changing the saved setting
+#   --resize WxH    8 seconds in, shrink the window to W by H points, as a drag would (auto-scroll)
 #   --sound         play the demo's sounds
 #   --zh, --en      run in Traditional Chinese or English
 #   --speed N       play the demo N times as fast
@@ -38,11 +40,13 @@ while [ $# -gt 0 ]; do
     --live) LIVE=1 ;;
     --fake-update|--check-now|--updates|--settings) ARGS+=("$1") ;;
     --sound) SOUND=YES ;;
+    --compact) ARGS+=(-compactView YES) ;;
+    --resize) [ $# -ge 2 ] || fail "--resize needs WIDTHxHEIGHT"; ARGS+=(--resize "$2"); shift ;;
     --zh) ARGS+=(-language zh-Hant) ;;
     --en) ARGS+=(-language en) ;;
     --speed) [ $# -ge 2 ] || fail "--speed needs a number"; ARGS+=(--speed "$2"); shift ;;
     --) shift; ARGS+=("$@"); break ;;
-    -h|--help) sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) fail "unknown option $1 (see --help)" ;;
   esac
   shift

@@ -80,6 +80,23 @@ extension TownScene {
     /// True for characters on screen.
     func onScreen(_ a: Actor) -> Bool { !hidden.contains(a.block) }
 
+    /// A character on screen, for auto-scroll: its position in its block and its spot on the floor.
+    struct CharacterSpot {
+        let id: String
+        let local: SIMD3<Float>
+        let floor: SIMD2<Float>
+    }
+
+    /// Every character in a shown block. The CEO while the user walks it is left out: the view
+    /// already follows the CEO then.
+    func characterSpots() -> [CharacterSpot] {
+        actors.values.compactMap { a in
+            guard onScreen(a), !a.steering, a.root.parent != nil else { return nil }
+            let w = a.root.position(relativeTo: nil)
+            return CharacterSpot(id: a.id, local: a.root.position, floor: [w.x, w.z])
+        }
+    }
+
     /// Twice a second: with the setting on, hides blocks settled for long enough; with it off,
     /// brings every hidden block back. No block hides while the user has walked the CEO away from
     /// the desk, so the floor never goes or slides from under the CEO.

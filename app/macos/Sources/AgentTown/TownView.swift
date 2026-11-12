@@ -1,6 +1,7 @@
 import AppKit
 import RealityKit
 import SwiftUI
+import TownCore
 
 /// The office window: the RealityKit scene with 2D labels drawn over it.
 struct TownView: View {
@@ -15,10 +16,15 @@ struct TownView: View {
     @State private var window: NSWindow?
     /// The window's opacity from Settings; applied to this window only.
     @AppStorage(Prefs.opacity) private var opacity = 1.0
+    /// Pans the view toward moving characters when the office does not fit (spec: auto-scroll).
+    @State private var autoScroll = AutoScroll()
+
+    /// The smallest window: a corner of a laptop screen. A window smaller than the office scrolls.
+    static let minSize = CGSize(width: 320, height: 240)
 
     /// The office is shown at this size when it fits, and never smaller than `minPixelsPerMeter`.
-    static let pixelsPerMeter: CGFloat = 110
-    static let minPixelsPerMeter: CGFloat = 70
+    static let pixelsPerMeter: CGFloat = 110 * ViewScale.world
+    static let minPixelsPerMeter: CGFloat = 70 * ViewScale.world
 
     static func makeCamera() -> Entity {
         let cam = Entity()
@@ -66,16 +72,45 @@ struct TownView: View {
         pan = [min(lim.x, max(-lim.x, x)), min(lim.y, max(-lim.y, z))]
     }
 
+    /// One step of auto-scroll: when the office does not fit, ease the view toward the window-sized
+    /// area with the most moving characters. Walking the CEO and the user's own scrolling come first.
+    private func autoScrollStep(size: CGSize) {
+        let lim = panLimit(size)
+        guard lim.x > 0.01 || lim.y > 0.01 else { return } // the whole office is in view
+        let now = Date()
+        let movers = autoScroll.movers(scene.characterSpots(), at: now)
+        guard now >= autoScroll.pausedUntil else { return }
+        let ppm = Float(pixelsPerMeter(size))
+        let half = SIMD2<Float>(Float(size.width) / ppm / 2, Float(size.height) / ppm / 2 / Projector.depthFactor)
+        let current = SIMD2(scene.officeSize.x / 2, scene.officeSize.y / 2) + SIMD2(min(lim.x, max(-lim.x, pan.x)), min(lim.y, max(-lim.y, pan.y)))
+        if let center = ViewFocus.bestCenter(movers, current: current, half: half * 0.8) {
+            let want = center - SIMD2(scene.officeSize.x / 2, scene.officeSize.y / 2)
+            autoScroll.target = [min(lim.x, max(-lim.x, want.x)), min(lim.y, max(-lim.y, want.y))]
+        }
+        guard let target = autoScroll.target else { return }
+        let from = SIMD2(min(lim.x, max(-lim.x, pan.x)), min(lim.y, max(-lim.y, pan.y)))
+        let d = target - from
+        guard simd_length(d) > 0.01 else { return }
+        pan = from + d * 0.12 // eases in over about half a second
+    }
+
     /// Makes the window as tall as the office at the current width's scale, keeping its top edge
     /// where it is and staying on the screen. Runs when a block is added or removed, so a size the
     /// user dragged to holds until then. A taller office than the screen pans with the scroll wheel.
-    private func fitWindow(in w: NSWindow? = nil) {
+    ///
+    /// A window the user made shorter than the office (`before`, the office it was showing) keeps
+    /// its height and auto-scrolls instead, so a small window on a laptop stays small.
+    private func fitWindow(in w: NSWindow? = nil, before: SIMD2<Float>? = nil) {
         guard let window = w ?? window, let screen = window.screen ?? NSScreen.main, !window.styleMask.contains(.fullScreen) else { return }
         let content = window.contentRect(forFrameRect: window.frame)
         let ppm = min(Self.pixelsPerMeter, max(Self.minPixelsPerMeter, content.width / CGFloat(max(1, scene.officeSize.x))))
         let chrome = window.frame.height - content.height
-        let wanted = max(480, officePixels(ppm).height) + chrome
         let visible = screen.visibleFrame
+        if let before {
+            let shown = CGFloat(before.y * Projector.depthFactor) * ppm
+            if content.height < shown - 2, window.frame.height < visible.height - 2 { return }
+        }
+        let wanted = max(480 * ViewScale.world, officePixels(ppm).height) + chrome
         let height = min(wanted, visible.height)
         var frame = window.frame
         guard abs(frame.height - height) > 1 else { return }
@@ -122,12 +157,21 @@ struct TownView: View {
             }
             .onAppear { proj.apply(to: camera) }
             .onChange(of: geo.size) { proj.apply(to: camera) }
-            .onChange(of: scene.officeSize) {
-                fitWindow()
+            .onChange(of: scene.officeSize) { old, _ in
+                fitWindow(before: old)
                 projector(geo.size).apply(to: camera)
             }
             .onChange(of: stayOnTop) { _, on in window?.level = on ? .floating : .normal }
-            .onChange(of: scene.ceoSpot) { _, spot in follow(spot, size: geo.size) }
+            .onChange(of: scene.ceoSpot) { _, spot in
+                follow(spot, size: geo.size)
+                autoScroll.pause() // the user is walking the CEO
+            }
+            .task(id: geo.size) {
+                while !Task.isCancelled {
+                    autoScrollStep(size: geo.size)
+                    try? await Task.sleep(for: .milliseconds(33))
+                }
+            }
             .onChange(of: opacity) { _, v in window?.alphaValue = Prefs.clampOpacity(v) } // live while the slider moves
             .overlay(alignment: .bottomLeading) { tip.padding([.leading, .bottom], 12) } // clear of the context bar under a block
             .background(WindowReader { w in
@@ -136,9 +180,22 @@ struct TownView: View {
                 guard w !== window else { return }
                 window = w
                 w.level = stayOnTop ? .floating : .normal
-                WindowPlace.restore(w)
-                fitWindow(in: w) // sessions already open when the window opens
+                let restored = WindowPlace.restore(w)
+                // Sessions already open when the window opens; a restored size the user made smaller stays.
+                fitWindow(in: w, before: restored ? scene.officeSize : nil)
                 WindowPlace.keep(w)
+                // --resize WIDTHxHEIGHT: 8 seconds in, once the demo's blocks are open, shrink the window as a user's
+                // drag would, to see auto-scroll.
+                let args = CommandLine.arguments
+                if let i = args.firstIndex(of: "--resize"), i + 1 < args.count {
+                    let wh = args[i + 1].split(separator: "x").compactMap { Double($0) }
+                    if wh.count == 2 {
+                        Task { @MainActor in
+                            try? await Task.sleep(for: .seconds(8))
+                            w.setContentSize(NSSize(width: wh[0], height: wh[1]))
+                        }
+                    }
+                }
             })
             .background(KeyCatcher(onKey: { scene.key($0, down: $1) }, onResign: { scene.releaseKeys() }))
             .background(ScrollCatcher { dx, dy in
@@ -146,6 +203,7 @@ struct TownView: View {
                 let lim = panLimit(geo.size)
                 pan.x = min(lim.x, max(-lim.x, pan.x - Float(dx) / ppm))
                 pan.y = min(lim.y, max(-lim.y, pan.y - Float(dy) / ppm / Projector.depthFactor))
+                autoScroll.pause() // the user's own scrolling holds for a while
             })
         }
         .background(Color(nsColor: NSColor(srgbRed: 0.957, green: 0.918, blue: 0.859, alpha: 1)))
@@ -192,7 +250,9 @@ struct LabelOverlay: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            ForEach(items, id: \.id) { item in
+            // A tag whose character is well above the window (scrolled out of view) is not shown;
+            // one just above slides down to stay in view.
+            ForEach(items.filter { projector.screen($0.anchor).y > -20 }, id: \.id) { item in
                 let p = projector.screen(item.anchor)
                 let isSign = item.lines.first?.1 == .sign
                 Group {
@@ -254,10 +314,10 @@ struct MeterOverlay: View {
     let items: [TownScene.MeterItem]
     let projector: Projector
 
-    static let barWidth: CGFloat = 96
-    static let rowHeight: CGFloat = 22
-    static let gap: CGFloat = 8
-    static let font = NSFont.monospacedDigitSystemFont(ofSize: 10.5, weight: .medium)
+    static let barWidth: CGFloat = 96 * ViewScale.text
+    static let rowHeight: CGFloat = 22 * ViewScale.text
+    static let gap: CGFloat = 8 * ViewScale.text
+    static let font = NSFont.monospacedDigitSystemFont(ofSize: 10.5 * ViewScale.text, weight: .medium)
 
     /// Green while there is room, amber past 60%, red past 80%.
     static func color(_ f: Double) -> NSColor {
@@ -271,17 +331,17 @@ struct MeterOverlay: View {
         ZStack(alignment: .topLeading) {
             ForEach(items, id: \.id) { item in
                 let p = projector.screen(item.anchor)
-                HStack(spacing: 7) {
+                HStack(spacing: 7 * ViewScale.text) {
                     ZStack(alignment: .leading) {
                         Capsule().fill(Color.white.opacity(0.22))
                         Capsule().fill(Color(nsColor: Self.color(item.fraction ?? 0)))
                             .frame(width: Self.barWidth * CGFloat(item.fraction ?? 0))
                     }
-                    .frame(width: Self.barWidth, height: 7)
+                    .frame(width: Self.barWidth, height: 7 * ViewScale.text)
                     Text(item.text).font(Font(Self.font)).foregroundStyle(.white)
                 }
-                .padding(.horizontal, 8)
-                .frame(height: Self.rowHeight - 4)
+                .padding(.horizontal, 8 * ViewScale.text)
+                .frame(height: Self.rowHeight - 4 * ViewScale.text)
                 .background(RoundedRectangle(cornerRadius: 5).fill(Color(nsColor: Self.background)))
                 .fixedSize()
                 .frame(width: 0, height: 0)
@@ -298,7 +358,7 @@ struct Tag: View {
     let style: TownScene.LabelItem.Style
 
     /// A statement wraps at this width.
-    static let statementWidth: CGFloat = 230
+    static let statementWidth: CGFloat = 230 * ViewScale.text
 
     var body: some View {
         if style == .statement {
@@ -323,11 +383,12 @@ struct Tag: View {
     }
 
     static func font(_ s: TownScene.LabelItem.Style) -> NSFont {
-        switch s {
-        case .sign: .systemFont(ofSize: 13, weight: .semibold)
-        case .name: .systemFont(ofSize: 10.5, weight: .semibold)
-        case .statement: .systemFont(ofSize: 11)
-        default: .systemFont(ofSize: 10.5)
+        let k = ViewScale.text
+        return switch s {
+        case .sign: .systemFont(ofSize: 13 * k, weight: .semibold)
+        case .name: .systemFont(ofSize: 10.5 * k, weight: .semibold)
+        case .statement: .systemFont(ofSize: 11 * k)
+        default: .systemFont(ofSize: 10.5 * k)
         }
     }
 
@@ -468,14 +529,32 @@ private struct WindowReader: NSViewRepresentable {
 @MainActor enum WindowPlace {
     private static var observers: [NSObjectProtocol] = []
 
-    /// Moves the window to its saved frame, if that is still on a connected display.
-    static func restore(_ w: NSWindow) {
-        guard let s = UserDefaults.standard.string(forKey: Prefs.windowFrame) else { return }
-        let r = NSRectFromString(s)
-        guard r.width >= 200, r.height >= 200,
-              NSScreen.screens.contains(where: { $0.visibleFrame.intersection(r).width >= 100 && $0.visibleFrame.intersection(r).height >= 100 })
-        else { return }
+    /// Compact view keeps its own frame, so turning it on or off brings back that view's size.
+    static var key: String { ViewScale.compact ? Prefs.windowFrameCompact : Prefs.windowFrame }
+
+    /// Moves the window to its saved frame, if that is still on a connected display; true if it did.
+    /// The first time in compact view, the normal frame's top-left corner, at half its height and wide
+    /// enough for the office at compact view's full scale.
+    @discardableResult static func restore(_ w: NSWindow) -> Bool {
+        let d = UserDefaults.standard
+        var r: NSRect
+        if let s = d.string(forKey: key) {
+            r = NSRectFromString(s)
+        } else if ViewScale.compact, let s = d.string(forKey: Prefs.windowFrame) {
+            // Half the normal window, but wide enough for the office at compact view's full scale.
+            let n = NSRectFromString(s)
+            let full = CGFloat(2 * Layout.margin + Layout.blockWidth) * TownView.pixelsPerMeter
+            let width = min(n.width, max(n.width / 2, full))
+            r = NSRect(x: n.minX, y: n.maxY - n.height / 2, width: width, height: n.height / 2)
+        } else {
+            return false
+        }
+        r.size.width = max(r.width, TownView.minSize.width)
+        r.size.height = max(r.height, TownView.minSize.height)
+        guard NSScreen.screens.contains(where: { $0.visibleFrame.intersection(r).width >= 100 && $0.visibleFrame.intersection(r).height >= 100 })
+        else { return false }
         w.setFrame(r, display: true)
+        return true
     }
 
     /// Saves the frame each time the window moves or is resized.
@@ -483,11 +562,45 @@ private struct WindowReader: NSViewRepresentable {
         observers.forEach(NotificationCenter.default.removeObserver)
         let save: (Notification) -> Void = { n in
             guard let w = n.object as? NSWindow, !w.styleMask.contains(.fullScreen) else { return }
-            UserDefaults.standard.set(NSStringFromRect(w.frame), forKey: Prefs.windowFrame)
+            UserDefaults.standard.set(NSStringFromRect(w.frame), forKey: key)
         }
         observers = [NSWindow.didMoveNotification, NSWindow.didResizeNotification].map {
             NotificationCenter.default.addObserver(forName: $0, object: w, queue: .main, using: save)
         }
-        UserDefaults.standard.set(NSStringFromRect(w.frame), forKey: Prefs.windowFrame)
+        UserDefaults.standard.set(NSStringFromRect(w.frame), forKey: key)
     }
+}
+
+/// Auto-scroll's memory: where each character was, which ones are walking, and when the user last
+/// took the view (spec: auto-scroll).
+@MainActor final class AutoScroll {
+    /// Seconds the user's own scrolling, or walking the CEO, holds auto-scroll off.
+    static let pause: TimeInterval = 10
+
+    private var last: [String: SIMD3<Float>] = [:]
+    private var movingUntil: [String: Date] = [:]
+    private(set) var pausedUntil = Date.distantPast
+    var target: SIMD2<Float>?
+
+    func pause() {
+        pausedUntil = Date().addingTimeInterval(Self.pause)
+        target = nil
+    }
+
+    /// The floor spots of characters walking now: those whose position in their block changed
+    /// since the last look (a block moving down when another is added does not count). A walker
+    /// stays counted a moment after stopping, so a pause between legs of a walk doesn't drop it.
+    func movers(_ spots: [TownScene.CharacterSpot], at now: Date) -> [SIMD2<Float>] {
+        var seen: [String: SIMD3<Float>] = [:]
+        var out: [SIMD2<Float>] = []
+        for c in spots {
+            seen[c.id] = c.local
+            if let l = last[c.id], simd_distance(l, c.local) > 0.002 { movingUntil[c.id] = now.addingTimeInterval(0.6) }
+            if let u = movingUntil[c.id], u > now { out.append(c.floor) }
+        }
+        last = seen
+        movingUntil = movingUntil.filter { seen[$0.key] != nil && $0.value > now }
+        return out
+    }
+
 }

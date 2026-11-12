@@ -113,6 +113,7 @@ A strip across the top, with three people at their desks:
 ### The project blocks
 
 - **One block per project.** A block appears when a Claude Code session opens in that project, before any prompt, and leaves when its last session ends. Blocks stack under the executive office, and the window grows to fit them. To keep the window small, turn on Settings → Hide idle project blocks: a block then shows only while its project has work, and hides a few seconds (5 by default, adjustable) after the work is done. A hidden block's context bars stay on screen, named by project, under the executive office, so you can still see which sessions are open.
+- **On a laptop screen.** Turn on Settings → Compact view (it applies after a restart) to draw the office at half size, with smaller text. You can also make the window as small as 320 × 240: when the office doesn't fit, the view scrolls by itself to where characters are walking. Your own scrolling, or walking the CEO, pauses that for 10 seconds.
 - **The sign** shows the project's name and a short title for the running task. A bar under the block shows the session's context use.
 - **Desks**: one Chief of Staff desk with a telephone, and five staff desks. A second session in the same project brings a second Chief of Staff.
 - **The resource bench** is where staff wait between jobs. The Chief of Staff pages them over the bench speaker.
@@ -129,7 +130,7 @@ A strip across the top, with three people at their desks:
 
 - You hear a sound when a ticket arrives, when work is done, and when Claude Code needs your approval, even with the window hidden.
 - The menu bar menu has About, Show agent-town, Stay on top, Sound, Settings… and Quit. Stay on top keeps the office window above other apps' windows, even when another app is in front. Your choices are kept across restarts, and the window opens where you left it.
-- Settings has the language (English or Traditional Chinese, following macOS by default), Open at login, Opacity (10% to 100%) for the office window, Hide idle project blocks (with how many seconds to wait), and Show tips.
+- Settings has the language (English or Traditional Chinese, following macOS by default), Open at login, Opacity (10% to 100%) for the office window, Compact view, Hide idle project blocks (with how many seconds to wait), Show tips, the sounds, and update checks.
 - Settings → Sounds has a volume for agent-town's sounds, and for each sound (dispatch, completion, approval) an on/off switch, the sound (a macOS sound or a file of your own) and a Play button. Under completion, set a minimum task length in seconds so that only longer tasks play it.
 
 ## 4. Known issues and limitations
@@ -141,7 +142,8 @@ A strip across the top, with three people at their desks:
 - **Work done while the app is closed is not shown later.** town-link sends events only while the app is running and drops them otherwise. A Claude Code session that is already running shows up within a few seconds of the app starting, from that point on.
 - **Commands you run with `!` don't show in the office.** Claude Code runs them in your shell without the model, and tells plugins nothing about them. If Claude goes on working after one, that work shows as usual, with the Chief of Staff's note reading "Continuing".
 - **A session that stops responding leaves the office about two minutes later.** When a Claude Code session ends normally, its Chief of Staff leaves right away. When it stops responding (for example, the terminal was killed), its Chief of Staff stays until the app has heard nothing for two minutes.
-- **Labels can cover someone near the top of a small window.** Name tags and notes slide down to stay inside the window, so in a short window they may sit over the character's head. Make the window taller or scroll.
+- **Labels can cover someone near the top of a small window.** Name tags and notes slide down to stay inside the window, so in a short window they may sit over the character's head. Make the window taller or scroll. A character scrolled out of view above the window has no tag shown.
+- **Tags can overlap in compact view.** The text is 75% of its normal size on an office at half size, so tags of characters side by side (two Chiefs of Staff, for example) can overlap, mostly in a narrow window.
 - **Task titles and staff roles use your Claude plan.** Each new task makes a few short Haiku requests on your own plan or API key to pick a title, the kind of task and staff roles. If a request fails, the sign shows no task title and the hat and roles fall back to defaults.
 - **One project block shows up to five sessions.** The back row has five desk spots, shared by the Chiefs of Staff and by staff who carry in a desk when the front desks are full. A Chief of Staff who arrives when all five are taken stands on the first desk's spot, over the Chief already there.
 - **macOS only.** The app needs macOS 15 or later.

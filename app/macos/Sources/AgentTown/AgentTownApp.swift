@@ -54,7 +54,7 @@ struct AgentTownApp: App {
                 if CommandLine.arguments.contains("--spike") {
                     SpikeView().frame(minWidth: 900, minHeight: 600)
                 } else {
-                    TownView(scene: town.scene).frame(minWidth: 640, minHeight: 480)
+                    TownView(scene: town.scene).frame(minWidth: TownView.minSize.width, minHeight: TownView.minSize.height)
                 }
             }
             // Closing the window hides the office; the app keeps running in the menu bar.

@@ -4,6 +4,17 @@ import RealityKit
 import simd
 import TownCore
 
+/// Compact view (Settings → Office; read once at launch, so a change applies after a restart):
+/// the office is drawn at half scale and its text at 75%, the smallest that stays readable. The
+/// layout in meters is the same either way.
+enum ViewScale {
+    static let compact: Bool = UserDefaults.standard.bool(forKey: Prefs.compactView)
+    /// The office's drawing scale.
+    static let world: CGFloat = compact ? 0.5 : 1
+    /// Tags, signs, statements and context bars.
+    static let text: CGFloat = compact ? 0.75 : 1
+}
+
 /// World layout, in meters, on one flat plane (y up). x runs right and z runs down
 /// the screen. The office is a set of blocks with paths between them, seen from above:
 /// the executive block, a strip along the top, then one block per active project
@@ -20,7 +31,9 @@ enum Layout {
     static let characterScale: Float = 0.75
     static let floorThickness: Float = 0.02
     /// Floor depth one context bar row takes on screen at the smallest scale (22 px at 70 px/m, tilted).
-    static let meterRowDepth: Float = 0.36
+    /// In compact view the bars are 75% as tall on an office drawn at half scale, so a row takes
+    /// 1.5 times the floor.
+    static let meterRowDepth: Float = 0.36 * Float(ViewScale.text / ViewScale.world)
 
     /// Room under the executive block for `rows` context bars of hidden blocks.
     static func execExtra(rows: Int) -> Float { rows == 0 ? 0 : Float(rows) * meterRowDepth + 0.15 }

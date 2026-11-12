@@ -31,6 +31,8 @@ enum Prefs {
         let d = UserDefaults.standard // double(forKey:) also reads a number given as a launch argument
         return clampIdleHide(d.object(forKey: idleHideSeconds) == nil ? 5 : d.double(forKey: idleHideSeconds))
     }
+    /// Compact view: the office at half size, for a laptop screen. Default off. Applies after a restart.
+    static let compactView = "compactView"
     /// Check GitHub for a newer app and town-link once a day. Default on (spec: Updates).
     static let checkForUpdatesKey = "checkForUpdates"
     static var checkForUpdates: Bool { isOn(checkForUpdatesKey) }
@@ -40,6 +42,8 @@ enum Prefs {
     static let language = "language"
     /// The office window's frame in screen coordinates, as NSStringFromRect writes it.
     static let windowFrame = "windowFrame"
+    /// The same in compact view, kept apart so each view keeps its own size.
+    static let windowFrameCompact = "windowFrameCompact"
     /// The office window's opacity, 0.1 to 1. Default 1 (opaque).
     static let opacity = "opacity"
     /// agent-town's sound volume, 0 to 1. Default 1. Each sound's switch and choice are in SoundKind.
@@ -144,6 +148,7 @@ struct SettingsView: View {
     @AppStorage(Prefs.idleHideSeconds) private var idleSeconds = 5.0
     @AppStorage(Prefs.showTips) private var showTips = true
     @AppStorage(Prefs.checkForUpdatesKey) private var checkUpdates = true
+    @AppStorage(Prefs.compactView) private var compact = false
     @State private var openAtLogin = LoginItem.isOn
     @State private var loginNote: String?
 
@@ -182,6 +187,16 @@ struct SettingsView: View {
                 }
             }
             Section(Labels.text("Office")) {
+                Toggle(Labels.text("Compact view"), isOn: $compact)
+                // The scale is set when the window is made, so a change needs a restart.
+                if compact != ViewScale.compact {
+                    HStack {
+                        Text(Labels.text("Restart agent-town to change the view."))
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button(Labels.text("Restart now")) { Prefs.relaunch() }
+                    }
+                }
                 Toggle(Labels.text("Hide idle project blocks"), isOn: $hideIdle)
                 LabeledContent(Labels.text("Hide after")) {
                     HStack(spacing: 6) {
