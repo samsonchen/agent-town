@@ -137,8 +137,10 @@ import TownCore
     }
 }
 
-/// The menu bar icon: the system "building.2", with a dot cut into its corner while an update is
-/// available. A template image, so macOS colors it for light mode, dark mode and an open menu.
+/// The menu bar icon: the system "building.2", with a red dot in its corner while an update is
+/// available. Without the dot it is a template image, so macOS colors it. With the dot it can't
+/// be one (a template has no color), so the building is drawn in the menu bar's text color,
+/// looked up each time the image is drawn, and follows light and dark mode.
 enum MenuIcon {
     static func image(dot: Bool) -> NSImage {
         let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .regular)
@@ -150,17 +152,20 @@ enum MenuIcon {
         }
         let size = NSSize(width: base.size.width + 3, height: base.size.height + 2)
         let img = NSImage(size: size, flipped: false) { rect in
-            base.draw(in: NSRect(x: 0, y: 0, width: base.size.width, height: base.size.height))
+            let symbol = NSRect(x: 0, y: 0, width: base.size.width, height: base.size.height)
+            base.draw(in: symbol)
+            NSColor.labelColor.set()
+            symbol.fill(using: .sourceAtop) // the building in the menu bar's text color
             let d: CGFloat = 7
             let dotRect = NSRect(x: rect.maxX - d, y: rect.maxY - d, width: d, height: d)
             NSGraphicsContext.current?.compositingOperation = .clear
             NSBezierPath(ovalIn: dotRect.insetBy(dx: -1.5, dy: -1.5)).fill()
             NSGraphicsContext.current?.compositingOperation = .sourceOver
-            NSColor.black.setFill()
+            NSColor.systemRed.setFill()
             NSBezierPath(ovalIn: dotRect).fill()
             return true
         }
-        img.isTemplate = true
+        img.isTemplate = false
         img.accessibilityDescription = Labels.text("agent-town: an update is available")
         return img
     }

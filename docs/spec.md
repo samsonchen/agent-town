@@ -241,7 +241,7 @@ Versions are compared number by number (`1.0.10` is newer than `1.0.9`). A faile
 
 **Where the user sees it.**
 
-- A dot on the menu bar icon (on Windows, on the tray icon) while either update is available.
+- A red dot on the menu bar icon (on Windows, on the tray icon) while either update is available.
 - A line at the top of the menu, "agent-town X is available…" or "town-link X is available…", which opens the Updates window.
 - No system notifications (macOS or Windows): the icon and the menu are enough, by the user's choice (2026-11-12).
 
