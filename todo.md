@@ -170,6 +170,34 @@ Built in the macOS app 1.0.8; `docs/spec.md` → The office has the details. The
 - [x] Strings: "Compact view" (精簡檢視) and "Restart agent-town to change the view." (重新啟動 agent-town 以切換檢視。), already in the shared `Localizable.strings` and synced.
 - [x] `run-local` options to match the Mac's: `-Compact` and `-Resize WxH` (8 seconds in, shrink the window as a drag would).
 
+### Repository rename to `samsonchen/agent-town-claude-code` (2026-11-13)
+
+The user is renaming the repository from `samsonchen/agent-town` to `samsonchen/agent-town-claude-code`, so it is told apart from other projects named agent-town (the product name stays Agent-Town). GitHub redirects the old name (web, git, API, release downloads), so installed apps, plugins and taps keep working. Never create a new repository named `samsonchen/agent-town`: it would end the redirects. Change the references only after the rename is done on GitHub, or the new addresses 404.
+
+**The user:**
+
+- [ ] Rename on GitHub: repository Settings → General → Repository name → `agent-town-claude-code`.
+- [ ] Point each local clone at the new name (the Mac and the Windows machine): `git remote set-url origin https://github.com/samsonchen/agent-town-claude-code.git`, then `git fetch` to check. The folders can keep their names.
+- [ ] Optional, for your own installs (both keep working through the redirect): the Homebrew tap, `git -C "$(brew --repo samsonchen/agent-town)" remote set-url origin https://github.com/samsonchen/agent-town-claude-code`; town-link's marketplace needs nothing (its name `agent-town` doesn't change).
+- [ ] Release the macOS app (the next version) and the Windows app (the next version) once both sessions have pushed, so their update checks use the new addresses.
+
+**The Mac session** (after the rename):
+
+- [ ] Every reference outside `app/windows/` and `docs/windows/`: both READMEs (install commands, links), `docs/` (distribution, releasing, spec: the update check's two addresses), `Casks/agent-town.rb` (`url`, `homepage`; the cask's name and the tap's name `samsonchen/agent-town` stay), `AppInfo.repository` in `About.swift`, `UpdateFeed` in `TownCore/Updates.swift` and the brew command in `Updates.swift` (the tap name stays, so the command doesn't change), `plugin/.claude-plugin/plugin.json` `homepage` (raise town-link's version), the schema's `$id`. The tests' example remotes in `plugin/tests/core.test.ts` are only examples; leave them.
+- [ ] Check the redirects from the old name: the API releases list, `raw.githubusercontent.com` for plugin.json (the update check of the apps already out), a release download and `git ls-remote`.
+- [ ] Raise the macOS app's version, run the checks, commit and push.
+
+**The Windows session** (after the rename and after the Mac session has pushed; `git pull` first):
+
+- [ ] `app/windows/core/update_feed.gd`: `RELEASES_URL` → `https://api.github.com/repos/samsonchen/agent-town-claude-code/releases?per_page=50`, `PLUGIN_MANIFEST_URL` → `https://raw.githubusercontent.com/samsonchen/agent-town-claude-code/main/plugin/.claude-plugin/plugin.json`.
+- [ ] `app/windows/shell/about_window.gd`: `REPOSITORY` → `https://github.com/samsonchen/agent-town-claude-code`.
+- [ ] `app/windows/installer/agent-town.iss`: `AppPublisherURL`, `AppSupportURL` (`…/issues`) and `AppUpdatesURL` (`…/releases`) to the new name. Keep the `AppId` as it is, so the new installer still upgrades the installed app.
+- [ ] `app/windows/scripts/release.ps1`: the three `--repo samsonchen/agent-town` → `--repo samsonchen/agent-town-claude-code`.
+- [ ] `docs/windows/` (for example `releasing.md`: the account that can publish on the repository) and any other mention under `app/windows/` (`git grep -n "samsonchen/agent-town" -- app/windows docs/windows`; leave the copies in `app/windows/shared/`, which `tools/sync-windows-assets.py` keeps).
+- [ ] Raise the Windows app's version, run the Windows tests, commit and push. Tick these boxes.
+
+**Side effect:** town-link names a project's block after its git remote, so once a clone points at the new name, this repository's own block is "agent-town-claude-code" and counts as a new project (a new `projectId`). Other projects are not affected.
+
 ### Shared material a second app needs
 
 - [x] **Expected state for each fixture.** Done (2026-11-11): `protocol/fixtures/expected/`, one file per fixture with the state after each event that changes it; format in its README; checked by `ExpectedStateTests.swift`. The Windows app runs the same fixtures against the same answers.
