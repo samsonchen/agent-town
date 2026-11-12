@@ -18,6 +18,8 @@ var show_tips := true ## the closable tips in the window
 var hide_idle_blocks := false ## project blocks show only while they have work
 var idle_hide_seconds := 5 ## how long a block's work must have settled before it hides
 var compact_view := false ## the office at half size; applies after a restart
+var check_updates := true ## check GitHub for a newer app and town-link once a day (spec: Updates)
+var last_update_check := 0 ## unix time of the last answered check; 0 before any
 var show_window := true
 var opacity := 1.0
 var window_position: Variant = null ## Vector2i, or null before the first save
@@ -48,6 +50,8 @@ func _init(p_path: String = "") -> void:
 	hide_idle_blocks = bool(_cfg.get_value("app", "hide_idle_blocks", hide_idle_blocks))
 	idle_hide_seconds = clamp_idle_hide(_cfg.get_value("app", "idle_hide_seconds", 5))
 	compact_view = bool(_cfg.get_value("app", "compact_view", false))
+	check_updates = bool(_cfg.get_value("updates", "check_automatically", true))
+	last_update_check = int(_cfg.get_value("updates", "last_check", 0))
 	show_window = bool(_cfg.get_value("app", "show_window", show_window))
 	opacity = clamp_opacity(_cfg.get_value("app", "opacity", opacity))
 	_read_window("window")
@@ -122,6 +126,8 @@ func save() -> void:
 	_cfg.set_value("app", "hide_idle_blocks", hide_idle_blocks)
 	_cfg.set_value("app", "idle_hide_seconds", idle_hide_seconds)
 	_cfg.set_value("app", "compact_view", compact_view)
+	_cfg.set_value("updates", "check_automatically", check_updates)
+	_cfg.set_value("updates", "last_check", last_update_check)
 	_cfg.set_value("app", "show_window", show_window)
 	_cfg.set_value("app", "opacity", opacity)
 	_cfg.set_value("sounds", "volume", volume)

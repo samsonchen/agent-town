@@ -7,12 +7,16 @@ extends Node
 ## TOWN_LOG=<file>: appends what arrives and what changes, for debugging the live app.
 
 signal changed(change: Dictionary)
+signal plugin_versions_changed ## a session opened with its town-link version, or closed
 
 const STALE_CHECK_MS := 5000
 
 var building := Building.new()
 var server := LoopbackServer.new()
 var last_event_ms := -1 ## the app's clock when the last batch arrived; -1 before any
+## session id -> its town-link version from session.open ("" when it sent none: town-link 1.0.2 or
+## older), for open sessions only (spec: Updates).
+var plugin_versions: Dictionary = {}
 
 var _sequencer := Sequencer.new()
 var _last_expiry_ms := 0
@@ -46,6 +50,7 @@ func tick(now_ms: int) -> void:
 	if now_ms - _last_expiry_ms > STALE_CHECK_MS:
 		_last_expiry_ms = now_ms
 		_emit(building.expire_stale(now_ms))
+		_prune_plugin_versions()
 
 
 func receive(batch: Dictionary, now_ms: int) -> void:
@@ -63,6 +68,36 @@ func _apply(events: Array[TownEvent], now_ms: int) -> void:
 		_log("event %s seq=%d ts=%d session=%s project=%s fields=%s" % [e.type, e.seq, e.ts, e.session_id,
 			JSON.stringify(e.project_id), JSON.stringify(e.fields)])
 		_emit(building.apply(e, now_ms))
+		if e.type == "session.open": # after the building has the session, for its project name
+			var v: Variant = e.string("pluginVersion")
+			var version: String = v if v != null else ""
+			if plugin_versions.get(e.session_id) != version:
+				plugin_versions[e.session_id] = version
+				plugin_versions_changed.emit()
+	if not events.is_empty():
+		_prune_plugin_versions()
+
+
+## Forgets the versions of sessions that have closed or expired.
+func _prune_plugin_versions() -> void:
+	var open: Dictionary = {}
+	for b: Building.Block in building.blocks.values():
+		for s: String in b.chiefs:
+			open[s] = true
+	var gone := plugin_versions.keys().filter(func(s: String) -> bool: return not open.has(s))
+	if gone.is_empty():
+		return
+	for s: String in gone:
+		plugin_versions.erase(s)
+	plugin_versions_changed.emit()
+
+
+## The project name of an open session, or "".
+func project_name_of(session_id: String) -> String:
+	for b: Building.Block in building.blocks.values():
+		if b.chiefs.has(session_id):
+			return b.name
+	return ""
 
 
 func _emit(changes: Array[Dictionary]) -> void:

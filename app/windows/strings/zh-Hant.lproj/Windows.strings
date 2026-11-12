@@ -18,3 +18,6 @@
 "Only when a task takes at least" = "工作至少花了";
 "seconds (0: every task)" = "秒才播放（0：每個工作）";
 "Sound files" = "音效檔";
+
+/* Updates */
+"Run the downloaded installer: it replaces the installed agent-town." = "執行下載的安裝程式，它會取代已安裝的 agent-town。";

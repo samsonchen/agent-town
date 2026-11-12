@@ -10,6 +10,7 @@ signal office_changed ## Hide idle project blocks, Hide after, or Show tips
 const SOUND_TITLES := {"dispatch": "Ticket dispatched", "completion": "Work done", "approval": "Approval needed"}
 
 var settings: TownSettings
+var updater: Updater ## set before the window enters the tree, for Settings → Updates
 var labels: TownLabels
 var audio: TownAudio
 var _media: Array[String] = []
@@ -119,6 +120,7 @@ func _ready() -> void:
 
 	_build_office(box)
 	_build_sounds(box)
+	_build_updates(box)
 
 	var close := Button.new()
 	close.text = labels.t("Close")
@@ -194,6 +196,27 @@ func _build_office(box: VBoxContainer) -> void:
 		settings.save()
 		office_changed.emit())
 	box.add_child(_tips)
+
+
+# --- Updates ------------------------------------------------------------------------------
+
+## Check for updates automatically, and when the last check ran, with Check now (spec: Updates).
+func _build_updates(box: VBoxContainer) -> void:
+	if updater == null:
+		return
+	box.add_child(HSeparator.new())
+	var heading := Label.new()
+	heading.text = labels.t("Updates")
+	heading.add_theme_font_size_override("font_size", 16)
+	box.add_child(heading)
+	var auto := CheckBox.new()
+	auto.text = labels.t("Check for updates automatically")
+	auto.button_pressed = settings.check_updates
+	auto.toggled.connect(func(on: bool) -> void:
+		settings.check_updates = on
+		settings.save())
+	box.add_child(auto)
+	box.add_child(UpdateCheckRow.new(updater, labels))
 
 
 # --- Sounds -------------------------------------------------------------------------------

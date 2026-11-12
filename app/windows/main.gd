@@ -8,7 +8,9 @@ extends Node
 ##   godot --path app/windows -- --demo ../../protocol/fixtures/01-basic-ticket.json [--speed N]
 ##         [--snapshot out.png --at SECONDS[,SECONDS…]] [--language en|zh-Hant] [--open settings|about]
 ##         [--keys "down:1.5,right:1,h"] [--clicks "95:270@2,300:500@6"] [--hide-idle SECONDS]
-##         [--compact yes] [--resize WxH]
+##         [--compact yes] [--resize WxH] [--fake-update yes] [--check-now yes] [--open updates]
+## --fake-update makes up a newer app and town-link (99.0.0) without the network; --check-now makes a
+## real update check, even in a demo (a demo or a snapshot makes no automatic check).
 ## --compact yes shows compact view for this run; --resize shrinks the window 8 s in, as a drag would.
 ## A run with --snapshot never starts the server, so it cannot take the endpoint from the running app.
 ## Gaps between events keep their timing, each capped at 4 s and divided by `--speed`.
@@ -21,7 +23,7 @@ static var MIN_HEIGHT := 480
 const MIN_SIZE := Vector2i(320, 240)
 const AUTO_SCROLL_PAUSE := 10000 ## msec the user's own scrolling, or walking the CEO, holds auto-scroll off
 
-enum Menu { ABOUT, SHOW, ON_TOP, SOUND, SETTINGS, QUIT }
+enum Menu { ABOUT, SHOW, ON_TOP, SOUND, SETTINGS, QUIT, APP_UPDATE, PLUGIN_UPDATE }
 
 var settings := TownSettings.new()
 var labels: TownLabels
@@ -38,6 +40,9 @@ var _tray := StatusIndicator.new()
 var _menu := PopupMenu.new()
 var _settings_window: SettingsWindow
 var _about_window: AboutWindow
+var _updates_window: UpdatesWindow
+var updater: Updater
+var _icon: Image ## the tray icon without the update dot
 var _args: Dictionary = {}
 var _tip: PanelContainer
 var _tip_label: Label
@@ -100,8 +105,12 @@ func _ready() -> void:
 	_restore_window()
 	w.always_on_top = settings.stay_on_top
 	_apply_opacity(settings.opacity)
+	var version: String = ProjectSettings.get_setting("application/config/version", "0.0.0")
+	updater = Updater.new(settings, store, version)
+	add_child(updater)
 	_build_tray()
 	_settings_window = SettingsWindow.new(settings, labels, audio)
+	_settings_window.updater = updater
 	_settings_window.sounds_changed.connect(_apply_sounds)
 	_settings_window.office_changed.connect(_apply_office)
 	_settings_window.restart_requested.connect(func() -> void:
@@ -115,6 +124,11 @@ func _ready() -> void:
 	_about_window = AboutWindow.new(labels)
 	_about_window.visible = false
 	add_child(_about_window)
+	_updates_window = UpdatesWindow.new(updater, labels)
+	_updates_window.visible = false
+	add_child(_updates_window)
+	updater.changed.connect(_fill_menu)
+	updater.start(not _args.has("demo") and not _args.has("snapshot"), _args.has("fake-update"), _args.has("check-now"))
 	_call_window("hide_from_taskbar", [_hwnd()])
 	# Sessions already open; a restored height the user made shorter than the office stays.
 	_fit_window(scene.office_size if settings.window_height > 0 else null)
@@ -128,10 +142,10 @@ func _ready() -> void:
 	match _args.get("open", ""):
 		"settings": _settings_window.popup_centered.call_deferred()
 		"about": _about_window.popup_centered.call_deferred()
+		"updates": _updates_window.popup_centered.call_deferred()
 	if _args.has("demo"):
 		_play_demo(_args["demo"], float(_args.get("speed", "1")))
 	elif not _args.has("snapshot"): # a check run never takes the endpoint from the running app
-		var version: String = ProjectSettings.get_setting("application/config/version", "0.0.0")
 		store.start(version)
 	if _args.has("keys"):
 		_press_keys(_args["keys"])
@@ -141,14 +155,18 @@ func _ready() -> void:
 		_snapshot_later(_args["snapshot"], _args.get("at", "3"))
 
 
+## `--name value` pairs; a flag with no value (`--fake-update`) counts as "yes".
 static func _parse_args(args: PackedStringArray) -> Dictionary:
 	var out: Dictionary = {}
 	var i := 0
 	while i < args.size():
-		if args[i].begins_with("--") and i + 1 < args.size():
+		if not args[i].begins_with("--"):
+			i += 1
+		elif i + 1 < args.size() and not args[i + 1].begins_with("--"):
 			out[args[i].trim_prefix("--")] = args[i + 1]
 			i += 2
 		else:
+			out[args[i].trim_prefix("--")] = "yes"
 			i += 1
 	return out
 
@@ -265,6 +283,32 @@ func _place_tip() -> void:
 
 func _build_tray() -> void:
 	_menu.prefer_native_menu = true
+	_menu.id_pressed.connect(_on_menu)
+	_menu.about_to_popup.connect(_sync_menu)
+	add_child(_menu)
+	_icon = (load("res://shared/icons/app-icon-1024.png") as Texture2D).get_image()
+	_icon.resize(64, 64, Image.INTERPOLATE_LANCZOS)
+	_fill_menu()
+	add_child(_tray)
+	_tray.menu = _tray.get_path_to(_menu)
+	_tray.pressed.connect(func(button: int, _at: Vector2i) -> void:
+		if button == MOUSE_BUTTON_LEFT:
+			_set_shown(true))
+	_sync_menu()
+
+
+## The tray menu, with a line at the top for each update available (spec: Updates), and the tray
+## icon, with a red dot while there is one.
+func _fill_menu() -> void:
+	_menu.clear()
+	var app: Variant = updater.app_update()
+	var plugin := updater.plugin_update()
+	if app != null:
+		_menu.add_item(labels.t("agent-town %@ is available…", [app["version"]]), Menu.APP_UPDATE)
+	if plugin != "":
+		_menu.add_item(labels.t("town-link %@ is available…", [plugin]), Menu.PLUGIN_UPDATE)
+	if app != null or plugin != "":
+		_menu.add_separator()
 	_menu.add_item(labels.t("About agent-town"), Menu.ABOUT)
 	_menu.add_separator()
 	_menu.add_check_item(labels.t("Show agent-town"), Menu.SHOW)
@@ -274,19 +318,29 @@ func _build_tray() -> void:
 	_menu.add_item(labels.t("Settings…"), Menu.SETTINGS)
 	_menu.add_separator()
 	_menu.add_item(labels.t("Quit agent-town"), Menu.QUIT)
-	_menu.id_pressed.connect(_on_menu)
-	_menu.about_to_popup.connect(_sync_menu)
-	add_child(_menu)
-	var icon := (load("res://shared/icons/app-icon-1024.png") as Texture2D).get_image()
-	icon.resize(64, 64, Image.INTERPOLATE_LANCZOS)
-	_tray.icon = ImageTexture.create_from_image(icon)
-	_tray.tooltip = "agent-town"
-	add_child(_tray)
-	_tray.menu = _tray.get_path_to(_menu)
-	_tray.pressed.connect(func(button: int, _at: Vector2i) -> void:
-		if button == MOUSE_BUTTON_LEFT:
-			_set_shown(true))
 	_sync_menu()
+	var dot := updater.has_update()
+	_tray.icon = ImageTexture.create_from_image(with_dot(_icon) if dot else _icon)
+	_tray.tooltip = labels.t("agent-town: an update is available") if dot else "agent-town"
+
+
+## The icon with a red dot about half its height in the top-right corner, and a thin transparent
+## ring cut around the dot so it stands apart from the building.
+static func with_dot(icon: Image) -> Image:
+	var img := icon.duplicate() as Image
+	img.convert(Image.FORMAT_RGBA8)
+	var n := img.get_width()
+	var r := n / 4.0
+	var c := Vector2(n - r, r)
+	var ring := maxf(2.0, n / 24.0)
+	for y in ceili(2.0 * r + ring):
+		for x in range(floori(n - 2.0 * r - ring), n):
+			var d := Vector2(x + 0.5, y + 0.5).distance_to(c)
+			if d <= r:
+				img.set_pixel(x, y, Color(0.92, 0.2, 0.18))
+			elif d <= r + ring:
+				img.set_pixel(x, y, Color(0, 0, 0, 0))
+	return img
 
 
 func _sync_menu() -> void:
@@ -297,6 +351,8 @@ func _sync_menu() -> void:
 
 func _on_menu(id: int) -> void:
 	match id:
+		Menu.APP_UPDATE, Menu.PLUGIN_UPDATE:
+			_updates_window.popup_centered()
 		Menu.ABOUT:
 			_about_window.popup_centered()
 		Menu.SHOW:
@@ -587,7 +643,9 @@ func _snapshot_later(path: String, at: String) -> void:
 		var out := path if times.size() == 1 else "%s-%d.%s" % [path.get_basename(), i + 1, path.get_extension()]
 		get_viewport().get_texture().get_image().save_png(out)
 		print("snapshot: ", out)
-		for w: Window in [_settings_window, _about_window]:
+		if updater.has_update(): # the tray icon with its dot, to look at
+			(_tray.icon as ImageTexture).get_image().save_png("%s-tray.png" % out.get_basename())
+		for w: Window in [_settings_window, _about_window, _updates_window]:
 			if w.visible: # an open window from --open is saved beside it
 				var extra := "%s-%s.png" % [out.get_basename(), w.title.to_lower().replace(" ", "-")]
 				w.get_texture().get_image().save_png(extra)
