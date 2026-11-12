@@ -110,7 +110,7 @@ A strip across the top, with three people at their desks:
 
 ### The project blocks
 
-- **One block per project.** A block appears when a Claude Code session opens in that project, before any prompt, and leaves when its last session ends. Blocks stack under the executive office, and the window grows to fit them. To keep the window small, turn on Settings → Hide idle project blocks: a block then shows only while its project has work, and hides a few seconds (5 by default, adjustable) after the work is done.
+- **One block per project.** A block appears when a Claude Code session opens in that project, before any prompt, and leaves when its last session ends. Blocks stack under the executive office, and the window grows to fit them. To keep the window small, turn on Settings → Hide idle project blocks: a block then shows only while its project has work, and hides a few seconds (5 by default, adjustable) after the work is done. A hidden block's context bars stay on screen, named by project, under the last block shown, so you can still see which sessions are open.
 - **The sign** shows the project's name and a short title for the running task. A bar under the block shows the session's context use.
 - **Desks**: one Chief of Staff desk with a telephone, and five staff desks. A second session in the same project brings a second Chief of Staff.
 - **The resource bench** is where staff wait between jobs. The Chief of Staff pages them over the bench speaker.

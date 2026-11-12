@@ -101,6 +101,7 @@ final class TownScene: ObservableObject {
         let wasAllDone = allWorkDone
         self.building = building
         defer { if !wasAllDone && allWorkDone { ceoHomeWhenAllDone() } }
+        defer { updateOfficeSize() } // a session opening or closing in a hidden block changes its meter list
         // A hidden block with work comes back before its scene plays.
         showIfWorking(change)
         switch change {
@@ -472,8 +473,35 @@ final class TownScene: ObservableObject {
                 node.placed = true
             }
         }
-        officeSize = Layout.officeSize(count: n)
+        updateOfficeSize()
+    }
+
+    /// The office's size for the blocks on screen, plus room under the last one for the context
+    /// bars of hidden blocks (Settings → Hide idle project blocks).
+    func updateOfficeSize() {
+        var size = Layout.officeSize(count: blockOrder.count)
+        let hiddenRows = hiddenMeterSessions().count
+        if hiddenRows > 0 {
+            let rows = Float(lastShownMeterRows + hiddenRows)
+            size.y += max(0, rows * Layout.meterRowDepth + 0.25 - Layout.margin)
+        }
+        guard size != officeSize else { return }
+        officeSize = size
         buildGround()
+    }
+
+    /// Sessions in hidden blocks, in the order their projects and sessions opened.
+    func hiddenMeterSessions() -> [(project: String, session: String)] {
+        building.blockOrder.filter { hidden.contains($0) }.flatMap { p -> [(project: String, session: String)] in
+            guard let b = building.blocks[p] else { return [] }
+            return b.order.filter { b.chiefs[$0] != nil }.map { (p, $0) }
+        }
+    }
+
+    /// How many context bars sit under the last block on screen (none under the executive block).
+    private var lastShownMeterRows: Int {
+        guard let p = blockOrder.last, p != Self.executive, let b = building.blocks[p] else { return 0 }
+        return b.order.filter { b.chiefs[$0] != nil }.count
     }
 
     private func addLight() {
@@ -709,6 +737,22 @@ final class TownScene: ObservableObject {
                 out.append(MeterItem(id: "meter-\(s)", anchor: anchor, row: row, fraction: c.context.fraction,
                                      text: parts.joined(separator: " · ")))
             }
+        }
+        // Hidden blocks keep their bars, named by project, listed under the last block on screen,
+        // so idle sessions can still be seen.
+        let hiddenSessions = hiddenMeterSessions()
+        guard !hiddenSessions.isEmpty, let last = blockOrder.last, let lastNode = blocks[last] else { return out }
+        let o = lastNode.entity.position(relativeTo: nil)
+        let depth = last == Self.executive ? Layout.execDepth : Layout.blockDepth
+        let anchor = o + [Layout.blockWidth / 2, 0, depth]
+        for (i, (p, s)) in hiddenSessions.enumerated() {
+            guard let block = building.blocks[p], let c = block.chiefs[s] else { continue }
+            var parts = [block.name]
+            let count = block.order.filter { block.chiefs[$0] != nil }.count
+            if count > 1, let slot = blocks[p]?.chiefSlots[s] { parts.append(labels.desk(slot + 1)) }
+            parts.append(labels.contextLine(c.context))
+            out.append(MeterItem(id: "meter-\(s)", anchor: anchor, row: lastShownMeterRows + i,
+                                 fraction: c.context.fraction, text: parts.joined(separator: " · ")))
         }
         return out
     }

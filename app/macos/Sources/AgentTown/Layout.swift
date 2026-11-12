@@ -19,6 +19,8 @@ enum Layout {
     static let furnitureScale: Float = 0.85
     static let characterScale: Float = 0.75
     static let floorThickness: Float = 0.02
+    /// Floor depth one context bar row takes on screen at the smallest scale (22 px at 70 px/m, tilted).
+    static let meterRowDepth: Float = 0.36
     static let walkSpeed: Float = 2.34 // m/s
 
     // Executive block: a strip as wide as a project block and a third as deep, with the CEO,
