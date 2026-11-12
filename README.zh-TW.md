@@ -100,7 +100,7 @@ App 每天會到 GitHub 檢查一次有沒有新版的 app 和 town-link（「�
 
 ### Windows 上的 App
 
-需要 Windows 11（x64）。從 [Releases](https://github.com/samsonchen/agent-town/releases) 找最新的 **agent-town for Windows**（標籤 `windows-v<版本>`），下載 `agent-town-setup-<版本>.exe` 並執行。它只安裝給你自己的帳號，不需要系統管理員權限，並會加到「開始」選單。
+需要 Windows 11（x64）。安裝程式也允許 Windows 10，但 app 沒有在 Windows 10 上測試過。從 [Releases](https://github.com/samsonchen/agent-town/releases) 找最新的 **agent-town for Windows**（標籤 `windows-v<版本>`），下載 `agent-town-setup-<版本>.exe` 並執行。它只安裝給你自己的帳號，不需要系統管理員權限，並會加到「開始」選單。
 
 安裝程式還沒有程式碼簽章，所以第一次執行時 Windows 會顯示「Windows 已保護您的電腦」：按 **其他資訊**，再按 **仍要執行**。
 
@@ -158,6 +158,6 @@ Claude Code 要直接在 Windows 上執行（終端機、Desktop app 的 Code �
 - **精簡檢視裡標籤可能重疊。** 辦公室是一半大小，文字是原本的 75%，所以並排角色的標籤（例如兩位幕僚長）可能重疊，視窗窄的時候比較明顯。
 - **工作標題和職稱會用到你的 Claude 方案。** 每個新工作會用你自己的方案或 API key 向 Haiku 發幾個簡短請求，選標題、工作類型和職稱。請求失敗時，招牌不顯示工作標題，帽子和職稱改用預設值。
 - **一個專案區塊最多顯示五個 session。** 後排有五個桌位，由幕僚長和前排坐滿時搬桌子進來的職員共用。五個桌位都有人時，再來的幕僚長會站在第一張桌子的位置，和原本的幕僚長疊在一起。
-- **macOS 15 或 Windows 11。** macOS 版需要 macOS 15 以上；Windows 版需要 Windows 11（x64），而且 Claude Code 要直接在 Windows 上執行（不支援 WSL）。
+- **macOS 15 或 Windows 11。** macOS 版需要 macOS 15 以上；Windows 版需要 Windows 11（x64；可以裝在 Windows 10，但沒有測試過），而且 Claude Code 要直接在 Windows 上執行（不支援 WSL）。
 
 Claude Desktop 與 Cowork 的支援情況、文件和開發說明，請看[英文 README](README.md)。

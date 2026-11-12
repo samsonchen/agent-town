@@ -38,6 +38,10 @@ The app icon for the exe and the installer is `app/windows/installer/agent-town.
 
 The installer and the app are not code-signed, so SmartScreen shows "Windows protected your PC" (More info → Run anyway) until enough people have run that file. Signing must be free (for example the SignPath Foundation's program for open-source projects); see [roadmap.md](roadmap.md).
 
+## Windows 10
+
+The installer allows Windows 10 (`MinVersion=10.0`), at the user's choice (2026-11-13), but the app is tested only on Windows 11; the README says so. Nothing in the app needs Windows 11: Godot 4.7, the tray icon, the TownWindow add-on and the default sounds all exist on Windows 10.
+
 ## Only x64 for now
 
 The export preset makes an x64 build, which also runs on Windows on ARM through emulation. An ARM64 build waits until one has been run on an ARM machine (`docs/windows/verification.md`).

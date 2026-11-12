@@ -100,7 +100,7 @@ The app checks GitHub once a day for a newer app and a newer town-link (Settings
 
 ### The app on Windows
 
-Requires Windows 11 (x64). Download `agent-town-setup-<version>.exe` from the newest **agent-town for Windows** release on [Releases](https://github.com/samsonchen/agent-town/releases) (tags `windows-v<version>`) and run it. It installs for your user only, with no administrator prompt, and adds agent-town to the Start menu.
+Requires Windows 11 (x64). Windows 10 is allowed by the installer, but the app has not been tested on it. Download `agent-town-setup-<version>.exe` from the newest **agent-town for Windows** release on [Releases](https://github.com/samsonchen/agent-town/releases) (tags `windows-v<version>`) and run it. It installs for your user only, with no administrator prompt, and adds agent-town to the Start menu.
 
 The installer is not code-signed yet, so Windows shows "Windows protected your PC" the first time: click **More info**, then **Run anyway**.
 
@@ -158,7 +158,7 @@ A strip across the top, with three people at their desks:
 - **Tags can overlap in compact view.** The text is 75% of its normal size on an office at half size, so tags of characters side by side (two Chiefs of Staff, for example) can overlap, mostly in a narrow window.
 - **Task titles and staff roles use your Claude plan.** Each new task makes a few short Haiku requests on your own plan or API key to pick a title, the kind of task and staff roles. If a request fails, the sign shows no task title and the hat and roles fall back to defaults.
 - **One project block shows up to five sessions.** The back row has five desk spots, shared by the Chiefs of Staff and by staff who carry in a desk when the front desks are full. A Chief of Staff who arrives when all five are taken stands on the first desk's spot, over the Chief already there.
-- **macOS 15 or Windows 11.** The macOS app needs macOS 15 or later; the Windows app needs Windows 11 (x64) and native Windows Claude Code sessions (not WSL).
+- **macOS 15 or Windows 11.** The macOS app needs macOS 15 or later; the Windows app needs Windows 11 (x64; Windows 10 is allowed but untested) and native Windows Claude Code sessions (not WSL).
 
 ## 5. Claude Desktop and Cowork
 

@@ -1,6 +1,6 @@
 # Windows app spec
 
-The Windows app runs on Windows 11 on x64, with ARM64 as a nice-to-have (an x64 build also runs on ARM through emulation). It draws the same office from the same protocol and follows the main [spec](../spec.md), except where this document says otherwise.
+The Windows app runs on Windows 11 on x64 (the installer also allows Windows 10, untested), with ARM64 as a nice-to-have (an x64 build also runs on ARM through emulation). It draws the same office from the same protocol and follows the main [spec](../spec.md), except where this document says otherwise.
 
 It has its own version number, separate from the macOS app and from town-link. The protocol version alone decides whether a plugin and an app work together.
 

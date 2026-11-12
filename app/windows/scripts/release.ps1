@@ -132,7 +132,7 @@ Step "Publishing $tag"
 $notes = @"
 agent-town for Windows ${version}: the office for Claude Code, in the tray.
 
-Download agent-town-setup-$version.exe and run it. It installs for your user only (no administrator prompt). The installer is not code-signed yet, so Windows shows "Windows protected your PC": click More info, then Run anyway. Requires Windows 11 (x64). Install the town-link plugin in Claude Code as the README says.
+Download agent-town-setup-$version.exe and run it. It installs for your user only (no administrator prompt). The installer is not code-signed yet, so Windows shows "Windows protected your PC": click More info, then Run anyway. Requires Windows 11 (x64); Windows 10 is allowed but not tested. Install the town-link plugin in Claude Code as the README says.
 
 SHA-256 of agent-town-setup-$version.exe: $sha
 "@
