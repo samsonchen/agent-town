@@ -139,7 +139,11 @@ SHA-256 of agent-town-setup-$version.exe: $sha
 $flags = @('--latest=false')
 if ($Draft) { $flags += '--draft' }
 $target = git -C $repo rev-parse HEAD
-gh release create $tag $setup --repo samsonchen/agent-town --target $target --title "agent-town for Windows $version" --notes $notes @flags
+# The notes go in a file: Windows PowerShell 5.1 does not escape double quotes inside an argument
+# to a program, so gh would get the notes in pieces.
+$notesFile = Join-Path $build 'release-notes.md'
+[IO.File]::WriteAllText($notesFile, $notes, (New-Object Text.UTF8Encoding $false))
+gh release create $tag $setup --repo samsonchen/agent-town --target $target --title "agent-town for Windows $version" --notes-file $notesFile @flags
 if ($LASTEXITCODE -ne 0) { Fail 'gh release create failed' }
 
 Step 'Checking the uploaded installer'
