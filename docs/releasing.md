@@ -100,7 +100,7 @@ open AgentTown-<version>.dmg
 app/macos/scripts/release.sh --publish
 ```
 
-- It builds and notarizes again, then publishes GitHub release `v<version>` with the `.dmg` attached, tagged on the commit you built from.
+- It builds and notarizes again, then publishes GitHub release `v<version>`, titled "agent-town for macOS <version>" (beside the Windows app's "agent-town for Windows <version>"; titles before 1.0.9 say only "agent-town <version>"), with the `.dmg` attached, tagged on the commit you built from. It is marked Latest. The app's update check goes by the tag (`v<version>`), not the title or the Latest mark.
 - It then downloads the uploaded `.dmg`, checks that its checksum matches, and commits and pushes the Homebrew cask with the new version (see [Homebrew](#homebrew)). After that, `brew update && brew upgrade --cask agent-town` installs the new version.
 - It refuses to run with uncommitted changes, from a branch other than `main`, or when `main` differs from `origin/main`.
 - To review the release on GitHub first, add `--draft`: the release is made as a draft, and the cask is updated but not committed. Publish the draft on GitHub → Releases, then commit and push `Casks/agent-town.rb` yourself.

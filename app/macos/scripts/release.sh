@@ -192,7 +192,7 @@ if [ "$PUBLISH" -eq 1 ]; then
   fi
   step "Creating GitHub release v$VERSION (${flags[*]})"
   (cd "$REPO" && gh release create "v$VERSION" "$DMG" "${flags[@]}" --target "$(git rev-parse HEAD)" \
-    --title "agent-town $VERSION" --notes "$notes")
+    --title "agent-town for macOS $VERSION" --notes "$notes")
 
   CASK="$REPO/Casks/agent-town.rb"
   SHA="$(shasum -a 256 "$DMG" | cut -d' ' -f1)"
