@@ -28,8 +28,11 @@ A GDExtension in `app/windows/native/` (C++, built with `godot-cpp` 10.0.0, a su
 | `is_hidden_from_taskbar(hwnd)` | Whether the style is set |
 | `set_shown(hwnd, shown)` | Hides or shows the window (`ShowWindow`); Godot itself refuses to hide its main window |
 | `is_shown(hwnd)` | Whether the window is visible |
+| `set_owner(hwnd, owner_hwnd)` | Makes the office window the owner of Settings, About and Updates (`GWLP_HWNDPARENT`), so Windows keeps them above it, also when Stay on top is on and the office is clicked; Godot gives its sub-windows no owner. `main.gd` calls it each time one of them is shown, because Godot makes a new native window on every show. 0 removes the owner |
+| `get_owner(hwnd)` | The window's owner, or 0 |
 
 - The built DLLs are committed in `app/windows/addons/town_window/bin/` (x64 and ARM64, about 300 KB each), so working on the Godot project needs no C++ compiler.
+- The build's commands hold the checkout's full path, so after the folder is moved or renamed the first build compiles all of `godot-cpp` again (several minutes per architecture); later builds compile only `native/src/`.
 - To rebuild after changing `native/src/`: `app/windows/native/build.ps1` (PowerShell; `build.sh` runs it from Git Bash). It needs Visual Studio Build Tools 2026 with the C++ x64 and ARM64 tools and a Windows SDK, and checks for them first. It fetches the `godot-cpp` submodule if missing, takes SCons from `SCONS` or `PATH` or else installs it into a private `native/.venv`, builds x64 and ARM64 (or one with `-Arch`), and checks each DLL's CPU type. `-Check` only checks the prerequisites.
 - `app/windows/dev/taskbar_check.tscn` checks it in a real window (the project's main scene for now).
 

@@ -35,6 +35,8 @@ void TownWindow::_bind_methods() {
 	ClassDB::bind_static_method("TownWindow", D_METHOD("is_hidden_from_taskbar", "hwnd"), &TownWindow::is_hidden_from_taskbar);
 	ClassDB::bind_static_method("TownWindow", D_METHOD("set_shown", "hwnd", "shown"), &TownWindow::set_shown);
 	ClassDB::bind_static_method("TownWindow", D_METHOD("is_shown", "hwnd"), &TownWindow::is_shown);
+	ClassDB::bind_static_method("TownWindow", D_METHOD("set_owner", "hwnd", "owner_hwnd"), &TownWindow::set_owner);
+	ClassDB::bind_static_method("TownWindow", D_METHOD("get_owner", "hwnd"), &TownWindow::get_owner);
 }
 
 // Windows gives no taskbar button to a tool window. The style only takes effect on the taskbar
@@ -83,4 +85,22 @@ void TownWindow::set_shown(int64_t hwnd, bool shown) {
 bool TownWindow::is_shown(int64_t hwnd) {
 	HWND h = reinterpret_cast<HWND>(hwnd);
 	return IsWindow(h) && IsWindowVisible(h) != FALSE;
+}
+
+// Makes `owner_hwnd` the owner of `hwnd`: Windows then keeps the window above its owner, also when
+// the owner is always on top and is clicked (Godot's transient windows get no owner). An owned
+// window has no taskbar button of its own. 0 removes the owner.
+bool TownWindow::set_owner(int64_t hwnd, int64_t owner_hwnd) {
+	HWND h = reinterpret_cast<HWND>(hwnd);
+	HWND owner = reinterpret_cast<HWND>(owner_hwnd);
+	if (!IsWindow(h) || (owner != nullptr && !IsWindow(owner)) || owner == h) {
+		return false;
+	}
+	SetWindowLongPtrW(h, GWLP_HWNDPARENT, reinterpret_cast<LONG_PTR>(owner));
+	return true;
+}
+
+int64_t TownWindow::get_owner(int64_t hwnd) {
+	HWND h = reinterpret_cast<HWND>(hwnd);
+	return IsWindow(h) ? reinterpret_cast<int64_t>(GetWindow(h, GW_OWNER)) : 0;
 }

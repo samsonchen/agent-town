@@ -131,6 +131,9 @@ func _ready() -> void:
 	_updates_window = UpdatesWindow.new(updater, labels)
 	_updates_window.visible = false
 	add_child(_updates_window)
+	for dialog: Window in [_settings_window, _about_window, _updates_window]:
+		# Deferred: after Godot has made the window and finished its own setup of it.
+		dialog.visibility_changed.connect(_keep_above_office.bind(dialog), CONNECT_DEFERRED)
 	updater.changed.connect(_fill_menu)
 	updater.window_requested.connect(_show_updates)
 	updater.start(not _args.has("demo") and not _args.has("snapshot"), _args.has("fake-update"), _args.has("check-now"))
@@ -393,9 +396,23 @@ func _hwnd() -> int:
 	return DisplayServer.window_get_native_handle(DisplayServer.WINDOW_HANDLE, get_window().get_window_id())
 
 
-## Calls the TownWindow add-on when it is loaded (it is Windows only).
+## Settings, About and Updates stay above the office window, also when Stay on top is on and the
+## office is clicked: each is made an owned window of the office (as on the Mac, where they sit one
+## level above it). Godot gives a window a new native window each time it is shown, so this runs on
+## every show.
+func _keep_above_office(dialog: Window) -> void:
+	if not dialog.visible:
+		return
+	var id := dialog.get_window_id()
+	if id == DisplayServer.INVALID_WINDOW_ID:
+		return
+	_call_window("set_owner", [DisplayServer.window_get_native_handle(DisplayServer.WINDOW_HANDLE, id), _hwnd()])
+
+
+## Calls the TownWindow add-on when it is loaded (it is Windows only). An add-on built before a
+## method was added just lacks it: the call is skipped.
 func _call_window(method: String, args: Array) -> Variant:
-	if not ClassDB.class_exists("TownWindow"):
+	if not ClassDB.class_exists("TownWindow") or not ClassDB.class_has_method("TownWindow", method):
 		return null
 	return ClassDB.class_call_static("TownWindow", method, args[0]) if args.size() == 1 \
 		else ClassDB.class_call_static("TownWindow", method, args[0], args[1])

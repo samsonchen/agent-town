@@ -17,6 +17,8 @@ public:
 	static bool is_hidden_from_taskbar(int64_t hwnd);
 	static void set_shown(int64_t hwnd, bool shown);
 	static bool is_shown(int64_t hwnd);
+	static bool set_owner(int64_t hwnd, int64_t owner_hwnd);
+	static int64_t get_owner(int64_t hwnd);
 };
 
 } // namespace godot
