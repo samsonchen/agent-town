@@ -45,9 +45,9 @@ public struct ReleaseInfo: Equatable, Sendable {
 /// Reads what GitHub answers (spec: Updates).
 public enum UpdateFeed {
     /// The releases of the repository, newest first by GitHub's order.
-    public static let releasesURL = URL(string: "https://api.github.com/repos/samsonchen/agent-town/releases?per_page=50")!
+    public static let releasesURL = URL(string: "https://api.github.com/repos/samsonchen/agent-town-claude-code/releases?per_page=50")!
     /// town-link's manifest on `main`: what `claude plugin update` installs.
-    public static let pluginManifestURL = URL(string: "https://raw.githubusercontent.com/samsonchen/agent-town/main/plugin/.claude-plugin/plugin.json")!
+    public static let pluginManifestURL = URL(string: "https://raw.githubusercontent.com/samsonchen/agent-town-claude-code/main/plugin/.claude-plugin/plugin.json")!
 
     /// The highest-versioned release whose tag is `<tagPrefix><version>`, skipping drafts and
     /// pre-releases. The macOS app passes `v`, so `windows-v…` tags never match. GitHub's

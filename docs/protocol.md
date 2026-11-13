@@ -45,9 +45,9 @@ The app writes this file when its server starts and deletes it on quit (only if 
 
 | Platform | Path |
 |---|---|
-| macOS | `~/Library/Application Support/agent-town/endpoint.json` |
-| Windows | `%APPDATA%\agent-town\endpoint.json` (the Windows app is future; town-link already looks here) |
-| Linux | `$XDG_STATE_HOME/agent-town/endpoint.json` (future) |
+| macOS | `~/Library/Application Support/agent-town-claude-code/endpoint.json` |
+| Windows | `%APPDATA%\agent-town-claude-code\endpoint.json` (the Windows app is future; town-link already looks here) |
+| Linux | `$XDG_STATE_HOME/agent-town-claude-code/endpoint.json` (future) |
 
 A mod cannot ask Claude Code for the OS, so town-link uses the Windows path when `APPDATA` is set, which macOS never sets, and the macOS path otherwise.
 

@@ -3,7 +3,7 @@
 // Every hook only observes: it passes the event on unchanged, never awaits the
 // network or a model call, and swallows its own errors. Events are queued and
 // sent in one POST about every 250 ms to the loopback endpoint the app writes
-// to ~/Library/Application Support/agent-town/endpoint.json. See
+// to ~/Library/Application Support/agent-town-claude-code/endpoint.json. See
 // docs/protocol.md and docs/architecture.md in the agent-town repository.
 
 import type { Register } from 'claude-code'

@@ -53,8 +53,8 @@ describe('helpers', () => {
   })
 
   test('project identity', async () => {
-    expect(projectIdentity('https://github.com/samsonchen/agent-town.git', '/x/y')).toEqual({ identity: 'github.com/samsonchen/agent-town', name: 'agent-town' })
-    expect(projectIdentity('git@github.com:samsonchen/agent-town.git', '/x')).toEqual({ identity: 'github.com/samsonchen/agent-town', name: 'agent-town' })
+    expect(projectIdentity('https://github.com/samsonchen/agent-town-claude-code.git', '/x/y')).toEqual({ identity: 'github.com/samsonchen/agent-town-claude-code', name: 'agent-town-claude-code' })
+    expect(projectIdentity('git@github.com:samsonchen/agent-town-claude-code.git', '/x')).toEqual({ identity: 'github.com/samsonchen/agent-town-claude-code', name: 'agent-town-claude-code' })
     expect(projectIdentity('https://user:secret@example.com/a/b/', '/x').identity).toBe('example.com/a/b')
     expect(projectIdentity(null, '/Users/me/work/site/')).toEqual({ identity: '/Users/me/work/site', name: 'site' })
   })
@@ -69,9 +69,9 @@ describe('helpers', () => {
   })
 
   test('endpoint file path', () => {
-    expect(endpointFilePath('/Users/me', undefined)).toBe('/Users/me/Library/Application Support/agent-town/endpoint.json')
-    expect(endpointFilePath(undefined, 'C:\\Users\\me\\AppData\\Roaming')).toBe('C:\\Users\\me\\AppData\\Roaming\\agent-town\\endpoint.json')
-    expect(endpointFilePath('/c/Users/me', 'C:\\Users\\me\\AppData\\Roaming\\')).toBe('C:\\Users\\me\\AppData\\Roaming\\agent-town\\endpoint.json')
+    expect(endpointFilePath('/Users/me', undefined)).toBe('/Users/me/Library/Application Support/agent-town-claude-code/endpoint.json')
+    expect(endpointFilePath(undefined, 'C:\\Users\\me\\AppData\\Roaming')).toBe('C:\\Users\\me\\AppData\\Roaming\\agent-town-claude-code\\endpoint.json')
+    expect(endpointFilePath('/c/Users/me', 'C:\\Users\\me\\AppData\\Roaming\\')).toBe('C:\\Users\\me\\AppData\\Roaming\\agent-town-claude-code\\endpoint.json')
   })
 })
 

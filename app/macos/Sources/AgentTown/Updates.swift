@@ -44,7 +44,7 @@ import TownCore
         }
     }
 
-    static let brewCommand = "brew update && brew upgrade --cask samsonchen/agent-town/agent-town"
+    static let brewCommand = "brew update && brew upgrade --cask samsonchen/agent-town-claude-code/agent-town"
     static let pluginCommands = ["claude plugin marketplace update agent-town", "claude plugin update town-link@agent-town"]
 
     private var store: TownStore?

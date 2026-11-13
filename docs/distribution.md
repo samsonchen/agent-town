@@ -7,14 +7,14 @@ Users install two things: the macOS app and the Claude Code plugin. Neither shou
 The repo root holds `.claude-plugin/marketplace.json`, which lists one plugin, `town-link`, with its source at `./plugin`. The plugin links Claude Code to the town app. Plugin names cannot start with `claude-`, which Claude Code reserves. The app and the repository are named agent-town. Users install it in a Claude Code session:
 
 ```
-/plugin marketplace add samsonchen/agent-town
+/plugin marketplace add samsonchen/agent-town-claude-code
 /plugin install town-link@agent-town
 ```
 
 Or from the shell:
 
 ```bash
-claude plugin marketplace add samsonchen/agent-town
+claude plugin marketplace add samsonchen/agent-town-claude-code
 claude plugin install town-link@agent-town
 ```
 
@@ -35,7 +35,7 @@ To check: whether Anthropic offers a public plugin directory that accepts commun
 | Channel | Command or location |
 |---|---|
 | GitHub Releases | `AgentTown-<version>.dmg` on the repo's Releases page |
-| Homebrew | `brew tap samsonchen/agent-town https://github.com/samsonchen/agent-town`, then `brew install --cask samsonchen/agent-town/agent-town` (the cask is `Casks/agent-town.rb` in this repo) |
+| Homebrew | `brew tap samsonchen/agent-town-claude-code https://github.com/samsonchen/agent-town-claude-code`, then `brew install --cask samsonchen/agent-town-claude-code/agent-town` (the cask is `Casks/agent-town.rb` in this repo) |
 | Updates | Sparkle, with the appcast published on GitHub Pages or in the Releases |
 
 Code signing and notarization:

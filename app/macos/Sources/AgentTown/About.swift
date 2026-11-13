@@ -6,7 +6,7 @@ enum AppInfo {
     /// The macOS app's version: release.sh reads it from here for the bundle, the .dmg and the
     /// release tag. Used as is when running from the build folder (swift run), which has no
     /// Info.plist. It is separate from town-link's version (plugin.json) and the Windows app's.
-    static let fallbackVersion = "1.0.9"
+    static let fallbackVersion = "1.0.10"
 
     static var version: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? fallbackVersion
@@ -15,7 +15,7 @@ enum AppInfo {
     /// The build number (the commit count when release.sh built it); nil when run from the build folder.
     static var build: String? { Bundle.main.infoDictionary?["CFBundleVersion"] as? String }
 
-    static let repository = URL(string: "https://github.com/samsonchen/agent-town")!
+    static let repository = URL(string: "https://github.com/samsonchen/agent-town-claude-code")!
 }
 
 /// A third-party component the app ships with.
@@ -67,7 +67,7 @@ struct AboutView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(Labels.text("By Samson Chen"))
-                Text(markdown("[github.com/samsonchen/agent-town](\(AppInfo.repository.absoluteString))"))
+                Text(markdown("[github.com/samsonchen/agent-town-claude-code](\(AppInfo.repository.absoluteString))"))
             }
 
             Divider()

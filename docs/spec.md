@@ -235,8 +235,8 @@ The app tells the user when a newer agent-town or a newer town-link is available
 
 **What is checked.** Once shortly after launch and then once a day, while **Check for updates automatically** (Settings → Updates, on by default) is on; **Check now** checks at any time. Two public GitHub addresses are read, with nothing about the user sent:
 
-- The app: the releases of `samsonchen/agent-town` (`https://api.github.com/repos/samsonchen/agent-town/releases`). Drafts and pre-releases are skipped. The macOS app takes the highest version among tags `v<version>`; the Windows app the highest among tags `windows-v<version>`. Each matches tags, never GitHub's "Latest" flag (the macOS release keeps it; Windows releases are published with `--latest=false`).
-- town-link: `plugin/.claude-plugin/plugin.json` on `main` (`https://raw.githubusercontent.com/samsonchen/agent-town/main/plugin/.claude-plugin/plugin.json`), which is what `claude plugin update` installs.
+- The app: the releases of `samsonchen/agent-town-claude-code` (`https://api.github.com/repos/samsonchen/agent-town-claude-code/releases`). Drafts and pre-releases are skipped. The macOS app takes the highest version among tags `v<version>`; the Windows app the highest among tags `windows-v<version>`. Each matches tags, never GitHub's "Latest" flag (the macOS release keeps it; Windows releases are published with `--latest=false`).
+- town-link: `plugin/.claude-plugin/plugin.json` on `main` (`https://raw.githubusercontent.com/samsonchen/agent-town-claude-code/main/plugin/.claude-plugin/plugin.json`), which is what `claude plugin update` installs.
 
 Versions are compared number by number (`1.0.10` is newer than `1.0.9`). A failed check changes nothing and is tried again at the next check.
 
@@ -251,7 +251,7 @@ Versions are compared number by number (`1.0.10` is newer than `1.0.9`). A faile
 **The Updates window** shows, for each of the two:
 
 - agent-town: the version running and the newest version, the release notes (from the GitHub release), a "View release" link, and the steps for how it was installed:
-  - Installed with Homebrew (the cask's folder `Caskroom/agent-town` exists under `/opt/homebrew` or `/usr/local`): `brew update && brew upgrade --cask samsonchen/agent-town/agent-town`, with a Copy button.
+  - Installed with Homebrew (the cask's folder `Caskroom/agent-town` exists under `/opt/homebrew` or `/usr/local`): `brew update && brew upgrade --cask samsonchen/agent-town-claude-code/agent-town`, with a Copy button.
   - Otherwise (from the `.dmg`): a Download button for the release's `.dmg`, and "Quit agent-town, open the downloaded file and drag agent-town to Applications, replacing the old copy."
   - Windows: a Download button for the installer; running it replaces the installed app.
 - town-link: the newest version and the open sessions that run an older one (project name and version, or "1.0.2 or older"), then the commands, each with a Copy button:

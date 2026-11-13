@@ -13,7 +13,7 @@ public struct EndpointFile: Codable, Equatable, Sendable {
 
     public static var defaultURL: URL {
         FileManager.default.homeDirectoryForCurrentUser
-            .appending(path: "Library/Application Support/agent-town/endpoint.json")
+            .appending(path: "Library/Application Support/agent-town-claude-code/endpoint.json")
     }
 
     /// A fresh 32-byte random token, base64url without padding.

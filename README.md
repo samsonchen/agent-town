@@ -43,7 +43,7 @@ You need both parts: the plugin in Claude Code, and the app on your Mac or Windo
 town-link is built as a Claude Code mod (a plugin with a hooks module), so it needs a Claude Code version that runs mods: v2.1.287 or later. In a Claude Code session:
 
 ```
-/plugin marketplace add samsonchen/agent-town
+/plugin marketplace add samsonchen/agent-town-claude-code
 ```
 
 ```
@@ -53,7 +53,7 @@ town-link is built as a Claude Code mod (a plugin with a hooks module), so it ne
 Or from a terminal:
 
 ```bash
-claude plugin marketplace add samsonchen/agent-town
+claude plugin marketplace add samsonchen/agent-town-claude-code
 ```
 
 ```bash
@@ -72,7 +72,7 @@ claude plugin marketplace update agent-town
 claude plugin update town-link@agent-town
 ```
 
-**In the Claude Desktop app:** the Code tab, the terminal and the VS Code extension on one Mac share plugins installed for your user, so installing once in any of them is enough. To install from the Code tab itself, click **+** next to the prompt box, then **Add plugins**, add the marketplace `samsonchen/agent-town`, and install town-link. This only makes sense for Code tab sessions that run on your Mac (see [Claude Desktop and Cowork](#5-claude-desktop-and-cowork)).
+**In the Claude Desktop app:** the Code tab, the terminal and the VS Code extension on one Mac share plugins installed for your user, so installing once in any of them is enough. To install from the Code tab itself, click **+** next to the prompt box, then **Add plugins**, add the marketplace `samsonchen/agent-town-claude-code`, and install town-link. This only makes sense for Code tab sessions that run on your Mac (see [Claude Desktop and Cowork](#5-claude-desktop-and-cowork)).
 
 Like every plugin with a hooks module, town-link runs with your user's permissions. To see every event it handles and every call it makes before you install it, run `claude plugin validate plugin` in a clone of this repo.
 
@@ -81,14 +81,14 @@ Like every plugin with a hooks module, town-link runs with your user's permissio
 Requires macOS 15 or later. With [Homebrew](https://brew.sh):
 
 ```bash
-brew tap samsonchen/agent-town https://github.com/samsonchen/agent-town
+brew tap samsonchen/agent-town-claude-code https://github.com/samsonchen/agent-town-claude-code
 ```
 
 ```bash
-brew install --cask samsonchen/agent-town/agent-town
+brew install --cask samsonchen/agent-town-claude-code/agent-town
 ```
 
-Or download `AgentTown-<version>.dmg` from [Releases](https://github.com/samsonchen/agent-town/releases), open it, and drag AgentTown into Applications.
+Or download `AgentTown-<version>.dmg` from [Releases](https://github.com/samsonchen/agent-town-claude-code/releases), open it, and drag AgentTown into Applications.
 
 The app is signed with a Developer ID and notarized by Apple, so it opens like any other app.
 
@@ -102,7 +102,7 @@ The app checks GitHub once a day for a newer app and a newer town-link (Settings
 
 ### The app on Windows
 
-Requires Windows 11 (x64). Windows 10 is allowed by the installer, but the app has not been tested on it. Download `agent-town-setup-<version>.exe` from the newest **agent-town for Windows** release on [Releases](https://github.com/samsonchen/agent-town/releases) (tags `windows-v<version>`) and run it. It installs for your user only, with no administrator prompt, and adds agent-town to the Start menu.
+Requires Windows 11 (x64). Windows 10 is allowed by the installer, but the app has not been tested on it. Download `agent-town-setup-<version>.exe` from the newest **agent-town for Windows** release on [Releases](https://github.com/samsonchen/agent-town-claude-code/releases) (tags `windows-v<version>`) and run it. It installs for your user only, with no administrator prompt, and adds agent-town to the Start menu.
 
 The installer is not code-signed yet, so Windows shows "Windows protected your PC" the first time: click **More info**, then **Run anyway**.
 

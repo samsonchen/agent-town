@@ -43,7 +43,7 @@ agent-town 在 macOS 和 Windows 上把 Claude Code 的工作畫成一間小辦�
 town-link 是用 Claude Code 的 mod（帶 hooks 模組的 plugin）做的，所以需要能執行 mod 的 Claude Code 版本：v2.1.287 以上。在 Claude Code session 裡輸入：
 
 ```
-/plugin marketplace add samsonchen/agent-town
+/plugin marketplace add samsonchen/agent-town-claude-code
 ```
 
 ```
@@ -53,7 +53,7 @@ town-link 是用 Claude Code 的 mod（帶 hooks 模組的 plugin）做的，所
 或在終端機執行：
 
 ```bash
-claude plugin marketplace add samsonchen/agent-town
+claude plugin marketplace add samsonchen/agent-town-claude-code
 ```
 
 ```bash
@@ -72,7 +72,7 @@ claude plugin marketplace update agent-town
 claude plugin update town-link@agent-town
 ```
 
-**在 Claude 桌面 app 裡**：同一台 Mac 上的 Code 分頁、終端機和 VS Code 擴充功能共用你這個使用者安裝的 plugin，所以在任一處裝一次就夠了。要從 Code 分頁安裝，按 prompt 輸入框旁的 **+**，選 **Add plugins**，加入 marketplace `samsonchen/agent-town`，再安裝 town-link。這只對在你 Mac 上執行的 Code 分頁 session 有用（見英文 README 的 [Claude Desktop and Cowork](README.md#5-claude-desktop-and-cowork)）。
+**在 Claude 桌面 app 裡**：同一台 Mac 上的 Code 分頁、終端機和 VS Code 擴充功能共用你這個使用者安裝的 plugin，所以在任一處裝一次就夠了。要從 Code 分頁安裝，按 prompt 輸入框旁的 **+**，選 **Add plugins**，加入 marketplace `samsonchen/agent-town-claude-code`，再安裝 town-link。這只對在你 Mac 上執行的 Code 分頁 session 有用（見英文 README 的 [Claude Desktop and Cowork](README.md#5-claude-desktop-and-cowork)）。
 
 和所有帶 hooks 模組的 plugin 一樣，town-link 以你的使用者權限執行。安裝前想看它處理哪些事件、呼叫哪些功能，可以在這個 repo 的 clone 裡執行 `claude plugin validate plugin`。
 
@@ -81,14 +81,14 @@ claude plugin update town-link@agent-town
 需要 macOS 15 以上。用 [Homebrew](https://brew.sh)：
 
 ```bash
-brew tap samsonchen/agent-town https://github.com/samsonchen/agent-town
+brew tap samsonchen/agent-town-claude-code https://github.com/samsonchen/agent-town-claude-code
 ```
 
 ```bash
-brew install --cask samsonchen/agent-town/agent-town
+brew install --cask samsonchen/agent-town-claude-code/agent-town
 ```
 
-或從 [Releases](https://github.com/samsonchen/agent-town/releases) 下載 `AgentTown-<版本>.dmg`，打開後把 AgentTown 拖進「應用程式」。
+或從 [Releases](https://github.com/samsonchen/agent-town-claude-code/releases) 下載 `AgentTown-<版本>.dmg`，打開後把 AgentTown 拖進「應用程式」。
 
 App 有 Developer ID 簽章並經過 Apple 公證，可以像一般 app 一樣直接打開。
 
@@ -102,7 +102,7 @@ App 每天會到 GitHub 檢查一次有沒有新版的 app 和 town-link（「�
 
 ### Windows 上的 App
 
-需要 Windows 11（x64）。安裝程式也允許 Windows 10，但 app 沒有在 Windows 10 上測試過。從 [Releases](https://github.com/samsonchen/agent-town/releases) 找最新的 **agent-town for Windows**（標籤 `windows-v<版本>`），下載 `agent-town-setup-<版本>.exe` 並執行。它只安裝給你自己的帳號，不需要系統管理員權限，並會加到「開始」選單。
+需要 Windows 11（x64）。安裝程式也允許 Windows 10，但 app 沒有在 Windows 10 上測試過。從 [Releases](https://github.com/samsonchen/agent-town-claude-code/releases) 找最新的 **agent-town for Windows**（標籤 `windows-v<版本>`），下載 `agent-town-setup-<版本>.exe` 並執行。它只安裝給你自己的帳號，不需要系統管理員權限，並會加到「開始」選單。
 
 安裝程式還沒有程式碼簽章，所以第一次執行時 Windows 會顯示「Windows 已保護您的電腦」：按 **其他資訊**，再按 **仍要執行**。
 

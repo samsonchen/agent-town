@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/samsonchen/agent-town/protocol/schema/v1.schema.json",
+  "$id": "https://github.com/samsonchen/agent-town-claude-code/protocol/schema/v1.schema.json",
   "title": "agent-town protocol v1 batch",
   "description": "POST /v1/events body. Senders must send only known events. Receivers ignore unknown event types and unknown fields (see docs/protocol.md).",
   "type": "object",

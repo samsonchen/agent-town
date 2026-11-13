@@ -5,7 +5,7 @@ Open items as of 2026-11-11, for the next session to pick up. Everything listed 
 ## Where things stand
 
 - Work is committed on `main`.
-- town-link 1.0.3 (sends its version in `session.open`); the macOS app 1.0.9 (release title "agent-town for macOS 1.0.9", to check the release end to end), not yet released; 1.0.8 (update notices; compact view, small windows and auto-scroll) is released; 1.0.7 (the context bars of hidden blocks always under the executive office) is the latest release. They move separately. town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
+- town-link 1.0.4 and the macOS app 1.0.10 (the repository `samsonchen/agent-town-claude-code` and the data folder `agent-town-claude-code`), not yet released; 1.0.9 is the latest macOS release. They move separately. town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
 - Versions are separate (since 2026-11-11, both at 1.0.2 then). A plugin change: raise `plugin/.claude-plugin/plugin.json`, commit and push; no release. An app change: raise `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push, then the user runs `app/macos/scripts/release.sh --publish` (auto mode refuses to publish a release): it publishes the release, checks the uploaded `.dmg`'s checksum, and commits and pushes the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town`.
 - Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (53 tests). App checks: `swift build` and `swift test` in `app/macos` (36 tests).
 - Two Swift warnings in the release build, harmless: `TownScene+Staff.swift:89` (a weak self inside a strong one) and `TownView.swift:489` (a non-Sendable observer closure). Clean up when convenient.
@@ -107,7 +107,7 @@ A Windows version of the app is planned: Windows 11 on x64, with ARM64 as a nice
 
 ### town-link: make it work on Windows (done in 1.0.2, 2026-11-11; still to try on a Windows machine)
 
-- [x] **Endpoint path** (`plugin/hooks/register.ts:273–274`). It is built only for macOS from `HOME`, which is often unset on Windows. On Windows read `%APPDATA%\agent-town\endpoint.json`, the path `docs/protocol.md` already names. Find in the installed `claude-code.d.ts` how a mod learns the OS (or fall back to `APPDATA` being set with no `HOME`), and keep the macOS path unchanged. Done: `endpointFilePath` in `core.ts` uses `%APPDATA%\agent-town\endpoint.json` when `APPDATA` is set (a mod can't ask for the OS; macOS never sets it). `/town` now also looks for the app itself, so early in a session it no longer says the app is not running.
+- [x] **Endpoint path** (`plugin/hooks/register.ts:273–274`). It is built only for macOS from `HOME`, which is often unset on Windows. On Windows read `%APPDATA%\agent-town-claude-code\endpoint.json`, the path `docs/protocol.md` already names. Find in the installed `claude-code.d.ts` how a mod learns the OS (or fall back to `APPDATA` being set with no `HOME`), and keep the macOS path unchanged. Done: `endpointFilePath` in `core.ts` uses `%APPDATA%\agent-town-claude-code\endpoint.json` when `APPDATA` is set (a mod can't ask for the OS; macOS never sets it). `/town` now also looks for the app itself, so early in a session it no longer says the app is not running.
 - [x] **Privacy bug: the project name on Windows** (`plugin/hooks/core.ts:167,171`, `projectIdentity`). The name is cut with `split('/')`, so a Windows root such as `C:\Users\me\code\agent-town` with no remote is sent whole as `projectName`. `docs/architecture.md` promises the full path is never sent. Split on both `/` and `\`, and strip a trailing `\` as well as `/`.
 - [x] **One block per project on Windows.** Before hashing a Windows root into `projectId`, normalize it (backslashes to `/`, lowercase drive letter), so `C:\x` and `c:/x` from different surfaces land in the same block.
 - [x] **Desk-worker roles from Windows paths** (`core.ts:72`, `fileRole`). The `Dockerfile` and `.github/workflows/` checks fail on backslash paths. Normalize the separators first. Extensions already work.
@@ -130,8 +130,8 @@ Built in the macOS app 1.0.5; the Windows app should do the same. `docs/spec.md`
 Built in the macOS app 1.0.8; `docs/spec.md` → Updates has the details. The Windows app should do the same:
 
 - [x] Settings → Updates: **Check for updates automatically** (on by default), **Check now**, and when the last check ran. Check shortly after launch and once a day.
-- [x] The app's newest version: list `https://api.github.com/repos/samsonchen/agent-town/releases`, skip drafts and pre-releases, and take the highest version among tags `windows-v<version>`. Do not use GitHub's "Latest": it stays on the macOS release.
-- [x] town-link's newest version: `version` in `https://raw.githubusercontent.com/samsonchen/agent-town/main/plugin/.claude-plugin/plugin.json`. Each session's own version is `pluginVersion` in `session.open` (town-link 1.0.3 or later); a session without it runs 1.0.2 or older.
+- [x] The app's newest version: list `https://api.github.com/repos/samsonchen/agent-town-claude-code/releases`, skip drafts and pre-releases, and take the highest version among tags `windows-v<version>`. Do not use GitHub's "Latest": it stays on the macOS release.
+- [x] town-link's newest version: `version` in `https://raw.githubusercontent.com/samsonchen/agent-town-claude-code/main/plugin/.claude-plugin/plugin.json`. Each session's own version is `pluginVersion` in `session.open` (town-link 1.0.3 or later); a session without it runs 1.0.2 or older.
 - [x] Compare versions number by number. Show a red dot on the tray icon and a line at the top of the tray menu ("agent-town X is available…", "town-link X is available…") while there is an update, and an Updates window (no Windows notifications: the user does not want system notifications on either platform): for the app, the release notes and a Download button for the installer (running it replaces the installed app); for town-link, the sessions with an older one, the two `claude plugin` commands with Copy buttons, and "Then restart those Claude Code sessions".
 - [x] Strings: the macOS app 1.0.8 added them to the shared `Localizable.strings` under `/* Updates */` (already synced to `app/windows/shared/`).
 - [x] Details from the Mac, to match:
@@ -157,7 +157,7 @@ The Mac has `app/macos/scripts/run-local.sh` (added 2026-11-12; read it for the 
   - `-Zh`, `-En`: the language (the app's `--language zh-Hant` or `en`).
   - `-Speed N`: play the demo N times as fast.
   - Anything after `--` goes to the app as is.
-- [x] `-Live`: the installed agent-town and this run would both write `%APPDATA%\agent-town\endpoint.json`. If the installed app is running, quit it first and start it again when this run ends, also after Ctrl+C. Until the installer exists there is nothing to quit; then use the path the installer writes.
+- [x] `-Live`: the installed agent-town and this run would both write `%APPDATA%\agent-town-claude-code\endpoint.json`. If the installed app is running, quit it first and start it again when this run ends, also after Ctrl+C. Until the installer exists there is nothing to quit; then use the path the installer writes.
 - [x] The run keeps its own settings, apart from the installed app's, as on the Mac. If the Godot project and the exported app share `user://`, give the run a separate settings file (for example through a flag the script passes).
 - [x] Docs: the usage in `docs/windows/README.md` (or wherever the Windows dev steps are), and a line in `CLAUDE.md` next to the Mac's, so a session points the user to it for testing.
 
@@ -172,36 +172,25 @@ Built in the macOS app 1.0.8; `docs/spec.md` → The office has the details. The
 - [x] Strings: "Compact view" (精簡檢視) and "Restart agent-town to change the view." (重新啟動 agent-town 以切換檢視。), already in the shared `Localizable.strings` and synced.
 - [x] `run-local` options to match the Mac's: `-Compact` and `-Resize WxH` (8 seconds in, shrink the window as a drag would).
 
-### Repository rename to `samsonchen/agent-town-claude-code` (2026-11-13)
+### The repository and the data folder: `agent-town-claude-code` (2026-11-13)
 
-The user is renaming the repository from `samsonchen/agent-town` to `samsonchen/agent-town-claude-code`, so it is told apart from other projects named agent-town (the product name stays Agent-Town). GitHub redirects the old name (web, git, API, release downloads), so installed apps, plugins and taps keep working. Never create a new repository named `samsonchen/agent-town`: it would end the redirects. Change the references only after the rename is done on GitHub, or the new addresses 404.
+The repository is `samsonchen/agent-town-claude-code` (the product name is Agent-Town; the suffix tells it apart from other projects named agent-town). The Homebrew tap has the same name (`brew tap samsonchen/agent-town-claude-code https://github.com/samsonchen/agent-town-claude-code`, cask `agent-town`); the plugin marketplace is `agent-town` (`town-link@agent-town`). Everything the apps keep on disk is in a folder of the same name: macOS `~/Library/Application Support/agent-town-claude-code/` (the endpoint; settings are kept by the bundle ID), Windows `%APPDATA%\agent-town-claude-code\` (the endpoint, settings and the rest). town-link reads the endpoint only there (`docs/protocol.md` → Endpoint file).
 
-**The user:**
+**The Mac session:**
 
-- [ ] Rename on GitHub: repository Settings → General → Repository name → `agent-town-claude-code`.
-- [ ] Point each local clone at the new name (the Mac and the Windows machine): `git remote set-url origin https://github.com/samsonchen/agent-town-claude-code.git`, then `git fetch` to check. The folders can keep their names.
-- [ ] Rename the local folders too, after the remotes (asked 2026-11-13). Nothing in the repository depends on the folder's name (the `agent-town` folders under `%APPDATA%` and Application Support are the app's data and stay). Close the Claude Code session running in a folder before renaming it.
-  - Mac: `mv ~/caGit/agent-town ~/caGit/agent-town-claude-code`, then `rm -rf app/macos/.build` in the new folder (SwiftPM's build cache keeps the old absolute paths) and `swift build`. Claude Code keeps a project's memory by folder path: the Mac session copied it to `~/.claude/projects/-Users-samson-caGit-agent-town-claude-code/memory/` before the rename. Start new sessions in the new folder; the old folder's past sessions stay listed under the old path.
-  - Windows: close the session, rename the folder in Explorer (or `Rename-Item <parent>\agent-town agent-town-claude-code`), and open the new folder. Godot rebuilds its `.godot` import cache the first time. Copy the project's Claude Code memory the same way: from `%USERPROFILE%\.claude\projects\<old folder key>\memory` to the new folder's key (the key is the folder path with `:`, `\` and `/` turned into `-`); the Windows session can do it before the rename.
-- [ ] Optional, for your own installs (both keep working through the redirect): the Homebrew tap, `git -C "$(brew --repo samsonchen/agent-town)" remote set-url origin https://github.com/samsonchen/agent-town-claude-code`; town-link's marketplace needs nothing (its name `agent-town` doesn't change).
-- [ ] Release the macOS app (the next version) and the Windows app (the next version) once both sessions have pushed, so their update checks use the new addresses.
+- [x] The repository's address everywhere outside `app/windows/` and `docs/windows/`: READMEs, docs, the cask (`url`, `homepage`, `zap`), `AppInfo.repository`, the update check (`UpdateFeed`) and the brew command in the Updates window, `plugin.json`'s `homepage`, the schema's `$id`.
+- [x] The endpoint folder: town-link's `endpointFilePath` (macOS and Windows) with its tests, the macOS app's `Endpoint.defaultURL`, `tools/debug-receiver.py`, `dev/recorder`, `docs/protocol.md`. town-link 1.0.4, macOS app 1.0.10.
 
-**The Mac session** (after the rename):
-
-- [ ] Every reference outside `app/windows/` and `docs/windows/`: both READMEs (install commands, links), `docs/` (distribution, releasing, spec: the update check's two addresses), `Casks/agent-town.rb` (`url`, `homepage`; the cask's name and the tap's name `samsonchen/agent-town` stay), `AppInfo.repository` in `About.swift`, `UpdateFeed` in `TownCore/Updates.swift` and the brew command in `Updates.swift` (the tap name stays, so the command doesn't change), `plugin/.claude-plugin/plugin.json` `homepage` (raise town-link's version), the schema's `$id`. The tests' example remotes in `plugin/tests/core.test.ts` are only examples; leave them.
-- [ ] Check the redirects from the old name: the API releases list, `raw.githubusercontent.com` for plugin.json (the update check of the apps already out), a release download and `git ls-remote`.
-- [ ] Raise the macOS app's version, run the checks, commit and push.
-
-**The Windows session** (after the rename and after the Mac session has pushed; `git pull` first):
+**The Windows session** (`git pull` first):
 
 - [ ] `app/windows/core/update_feed.gd`: `RELEASES_URL` → `https://api.github.com/repos/samsonchen/agent-town-claude-code/releases?per_page=50`, `PLUGIN_MANIFEST_URL` → `https://raw.githubusercontent.com/samsonchen/agent-town-claude-code/main/plugin/.claude-plugin/plugin.json`.
 - [ ] `app/windows/shell/about_window.gd`: `REPOSITORY` → `https://github.com/samsonchen/agent-town-claude-code`.
-- [ ] `app/windows/installer/agent-town.iss`: `AppPublisherURL`, `AppSupportURL` (`…/issues`) and `AppUpdatesURL` (`…/releases`) to the new name. Keep the `AppId` as it is, so the new installer still upgrades the installed app.
-- [ ] `app/windows/scripts/release.ps1`: the three `--repo samsonchen/agent-town` → `--repo samsonchen/agent-town-claude-code`.
-- [ ] `docs/windows/` (for example `releasing.md`: the account that can publish on the repository) and any other mention under `app/windows/` (`git grep -n "samsonchen/agent-town" -- app/windows docs/windows`; leave the copies in `app/windows/shared/`, which `tools/sync-windows-assets.py` keeps).
-- [ ] Raise the Windows app's version, run the Windows tests, commit and push. Tick these boxes.
+- [ ] `app/windows/installer/agent-town.iss`: `AppPublisherURL`, `AppSupportURL` (`…/issues`) and `AppUpdatesURL` (`…/releases`) on `https://github.com/samsonchen/agent-town-claude-code`; its uninstall entries under `{userappdata}\agent-town-claude-code`. Keep the `AppId`.
+- [ ] `app/windows/scripts/release.ps1`: `--repo samsonchen/agent-town-claude-code`.
+- [ ] The app's data under `%APPDATA%\agent-town-claude-code\`: `endpoint.json` (where town-link looks), `settings.cfg`, run-local's separate settings, logs and anything else (check Godot's `user://` too). Settings start from scratch.
+- [ ] `docs/windows/` to match. Raise the Windows app's version, run the Windows tests, try a demo and `-Live` with `run-local.ps1` against town-link from `main`, commit and push. Tick these boxes.
 
-**Side effect:** town-link names a project's block after its git remote, so once a clone points at the new name, this repository's own block is "agent-town-claude-code" and counts as a new project (a new `projectId`). Other projects are not affected.
+**The user:** release the macOS app (1.0.10) and the Windows app once both sessions have pushed, then install them fresh, with town-link from the marketplace (`claude plugin marketplace add samsonchen/agent-town-claude-code`, then `claude plugin install town-link@agent-town`).
 
 ### Shared material a second app needs
 

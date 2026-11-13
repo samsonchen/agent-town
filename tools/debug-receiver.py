@@ -32,9 +32,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from protocol_check import check_batch, load_schema  # noqa: E402
 
 DEFAULT_ENDPOINT = (
-    os.path.join(os.environ["APPDATA"], "agent-town", "endpoint.json")
+    os.path.join(os.environ["APPDATA"], "agent-town-claude-code", "endpoint.json")
     if os.name == "nt" and os.environ.get("APPDATA")
-    else os.path.expanduser("~/Library/Application Support/agent-town/endpoint.json")
+    else os.path.expanduser("~/Library/Application Support/agent-town-claude-code/endpoint.json")
 )
 PROTOCOL = 1
 APP_VERSION = "0.0.0-debug"

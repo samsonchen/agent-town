@@ -100,7 +100,7 @@ open AgentTown-<version>.dmg
 app/macos/scripts/release.sh --publish
 ```
 
-- It builds and notarizes again, then publishes GitHub release `v<version>`, titled "agent-town for macOS <version>" (beside the Windows app's "agent-town for Windows <version>"; releases before 1.0.9, titled "agent-town <version>", were deleted on 2026-11-13, their tags kept), with the `.dmg` attached, tagged on the commit you built from. Its notes follow the Windows release's: one line on what it is, how to install, and the `.dmg`'s SHA-256. It is marked Latest. The app's update check goes by the tag (`v<version>`), not the title or the Latest mark.
+- It builds and notarizes again, then publishes GitHub release `v<version>`, titled "agent-town for macOS <version>" (beside the Windows app's "agent-town for Windows <version>"), with the `.dmg` attached, tagged on the commit you built from. Its notes follow the Windows release's: one line on what it is, how to install, and the `.dmg`'s SHA-256. It is marked Latest. The app's update check goes by the tag (`v<version>`), not the title or the Latest mark.
 - It then downloads the uploaded `.dmg`, checks that its checksum matches, and commits and pushes the Homebrew cask with the new version (see [Homebrew](#homebrew)). After that, `brew update && brew upgrade --cask agent-town` installs the new version.
 - It refuses to run with uncommitted changes, from a branch other than `main`, or when `main` differs from `origin/main`.
 - To review the release on GitHub first, add `--draft`: the release is made as a draft, and the cask is updated but not committed. Publish the draft on GitHub → Releases, then commit and push `Casks/agent-town.rb` yourself.
@@ -119,8 +119,8 @@ app/macos/scripts/release.sh --unsigned --publish
 The cask is `Casks/agent-town.rb` in this repo, so the repo is also a Homebrew tap:
 
 ```
-brew tap samsonchen/agent-town https://github.com/samsonchen/agent-town
-brew install --cask samsonchen/agent-town/agent-town
+brew tap samsonchen/agent-town-claude-code https://github.com/samsonchen/agent-town-claude-code
+brew install --cask samsonchen/agent-town-claude-code/agent-town
 ```
 
 - Homebrew reads the cask from this repo's `main` branch, not from the Releases page. A published release alone changes nothing for `brew upgrade`; the cask with the new version and checksum has to be pushed too. `release.sh --publish` does both (with `--draft`, push the cask yourself after publishing).

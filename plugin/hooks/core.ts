@@ -158,13 +158,13 @@ export function taskStatus(s: string): 'completed' | 'failed' | 'killed' {
 }
 
 /**
- * Where the app writes its endpoint file (docs/protocol.md): `%APPDATA%\\agent-town\\endpoint.json`
- * on Windows, else `~/Library/Application Support/agent-town/endpoint.json` on macOS. A mod cannot
+ * Where the app writes its endpoint file (docs/protocol.md): `%APPDATA%\\agent-town-claude-code\\endpoint.json`
+ * on Windows, else `~/Library/Application Support/agent-town-claude-code/endpoint.json` on macOS. A mod cannot
  * ask for the OS, so `APPDATA` being set is taken to mean Windows; macOS does not set it.
  */
 export function endpointFilePath(home: string | undefined, appData: string | undefined): string {
-  if (appData) return `${appData.replace(/[\\/]+$/, '')}\\agent-town\\endpoint.json`
-  return `${home ?? ''}/Library/Application Support/agent-town/endpoint.json`
+  if (appData) return `${appData.replace(/[\\/]+$/, '')}\\agent-town-claude-code\\endpoint.json`
+  return `${home ?? ''}/Library/Application Support/agent-town-claude-code/endpoint.json`
 }
 
 /**
