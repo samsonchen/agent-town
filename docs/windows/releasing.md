@@ -11,12 +11,13 @@ The Windows app has its own version number, `config/version` in `app/windows/pro
 ## Making a release
 
 1. Raise the version in two places, to the same number: `config/version` in `app/windows/project.godot`, and `application/file_version` and `application/product_version` in `app/windows/export_presets.cfg` (with a fourth part, `.0`: `1.0.1.0`). `release.ps1` stops if they differ.
-2. Build and try it:
+2. Add the version to [`CHANGELOG/CHANGELOG_WINDOWS.md`](../../CHANGELOG/CHANGELOG_WINDOWS.md), at the top: what a user would notice, fixes included. `git log windows-v<previous>..HEAD -- app/windows` lists the changes since the last release.
+3. Build and try it:
    ```powershell
    .\app\windows\scripts\release.ps1
    ```
    It runs the tests, exports `app\windows\build\agent-town.exe` (with the TownWindow DLL next to it), builds `app\windows\build\installer\agent-town-setup-<version>.exe`, and prints its SHA-256. Run the installer and try the installed app, including Settings → Open at login, which works only in the installed app.
-3. Commit and push, then publish (the user runs this; auto mode refuses to publish):
+4. Commit and push, then publish (the user runs this; auto mode refuses to publish):
    ```powershell
    .\app\windows\scripts\release.ps1 -Publish
    ```
