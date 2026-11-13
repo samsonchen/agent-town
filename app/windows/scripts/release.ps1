@@ -164,8 +164,9 @@ if ($Store) {
 
 # -- Export ------------------------------------------------------------------------------------
 Step 'Exporting with Godot'
-if (Test-Path $build) { Remove-Item -Recurse -Force $build }
+# Everything in build\ but the Store package (-Store), which may be registered for a try.
 New-Item -ItemType Directory -Force $build | Out-Null
+Get-ChildItem $build -Force | Where-Object { $_.Name -ne 'store' } | Remove-Item -Recurse -Force
 $exe = Join-Path $build 'agent-town.exe'
 & $godot --headless --path $project --export-release 'Windows x64' $exe 2>&1 | Out-Null
 if (-not (Test-Path $exe)) { Fail 'the export made no agent-town.exe' }
