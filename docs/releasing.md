@@ -68,7 +68,7 @@ What happens:
 - Then `The staple and validate action worked!` and `accepted … source=Notarized Developer ID`.
 - The app and `AgentTown-<version>.dmg` are in `app/macos/build/release/`.
 
-The version comes from the app itself (`AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`). Raise it there before a new release. The town-link plugin has its own version in `plugin/.claude-plugin/plugin.json` and does not need a release: users get it from `main` once its version is raised. Any town-link and any app that speak the same protocol version work together (see [protocol.md](protocol.md)).
+The version comes from the app itself (`AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`). Raise it there before a new release, and add the version at the top of [`CHANGELOG/CHANGELOG_MACOS.md`](../CHANGELOG/CHANGELOG_MACOS.md): what a user would notice, fixes included. `git log v<previous>..HEAD -- app/macos` lists the changes since the last release. The town-link plugin has its own version in `plugin/.claude-plugin/plugin.json` and does not need a release: users get it from `main` once its version is raised. Any town-link and any app that speak the same protocol version work together (see [protocol.md](protocol.md)).
 
 If notarization fails (`status: Invalid`), read Apple's reason with the submission ID it printed:
 

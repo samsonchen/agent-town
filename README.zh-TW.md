@@ -128,6 +128,7 @@ Claude Code 要直接在 Windows 上執行（終端機、Desktop app 的 Code �
 - [已知問題與支援的環境](docs/known-issues.md)：哪些場景可能不顯示，以及哪些 Claude 使用方式可以用（終端機、桌面 app 的 Code 分頁、VS Code；雲端 session 和 Cowork 不行）
 - [town-link 讀取和傳送什麼](docs/privacy.md)：事件只傳到你自己電腦上的 app，另外每個工作用你自己的方案向 Haiku 發幾個簡短請求，沒有別的
 - [開發 agent-town](docs/development.md)：從原始碼執行、檢查、試跑修改、發行
+- 各版本的更新內容：[macOS app](CHANGELOG/CHANGELOG_MACOS.md)、[Windows app](CHANGELOG/CHANGELOG_WINDOWS.md)、[town-link](CHANGELOG/CHANGELOG_PLUGIN.md)
 - [所有文件](docs/README.md)
 
 如果辦公室裡有什麼看起來不對，或你想要一個還沒有的場景，歡迎在 GitHub 開 issue。

@@ -127,6 +127,7 @@ The whole tour, with the settings: [The office](docs/office.md).
 - [Known issues and where it works](docs/known-issues.md): what may not show, and which Claude surfaces work (terminal, the Desktop app's Code tab, VS Code; not cloud sessions or Cowork)
 - [What town-link reads and sends](docs/privacy.md): events to the app on your own computer, and a few short Haiku requests per task on your own plan; nothing else
 - [Developing agent-town](docs/development.md): running it from source, the checks, trying a change, and releasing
+- What changed in each version: [macOS app](CHANGELOG/CHANGELOG_MACOS.md), [Windows app](CHANGELOG/CHANGELOG_WINDOWS.md), [town-link](CHANGELOG/CHANGELOG_PLUGIN.md)
 - [All documents](docs/README.md): the spec, the architecture, the protocol, the roadmap
 
 If something in the office looks wrong, or you would like a scene that isn't there yet, please open an issue on GitHub.
