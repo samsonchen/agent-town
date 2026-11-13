@@ -49,6 +49,12 @@ func test_everything_on_disk_is_in_one_folder() -> void:
 	check_eq(LoginItem.VALUE, "agent-town-claude-code", "the Run value")
 
 
+func test_open_at_login_writes_a_windows_path_in_quotes() -> void:
+	check_eq(LoginItem.command("C:/Users/me/AppData/Local/Programs/agent-town-claude-code/agent-town.exe"),
+		"\"C:\\Users\\me\\AppData\\Local\\Programs\\agent-town-claude-code\\agent-town.exe\"", "backslashes, quoted")
+	check_eq(LoginItem.command("C:/Users/a b/agent-town.exe"), "\"C:\\Users\\a b\\agent-town.exe\"", "a space stays inside the quotes")
+
+
 func test_endpoint_file_is_removed_only_by_its_owner() -> void:
 	var path := OS.get_temp_dir().path_join("agent-town-claude-code-test-%d" % randi()).path_join("endpoint.json")
 	var token := EndpointFile.new_token()

@@ -135,6 +135,7 @@ func _ready() -> void:
 	updater.window_requested.connect(_show_updates)
 	updater.start(not _args.has("demo") and not _args.has("snapshot"), _args.has("fake-update"), _args.has("check-now"))
 	_call_window("hide_from_taskbar", [_hwnd()])
+	LoginItem.repair() # an Open at login entry from 1.0.4 or older, which Windows skipped at sign-in
 	# Sessions already open; a restored height the user made shorter than the office stays.
 	_fit_window(scene.office_size if settings.window_height > 0 else null)
 	_last_office = scene.office_size
