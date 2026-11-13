@@ -2,7 +2,7 @@
 
 看 Claude Code 的 agent 怎麼工作：一個 Claude Code plugin 加上一個 macOS 選單列 app（現在也有 Windows 版），把你的 session、subagent、背景工作和待核准的操作畫成一間小小的 3D 辦公室。（與其他名為 agent-town 的專案無關。）
 
-[English](README.md)
+[網站（英文）](https://samsonchen.github.io/agent-town-claude-code/) · [English](README.md)
 
 agent-town 在 macOS 和 Windows 上把 Claude Code 的工作畫成一間小辦公室，從上往下看，裡面是 3D 角色。俯視的畫面受到 Gather Town 的啟發。你是執行長。每個 Claude Code session 是一位幕僚長，各自帶著自己的職員。你可以看著他們接你的工單、找職員來做事、在背景跑工作、等你核准，最後打電話回報。
 
@@ -104,7 +104,7 @@ App 每天會到 GitHub 檢查一次有沒有新版的 app 和 town-link（「�
 
 需要 Windows 11（x64）。安裝程式也允許 Windows 10，但 app 沒有在 Windows 10 上測試過。從 [Releases](https://github.com/samsonchen/agent-town-claude-code/releases) 找最新的 **agent-town for Windows**（標籤 `windows-v<版本>`），下載 `agent-town-setup-<版本>.exe` 並執行。它只安裝給你自己的帳號，不需要系統管理員權限，並會加到「開始」選單。
 
-安裝程式還沒有程式碼簽章，所以第一次執行時 Windows 會顯示「Windows 已保護您的電腦」：按 **其他資訊**，再按 **仍要執行**。
+安裝程式還沒有程式碼簽章，所以第一次執行時 Windows 會顯示「Windows 已保護您的電腦」：按 **其他資訊**，再按 **仍要執行**。見[程式碼簽章政策（Code signing policy，英文）](https://samsonchen.github.io/agent-town-claude-code/code-signing-policy.html)。
 
 App 在系統匣（通知區域）裡，工作列上沒有按鈕；關掉辦公室視窗只是把它藏起來。Windows 11 一開始會把新的系統匣圖示放在隱藏的圖示裡（**^** 箭頭）；把它拖出來就會一直看得到。要讓它登入時自動啟動，打開「設定」→「登入時開啟」。
 

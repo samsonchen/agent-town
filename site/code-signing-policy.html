@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code signing policy: Agent-Town for Claude Code</title>
+<meta name="description" content="How the Agent-Town for Claude Code apps for Windows and macOS are built and signed, who approves each release, and how to report a problem.">
+<link rel="canonical" href="https://samsonchen.github.io/agent-town-claude-code/code-signing-policy.html">
+<meta name="theme-color" content="#9d9fdc">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Agent-Town for Claude Code">
+<meta property="og:title" content="Code signing policy: Agent-Town for Claude Code">
+<meta property="og:description" content="How the Agent-Town for Claude Code apps for Windows and macOS are built and signed, who approves each release, and how to report a problem.">
+<meta property="og:url" content="https://samsonchen.github.io/agent-town-claude-code/code-signing-policy.html">
+<meta property="og:image" content="https://samsonchen.github.io/agent-town-claude-code/images/social-preview.png">
+<link rel="icon" type="image/png" href="images/favicon-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="images/apple-touch-icon.png" alt="" width="36" height="36">Agent-Town for Claude Code</a>
+    <nav aria-label="Main">
+      <a href="./#download">Download</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="code-signing-policy.html">Code signing policy</a>
+      <a href="https://github.com/samsonchen/agent-town-claude-code">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <article class="block page">
+      <span class="sign">Code signing</span>
+      <h1>Code signing policy</h1>
+      <p>Signing lets your computer check that an Agent-Town app really comes from this project and hasn't been changed since it was built.</p>
+
+      <h2>Windows</h2>
+      <p>Free code signing provided by <a href="https://signpath.io">SignPath.io</a>, certificate by <a href="https://signpath.org">SignPath Foundation</a>.</p>
+      <p class="small">Agent-Town is applying to the SignPath Foundation's program for open-source projects. Until it is approved, Windows releases are not signed, and Windows may show "Windows protected your PC" when the installer is run.</p>
+      <p>What is signed: the Windows app (<code>agent-town.exe</code> and its add-on library) and its installer (<code>agent-town-setup-&lt;version&gt;.exe</code>), as published on the project's <a href="https://github.com/samsonchen/agent-town-claude-code/releases">GitHub Releases</a> under tags <code>windows-v&lt;version&gt;</code>.</p>
+
+      <h2>macOS</h2>
+      <p>The Mac app is signed with an Apple Developer ID and notarized by Apple, so macOS can confirm where it came from before it opens.</p>
+
+      <h2>How releases are made</h2>
+      <ul>
+        <li>Every release is built from the public source code in the <a href="https://github.com/samsonchen/agent-town-claude-code">GitHub repository</a>, from a tagged commit on the main branch, with the release scripts in the same repository.</li>
+        <li>Only software built from this project's own source is signed. The app includes no proprietary components; it uses the operating system's libraries, the open-source Godot engine on Windows, and Kenney's CC0 models.</li>
+        <li>Each signing request is approved by hand by an approver below.</li>
+        <li>Every team member must use multi-factor authentication for GitHub and for signing.</li>
+      </ul>
+
+      <h2>Team roles</h2>
+      <table>
+        <thead><tr><th>Role</th><th>Members</th></tr></thead>
+        <tbody>
+          <tr><td>Committers and reviewers</td><td><a href="https://github.com/samsonchen">Samson Chen (samsonchen)</a></td></tr>
+          <tr><td>Approvers</td><td><a href="https://github.com/samsonchen">Samson Chen (samsonchen)</a></td></tr>
+        </tbody>
+      </table>
+
+      <h2>Privacy</h2>
+      <p>This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it, with one exception that can be turned off: a daily check of GitHub for a newer version (Settings → Updates). See the <a href="privacy.html">privacy policy</a> for what the app and the Claude Code plugin send, and where.</p>
+
+      <h2>Reporting a problem</h2>
+      <p>If you think a signed Agent-Town file has been tampered with, or have any other concern about a release, <a href="https://github.com/samsonchen/agent-town-claude-code/issues">open an issue on GitHub</a>.</p>
+    </article>
+  </div>
+</main>
+<footer>
+  <div class="wrap">
+    <p>Made by Samson Chen. Licensed under Apache 2.0. Claude and Claude Code are trademarks of Anthropic; Agent-Town is an independent project.</p>
+  </div>
+</footer>
+</body>
+</html>

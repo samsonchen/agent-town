@@ -2,7 +2,7 @@
 
 Watch your Claude Code agents at work: a Claude Code plugin and a macOS menu bar app (now on Windows too) that show your sessions, subagents, background tasks and approvals as a small 3D office. (Not related to other projects named agent-town.)
 
-[繁體中文說明](README.zh-TW.md)
+[Website](https://samsonchen.github.io/agent-town-claude-code/) · [繁體中文說明](README.zh-TW.md)
 
 agent-town shows Claude Code's work as a small office on macOS and Windows, seen from above, with 3D characters. The top-down view was inspired by Gather Town. You are the CEO. Each Claude Code session is a Chief of Staff with a staff of its own, and you can watch them take your tickets, call staff, run background jobs, wait for your approval and phone the report back.
 
@@ -104,7 +104,7 @@ The app checks GitHub once a day for a newer app and a newer town-link (Settings
 
 Requires Windows 11 (x64). Windows 10 is allowed by the installer, but the app has not been tested on it. Download `agent-town-setup-<version>.exe` from the newest **agent-town for Windows** release on [Releases](https://github.com/samsonchen/agent-town-claude-code/releases) (tags `windows-v<version>`) and run it. It installs for your user only, with no administrator prompt, and adds agent-town to the Start menu.
 
-The installer is not code-signed yet, so Windows shows "Windows protected your PC" the first time: click **More info**, then **Run anyway**.
+The installer is not code-signed yet, so Windows shows "Windows protected your PC" the first time: click **More info**, then **Run anyway**. See the [code signing policy](https://samsonchen.github.io/agent-town-claude-code/code-signing-policy.html).
 
 The app lives in the tray (the notification area), with no taskbar button; closing the office window hides it. Windows 11 first puts a new tray icon among the hidden icons (the **^** arrow); drag it out to keep it in view. To have it start when you sign in, turn on Settings → Open at login.
 

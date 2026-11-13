@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent-Town for Claude Code: watch your Claude Code agents at work</title>
+<meta name="description" content="Agent-Town is a free, open-source app for macOS and Windows that shows what Claude Code is doing as a small 3D office: each session is a Chief of Staff, each subagent a staff member, and your approvals ring the CEO's phone.">
+<link rel="canonical" href="https://samsonchen.github.io/agent-town-claude-code/">
+<meta name="theme-color" content="#9d9fdc">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Agent-Town for Claude Code">
+<meta property="og:title" content="Agent-Town for Claude Code: watch your Claude Code agents at work">
+<meta property="og:description" content="A small 3D office on your Mac or Windows PC that shows what Claude Code is doing: sessions, subagents, background tasks and approvals. Free and open source.">
+<meta property="og:url" content="https://samsonchen.github.io/agent-town-claude-code/">
+<meta property="og:image" content="https://samsonchen.github.io/agent-town-claude-code/images/social-preview.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta property="og:image:alt" content="Agent-Town for Claude Code: a top-down office with the CEO, Chiefs of Staff and staff at their desks">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Agent-Town for Claude Code">
+<meta name="twitter:description" content="Watch your Claude Code sessions, subagents and background jobs as a small 3D office. macOS and Windows, free and open source.">
+<meta name="twitter:image" content="https://samsonchen.github.io/agent-town-claude-code/images/social-preview.png">
+
+<link rel="icon" type="image/png" href="images/favicon-64.png">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Agent-Town for Claude Code",
+  "alternateName": "agent-town",
+  "description": "A desktop app and a Claude Code plugin that show what Claude Code is doing as a small 3D office seen from above. Each Claude Code session is a Chief of Staff, each subagent is a staff member, background tasks are operators in a server room, and approval requests ring the CEO's phone.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "macOS 15 or later, Windows 11",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "license": "https://www.apache.org/licenses/LICENSE-2.0",
+  "isAccessibleForFree": true,
+  "url": "https://samsonchen.github.io/agent-town-claude-code/",
+  "downloadUrl": "https://github.com/samsonchen/agent-town-claude-code/releases",
+  "codeRepository": "https://github.com/samsonchen/agent-town-claude-code",
+  "image": "https://samsonchen.github.io/agent-town-claude-code/images/social-preview.png",
+  "screenshot": "https://samsonchen.github.io/agent-town-claude-code/images/agent-town.gif",
+  "inLanguage": ["en", "zh-TW"],
+  "author": { "@type": "Person", "name": "Samson Chen", "url": "https://github.com/samsonchen" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is Agent-Town for Claude Code?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A free app for macOS and Windows, with a Claude Code plugin, that draws what Claude Code is doing as a small office: sessions, subagents, background tasks and approval requests become people at work." } },
+    { "@type": "Question", "name": "Does Agent-Town control Claude Code?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. It only watches. You keep working in your terminal, the Claude desktop app or VS Code, and the plugin never changes what Claude Code does." } },
+    { "@type": "Question", "name": "Does Agent-Town send my code or prompts anywhere?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Events go only to the app on your own computer. For each new task the plugin asks Claude's Haiku model, on your own Claude plan, for a short title and the kind of task." } },
+    { "@type": "Question", "name": "Which Claude apps does it work with?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Claude Code in a terminal, the Code tab of the Claude desktop app, and the VS Code extension, when they run on the same computer as the app. Cloud sessions and Claude Code on the web are not supported." } },
+    { "@type": "Question", "name": "Is it free?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Agent-Town is open source under the Apache 2.0 license." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="images/apple-touch-icon.png" alt="" width="36" height="36">Agent-Town for Claude Code</a>
+    <nav aria-label="Main">
+      <a href="#whos-who">Who's who</a>
+      <a href="#download">Download</a>
+      <a href="#questions">Questions</a>
+      <a href="https://github.com/samsonchen/agent-town-claude-code">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="line" aria-hidden="true"></div>
+  <div class="wrap">
+
+    <section class="block exec" aria-labelledby="title">
+      <div class="hero">
+        <div>
+          <span class="sign">Executive office</span>
+          <h1 id="title">Watch Claude Code work, as a little office.</h1>
+          <p class="lede">You give Claude Code a task, and then you wait. Agent-Town shows you what happens in between: who is working, who was called in, and when it needs you.</p>
+          <div class="buttons">
+            <a class="button" href="#download">Download for Mac or Windows</a>
+            <a class="button light" href="https://github.com/samsonchen/agent-town-claude-code">See it on GitHub</a>
+          </div>
+          <p class="note">Free and open source. Works with Claude Code on your own computer.</p>
+        </div>
+        <figure class="office">
+          <img src="images/agent-town.gif" width="640" height="667" alt="Agent-Town at work: the CEO phones a ticket to a Chief of Staff, who pages staff from the bench to their desks while operators work in the server room">
+          <figcaption>A task arrives, the Chief of Staff calls in staff, and the report is phoned back.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="block" id="whos-who" aria-labelledby="cast-title">
+      <span class="sign">Who's who</span>
+      <h2 id="cast-title">Everyone in the office is something Claude Code is doing.</h2>
+      <ul class="cast">
+        <li><span class="tag you">CEO</span><p>That's you. Every prompt you type becomes a ticket, phoned through to the right desk. When Claude Code needs your OK, your phone rings.</p></li>
+        <li><span class="tag">Chief of Staff</span><p>One Claude Code session. Takes your ticket, wears a hat for the kind of task, and phones you the report when it's done.</p></li>
+        <li><span class="tag">Staff</span><p>The helpers Claude Code calls in, the subagents. They wait on the bench, walk to a desk, work, and report back.</p></li>
+        <li><span class="tag">Operators</span><p>Long-running jobs in the background, like builds and tests, worked on at the racks of the server room.</p></li>
+        <li><span class="tag">Dispatcher</span><p>Keeps the board of scheduled and repeating tasks, and radios each one to its Chief of Staff when it's due.</p></li>
+        <li><span class="tag">Inspector</span><p>Stands at reception. When a check sends the work back, the Inspector stamps it "Returned" and the work goes on.</p></li>
+      </ul>
+    </section>
+
+    <section class="block blue" aria-labelledby="notice-title">
+      <span class="sign">What you'll notice</span>
+      <h2 id="notice-title">Know what's happening without reading the terminal.</h2>
+      <div class="points">
+        <div><h3>A sound when it's done</h3><p>Leave the office in a corner of your screen, or hide it. You still hear when work is dispatched, when it's finished, and when Claude Code is waiting for you.</p></div>
+        <div><h3>One block per project</h3><p>Each project you have open gets its own office block, with its name on the sign and a short title for the task under way.</p></div>
+        <div><h3>A bar for the context</h3><p>Under each block, a bar shows how full the session's memory is, so you can see when it's time to start fresh.</p></div>
+        <div><h3>Made for a laptop too</h3><p>Compact view draws the office at half size, idle projects can step out of sight, and a small window follows wherever people are walking.</p></div>
+        <div><h3>English and 繁體中文</h3><p>The app speaks English and Traditional Chinese, and follows your system's language.</p></div>
+        <div><h3>It only watches</h3><p>Agent-Town never touches your work. Events stay on your own computer, and nothing is sent to us. <a href="privacy.html">How it handles your data</a>.</p></div>
+      </div>
+    </section>
+
+    <section class="block wood story" aria-labelledby="story-title">
+      <span class="sign">Why it exists</span>
+      <h2 id="story-title">It started as a sound.</h2>
+      <p>Some tasks in Claude Code take a long time. You type a prompt, it starts reading files, running commands and calling helpers, and you wait. I wanted to know two things: what is it doing right now, and is it done yet?</p>
+      <p>The first idea was small: play a sound when a long task finishes. But Claude Code already says a lot about what it's doing, which tool it's using, which helper it started, when it's waiting for approval. If every one of those moments can be heard, it can be seen. So the sound grew into an office.</p>
+      <p class="by">Samson Chen, who made Agent-Town</p>
+    </section>
+
+    <section class="block green" id="download" aria-labelledby="download-title">
+      <span class="sign">Download</span>
+      <h2 id="download-title">Two parts: the app, and a plugin for Claude Code.</h2>
+      <p>The app draws the office. The plugin, town-link, tells it what Claude Code is doing. Install both; it takes a couple of minutes.</p>
+      <div class="downloads">
+        <div>
+          <h3>Mac</h3>
+          <p class="small">macOS 15 or later. Signed and notarized by Apple.</p>
+          <p>With <a href="https://brew.sh">Homebrew</a>:</p>
+          <pre>brew tap samsonchen/agent-town-claude-code https://github.com/samsonchen/agent-town-claude-code
+brew install --cask samsonchen/agent-town-claude-code/agent-town</pre>
+          <p>Or download the <a href="https://github.com/samsonchen/agent-town-claude-code/releases/latest">latest .dmg</a> and drag Agent-Town into Applications. It lives in the menu bar.</p>
+        </div>
+        <div>
+          <h3>Windows</h3>
+          <p class="small">Windows 11. Installs for your user only, with no administrator prompt.</p>
+          <p>Download <code>agent-town-setup</code> from the newest <strong>agent-town for Windows</strong> release on the <a href="https://github.com/samsonchen/agent-town-claude-code/releases">Releases page</a> and run it. It lives in the tray.</p>
+          <p class="small">The installer isn't code-signed yet, so Windows may show "Windows protected your PC": choose More info, then Run anyway. See the <a href="code-signing-policy.html">code signing policy</a>.</p>
+        </div>
+        <div class="plugin">
+          <h3>The Claude Code plugin</h3>
+          <p class="small">Claude Code 2.1.287 or later, on the same computer as the app.</p>
+          <p>In a Claude Code session, type:</p>
+          <pre>/plugin marketplace add samsonchen/agent-town-claude-code
+/plugin install town-link@agent-town-claude-code</pre>
+          <p>Restart Claude Code, open the app, and give it a task.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="questions" aria-labelledby="faq-title">
+      <span class="sign">Questions</span>
+      <h2 id="faq-title">Questions people ask</h2>
+      <details>
+        <summary>Does it control Claude Code?</summary>
+        <p>No. It only watches. You keep working in your terminal, the Claude desktop app or VS Code, and the plugin never changes what Claude Code does.</p>
+      </details>
+      <details>
+        <summary>Does it send my code or prompts anywhere?</summary>
+        <p>No. What Claude Code is doing goes only to the app on your own computer. To name each task and pick the right hat, the plugin asks Claude's Haiku model on your own Claude plan, the same way Claude Code itself would. The app checks GitHub once a day for a newer version, which you can turn off. Read the <a href="privacy.html">privacy policy</a>.</p>
+      </details>
+      <details>
+        <summary>Which Claude apps does it work with?</summary>
+        <p>Claude Code in a terminal, the Code tab of the Claude desktop app, and the VS Code extension, when they run on the same computer as the app. Cloud sessions and Claude Code on the web can't reach your computer, so they don't show up.</p>
+      </details>
+      <details>
+        <summary>Is it a productivity dashboard?</summary>
+        <p>No. It shows what is happening, not how well. There are no scores and no reports, just an office at work.</p>
+      </details>
+      <details>
+        <summary>Is it free?</summary>
+        <p>Yes. Agent-Town is open source under the Apache 2.0 license. The characters and furniture are Kenney's free CC0 models.</p>
+      </details>
+      <details>
+        <summary>Is it related to other projects called agent-town?</summary>
+        <p>No. This is Agent-Town for Claude Code, made for Anthropic's Claude Code. It isn't affiliated with Anthropic, or with other projects that share the name.</p>
+      </details>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <nav aria-label="More">
+      <a href="https://github.com/samsonchen/agent-town-claude-code">Source code</a>
+      <a href="https://github.com/samsonchen/agent-town-claude-code/releases">Releases</a>
+      <a href="privacy.html">Privacy policy</a>
+      <a href="code-signing-policy.html">Code signing policy</a>
+      <a href="https://github.com/samsonchen/agent-town-claude-code/issues">Report a problem</a>
+    </nav>
+    <p>Made by Samson Chen. Licensed under Apache 2.0. 3D models by <a href="https://kenney.nl">Kenney</a> (CC0). Claude and Claude Code are trademarks of Anthropic; Agent-Town is an independent project.</p>
+  </div>
+</footer>
+
+</body>
+</html>

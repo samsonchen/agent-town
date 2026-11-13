@@ -1,0 +1,32 @@
+# Agent-Town for Claude Code
+
+> Agent-Town for Claude Code is a free, open-source (Apache 2.0) desktop app for macOS and Windows, with a plugin for Anthropic's Claude Code (town-link), that shows what Claude Code is doing as a small 3D office seen from above. It is made by Samson Chen and is not affiliated with Anthropic or with other projects named agent-town.
+
+How it works, in plain terms:
+
+- The user is the CEO. Each prompt becomes a ticket that the CEO phones to a desk.
+- Each Claude Code session is a Chief of Staff, who wears a hat for the kind of task and phones the report back when the work is done.
+- Each subagent is a staff member who waits on a bench, walks to a desk, works and reports back.
+- Background tasks (builds, tests) are operators at the racks of a server room.
+- Scheduled and repeating tasks are handled by a Dispatcher with a board of cards; work sent back by a check goes past an Inspector at reception.
+- When Claude Code needs the user's approval, the CEO's phone rings. Sounds play when work is dispatched, done, or waiting for approval.
+- Each open project has its own office block, with the task's title on its sign and a bar showing how full the session's context is.
+- Settings include compact view for laptop screens, hiding idle projects, sounds, opacity, and English or Traditional Chinese.
+
+It only watches: it never changes what Claude Code does. Events go only to the app on the user's own computer; the plugin asks Claude's Haiku model, on the user's own plan, for short task titles and roles; the app checks GitHub once a day for updates (can be turned off).
+
+Requirements: macOS 15 or later, or Windows 11; Claude Code 2.1.287 or later running on the same computer (terminal, the Claude desktop app's Code tab, or VS Code). Cloud sessions and Claude Code on the web are not supported.
+
+## Links
+
+- [Home page](https://samsonchen.github.io/agent-town-claude-code/): what it is, who's who in the office, download
+- [Source code and documentation](https://github.com/samsonchen/agent-town-claude-code)
+- [Releases](https://github.com/samsonchen/agent-town-claude-code/releases): the Mac .dmg and the Windows installer
+- [Privacy policy](https://samsonchen.github.io/agent-town-claude-code/privacy.html)
+- [Code signing policy](https://samsonchen.github.io/agent-town-claude-code/code-signing-policy.html)
+
+## Install
+
+- Mac: `brew tap samsonchen/agent-town-claude-code https://github.com/samsonchen/agent-town-claude-code` then `brew install --cask samsonchen/agent-town-claude-code/agent-town`, or the .dmg from Releases.
+- Windows: the agent-town-setup installer from the newest "agent-town for Windows" release.
+- Claude Code plugin: `/plugin marketplace add samsonchen/agent-town-claude-code`, then `/plugin install town-link@agent-town-claude-code`.

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy policy: Agent-Town for Claude Code</title>
+<meta name="description" content="What Agent-Town for Claude Code reads, what it sends and where: everything stays on your computer, apart from a daily update check you can turn off and short task names from Claude's Haiku model on your own plan.">
+<link rel="canonical" href="https://samsonchen.github.io/agent-town-claude-code/privacy.html">
+<meta name="theme-color" content="#9d9fdc">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Agent-Town for Claude Code">
+<meta property="og:title" content="Privacy policy: Agent-Town for Claude Code">
+<meta property="og:description" content="What Agent-Town for Claude Code reads, what it sends and where: everything stays on your computer, apart from a daily update check you can turn off and short task names from Claude's Haiku model on your own plan.">
+<meta property="og:url" content="https://samsonchen.github.io/agent-town-claude-code/privacy.html">
+<meta property="og:image" content="https://samsonchen.github.io/agent-town-claude-code/images/social-preview.png">
+<link rel="icon" type="image/png" href="images/favicon-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="images/apple-touch-icon.png" alt="" width="36" height="36">Agent-Town for Claude Code</a>
+    <nav aria-label="Main">
+      <a href="./#download">Download</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="code-signing-policy.html">Code signing policy</a>
+      <a href="https://github.com/samsonchen/agent-town-claude-code">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <article class="block page">
+      <span class="sign">Privacy</span>
+      <h1>Privacy policy</h1>
+      <p>Agent-Town for Claude Code is made of two parts: the app (for macOS and Windows) and town-link, a plugin for Claude Code. Neither part has an account, collects analytics, or sends anything to the people who make Agent-Town. This page says exactly what each part reads and sends.</p>
+
+      <h2>In short</h2>
+      <ul>
+        <li>What Claude Code is doing is sent only to the Agent-Town app on your own computer, never over the internet.</li>
+        <li>To name each task, the plugin asks Claude's Haiku model through Claude Code, on your own Claude plan. Nothing goes to any other service.</li>
+        <li>The app checks GitHub once a day for a newer version. You can turn this off in Settings → Updates.</li>
+        <li>Nothing else leaves your computer.</li>
+      </ul>
+
+      <h2>The plugin (town-link)</h2>
+      <p>town-link watches what Claude Code does: a session opening, a prompt you type, a tool being used, a helper (subagent) or background task starting and finishing, a request for your approval, how full the session's memory is. It turns these into short messages and sends them to the Agent-Town app over a connection that stays inside your computer (to the address 127.0.0.1). The app accepts only messages that carry a random key it created, so other programs can't feed it events.</p>
+      <p>Those messages contain the project's name (not its full folder path), the start of each prompt as you typed it (it appears on the ticket in the office), the names of tools in use, short descriptions of helpers and background tasks, the model in use, and the plugin's version.</p>
+      <p>For each new task, town-link asks Claude's Haiku model, through Claude Code and on your own Claude plan or API key, for a short title and the kind of task; for each helper or background task, it asks for a fitting job title. These requests include the start of the prompt or the helper's description. They are handled by Anthropic like any other Claude Code request on your account. If you'd rather not, turn town-link off with <code>/town off</code> in Claude Code.</p>
+      <p>town-link never changes what Claude Code does: it doesn't allow, refuse or edit anything. When the app isn't running, it drops the events instead of storing them.</p>
+
+      <h2>The app</h2>
+      <p>The app shows the events it receives and keeps nothing after it quits, apart from your settings (such as the language, sounds and window position), which stay on your computer.</p>
+      <p>Once shortly after it starts, and then once a day, the app asks GitHub for the list of Agent-Town releases and for the plugin's latest version number, to tell you when an update is available. The request contains nothing about you, your work or your computer beyond what any web request carries, such as your IP address, which GitHub handles under its own privacy statement. To turn the check off, open Settings → Updates and switch off "Check for updates automatically".</p>
+
+      <h2>The installers</h2>
+      <p>The Mac app (Homebrew or the .dmg) and the Windows installer only install the app. They don't send any information anywhere.</p>
+
+      <h2>Other components</h2>
+      <p>The app uses the operating system's own libraries, the Godot engine on Windows, and Kenney's 3D models. None of them send information on Agent-Town's behalf.</p>
+
+      <h2>Questions</h2>
+      <p>The source code is public, so everything on this page can be checked. Questions or concerns: <a href="https://github.com/samsonchen/agent-town-claude-code/issues">open an issue on GitHub</a>.</p>
+      <p class="small">Last updated November 13, 2026.</p>
+    </article>
+  </div>
+</main>
+<footer>
+  <div class="wrap">
+    <p>Made by Samson Chen. Licensed under Apache 2.0. Claude and Claude Code are trademarks of Anthropic; Agent-Town is an independent project.</p>
+  </div>
+</footer>
+</body>
+</html>
