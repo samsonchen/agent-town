@@ -5,14 +5,14 @@ Open items as of 2026-11-11, for the next session to pick up. Everything listed 
 ## Where things stand
 
 - Work is committed on `main`.
-- town-link 1.0.5 (an icon, for the plugin directory) and the Windows app 1.0.4 (Check now in Settings opens the Updates window when it finds an update; not yet released), after 1.0.3 (the repository `samsonchen/agent-town-claude-code` and the data folder `agent-town-claude-code`, released); the macOS app 1.0.12 (1.0.11 added the bundle ID `ai.careactive.agenttown-claude-code`; 1.0.12: Check now in Settings opens the Updates window when it finds an update), after 1.0.10 (the repository and the data folder). They move separately. town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
+- town-link 1.0.5 (an icon, for the plugin directory) and the Windows app 1.0.4 (Check now in Settings opens the Updates window when it finds an update; not yet released), after 1.0.3 (the repository `samsonchen/agent-town-claude-code` and the data folder `agent-town-claude-code`, released); the macOS app 1.0.12 (1.0.11 changed the bundle ID to match the repository; 1.0.12: Check now in Settings opens the Updates window when it finds an update), after 1.0.10 (the repository and the data folder). They move separately. town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
 - Versions are separate (since 2026-11-11, both at 1.0.2 then). A plugin change: raise `plugin/.claude-plugin/plugin.json`, commit and push; no release. An app change: raise `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push, then the user runs `app/macos/scripts/release.sh --publish` (auto mode refuses to publish a release): it publishes the release, checks the uploaded `.dmg`'s checksum, and commits and pushes the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town-claude-code`.
 - Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (53 tests). App checks: `swift build` and `swift test` in `app/macos` (36 tests).
 - Two Swift warnings in the release build, harmless: `TownScene+Staff.swift:89` (a weak self inside a strong one) and `TownView.swift:489` (a non-Sendable observer closure). Clean up when convenient.
 
 ## 1. Check on a personal (non-Team) account
 
-On the Care Active Team account, Claude Code manages the organization's settings. In that case, every `classic.*` hook and `session.compact` skip plugins the user installed. `/plugin` → Errors lists them. The built-in guard `cc-plugin-sec-default` loads only with managed settings or a Team or Enterprise login, so a personal account should get every event.
+On a Team account whose organization ([organization]) manages Claude Code's settings, as the maintainer's work account does, In that case, every `classic.*` hook and `session.compact` skip plugins the user installed. `/plugin` → Errors lists them. The built-in guard `cc-plugin-sec-default` loads only with managed settings or a Team or Enterprise login, so a personal account should get every event.
 
 Check these on the personal account:
 
@@ -24,7 +24,7 @@ Check these on the personal account:
 
 ## 2. Waiting on others
 
-- [x] **Developer ID Application certificate** (done 2026-11-11). The user's role can't create it. The Account Holder (the product manager) must accept the latest Program License Agreement and issue the certificate. `docs/releasing.md` has the steps, including the request-file route under "If you are not the Account Holder". Parts B and C (app-specific password, `notarytool store-credentials agent-town-notary`) don't need the certificate.
+- [x] **Developer ID Application certificate** (done 2026-11-11). The maintainer's role in the developer team can't create it. The team's Account Holder ([name]) must accept the latest Program License Agreement and issue the certificate. `docs/releasing.md` has the steps, including the request-file route under "If you are not the Account Holder". Parts B and C (app-specific password, `notarytool store-credentials agent-town-notary`) don't need the certificate.
 - [x] **App icon** added (2026-11-11): `assets/icons/app-icon-1024.png`; release.sh makes AppIcon.icns from it. The menu bar keeps the system symbol `building.2`, by the user's choice.
 
 ## 3. Release
@@ -77,7 +77,7 @@ From `docs/roadmap.md` and `docs/spec.md`:
 
 ## 8. Decisions still open
 
-- [x] Bundle ID: `ai.careactive.agenttown-claude-code` (since macOS app 1.0.11, 2026-11-13, matching the repository; the Developer ID certificate signs any bundle ID). Settings are kept by it, so changing it again would make macOS treat the app as new and reset them.
+- [x] Bundle ID: the organization's reverse-DNS prefix plus `agenttown-claude-code` (`BUNDLE_ID` in `release.sh`; since macOS app 1.0.11, 2026-11-13, matching the repository; the Developer ID certificate signs any bundle ID). Settings are kept by it, so changing it again would make macOS treat the app as new and reset them.
 - [ ] Open questions in `docs/roadmap.md`: the default for ticket text, whether `claude -p` runs appear, sound files, bench size, where scheduled reports go, and long-lived operators.
 
 - [x] **Other coding agents (Codex CLI, Grok Build): not now** (decided 2026-11-13). Both have shell-style hooks (session start, prompt, tool calls, stop; Grok also subagent stop), but no mod interface: a hook can't call a model (task titles, roles) and can't see subagents and background tasks the way town-link does, so their office would lack staff, operators, titles and the context bar. The user finds that too dry. agent-town stays Claude Code only, hence the repository name `agent-town-claude-code`. Revisit only if their hooks gain subagents and a model call.
@@ -201,7 +201,7 @@ The repository is `samsonchen/agent-town-claude-code` (the product name is Agent
 - [x] `app/windows/installer/agent-town.iss`: `AppPublisherURL`, `AppSupportURL` (`…/issues`) and `AppUpdatesURL` (`…/releases`) on `https://github.com/samsonchen/agent-town-claude-code`; its uninstall entries under `{userappdata}\agent-town-claude-code`. Keep the `AppId`.
 - [x] `app/windows/scripts/release.ps1`: `--repo samsonchen/agent-town-claude-code`.
 - [x] The app's data under `%APPDATA%\agent-town-claude-code\`: `endpoint.json` (where town-link looks), `settings.cfg`, run-local's separate settings, logs and anything else (check Godot's `user://` too). Settings start from scratch.
-- [x] Beyond the list, so nothing is left under the old name (the user's choice): Godot's `user://` is the same folder (`application/config/custom_user_dir_name`), the install folder is `%LOCALAPPDATA%\Programs\agent-town-claude-code` (`UsePreviousAppDir=no`), and the Open at login value is `agent-town-claude-code`. The 1.0.3 installer removes the old install folder, the old `%APPDATA%` folder, Godot's old `app_userdata` folder and the old Run value. The product name (agent-town, `agent-town.exe`) stays, as on the Mac.
+- [x] Beyond the list, so everything the Windows app keeps uses one name (the user's choice): Godot's `user://` is the same folder (`application/config/custom_user_dir_name`), the install folder is `%LOCALAPPDATA%\Programs\agent-town-claude-code` (`UsePreviousAppDir=no`), and the Open at login value is `agent-town-claude-code`. The 1.0.3 installer also cleans up the folders and the Run value earlier test builds used. The product name (agent-town, `agent-town.exe`) stays, as on the Mac.
 - [x] `docs/windows/` to match. Raise the Windows app's version, run the Windows tests, try a demo and `-Live` with `run-local.ps1` against town-link from `main`, commit and push. Tick these boxes. Done (2026-11-13): Windows app 1.0.3, 52 tests pass; a demo, and `-Live` with town-link 1.0.4 from `main` (the endpoint at the new path, a `claude -p` session drawn as the block "agent-town-claude-code").
 
 **The user:** release the macOS app (1.0.10) and the Windows app once both sessions have pushed, then install them fresh, with town-link from the marketplace (`claude plugin marketplace add samsonchen/agent-town-claude-code`, then `claude plugin install town-link@agent-town-claude-code`).
