@@ -2,7 +2,9 @@
 
 Watch your Claude Code agents at work: a Claude Code plugin and a macOS menu bar app (now on Windows too) that show your sessions, subagents, background tasks and approvals as a small 3D office. (Not related to other projects named agent-town.)
 
-[Website](https://samsonchen.github.io/agent-town-claude-code/) · [繁體中文說明](README.zh-TW.md)
+Website: [samsonchen.github.io/agent-town-claude-code](https://samsonchen.github.io/agent-town-claude-code/)
+
+[繁體中文說明](README.zh-TW.md)
 
 agent-town shows Claude Code's work as a small office on macOS and Windows, seen from above, with 3D characters. The top-down view was inspired by Gather Town. You are the CEO. Each Claude Code session is a Chief of Staff with a staff of its own, and you can watch them take your tickets, call staff, run background jobs, wait for your approval and phone the report back.
 
