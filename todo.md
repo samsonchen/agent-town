@@ -206,6 +206,16 @@ The repository is `samsonchen/agent-town-claude-code` (the product name is Agent
 
 **The user:** release the macOS app (1.0.10) and the Windows app once both sessions have pushed, then install them fresh, with town-link from the marketplace (`claude plugin marketplace add samsonchen/agent-town-claude-code`, then `claude plugin install town-link@agent-town-claude-code`).
 
+### Windows app: code signing through the SignPath Foundation (2026-11-13)
+
+The project's web page is live for the application: https://samsonchen.github.io/agent-town-claude-code/ (source in `site/`, published by `.github/workflows/pages.yml`), with a privacy policy (`privacy.html`) and the code signing policy (`code-signing-policy.html`: the SignPath attribution, team roles, the privacy statement). The SignPath Foundation's terms (https://signpath.org/terms) also ask for:
+
+- [ ] The user: apply at https://signpath.org/apply, with the web page and the repository. Use multi-factor authentication on GitHub and SignPath.
+- [ ] The privacy notice shown at install: the Windows installer (`agent-town.iss`) shows a short page saying the app checks GitHub once a day for updates (Settings → Updates turns it off) and that nothing else leaves the computer, linking to the privacy policy.
+- [ ] Builds that SignPath can trace to the source: build the installer in GitHub Actions from a tagged commit (SignPath's origin verification records the repository, commit and build job), and send it to SignPath for signing from there, with manual approval. `release.ps1` builds locally today.
+- [ ] The product name and version in each binary's metadata match the project (agent-town, the release's version).
+- [ ] Once approved: the README's and the web page's "not code-signed yet" notes change to say releases are signed.
+
 ### Shared material a second app needs
 
 - [x] **Expected state for each fixture.** Done (2026-11-11): `protocol/fixtures/expected/`, one file per fixture with the state after each event that changes it; format in its README; checked by `ExpectedStateTests.swift`. The Windows app runs the same fixtures against the same answers.
