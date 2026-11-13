@@ -5,7 +5,7 @@ Open items as of 2026-11-11, for the next session to pick up. Everything listed 
 ## Where things stand
 
 - Work is committed on `main`.
-- town-link 1.0.5 (an icon, for the plugin directory) and the Windows app 1.0.3 (the repository `samsonchen/agent-town-claude-code` and the data folder `agent-town-claude-code`); the macOS app 1.0.11 (the bundle ID `ai.careactive.agenttown-claude-code`), not yet released, after 1.0.10 (the repository and the data folder). They move separately. town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
+- town-link 1.0.5 (an icon, for the plugin directory) and the Windows app 1.0.3 (the repository `samsonchen/agent-town-claude-code` and the data folder `agent-town-claude-code`); the macOS app 1.0.12 (1.0.11 added the bundle ID `ai.careactive.agenttown-claude-code`; 1.0.12: Check now in Settings opens the Updates window when it finds an update), after 1.0.10 (the repository and the data folder). They move separately. town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
 - Versions are separate (since 2026-11-11, both at 1.0.2 then). A plugin change: raise `plugin/.claude-plugin/plugin.json`, commit and push; no release. An app change: raise `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push, then the user runs `app/macos/scripts/release.sh --publish` (auto mode refuses to publish a release): it publishes the release, checks the uploaded `.dmg`'s checksum, and commits and pushes the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town-claude-code`.
 - Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (53 tests). App checks: `swift build` and `swift test` in `app/macos` (36 tests).
 - Two Swift warnings in the release build, harmless: `TownScene+Staff.swift:89` (a weak self inside a strong one) and `TownView.swift:489` (a non-Sendable observer closure). Clean up when convenient.
@@ -140,6 +140,15 @@ Built in the macOS app 1.0.8; `docs/spec.md` → Updates has the details. The Wi
   - **A failed check** (no network, GitHub's rate limit of 60 requests an hour without login, a 20-second timeout) changes nothing shown, says "The last check failed. It will try again later." next to Check now, and is tried again at the next check. Only an answered check updates "Last checked".
   - **Dev flags** on the Mac, worth copying: `--updates` opens the Updates window, `--fake-update` makes up a newer app and town-link (99.0.0) without the network, `--check-now` makes a real check even in a demo (a demo makes no automatic check).
   - **Mac code:** `app/macos/Sources/TownCore/Updates.swift` (version comparison, picking the release by tag prefix, reading plugin.json; tests in `Tests/TownCoreTests/UpdatesTests.swift`), `app/macos/Sources/AgentTown/Updates.swift` (`Updater`: the daily check, the session list, `MenuIcon`, `UpdatesView`), and `TownStore.pluginVersions` (each open session's version from `session.open`).
+
+### Windows app: Check now opens the Updates window (2026-11-13; macOS app 1.0.12, Windows still open)
+
+`docs/spec.md` → Updates has the details. The Windows app should do the same:
+
+- [ ] In Settings → Updates, when the user presses **Check now** and the check finds an update (an app update or a town-link update, the same test as the tray dot and menu line), open the Updates window and bring it to the front. If there is no update, do nothing more than now (no window, no message). A failed check also opens nothing.
+- [ ] Only the Settings button does this. **Check now** inside the Updates window stays as it is (that window is already open), and the automatic checks (after launch, once a day) still only show the red dot and the menu line.
+- [ ] Add it to `docs/windows/roadmap.md`, and check with `--fake-update` plus a real `--check-now` where it can be tried.
+- Mac code: `CheckRow(opensUpdatesWindow:)` in `app/macos/Sources/AgentTown/Updates.swift` (it calls `Updater.showWindow()` after `check()` when `hasUpdate`); Settings passes `true` in `Preferences.swift`.
 
 ### Windows app: a script to try a build before releasing (2026-11-12; Windows done 2026-11-13: `-Live` tried only by its process matching, since no app was running)
 
