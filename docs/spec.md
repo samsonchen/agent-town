@@ -256,8 +256,8 @@ Versions are compared number by number (`1.0.10` is newer than `1.0.9`). A faile
   - Windows: a Download button for the installer; running it replaces the installed app.
 - town-link: the newest version and the open sessions that run an older one (project name and version, or "1.0.2 or older"), then the commands, each with a Copy button:
   ```
-  claude plugin marketplace update agent-town
-  claude plugin update town-link@agent-town
+  claude plugin marketplace update agent-town-claude-code
+  claude plugin update town-link@agent-town-claude-code
   ```
   and "Then restart those Claude Code sessions: a session keeps the town-link it started with."
 - When the last check ran, and Check now.

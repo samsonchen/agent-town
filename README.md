@@ -47,7 +47,7 @@ town-link is built as a Claude Code mod (a plugin with a hooks module), so it ne
 ```
 
 ```
-/plugin install town-link@agent-town
+/plugin install town-link@agent-town-claude-code
 ```
 
 Or from a terminal:
@@ -57,7 +57,7 @@ claude plugin marketplace add samsonchen/agent-town-claude-code
 ```
 
 ```bash
-claude plugin install town-link@agent-town
+claude plugin install town-link@agent-town-claude-code
 ```
 
 Then restart Claude Code. In a session, `/town` shows the installed town-link version and whether the plugin is connected to the app, and `/town on` or `/town off` turns sending on or off for all sessions.
@@ -65,11 +65,11 @@ Then restart Claude Code. In a session, `/town` shows the installed town-link ve
 Updates are not automatic for this marketplace. To update:
 
 ```bash
-claude plugin marketplace update agent-town
+claude plugin marketplace update agent-town-claude-code
 ```
 
 ```bash
-claude plugin update town-link@agent-town
+claude plugin update town-link@agent-town-claude-code
 ```
 
 **In the Claude Desktop app:** the Code tab, the terminal and the VS Code extension on one Mac share plugins installed for your user, so installing once in any of them is enough. To install from the Code tab itself, click **+** next to the prompt box, then **Add plugins**, add the marketplace `samsonchen/agent-town-claude-code`, and install town-link. This only makes sense for Code tab sessions that run on your Mac (see [Claude Desktop and Cowork](#5-claude-desktop-and-cowork)).

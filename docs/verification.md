@@ -26,7 +26,7 @@ These answers come from the mod API types that Claude Code 2.1.318 writes (`clau
 
 ## Other facts
 
-- **Plugin name:** `claude plugin validate` refuses names that start with `claude-` (also `anthropic-`, `cc-plugin-`, and a few others). The plugin is named **`town-link`** and its marketplace **`agent-town`** (install: `town-link@agent-town`). The app and the repository are named agent-town.
+- **Plugin name:** `claude plugin validate` refuses names that start with `claude-` (also `anthropic-`, `cc-plugin-`, and a few others). The plugin is named **`town-link`** and its marketplace **`agent-town-claude-code`** (install: `town-link@agent-town-claude-code`). The app and the repository are named agent-town.
 - Gating hooks (`prompt.submit`, `tool.call`, `tool.check`, `agent.spawn`, `session.send`, `session.receive`, `classic.*`) should end with `.catch(...)` that passes the event on, so a bug in agent-town never blocks Claude Code.
 
 - Background task IDs: `Bash` → `result.backgroundTaskId`; `Monitor` → `result.taskId`; `Workflow` → `result.taskId` and `runId`. A background `Agent` is staff, keyed by its `agentId`.

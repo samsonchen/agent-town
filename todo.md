@@ -6,7 +6,7 @@ Open items as of 2026-11-11, for the next session to pick up. Everything listed 
 
 - Work is committed on `main`.
 - town-link 1.0.4 and the macOS app 1.0.10 (the repository `samsonchen/agent-town-claude-code` and the data folder `agent-town-claude-code`), not yet released; 1.0.9 is the latest macOS release. They move separately. town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
-- Versions are separate (since 2026-11-11, both at 1.0.2 then). A plugin change: raise `plugin/.claude-plugin/plugin.json`, commit and push; no release. An app change: raise `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push, then the user runs `app/macos/scripts/release.sh --publish` (auto mode refuses to publish a release): it publishes the release, checks the uploaded `.dmg`'s checksum, and commits and pushes the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town`.
+- Versions are separate (since 2026-11-11, both at 1.0.2 then). A plugin change: raise `plugin/.claude-plugin/plugin.json`, commit and push; no release. An app change: raise `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push, then the user runs `app/macos/scripts/release.sh --publish` (auto mode refuses to publish a release): it publishes the release, checks the uploaded `.dmg`'s checksum, and commits and pushes the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town-claude-code`.
 - Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (53 tests). App checks: `swift build` and `swift test` in `app/macos` (36 tests).
 - Two Swift warnings in the release build, harmless: `TownScene+Staff.swift:89` (a weak self inside a strong one) and `TownView.swift:489` (a non-Sendable observer closure). Clean up when convenient.
 
@@ -174,23 +174,25 @@ Built in the macOS app 1.0.8; `docs/spec.md` → The office has the details. The
 
 ### The repository and the data folder: `agent-town-claude-code` (2026-11-13)
 
-The repository is `samsonchen/agent-town-claude-code` (the product name is Agent-Town; the suffix tells it apart from other projects named agent-town). The Homebrew tap has the same name (`brew tap samsonchen/agent-town-claude-code https://github.com/samsonchen/agent-town-claude-code`, cask `agent-town`); the plugin marketplace is `agent-town` (`town-link@agent-town`). Everything the apps keep on disk is in a folder of the same name: macOS `~/Library/Application Support/agent-town-claude-code/` (the endpoint; settings are kept by the bundle ID), Windows `%APPDATA%\agent-town-claude-code\` (the endpoint, settings and the rest). town-link reads the endpoint only there (`docs/protocol.md` → Endpoint file).
+The repository is `samsonchen/agent-town-claude-code` (the product name is Agent-Town; the suffix tells it apart from other projects named agent-town). The Homebrew tap has the same name (`brew tap samsonchen/agent-town-claude-code https://github.com/samsonchen/agent-town-claude-code`, cask `agent-town`); the plugin marketplace is `agent-town-claude-code` too (`town-link@agent-town-claude-code`). Everything the apps keep on disk is in a folder of the same name: macOS `~/Library/Application Support/agent-town-claude-code/` (the endpoint; settings are kept by the bundle ID), Windows `%APPDATA%\agent-town-claude-code\` (the endpoint, settings and the rest). town-link reads the endpoint only there (`docs/protocol.md` → Endpoint file).
 
 **The Mac session:**
 
 - [x] The repository's address everywhere outside `app/windows/` and `docs/windows/`: READMEs, docs, the cask (`url`, `homepage`, `zap`), `AppInfo.repository`, the update check (`UpdateFeed`) and the brew command in the Updates window, `plugin.json`'s `homepage`, the schema's `$id`.
+- [x] The marketplace name `agent-town-claude-code` (`.claude-plugin/marketplace.json`), checked with `claude plugin validate` and an install in a throwaway config: install commands in the READMEs, docs, the cask's note and the Updates window.
 - [x] The endpoint folder: town-link's `endpointFilePath` (macOS and Windows) with its tests, the macOS app's `Endpoint.defaultURL`, `tools/debug-receiver.py`, `dev/recorder`, `docs/protocol.md`. town-link 1.0.4, macOS app 1.0.10.
 
 **The Windows session** (`git pull` first):
 
 - [ ] `app/windows/core/update_feed.gd`: `RELEASES_URL` → `https://api.github.com/repos/samsonchen/agent-town-claude-code/releases?per_page=50`, `PLUGIN_MANIFEST_URL` → `https://raw.githubusercontent.com/samsonchen/agent-town-claude-code/main/plugin/.claude-plugin/plugin.json`.
+- [ ] `app/windows/shell/updater.gd`: `PLUGIN_COMMANDS` → `claude plugin marketplace update agent-town-claude-code` and `claude plugin update town-link@agent-town-claude-code` (the marketplace has the repository's name).
 - [ ] `app/windows/shell/about_window.gd`: `REPOSITORY` → `https://github.com/samsonchen/agent-town-claude-code`.
 - [ ] `app/windows/installer/agent-town.iss`: `AppPublisherURL`, `AppSupportURL` (`…/issues`) and `AppUpdatesURL` (`…/releases`) on `https://github.com/samsonchen/agent-town-claude-code`; its uninstall entries under `{userappdata}\agent-town-claude-code`. Keep the `AppId`.
 - [ ] `app/windows/scripts/release.ps1`: `--repo samsonchen/agent-town-claude-code`.
 - [ ] The app's data under `%APPDATA%\agent-town-claude-code\`: `endpoint.json` (where town-link looks), `settings.cfg`, run-local's separate settings, logs and anything else (check Godot's `user://` too). Settings start from scratch.
 - [ ] `docs/windows/` to match. Raise the Windows app's version, run the Windows tests, try a demo and `-Live` with `run-local.ps1` against town-link from `main`, commit and push. Tick these boxes.
 
-**The user:** release the macOS app (1.0.10) and the Windows app once both sessions have pushed, then install them fresh, with town-link from the marketplace (`claude plugin marketplace add samsonchen/agent-town-claude-code`, then `claude plugin install town-link@agent-town`).
+**The user:** release the macOS app (1.0.10) and the Windows app once both sessions have pushed, then install them fresh, with town-link from the marketplace (`claude plugin marketplace add samsonchen/agent-town-claude-code`, then `claude plugin install town-link@agent-town-claude-code`).
 
 ### Shared material a second app needs
 

@@ -47,7 +47,7 @@ town-link 是用 Claude Code 的 mod（帶 hooks 模組的 plugin）做的，所
 ```
 
 ```
-/plugin install town-link@agent-town
+/plugin install town-link@agent-town-claude-code
 ```
 
 或在終端機執行：
@@ -57,7 +57,7 @@ claude plugin marketplace add samsonchen/agent-town-claude-code
 ```
 
 ```bash
-claude plugin install town-link@agent-town
+claude plugin install town-link@agent-town-claude-code
 ```
 
 裝完後重新啟動 Claude Code。在 session 裡，`/town` 會顯示已安裝的 town-link 版本，以及 plugin 有沒有連上 app，`/town on` 或 `/town off` 可以替所有 session 開啟或關閉傳送。
@@ -65,11 +65,11 @@ claude plugin install town-link@agent-town
 這個 marketplace 不會自動更新。更新方式：
 
 ```bash
-claude plugin marketplace update agent-town
+claude plugin marketplace update agent-town-claude-code
 ```
 
 ```bash
-claude plugin update town-link@agent-town
+claude plugin update town-link@agent-town-claude-code
 ```
 
 **在 Claude 桌面 app 裡**：同一台 Mac 上的 Code 分頁、終端機和 VS Code 擴充功能共用你這個使用者安裝的 plugin，所以在任一處裝一次就夠了。要從 Code 分頁安裝，按 prompt 輸入框旁的 **+**，選 **Add plugins**，加入 marketplace `samsonchen/agent-town-claude-code`，再安裝 town-link。這只對在你 Mac 上執行的 Code 分頁 session 有用（見英文 README 的 [Claude Desktop and Cowork](README.md#5-claude-desktop-and-cowork)）。

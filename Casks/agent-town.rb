@@ -27,6 +27,6 @@ cask "agent-town" do
   caveats <<~EOS
     agent-town also needs the town-link plugin in Claude Code:
       claude plugin marketplace add samsonchen/agent-town-claude-code
-      claude plugin install town-link@agent-town
+      claude plugin install town-link@agent-town-claude-code
   EOS
 end

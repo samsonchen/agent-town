@@ -1,5 +1,5 @@
 {
-  "name": "agent-town",
+  "name": "agent-town-claude-code",
   "owner": { "name": "Samson Chen" },
   "description": "agent-town: Claude Code's work shown as a small office building on macOS.",
   "plugins": [

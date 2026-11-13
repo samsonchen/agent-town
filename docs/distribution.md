@@ -8,17 +8,17 @@ The repo root holds `.claude-plugin/marketplace.json`, which lists one plugin, `
 
 ```
 /plugin marketplace add samsonchen/agent-town-claude-code
-/plugin install town-link@agent-town
+/plugin install town-link@agent-town-claude-code
 ```
 
 Or from the shell:
 
 ```bash
 claude plugin marketplace add samsonchen/agent-town-claude-code
-claude plugin install town-link@agent-town
+claude plugin install town-link@agent-town-claude-code
 ```
 
-The marketplace name (`agent-town`, after the `@`; it avoids the reserved `claude-` prefix too) is set in `marketplace.json`. Updates arrive through Claude Code's normal plugin update flow.
+The marketplace name (`agent-town-claude-code`, after the `@`, the same as the repository's; it doesn't start with the reserved `claude-` prefix) is set in `marketplace.json`. Updates arrive through Claude Code's normal plugin update flow.
 
 Requirements to state in the README:
 
