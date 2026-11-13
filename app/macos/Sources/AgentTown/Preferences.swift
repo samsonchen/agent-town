@@ -220,7 +220,7 @@ struct SettingsView: View {
             SoundSettingsView()
             Section(Labels.text("Updates")) {
                 Toggle(Labels.text("Check for updates automatically"), isOn: $checkUpdates)
-                CheckRow()
+                CheckRow(opensUpdatesWindow: true)
             }
         }
         .formStyle(.grouped)

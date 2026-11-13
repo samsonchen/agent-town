@@ -286,6 +286,8 @@ private struct CommandRow: View {
 /// When the last check ran, with Check now. Used in the Updates window and in Settings.
 struct CheckRow: View {
     @ObservedObject private var updater = Updater.shared
+    /// In Settings: when this manual check finds an update, open the Updates window (nothing if none).
+    var opensUpdatesWindow = false
 
     var body: some View {
         HStack {
@@ -302,7 +304,12 @@ struct CheckRow: View {
             }
             .foregroundStyle(.secondary)
             Spacer()
-            Button(Labels.text("Check now")) { Task { await updater.check() } }
+            Button(Labels.text("Check now")) {
+                Task {
+                    await updater.check()
+                    if opensUpdatesWindow, updater.hasUpdate { updater.showWindow() }
+                }
+            }
                 .disabled(updater.checking)
         }
     }

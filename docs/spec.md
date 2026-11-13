@@ -233,7 +233,7 @@ These choices, and the settings below, are kept when the app or the Mac restarts
 
 The app tells the user when a newer agent-town or a newer town-link is available. It does not install anything itself: Homebrew, the `.dmg` (or the Windows installer) and Claude Code's plugin commands do the upgrade.
 
-**What is checked.** Once shortly after launch and then once a day, while **Check for updates automatically** (Settings → Updates, on by default) is on; **Check now** checks at any time. Two public GitHub addresses are read, with nothing about the user sent:
+**What is checked.** Once shortly after launch and then once a day, while **Check for updates automatically** (Settings → Updates, on by default) is on; **Check now** in Settings checks at any time and opens the Updates window if it finds an update (nothing if not). Two public GitHub addresses are read, with nothing about the user sent:
 
 - The app: the releases of `samsonchen/agent-town-claude-code` (`https://api.github.com/repos/samsonchen/agent-town-claude-code/releases`). Drafts and pre-releases are skipped. The macOS app takes the highest version among tags `v<version>`; the Windows app the highest among tags `windows-v<version>`. Each matches tags, never GitHub's "Latest" flag (the macOS release keeps it; Windows releases are published with `--latest=false`).
 - town-link: `plugin/.claude-plugin/plugin.json` on `main` (`https://raw.githubusercontent.com/samsonchen/agent-town-claude-code/main/plugin/.claude-plugin/plugin.json`), which is what `claude plugin update` installs.
