@@ -28,7 +28,7 @@ A macOS menu bar app (Swift, RealityKit) that draws Claude Code's work as a smal
 - `app/windows/scripts/run-local.ps1` (or `run-local.sh` from Git Bash) runs the Windows app from the checkout with Godot for the user to try a change (a demo by default, `-Live` for real sessions; `-Help`). Point the user to it when they want to test on Windows.
 - A release is `app/macos/scripts/release.sh --publish`, run by the user (auto mode refuses to publish). It publishes the GitHub release and pushes the cask; Homebrew sees a new version only after the cask is on `main`.
 - A Windows release is `app/windows/scripts/release.ps1 -Publish`, run by the user (see `docs/windows/releasing.md`); without `-Publish` it only builds the installer.
-- When behavior changes, update the docs that describe it (README, and `README.zh-TW.md` for sections 1–4, `docs/spec.md`, `docs/protocol.md`, `docs/architecture.md`, `docs/releasing.md`; for the Windows app, `docs/windows/`) and `todo.md`.
+- When behavior changes, update the docs that describe it (README, and `README.zh-TW.md` for sections 1–3, `docs/office.md`, `docs/known-issues.md`, `docs/privacy.md` (when town-link's hooks or what it sends change), `docs/development.md` (scripts, flags, checks), `docs/spec.md`, `docs/protocol.md`, `docs/architecture.md`, `docs/releasing.md`; for the Windows app, `docs/windows/`) and `todo.md`.
 - Never commit access tokens, passwords or other credentials. Signing and notarization secrets live only in the keychain or GitHub secrets.
 - Write in American English or Traditional Chinese (Taiwan); never Simplified Chinese. UI strings are keyed by their English text, with the Traditional Chinese in `zh-Hant.lproj/Localizable.strings`.
 - No global installs without asking.

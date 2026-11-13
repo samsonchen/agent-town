@@ -4,13 +4,17 @@ agent-town shows Claude Code's work as a small office seen from above. The top-d
 
 The project has two parts:
 
-- **The mod**: a Claude Code plugin that listens to Claude Code events and sends them to the app.
-- **The app**: a macOS app that draws the office and plays sounds.
+- **town-link**: a Claude Code plugin (a mod) that listens to Claude Code events and sends them to the app.
+- **The app**: a macOS menu bar app, and a Windows tray app, that draw the office and play sounds.
 
 ## Documents
 
 | Document | What it covers |
 |---|---|
+| [office.md](office.md) | A tour of the office: who sits where, what each one does, the sounds and the settings |
+| [known-issues.md](known-issues.md) | Known issues and limitations, and which Claude surfaces it works in |
+| [privacy.md](privacy.md) | What town-link reads and sends, and what each of its hooks does |
+| [development.md](development.md) | Developing: the repository, running from source, checks, trying a change, versions and releasing |
 | [spec.md](spec.md) | What the user sees and hears, the decisions made so far, and the settings |
 | [architecture.md](architecture.md) | The components, how events flow, and how the mod and the app are built |
 | [protocol.md](protocol.md) | The mod-to-app protocol. Platform independent. |
@@ -19,7 +23,7 @@ The project has two parts:
 | [releasing.md](releasing.md) | How to build, sign, notarize and publish the macOS app |
 | [roadmap.md](roadmap.md) | Build phases, items to verify before coding, and open questions |
 | [verification.md](verification.md) | Phase 0 answers: what the Claude Code mod API provides, checked against the types and a live session |
-| [windows/](windows/README.md) | The Windows app (planned): its spec, architecture, roadmap and checks, kept apart from the macOS documents |
+| [windows/](windows/README.md) | The Windows app: its spec, architecture, roadmap, releasing and checks, kept apart from the macOS documents |
 
 ## Status
 
