@@ -5,7 +5,7 @@ Open items as of 2026-11-11, for the next session to pick up. Everything listed 
 ## Where things stand
 
 - Work is committed on `main`.
-- town-link 1.0.4, the macOS app 1.0.10 and the Windows app 1.0.3 (the repository `samsonchen/agent-town-claude-code` and the data folder `agent-town-claude-code`), not yet released; 1.0.9 is the latest macOS release. They move separately. town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
+- town-link 1.0.4 and the Windows app 1.0.3 (the repository `samsonchen/agent-town-claude-code` and the data folder `agent-town-claude-code`); the macOS app 1.0.11 (the bundle ID `ai.careactive.agenttown-claude-code`), not yet released, after 1.0.10 (the repository and the data folder). They move separately. town-link is installed from GitHub on the personal account; the app is installed with Homebrew from this repo's tap (`Casks/agent-town.rb`). v0.2.7 was the first signed and notarized release.
 - Versions are separate (since 2026-11-11, both at 1.0.2 then). A plugin change: raise `plugin/.claude-plugin/plugin.json`, commit and push; no release. An app change: raise `AppInfo.fallbackVersion` in `app/macos/Sources/AgentTown/About.swift`, commit and push, then the user runs `app/macos/scripts/release.sh --publish` (auto mode refuses to publish a release): it publishes the release, checks the uploaded `.dmg`'s checksum, and commits and pushes the cask. Users update with `brew upgrade --cask agent-town` and `claude plugin update town-link@agent-town-claude-code`.
 - Plugin checks: `claude plugin validate plugin` and `claude plugin test plugin` (53 tests). App checks: `swift build` and `swift test` in `app/macos` (36 tests).
 - Two Swift warnings in the release build, harmless: `TownScene+Staff.swift:89` (a weak self inside a strong one) and `TownView.swift:489` (a non-Sendable observer closure). Clean up when convenient.
@@ -77,7 +77,7 @@ From `docs/roadmap.md` and `docs/spec.md`:
 
 ## 8. Decisions still open
 
-- [ ] Bundle ID: it is `ai.careactive.agenttown`. Changing it makes macOS treat the app as new, so saved settings reset.
+- [x] Bundle ID: `ai.careactive.agenttown-claude-code` (since macOS app 1.0.11, 2026-11-13, matching the repository; the Developer ID certificate signs any bundle ID). Settings are kept by it, so changing it again would make macOS treat the app as new and reset them.
 - [ ] Open questions in `docs/roadmap.md`: the default for ticket text, whether `claude -p` runs appear, sound files, bench size, where scheduled reports go, and long-lived operators.
 
 - [x] **Other coding agents (Codex CLI, Grok Build): not now** (decided 2026-11-13). Both have shell-style hooks (session start, prompt, tool calls, stop; Grok also subagent stop), but no mod interface: a hook can't call a model (task titles, roles) and can't see subagents and background tasks the way town-link does, so their office would lack staff, operators, titles and the context bar. The user finds that too dry. agent-town stays Claude Code only, hence the repository name `agent-town-claude-code`. Revisit only if their hooks gain subagents and a model call.

@@ -17,11 +17,11 @@ cask "agent-town" do
 
   app "AgentTown.app"
 
-  uninstall quit: "ai.careactive.agenttown"
+  uninstall quit: "ai.careactive.agenttown-claude-code"
 
   zap trash: [
     "~/Library/Application Support/agent-town-claude-code",
-    "~/Library/Preferences/ai.careactive.agenttown.plist",
+    "~/Library/Preferences/ai.careactive.agenttown-claude-code.plist",
   ]
 
   caveats <<~EOS

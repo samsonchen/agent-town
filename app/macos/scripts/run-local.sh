@@ -61,11 +61,11 @@ if [ "$LIVE" = 1 ]; then
   installed() { pgrep -f "AgentTown.app/Contents/MacOS/AgentTown" >/dev/null; }
   if installed; then
     echo "Quitting the installed agent-town; it opens again when this build quits."
-    osascript -e 'tell application id "ai.careactive.agenttown" to quit' >/dev/null 2>&1 || true
+    osascript -e 'tell application id "ai.careactive.agenttown-claude-code" to quit' >/dev/null 2>&1 || true
     for _ in $(seq 1 20); do installed || break; sleep 0.25; done
     REOPEN=1
   fi
-  reopen() { [ "$REOPEN" = 1 ] && open -b ai.careactive.agenttown 2>/dev/null || true; }
+  reopen() { [ "$REOPEN" = 1 ] && open -b ai.careactive.agenttown-claude-code 2>/dev/null || true; }
   trap reopen EXIT
   echo "Running this build with real sessions. Quit it from its menu bar icon or with Ctrl+C."
   "$APP" -showWindow YES -sound "$SOUND" ${ARGS[@]+"${ARGS[@]}"}
