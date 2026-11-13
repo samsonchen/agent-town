@@ -210,7 +210,7 @@ The app runs in the menu bar, with no Dock icon. Its menu:
 - **agent-town X is available…** and **town-link X is available…** at the top, only while there is an update (see "Updates" below). Each opens the Updates window.
 - **About agent-town** opens a window with the version and build number, the author (Samson Chen), the license (Apache 2.0) with a link, the repository link, and the third-party components with links to each one and its license (Kenney Mini Characters and Kenney Furniture Kit, CC0 1.0).
 - **Show agent-town** (checked while the office window is open). Closing the window unchecks it; the app keeps running.
-- **Stay on top** (off by default). Keeps the office window above other apps' windows (floating level), even when another app is in front.
+- **Stay on top** (off by default). Keeps the office window above other apps' windows (floating level), even when another app is in front. About, Updates and Settings float one level above it (macOS), so they are not hidden behind the office.
 - **Sound** (checked while sounds play). Works whether the window is shown or hidden.
 - **Settings…**
 - **Quit agent-town**

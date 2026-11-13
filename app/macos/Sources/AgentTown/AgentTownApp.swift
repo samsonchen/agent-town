@@ -67,17 +67,17 @@ struct AgentTownApp: App {
         .defaultLaunchBehavior(Prefs.isOn(Prefs.showWindow) ? .presented : .suppressed)
         .restorationBehavior(.disabled)
 
-        Window(Labels.text("About agent-town"), id: "about") { AboutView() }
+        Window(Labels.text("About agent-town"), id: "about") { AboutView().aboveStayOnTop() }
             .windowResizability(.contentSize)
             .defaultLaunchBehavior(.suppressed)
             .restorationBehavior(.disabled)
 
-        Window(Labels.text("Updates"), id: "updates") { UpdatesView() }
+        Window(Labels.text("Updates"), id: "updates") { UpdatesView().aboveStayOnTop() }
             .windowResizability(.contentSize)
             .defaultLaunchBehavior(.suppressed)
             .restorationBehavior(.disabled)
 
-        Window(Labels.text("Settings"), id: "settings") { SettingsView() }
+        Window(Labels.text("Settings"), id: "settings") { SettingsView().aboveStayOnTop() }
             .windowResizability(.contentSize)
             .defaultLaunchBehavior(.suppressed)
             .restorationBehavior(.disabled)

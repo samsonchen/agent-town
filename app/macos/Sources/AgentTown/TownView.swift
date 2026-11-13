@@ -512,7 +512,7 @@ struct TipBar: View {
 }
 
 /// Hands over the NSWindow a view is in, once it is in one.
-private struct WindowReader: NSViewRepresentable {
+struct WindowReader: NSViewRepresentable {
     let found: (NSWindow?) -> Void
     func makeNSView(context: Context) -> NSView {
         let v = NSView()
@@ -522,6 +522,28 @@ private struct WindowReader: NSViewRepresentable {
     func updateNSView(_ v: NSView, context: Context) {
         DispatchQueue.main.async { if let w = v.window { found(w) } }
     }
+}
+
+/// With Stay on top on, the office floats; About, Updates and Settings sit one level above it, so they
+/// are not hidden behind it. Without Stay on top they are ordinary windows.
+private struct AboveStayOnTop: ViewModifier {
+    @AppStorage(Prefs.stayOnTop) private var stayOnTop = false
+    @State private var window: NSWindow?
+    private var level: NSWindow.Level { stayOnTop ? NSWindow.Level(rawValue: NSWindow.Level.floating.rawValue + 1) : .normal }
+    func body(content: Content) -> some View {
+        content
+            .background(WindowReader { w in
+                guard let w else { return }
+                window = w
+                w.level = level
+            })
+            .onChange(of: stayOnTop) { _, _ in window?.level = level }
+    }
+}
+
+extension View {
+    /// Lets this window stay above the office window when Stay on top is on.
+    func aboveStayOnTop() -> some View { modifier(AboveStayOnTop()) }
 }
 
 /// Keeps the office window where the user put it, across restarts of the app. The frame is saved
