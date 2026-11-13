@@ -1,11 +1,12 @@
 {
   "name": "town-link",
-  "version": "1.0.4",
-  "description": "Sends what Claude Code does to the agent-town macOS app, which shows it as a small office building.",
+  "version": "1.0.5",
+  "description": "Sends what Claude Code does to the agent-town app on macOS and Windows, which shows it as a small office.",
   "author": {
     "name": "Samson Chen"
   },
   "license": "Apache-2.0",
   "homepage": "https://github.com/samsonchen/agent-town-claude-code",
+  "icon": "./.claude-plugin/icon.png",
   "types": "./types/index.d.ts"
 }
