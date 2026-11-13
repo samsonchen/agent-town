@@ -5,7 +5,7 @@ config_version=5
 [application]
 
 config/name="agent-town"
-config/version="1.0.5"
+config/version="1.0.6"
 config/icon="res://shared/icons/app-icon-1024.png"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="agent-town-claude-code"

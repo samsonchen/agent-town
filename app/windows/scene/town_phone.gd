@@ -21,21 +21,26 @@ func anchor() -> Vector3:
 	return device.global_position + Vector3(0, tag_lift, 0)
 
 
-## Shakes the device for `seconds`.
+## Shakes the device for `seconds`. A phone out of the tree (its block hidden, or freed) stops:
+## it has no tree to wait on, and the release build crashes on a null tree rather than failing.
 func ring(seconds: float) -> void:
-	if ringing or not is_instance_valid(device):
+	if ringing or not _in_tree():
 		return
 	ringing = true
 	var base := device.basis
 	var steps := int(seconds / 0.1)
 	for i in steps:
-		if not is_instance_valid(device):
-			return
+		if not _in_tree():
+			break
 		device.basis = base if i == steps - 1 else base * Basis(Vector3.UP, 0.18 if i % 2 == 0 else -0.18)
 		await device.get_tree().create_timer(0.1).timeout
 	if is_instance_valid(device):
 		device.basis = base
 	ringing = false
+
+
+func _in_tree() -> bool:
+	return is_instance_valid(device) and device.is_inside_tree()
 
 
 ## Lifts the handset to `a`'s ear.
