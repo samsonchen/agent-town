@@ -80,6 +80,8 @@ From `docs/roadmap.md` and `docs/spec.md`:
 - [ ] Bundle ID: it is `ai.careactive.agenttown`. Changing it makes macOS treat the app as new, so saved settings reset.
 - [ ] Open questions in `docs/roadmap.md`: the default for ticket text, whether `claude -p` runs appear, sound files, bench size, where scheduled reports go, and long-lived operators.
 
+- [x] **Other coding agents (Codex CLI, Grok Build): not now** (decided 2026-11-13). Both have shell-style hooks (session start, prompt, tool calls, stop; Grok also subagent stop), but no mod interface: a hook can't call a model (task titles, roles) and can't see subagents and background tasks the way town-link does, so their office would lack staff, operators, titles and the context bar. The user finds that too dry. agent-town stays Claude Code only, hence the repository name `agent-town-claude-code`. Revisit only if their hooks gain subagents and a model call.
+
 ## 9. Before the Windows app: work for the Mac session
 
 A Windows version of the app is planned: Windows 11 on x64, with ARM64 as a nice-to-have. The engine is Godot 4 (see "Windows app: decisions" below). The items below are the groundwork that needs the Mac (`swift build` and `swift test`, the release script) or is best done there. Verifying the plugin on Windows itself is done on the Windows machine: the headless check passed on 2026-11-11 (`docs/windows/verification.md`). The Windows app's own steps are W0 to W2 in `docs/windows/roadmap.md`; all Windows docs are in `docs/windows/`.
