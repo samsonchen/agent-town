@@ -7,6 +7,9 @@ type Posted = { type: string; [k: string]: unknown }
 
 /** The engine and an app beneath the plugin; returns the events the app received. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+/** A command typed by the user at a terminal, as the engine stamps it. */
+const typed = { origin: { kind: 'composer' as const }, presentation: { isFullscreen: false, columns: 80 } }
+
 function world(on: any) {
   const clock = mock.clock(on, { now: 1_000_000 })
   mock.store(on)
@@ -54,7 +57,7 @@ describe('/compact', () => {
     on('command.run', () => ({}))
 
     await $.session.start({ cwd: '/work/town', surface: 'terminal', isInteractive: true })
-    await $.command.run({ command: 'compact', args: '' })
+    await $.command.run({ command: 'compact', args: '', ...typed })
     await clock.advance(1_000)
 
     expect(compactEvents(posted)).toEqual([
@@ -70,7 +73,7 @@ describe('/compact', () => {
     })
 
     await $.session.start({ cwd: '/work/town', surface: 'terminal', isInteractive: true })
-    await $.command.run({ command: 'compact', args: '' }).catch(() => undefined)
+    await $.command.run({ command: 'compact', args: '', ...typed }).catch(() => undefined)
     await clock.advance(1_000)
 
     expect(compactEvents(posted)).toEqual([
@@ -103,7 +106,7 @@ describe('/town', () => {
 
     await $.session.start({ cwd: '/work/town', surface: 'terminal', isInteractive: true })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = (await $.command.run({ command: 'town', args: '' })) as any
+    const result = (await $.command.run({ command: 'town', args: '', ...typed })) as any
     expect(String(result.text).split('\n')[0]).toBe('Version 9.8.7.')
   })
 })
