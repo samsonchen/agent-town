@@ -209,7 +209,7 @@ The app runs in the menu bar, with no Dock icon. Its menu:
 
 - **agent-town X is available…** and **town-link X is available…** at the top, only while there is an update (see "Updates" below). Each opens the Updates window.
 - **About agent-town** opens a window with the version and build number, the author (Samson Chen), the license (Apache 2.0) with a link, the repository link, and the third-party components with links to each one and its license (Kenney Mini Characters and Kenney Furniture Kit, CC0 1.0).
-- **Show agent-town** (checked while the office window is open). Closing the window unchecks it; the app keeps running.
+- **Show agent-town** (checked while the office window is open). Closing the window unchecks it; the app keeps running. While Settings → Hide the window when no Claude Code session is open has hidden it, it is unchecked, and choosing it shows the office.
 - **Stay on top** (off by default). Keeps the office window above other apps' windows (floating level), even when another app is in front. About, Updates and Settings float one level above it (macOS), so they are not hidden behind the office.
 - **Sound** (checked while sounds play). Works whether the window is shown or hidden.
 - **Settings…**
@@ -220,7 +220,8 @@ These choices, and the settings below, are kept when the app or the Mac restarts
 ## Settings (app)
 
 - Language (built): system (the default, following macOS), English, 繁體中文. A different choice applies after a restart; a "Restart now" button shows only when the choice differs from the language the app is running in.
-- Office: **Compact view** (off by default; applies after a restart; see "The office"), **Hide idle project blocks** (off by default) with **Hide after** N seconds (1 to 3600, default 5; see "The office"), and **Show tips** (on by default: the closable tips in the window, such as moving the CEO with the arrow keys; closing a tip turns this off, turning it on brings the tips back). Show tips was in the menu bar menu until macOS app 1.0.5.
+- Office: **Compact view** (off by default; applies after a restart; see "The office"), **Hide the window when no Claude Code session is open** (off by default; see below), **Hide idle project blocks** (off by default) with **Hide after** N seconds (1 to 3600, default 5; see "The office"; indented under Hide idle project blocks, since it belongs to it, and dimmed while that is off), and **Show tips** (on by default: the closable tips in the window, such as moving the CEO with the arrow keys; closing a tip turns this off, turning it on brings the tips back). Show tips was in the menu bar menu until macOS app 1.0.5.
+- **Hide the window when no Claude Code session is open** (macOS app 1.0.14): with it on, the whole office window hides 5 seconds after the last session closes (so a Chief walking out is seen, and a `/clear` or a restart of Claude Code does not make it blink), and comes back, without taking the focus, when a session opens. It is independent of Hide idle project blocks. "Show agent-town" in the menu shows off while the window is hidden this way; choosing it shows the office anyway, and the window hides again only after the next session closes. Closing the window yourself still wins: the window does not come back with a session while Show agent-town is off. Sound still plays while it is hidden. At launch with no session open, the window shows for those 5 seconds, then hides.
 - Window size; bench size (characters waiting per block)
 - Sounds: the volume; for dispatch, completion and approval, an on/off switch, the sound and a Play button; the completion threshold. See "Sound settings" above. (Muting all sounds is the menu's Sound item.)
 - Ticket text: full, or task type only

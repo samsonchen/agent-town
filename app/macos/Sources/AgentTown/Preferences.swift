@@ -27,6 +27,11 @@ enum Prefs {
 
     static var hideIdleBlocks: Bool { UserDefaults.standard.bool(forKey: hideIdle) }
 
+    /// The office window hides while no Claude Code session is open, and comes back when one opens.
+    /// Default off (spec: Hide when no session is open).
+    static let hideWithoutSessions = "hideWithoutSessions"
+    static var hidesWithoutSessions: Bool { UserDefaults.standard.bool(forKey: hideWithoutSessions) }
+
     static var idleHideDelay: Double {
         let d = UserDefaults.standard // double(forKey:) also reads a number given as a launch argument
         return clampIdleHide(d.object(forKey: idleHideSeconds) == nil ? 5 : d.double(forKey: idleHideSeconds))
@@ -103,6 +108,7 @@ struct TownMenu: View {
     @AppStorage(Prefs.stayOnTop) private var stayOnTop = false
     @AppStorage(Prefs.sound) private var sound = true
     @ObservedObject private var updater = Updater.shared
+    @ObservedObject private var presence = WindowPresence.shared
 
     var body: some View {
         if let r = updater.appUpdate {
@@ -117,8 +123,10 @@ struct TownMenu: View {
             NSApp.activate(ignoringOtherApps: true)
         }
         Divider()
-        Toggle(Labels.text("Show agent-town"), isOn: Binding(get: { showWindow }, set: { on in
+        // While hidden for having no session, the item is off; choosing it shows the office anyway.
+        Toggle(Labels.text("Show agent-town"), isOn: Binding(get: { showWindow && !presence.autoHidden }, set: { on in
             if on {
+                presence.showNow()
                 openWindow(id: "town")
                 NSApp.activate(ignoringOtherApps: true)
             } else {
@@ -145,6 +153,7 @@ struct SettingsView: View {
     @AppStorage(Prefs.language) private var language = ""
     @AppStorage(Prefs.opacity) private var opacity = 1.0
     @AppStorage(Prefs.hideIdle) private var hideIdle = false
+    @AppStorage(Prefs.hideWithoutSessions) private var hideWithoutSessions = false
     @AppStorage(Prefs.idleHideSeconds) private var idleSeconds = 5.0
     @AppStorage(Prefs.showTips) private var showTips = true
     @AppStorage(Prefs.checkForUpdatesKey) private var checkUpdates = true
@@ -197,8 +206,9 @@ struct SettingsView: View {
                         Button(Labels.text("Restart now")) { Prefs.relaunch() }
                     }
                 }
+                Toggle(Labels.text("Hide the window when no Claude Code session is open"), isOn: $hideWithoutSessions)
                 Toggle(Labels.text("Hide idle project blocks"), isOn: $hideIdle)
-                LabeledContent(Labels.text("Hide after")) {
+                LabeledContent {
                     HStack(spacing: 6) {
                         TextField("", value: Binding(get: { Prefs.clampIdleHide(idleSeconds) },
                                                      set: { idleSeconds = Prefs.clampIdleHide($0.rounded()) }),
@@ -213,6 +223,9 @@ struct SettingsView: View {
                             .labelsHidden()
                         Text(Labels.text("seconds"))
                     }
+                } label: {
+                    // Indented: it belongs to "Hide idle project blocks".
+                    Text(Labels.text("Hide after")).padding(.leading, 20)
                 }
                 .disabled(!hideIdle)
                 Toggle(Labels.text("Show tips"), isOn: $showTips)

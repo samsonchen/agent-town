@@ -179,6 +179,7 @@ struct TownView: View {
                 w.alphaValue = Prefs.clampOpacity(opacity) // also when the window opens or is made again
                 guard w !== window else { return }
                 window = w
+                WindowPresence.shared.window = w
                 w.level = stayOnTop ? .floating : .normal
                 let restored = WindowPlace.restore(w)
                 // Sessions already open when the window opens; a restored size the user made smaller stays.

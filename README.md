@@ -118,7 +118,7 @@ Claude Code must run natively on Windows (the terminal, the Desktop app's Code t
 
 The window shows one office building, seen from above. At the top is the executive office, where you, the CEO, sit beside the Inspector and the Dispatcher. Under it, each project you have open in Claude Code gets a block: its Chief of Staff (the session) takes your tickets, pages staff from the bench for each subagent, sends operators to the server room for background tasks, waits for your approval when Claude Code asks, and phones the report back. You hear a sound when work is dispatched, when it is done, and when your approval is needed.
 
-For a laptop screen, Settings has Compact view (the office at half size) and Hide idle project blocks, and the window can be made small: the view then scrolls by itself to where people are walking.
+For a laptop screen, Settings has Compact view (the office at half size), Hide idle project blocks, and Hide the window when no Claude Code session is open, and the window can be made small: the view then scrolls by itself to where people are walking.
 
 The whole tour, with the settings: [The office](docs/office.md).
 

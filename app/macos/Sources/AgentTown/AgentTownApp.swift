@@ -23,6 +23,7 @@ final class TownApp: ObservableObject {
         scene.onSound = { name in SoundKind(rawValue: name).map(SoundPlayer.play) }
         let thresh = UserDefaults.standard.object(forKey: Prefs.completionThreshold) as? Double ?? 0
         store.sound = SoundSettings(thresholdSeconds: Prefs.clampThreshold(thresh))
+        WindowPresence.shared.start(store: store)
     }
 
     func startServer() {
