@@ -6,6 +6,8 @@ extends Node
 ## app/macos/Sources/AgentTown/Updates.swift.
 
 signal changed
+## Show the Updates window and bring it to the front (main.gd does it).
+signal window_requested
 
 const PLUGIN_COMMANDS: Array[String] = ["claude plugin marketplace update agent-town-claude-code", "claude plugin update town-link@agent-town-claude-code"]
 const DAY := 24 * 3600
@@ -72,6 +74,10 @@ func plugin_update() -> String:
 
 func has_update() -> bool:
 	return app_update() != null or plugin_update() != ""
+
+
+func show_window() -> void:
+	window_requested.emit()
 
 
 ## Reads the newest release and town-link's version from GitHub. Sends nothing about the user.

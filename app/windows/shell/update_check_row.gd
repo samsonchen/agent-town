@@ -5,22 +5,33 @@ extends HBoxContainer
 
 var updater: Updater
 var labels: TownLabels
+## In Settings: when Check now finds an update, open the Updates window (nothing if none, or if the
+## check failed). The Updates window's own row and the automatic checks don't.
+var opens_updates_window := false
 var _status := Label.new()
 var _button := Button.new()
 
 
-func _init(p_updater: Updater, p_labels: TownLabels) -> void:
+func _init(p_updater: Updater, p_labels: TownLabels, p_opens_updates_window := false) -> void:
 	updater = p_updater
 	labels = p_labels
+	opens_updates_window = p_opens_updates_window
 	add_theme_constant_override("separation", 10)
 	_status.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	add_child(_status)
 	_button.text = labels.t("Check now")
-	_button.pressed.connect(func() -> void: updater.check())
+	_button.pressed.connect(check_now)
 	add_child(_button)
 	updater.changed.connect(_update)
 	_update()
+
+
+## Check now, pressed.
+func check_now() -> void:
+	await updater.check()
+	if opens_updates_window and updater.has_update():
+		updater.show_window()
 
 
 func _update() -> void:

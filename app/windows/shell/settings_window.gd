@@ -216,7 +216,7 @@ func _build_updates(box: VBoxContainer) -> void:
 		settings.check_updates = on
 		settings.save())
 	box.add_child(auto)
-	box.add_child(UpdateCheckRow.new(updater, labels))
+	box.add_child(UpdateCheckRow.new(updater, labels, true))
 
 
 # --- Sounds -------------------------------------------------------------------------------

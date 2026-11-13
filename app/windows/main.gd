@@ -132,6 +132,7 @@ func _ready() -> void:
 	_updates_window.visible = false
 	add_child(_updates_window)
 	updater.changed.connect(_fill_menu)
+	updater.window_requested.connect(_show_updates)
 	updater.start(not _args.has("demo") and not _args.has("snapshot"), _args.has("fake-update"), _args.has("check-now"))
 	_call_window("hide_from_taskbar", [_hwnd()])
 	# Sessions already open; a restored height the user made shorter than the office stays.
@@ -354,10 +355,18 @@ func _sync_menu() -> void:
 	_menu.set_item_checked(_menu.get_item_index(Menu.SOUND), settings.sound)
 
 
+## The Updates window, in front: opened if it is closed, raised if it is behind Settings.
+func _show_updates() -> void:
+	if not _updates_window.visible:
+		_updates_window.popup_centered()
+	_updates_window.move_to_foreground()
+	_updates_window.grab_focus()
+
+
 func _on_menu(id: int) -> void:
 	match id:
 		Menu.APP_UPDATE, Menu.PLUGIN_UPDATE:
-			_updates_window.popup_centered()
+			_show_updates()
 		Menu.ABOUT:
 			_about_window.popup_centered()
 		Menu.SHOW:

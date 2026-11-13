@@ -143,13 +143,13 @@ Built in the macOS app 1.0.8; `docs/spec.md` → Updates has the details. The Wi
   - **Dev flags** on the Mac, worth copying: `--updates` opens the Updates window, `--fake-update` makes up a newer app and town-link (99.0.0) without the network, `--check-now` makes a real check even in a demo (a demo makes no automatic check).
   - **Mac code:** `app/macos/Sources/TownCore/Updates.swift` (version comparison, picking the release by tag prefix, reading plugin.json; tests in `Tests/TownCoreTests/UpdatesTests.swift`), `app/macos/Sources/AgentTown/Updates.swift` (`Updater`: the daily check, the session list, `MenuIcon`, `UpdatesView`), and `TownStore.pluginVersions` (each open session's version from `session.open`).
 
-### Windows app: Check now opens the Updates window (2026-11-13; macOS app 1.0.12, Windows still open)
+### Windows app: Check now opens the Updates window (2026-11-13; macOS app 1.0.12, Windows app 1.0.3)
 
 `docs/spec.md` → Updates has the details. The Windows app should do the same:
 
-- [ ] In Settings → Updates, when the user presses **Check now** and the check finds an update (an app update or a town-link update, the same test as the tray dot and menu line), open the Updates window and bring it to the front. If there is no update, do nothing more than now (no window, no message). A failed check also opens nothing.
-- [ ] Only the Settings button does this. **Check now** inside the Updates window stays as it is (that window is already open), and the automatic checks (after launch, once a day) still only show the red dot and the menu line.
-- [ ] Add it to `docs/windows/roadmap.md`, and check with `--fake-update` plus a real `--check-now` where it can be tried.
+- [x] In Settings → Updates, when the user presses **Check now** and the check finds an update (an app update or a town-link update, the same test as the tray dot and menu line), open the Updates window and bring it to the front. If there is no update, do nothing more than now (no window, no message). A failed check also opens nothing.
+- [x] Only the Settings button does this. **Check now** inside the Updates window stays as it is (that window is already open), and the automatic checks (after launch, once a day) still only show the red dot and the menu line.
+- [x] Add it to `docs/windows/roadmap.md`, and check with `--fake-update` plus a real `--check-now` where it can be tried. Done: `UpdateCheckRow.new(updater, labels, true)` in Settings awaits the check, then `Updater.show_window()` (signal `window_requested`; main.gd opens or raises the window). Tested with a stand-in updater in `tests/check_row_tests.gd` (54 tests pass). A demo can't show the update case (fixtures carry no town-link version, and 1.0.3 is newer than the released 1.0.2), so the user tries it with `run-local.ps1 -Live -Settings` while a session runs town-link 1.0.4 (`main` has 1.0.5).
 - Mac code: `CheckRow(opensUpdatesWindow:)` in `app/macos/Sources/AgentTown/Updates.swift` (it calls `Updater.showWindow()` after `check()` when `hasUpdate`); Settings passes `true` in `Preferences.swift`.
 
 ### Windows app: a script to try a build before releasing (2026-11-12; Windows done 2026-11-13: `-Live` tried only by its process matching, since no app was running)
