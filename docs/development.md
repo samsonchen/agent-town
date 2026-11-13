@@ -20,7 +20,7 @@ How the repository is laid out, how to run the plugin and the apps from source, 
 | `protocol/` | The JSON schema (`schema/v1.schema.json`), recorded event streams in `fixtures/`, and in `fixtures/expected/` the building state each fixture must produce, which both apps are tested against. |
 | `catalog/` | Roles, departments, task types and models, shared by the plugin and both apps. |
 | `tools/` | `debug-receiver.py` (a stand-in for the app), `sync-windows-assets.py`, `build-plugin-catalog.py`, `convert-assets.py`. |
-| `site/` | The project's web page (home, privacy policy, code signing policy), published to GitHub Pages by `.github/workflows/pages.yml` whenever `site/` changes on `main`. Plain HTML and CSS; preview it with `python3 -m http.server` in `site/`. |
+| `site/` | The project's web page (home, privacy policy, code signing policy; English, and Traditional Chinese in `site/zh-TW/`), published to GitHub Pages by `.github/workflows/pages.yml` whenever `site/` changes on `main`. Plain HTML and CSS; preview it with `python3 -m http.server` in `site/`. |
 | `Casks/agent-town.rb` | The Homebrew cask: the repository is also a Homebrew tap. |
 | `.claude-plugin/marketplace.json` | Makes the repository a plugin marketplace (`agent-town-claude-code`). |
 

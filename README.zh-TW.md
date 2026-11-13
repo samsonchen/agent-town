@@ -2,7 +2,7 @@
 
 看 Claude Code 的 agent 怎麼工作：一個 Claude Code plugin 加上一個 macOS 選單列 app（現在也有 Windows 版），把你的 session、subagent、背景工作和待核准的操作畫成一間小小的 3D 辦公室。（與其他名為 agent-town 的專案無關。）
 
-[網站（英文）](https://samsonchen.github.io/agent-town-claude-code/) · [English](README.md)
+[網站](https://samsonchen.github.io/agent-town-claude-code/zh-TW/) · [English](README.md)
 
 agent-town 在 macOS 和 Windows 上把 Claude Code 的工作畫成一間小辦公室，從上往下看，裡面是 3D 角色。俯視的畫面受到 Gather Town 的啟發。你是執行長。每個 Claude Code session 是一位幕僚長，各自帶著自己的職員。你可以看著他們接你的工單、找職員來做事、在背景跑工作、等你核准，最後打電話回報。
 

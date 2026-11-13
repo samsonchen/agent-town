@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://samsonchen.github.io/agent-town-claude-code/</loc><lastmod>2026-11-13</lastmod></url>
-  <url><loc>https://samsonchen.github.io/agent-town-claude-code/privacy.html</loc><lastmod>2026-11-13</lastmod></url>
-  <url><loc>https://samsonchen.github.io/agent-town-claude-code/code-signing-policy.html</loc><lastmod>2026-11-13</lastmod></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url><loc>https://samsonchen.github.io/agent-town-claude-code/</loc><lastmod>2026-11-13</lastmod><xhtml:link rel="alternate" hreflang="en" href="https://samsonchen.github.io/agent-town-claude-code/"/><xhtml:link rel="alternate" hreflang="zh-Hant-TW" href="https://samsonchen.github.io/agent-town-claude-code/zh-TW/"/></url>
+  <url><loc>https://samsonchen.github.io/agent-town-claude-code/zh-TW/</loc><lastmod>2026-11-13</lastmod><xhtml:link rel="alternate" hreflang="en" href="https://samsonchen.github.io/agent-town-claude-code/"/><xhtml:link rel="alternate" hreflang="zh-Hant-TW" href="https://samsonchen.github.io/agent-town-claude-code/zh-TW/"/></url>
+  <url><loc>https://samsonchen.github.io/agent-town-claude-code/privacy.html</loc><lastmod>2026-11-13</lastmod><xhtml:link rel="alternate" hreflang="en" href="https://samsonchen.github.io/agent-town-claude-code/privacy.html"/><xhtml:link rel="alternate" hreflang="zh-Hant-TW" href="https://samsonchen.github.io/agent-town-claude-code/zh-TW/privacy.html"/></url>
+  <url><loc>https://samsonchen.github.io/agent-town-claude-code/zh-TW/privacy.html</loc><lastmod>2026-11-13</lastmod><xhtml:link rel="alternate" hreflang="en" href="https://samsonchen.github.io/agent-town-claude-code/privacy.html"/><xhtml:link rel="alternate" hreflang="zh-Hant-TW" href="https://samsonchen.github.io/agent-town-claude-code/zh-TW/privacy.html"/></url>
+  <url><loc>https://samsonchen.github.io/agent-town-claude-code/code-signing-policy.html</loc><lastmod>2026-11-13</lastmod><xhtml:link rel="alternate" hreflang="en" href="https://samsonchen.github.io/agent-town-claude-code/code-signing-policy.html"/><xhtml:link rel="alternate" hreflang="zh-Hant-TW" href="https://samsonchen.github.io/agent-town-claude-code/zh-TW/code-signing-policy.html"/></url>
+  <url><loc>https://samsonchen.github.io/agent-town-claude-code/zh-TW/code-signing-policy.html</loc><lastmod>2026-11-13</lastmod><xhtml:link rel="alternate" hreflang="en" href="https://samsonchen.github.io/agent-town-claude-code/code-signing-policy.html"/><xhtml:link rel="alternate" hreflang="zh-Hant-TW" href="https://samsonchen.github.io/agent-town-claude-code/zh-TW/code-signing-policy.html"/></url>
 </urlset>

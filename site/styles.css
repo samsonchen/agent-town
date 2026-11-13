@@ -43,7 +43,7 @@ a { color: var(--ink); text-decoration-color: var(--call); text-decoration-thick
 a:hover { text-decoration-color: var(--ink); }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
 
-h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.15; margin: 0 0 0.5em; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.15; margin: 0 0 0.5em; text-wrap: balance; }
 h1 { font-size: clamp(2.2rem, 5.2vw, 3.6rem); letter-spacing: -0.01em; }
 h2 { font-size: clamp(1.6rem, 3.4vw, 2.2rem); }
 h3 { font-size: 1.25rem; }
@@ -205,3 +205,14 @@ footer a { font-weight: 700; }
   .hero .lede { max-width: none; }
   .line { display: none; }
 }
+
+/* Traditional Chinese pages: Noto Sans TC for the Chinese characters (the rounded display face has
+   none), Latin letters keep their faces; a little more leading for CJK text. */
+:lang(zh-Hant-TW) {
+  --display: "Fredoka", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --text: "Atkinson Hyperlegible", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+}
+body:lang(zh-Hant-TW) { line-height: 1.8; }
+:lang(zh-Hant-TW) h1, :lang(zh-Hant-TW) h2, :lang(zh-Hant-TW) h3, :lang(zh-Hant-TW) summary { font-weight: 700; letter-spacing: 0.02em; }
+:lang(zh-Hant-TW) .hero .lede { max-width: 26em; }
+:lang(zh-Hant-TW) p { max-width: 40em; }

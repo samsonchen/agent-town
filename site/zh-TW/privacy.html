@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>隱私權政策：Agent-Town for Claude Code</title>
+<meta name="description" content="Agent-Town for Claude Code 讀取什麼、傳送什麼、傳到哪裡：所有東西都留在你的電腦裡，只有可以關閉的每日更新檢查，以及用你自己的方案向 Claude 的 Haiku 模型取得的工作短標題。">
+<link rel="canonical" href="https://samsonchen.github.io/agent-town-claude-code/zh-TW/privacy.html">
+<link rel="alternate" hreflang="en" href="https://samsonchen.github.io/agent-town-claude-code/privacy.html">
+<link rel="alternate" hreflang="zh-Hant-TW" href="https://samsonchen.github.io/agent-town-claude-code/zh-TW/privacy.html">
+<link rel="alternate" hreflang="x-default" href="https://samsonchen.github.io/agent-town-claude-code/privacy.html">
+<meta name="theme-color" content="#9d9fdc">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="Agent-Town for Claude Code">
+<meta property="og:title" content="隱私權政策：Agent-Town for Claude Code">
+<meta property="og:description" content="Agent-Town for Claude Code 讀取什麼、傳送什麼、傳到哪裡：所有東西都留在你的電腦裡，只有可以關閉的每日更新檢查，以及用你自己的方案向 Claude 的 Haiku 模型取得的工作短標題。">
+<meta property="og:url" content="https://samsonchen.github.io/agent-town-claude-code/zh-TW/privacy.html">
+<meta property="og:image" content="https://samsonchen.github.io/agent-town-claude-code/images/social-preview.png">
+<link rel="icon" type="image/png" href="../images/favicon-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="../images/apple-touch-icon.png" alt="" width="36" height="36">Agent-Town for Claude Code</a>
+    <nav aria-label="主選單">
+      <a href="./#download">下載</a>
+      <a href="privacy.html">隱私權</a>
+      <a href="code-signing-policy.html">程式碼簽章政策</a>
+      <a href="https://github.com/samsonchen/agent-town-claude-code">GitHub</a>
+      <a href="../privacy.html" hreflang="en" lang="en">English</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <article class="block page">
+      <span class="sign">隱私權</span>
+      <h1>隱私權政策</h1>
+      <p>Agent-Town for Claude Code 由兩個部分組成：app（macOS 和 Windows 版）和 town-link（一個 Claude Code plugin）。兩者都沒有帳號、不收集使用統計，也不會傳任何東西給 Agent-Town 的製作者。這一頁說明每個部分讀取什麼、傳送什麼。</p>
+
+      <h2>簡單來說</h2>
+      <ul>
+        <li>Claude Code 正在做的事，只會傳到你自己電腦上的 Agent-Town app，不會經過網路。</li>
+        <li>為了替每個工作取名字，plugin 會透過 Claude Code、用你自己的 Claude 方案請 Claude 的 Haiku 模型幫忙。不會傳到任何其他服務。</li>
+        <li>App 每天到 GitHub 檢查一次有沒有新版本。可以在「設定」→「更新」關掉。</li>
+        <li>除此之外，沒有任何東西會離開你的電腦。</li>
+      </ul>
+
+      <h2>Plugin（town-link）</h2>
+      <p>town-link 會觀察 Claude Code 在做什麼：session 開啟、你輸入 prompt、使用某個工具、幫手（subagent）或背景工作開始和結束、請你核准、session 的記憶用了多少。它把這些變成簡短的訊息，透過只在你電腦內部的連線（位址 127.0.0.1）傳給 Agent-Town app。App 只接受帶有它自己產生的隨機金鑰的訊息，所以其他程式無法冒充送事件給它。</p>
+      <p>這些訊息包含：專案名稱（不含完整資料夾路徑）、每個 prompt 的開頭（就是辦公室裡工單上顯示的文字）、使用中的工具名稱、幫手和背景工作的簡短說明、使用的模型，以及 plugin 的版本。</p>
+      <p>每個新工作，town-link 會透過 Claude Code、用你自己的 Claude 方案或 API key，請 Claude 的 Haiku 模型取一個短標題、判斷工作類型；每個幫手或背景工作，則請它選一個合適的職稱。這些請求包含 prompt 的開頭或幫手的說明，Anthropic 會像處理你帳號上其他 Claude Code 請求一樣處理它們。如果你不想這樣，可以在 Claude Code 裡用 <code>/town off</code> 關掉 town-link。</p>
+      <p>town-link 不會改變 Claude Code 的任何行為：不會允許、拒絕或修改任何東西。App 沒有執行時，事件會直接丟棄，不會留存。</p>
+
+      <h2>App</h2>
+      <p>App 只顯示它收到的事件，結束後不保留任何東西，除了你的設定（例如語言、音效和視窗位置），這些都留在你的電腦裡。</p>
+      <p>App 啟動後不久會檢查一次，之後每天一次，向 GitHub 取得 Agent-Town 的版本清單和 plugin 的最新版本號，在有新版本時告訴你。這個請求不包含任何關於你、你的工作或你電腦的資訊，只有一般網路請求都會帶的東西（例如你的 IP 位址），由 GitHub 依它自己的隱私權聲明處理。要關掉這個檢查，請到「設定」→「更新」關閉「自動檢查更新」。</p>
+
+      <h2>安裝程式</h2>
+      <p>Mac 版（Homebrew 或 .dmg）和 Windows 安裝程式只負責安裝 app，不會傳送任何資訊。</p>
+
+      <h2>其他元件</h2>
+      <p>App 使用作業系統本身的程式庫、Windows 版使用 Godot 引擎，以及 Kenney 的 3D 模型。它們都不會代替 Agent-Town 傳送資訊。</p>
+
+      <h2>問題</h2>
+      <p>原始碼是公開的，這一頁說的每件事都可以查證。有問題或疑慮，請<a href="https://github.com/samsonchen/agent-town-claude-code/issues">在 GitHub 開 issue</a>。</p>
+      <p class="small">最後更新：2026 年 11 月 13 日。英文版為準：<a href="../privacy.html" lang="en">Privacy policy</a>。</p>
+    </article>
+  </div>
+</main>
+<footer>
+  <div class="wrap">
+    <p>Samson Chen 製作。以 Apache 2.0 授權。Claude 和 Claude Code 是 Anthropic 的商標；Agent-Town 是獨立專案。</p>
+  </div>
+</footer>
+</body>
+</html>

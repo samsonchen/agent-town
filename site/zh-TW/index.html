@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent-Town for Claude Code：看 Claude Code 的 agent 在辦公室裡工作</title>
+<meta name="description" content="Agent-Town 是免費的開源 app，適用 macOS 和 Windows，把 Claude Code 正在做的事畫成一間小小的 3D 辦公室：每個 session 是一位幕僚長，每個 subagent 是一位職員，需要你核准時，執行長的電話就會響。">
+<link rel="canonical" href="https://samsonchen.github.io/agent-town-claude-code/zh-TW/">
+<link rel="alternate" hreflang="en" href="https://samsonchen.github.io/agent-town-claude-code/">
+<link rel="alternate" hreflang="zh-Hant-TW" href="https://samsonchen.github.io/agent-town-claude-code/zh-TW/">
+<link rel="alternate" hreflang="x-default" href="https://samsonchen.github.io/agent-town-claude-code/">
+<meta name="theme-color" content="#9d9fdc">
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:site_name" content="Agent-Town for Claude Code">
+<meta property="og:title" content="Agent-Town for Claude Code：看 Claude Code 的 agent 在辦公室裡工作">
+<meta property="og:description" content="在你的 Mac 或 Windows 電腦上，用一間小小的 3D 辦公室看 Claude Code 正在做什麼：session、subagent、背景工作和待核准的操作。免費、開源。">
+<meta property="og:url" content="https://samsonchen.github.io/agent-town-claude-code/zh-TW/">
+<meta property="og:image" content="https://samsonchen.github.io/agent-town-claude-code/images/social-preview.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta property="og:image:alt" content="Agent-Town for Claude Code：從上往下看的辦公室，執行長、幕僚長和職員都在座位上">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Agent-Town for Claude Code">
+<meta name="twitter:description" content="把 Claude Code 的 session、subagent 和背景工作畫成一間小小的 3D 辦公室。macOS 和 Windows，免費、開源。">
+<meta name="twitter:image" content="https://samsonchen.github.io/agent-town-claude-code/images/social-preview.png">
+
+<link rel="icon" type="image/png" href="../images/favicon-64.png">
+<link rel="apple-touch-icon" href="../images/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Agent-Town for Claude Code",
+  "alternateName": "agent-town",
+  "description": "一個桌面 app 加上一個 Claude Code plugin，把 Claude Code 正在做的事畫成一間從上往下看的小小 3D 辦公室。每個 Claude Code session 是一位幕僚長，每個 subagent 是一位職員，背景工作是機房裡的作業員，需要核准時執行長的電話會響。",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "macOS 15 或更新版本、Windows 11",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TWD" },
+  "license": "https://www.apache.org/licenses/LICENSE-2.0",
+  "isAccessibleForFree": true,
+  "url": "https://samsonchen.github.io/agent-town-claude-code/zh-TW/",
+  "downloadUrl": "https://github.com/samsonchen/agent-town-claude-code/releases",
+  "codeRepository": "https://github.com/samsonchen/agent-town-claude-code",
+  "image": "https://samsonchen.github.io/agent-town-claude-code/images/social-preview.png",
+  "screenshot": "https://samsonchen.github.io/agent-town-claude-code/images/agent-town.gif",
+  "inLanguage": "zh-Hant-TW",
+  "author": { "@type": "Person", "name": "Samson Chen", "url": "https://github.com/samsonchen" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "zh-Hant-TW",
+  "mainEntity": [
+    { "@type": "Question", "name": "Agent-Town for Claude Code 是什麼？",
+      "acceptedAnswer": { "@type": "Answer", "text": "一個免費的 macOS 和 Windows app，搭配一個 Claude Code plugin，把 Claude Code 正在做的事畫成一間小辦公室：session、subagent、背景工作和核准請求，都變成在上班的人。" } },
+    { "@type": "Question", "name": "Agent-Town 會控制 Claude Code 嗎？",
+      "acceptedAnswer": { "@type": "Answer", "text": "不會，它只負責看。你一樣在終端機、Claude 桌面 app 或 VS Code 裡工作，plugin 不會改變 Claude Code 的任何行為。" } },
+    { "@type": "Question", "name": "Agent-Town 會把我的程式碼或 prompt 傳到別的地方嗎？",
+      "acceptedAnswer": { "@type": "Answer", "text": "不會。事件只傳到你自己電腦上的 app。每個新工作，plugin 會用你自己的 Claude 方案請 Haiku 取一個短標題、判斷工作類型。" } },
+    { "@type": "Question", "name": "可以搭配哪些 Claude 使用方式？",
+      "acceptedAnswer": { "@type": "Answer", "text": "終端機裡的 Claude Code、Claude 桌面 app 的 Code 分頁，以及 VS Code 擴充功能，只要和 app 在同一台電腦上執行。雲端 session 和網頁版 Claude Code 不支援。" } },
+    { "@type": "Question", "name": "要付費嗎？",
+      "acceptedAnswer": { "@type": "Answer", "text": "不用。Agent-Town 以 Apache 2.0 授權開源。" } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="../images/apple-touch-icon.png" alt="" width="36" height="36">Agent-Town for Claude Code</a>
+    <nav aria-label="主選單">
+      <a href="#whos-who">辦公室裡有誰</a>
+      <a href="#download">下載</a>
+      <a href="#questions">常見問題</a>
+      <a href="https://github.com/samsonchen/agent-town-claude-code">GitHub</a>
+      <a href="../" hreflang="en" lang="en">English</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="line" aria-hidden="true"></div>
+  <div class="wrap">
+
+    <section class="block exec" aria-labelledby="title">
+      <div class="hero">
+        <div>
+          <span class="sign">執行長辦公室</span>
+          <h1 id="title">把 Claude Code 的工作，看成一間小辦公室。</h1>
+          <p class="lede">你交給 Claude Code 一個工作，然後就只能等。Agent-Town 讓你看到中間發生的事：誰在做事、誰被叫來幫忙、什麼時候需要你。</p>
+          <div class="buttons">
+            <a class="button" href="#download">下載 Mac 或 Windows 版</a>
+            <a class="button light" href="https://github.com/samsonchen/agent-town-claude-code">到 GitHub 看看</a>
+          </div>
+          <p class="note">免費、開源。搭配你自己電腦上的 Claude Code 使用。</p>
+        </div>
+        <figure class="office">
+          <img src="../images/agent-town.gif" width="640" height="667" alt="Agent-Town 運作中：執行長打電話把工單交給幕僚長，幕僚長從休息區呼叫職員到座位上工作，作業員在機房裡處理背景工作">
+          <figcaption>工作進來，幕僚長找職員幫忙，做完再打電話回報。</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="block" id="whos-who" aria-labelledby="cast-title">
+      <span class="sign">辦公室裡有誰</span>
+      <h2 id="cast-title">辦公室裡的每個人，都是 Claude Code 正在做的一件事。</h2>
+      <ul class="cast">
+        <li><span class="tag you">執行長</span><p>就是你。你輸入的每個 prompt 都會變成一張工單，用電話交給對的座位。Claude Code 需要你點頭時，你的電話就會響。</p></li>
+        <li><span class="tag">幕僚長</span><p>一個 Claude Code session。接下你的工單，依工作類型戴上帽子，做完後打電話向你回報。</p></li>
+        <li><span class="tag">職員</span><p>Claude Code 找來幫忙的 subagent。他們在休息區待命，走到座位上做事，做完再回報。</p></li>
+        <li><span class="tag">作業員</span><p>在背景長時間執行的工作，例如建置和測試，在機房的機櫃前處理。</p></li>
+        <li><span class="tag">調度員</span><p>管理排程和重複工作的看板，時間一到就用無線電把工作交給對應的幕僚長。</p></li>
+        <li><span class="tag">稽核員</span><p>站在櫃台。檢查沒過、工作被退回時，稽核員會蓋上「退回」的章，工作繼續進行。</p></li>
+      </ul>
+    </section>
+
+    <section class="block blue" aria-labelledby="notice-title">
+      <span class="sign">你會注意到的事</span>
+      <h2 id="notice-title">不用盯著終端機，也知道現在發生什麼事。</h2>
+      <div class="points">
+        <div><h3>做完會有聲音</h3><p>辦公室可以放在螢幕角落，也可以藏起來。派出工作、工作完成、Claude Code 在等你的時候，都聽得到提示音。</p></div>
+        <div><h3>一個專案一個區塊</h3><p>每個開著的專案都有自己的辦公區塊，招牌上有專案名稱，和正在進行的工作的短標題。</p></div>
+        <div><h3>一條看上下文的長條</h3><p>每個區塊下方有一條長條，顯示這個 session 的記憶用了多少，讓你知道什麼時候該重新開始。</p></div>
+        <div><h3>筆電上也好用</h3><p>精簡檢視把辦公室縮成一半大小，閒置的專案可以先隱藏，小視窗會自動跟著有人走動的地方。</p></div>
+        <div><h3>English 和繁體中文</h3><p>App 有英文和繁體中文，會跟隨你系統的語言設定。</p></div>
+        <div><h3>它只負責看</h3><p>Agent-Town 不會碰你的工作。事件只留在你自己的電腦裡，也不會傳給我們。<a href="privacy.html">它怎麼處理你的資料</a>。</p></div>
+      </div>
+    </section>
+
+    <section class="block wood story" aria-labelledby="story-title">
+      <span class="sign">為什麼做這個</span>
+      <h2 id="story-title">一開始只是一個聲音。</h2>
+      <p>Claude Code 有些工作要做很久。你輸入 prompt，它開始讀檔案、跑指令、找幫手，然後你只能等。我想知道兩件事：它現在在做什麼？做完了沒？</p>
+      <p>最初的想法很小：長時間的工作做完時，播一個聲音。但 Claude Code 其實一直在說它在做什麼：用哪個工具、開了哪個幫手、什麼時候在等核准。既然每件事都能被聽到，也就能被看到。所以那個聲音，後來變成了一間辦公室。</p>
+      <p class="by">Samson Chen，Agent-Town 的作者</p>
+    </section>
+
+    <section class="block green" id="download" aria-labelledby="download-title">
+      <span class="sign">下載</span>
+      <h2 id="download-title">兩個部分：app，和一個 Claude Code plugin。</h2>
+      <p>App 負責畫辦公室，plugin（town-link）負責告訴它 Claude Code 正在做什麼。兩個都要裝，幾分鐘就好。</p>
+      <div class="downloads">
+        <div>
+          <h3>Mac</h3>
+          <p class="small">macOS 15 或更新版本。已由 Apple 簽章與公證。</p>
+          <p>用 <a href="https://brew.sh">Homebrew</a> 安裝：</p>
+          <pre>brew tap samsonchen/agent-town-claude-code https://github.com/samsonchen/agent-town-claude-code
+brew install --cask samsonchen/agent-town-claude-code/agent-town</pre>
+          <p>或下載<a href="https://github.com/samsonchen/agent-town-claude-code/releases/latest">最新的 .dmg</a>，把 Agent-Town 拖進「應用程式」。它會出現在選單列。</p>
+        </div>
+        <div>
+          <h3>Windows</h3>
+          <p class="small">Windows 11。只安裝給你這個使用者，不需要系統管理員權限。</p>
+          <p>到 <a href="https://github.com/samsonchen/agent-town-claude-code/releases">Releases 頁面</a>，從最新的 <strong>agent-town for Windows</strong> 下載 <code>agent-town-setup</code> 並執行。它會出現在系統匣。</p>
+          <p class="small">安裝程式還沒有程式碼簽章，Windows 可能會顯示「Windows 已保護您的電腦」：按「其他資訊」，再按「仍要執行」。詳見<a href="code-signing-policy.html">程式碼簽章政策</a>。</p>
+        </div>
+        <div class="plugin">
+          <h3>Claude Code plugin</h3>
+          <p class="small">Claude Code 2.1.287 或更新版本，並和 app 在同一台電腦上。</p>
+          <p>在 Claude Code session 裡輸入：</p>
+          <pre>/plugin marketplace add samsonchen/agent-town-claude-code
+/plugin install town-link@agent-town-claude-code</pre>
+          <p>重新啟動 Claude Code，打開 app，交給它一個工作。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="questions" aria-labelledby="faq-title">
+      <span class="sign">常見問題</span>
+      <h2 id="faq-title">大家常問的問題</h2>
+      <details>
+        <summary>它會控制 Claude Code 嗎？</summary>
+        <p>不會，它只負責看。你一樣在終端機、Claude 桌面 app 或 VS Code 裡工作，plugin 不會改變 Claude Code 的任何行為。</p>
+      </details>
+      <details>
+        <summary>它會把我的程式碼或 prompt 傳到別的地方嗎？</summary>
+        <p>不會。Claude Code 正在做的事，只會傳到你自己電腦上的 app。為了替每個工作取名字、選帽子，plugin 會用你自己的 Claude 方案請 Claude 的 Haiku 模型幫忙。App 每天會到 GitHub 檢查一次有沒有新版本，這可以關掉。請看<a href="privacy.html">隱私權政策</a>。</p>
+      </details>
+      <details>
+        <summary>可以搭配哪些 Claude 使用方式？</summary>
+        <p>終端機裡的 Claude Code、Claude 桌面 app 的 Code 分頁，以及 VS Code 擴充功能，只要和 app 在同一台電腦上執行。雲端 session 和網頁版 Claude Code 連不到你的電腦，所以不會出現。</p>
+      </details>
+      <details>
+        <summary>這是生產力儀表板嗎？</summary>
+        <p>不是。它顯示正在發生什麼，不評斷做得好不好。沒有分數，也沒有報表，只有一間在上班的辦公室。</p>
+      </details>
+      <details>
+        <summary>要付費嗎？</summary>
+        <p>不用。Agent-Town 以 Apache 2.0 授權開源。角色和家具是 Kenney 免費的 CC0 3D 模型。</p>
+      </details>
+      <details>
+        <summary>它和其他叫 agent-town 的專案有關嗎？</summary>
+        <p>沒有。這是 Agent-Town for Claude Code，為 Anthropic 的 Claude Code 而做。它和 Anthropic 沒有隸屬關係，也和其他同名的專案無關。</p>
+      </details>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <nav aria-label="更多">
+      <a href="https://github.com/samsonchen/agent-town-claude-code">原始碼</a>
+      <a href="https://github.com/samsonchen/agent-town-claude-code/releases">下載版本</a>
+      <a href="privacy.html">隱私權政策</a>
+      <a href="code-signing-policy.html">程式碼簽章政策（Code signing policy）</a>
+      <a href="https://github.com/samsonchen/agent-town-claude-code/issues">回報問題</a>
+    </nav>
+    <p>Samson Chen 製作。以 Apache 2.0 授權。3D 模型由 <a href="https://kenney.nl">Kenney</a> 提供（CC0）。Claude 和 Claude Code 是 Anthropic 的商標；Agent-Town 是獨立專案。</p>
+  </div>
+</footer>
+
+</body>
+</html>
