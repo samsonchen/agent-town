@@ -26,3 +26,4 @@
 "Open at login…" = "登入時開啟…";
 "Turn agent-town on in Windows Settings → Apps → Startup." = "請在 Windows 設定 → 應用程式 → 啟動 中開啟 agent-town。";
 "The Microsoft Store keeps agent-town up to date." = "Microsoft Store 會讓 agent-town 保持最新。";
+"Checks for a newer town-link. The Microsoft Store updates agent-town." = "檢查是否有新版 town-link。agent-town 由 Microsoft Store 更新。";

@@ -68,6 +68,7 @@ func _ready() -> void:
 	_login_note = Label.new()
 	_login_note.add_theme_color_override("font_color", Color(0.45, 0.45, 0.45))
 	_login_note.text = "" if LoginItem.is_available() or Distribution.is_store() else labels.t("Available in the installed app only.")
+	_login_note.visible = not Distribution.is_store()
 	box.add_child(_login_note)
 	login.toggled.connect(func(on: bool) -> void:
 		var err := LoginItem.set_on(on)
@@ -227,6 +228,11 @@ func _build_updates(box: VBoxContainer) -> void:
 		settings.check_updates = on
 		settings.save())
 	box.add_child(auto)
+	if updater.store_build:
+		var note := Label.new()
+		note.add_theme_color_override("font_color", Color(0.45, 0.45, 0.45))
+		note.text = labels.t("Checks for a newer town-link. The Microsoft Store updates agent-town.")
+		box.add_child(note)
 	box.add_child(UpdateCheckRow.new(updater, labels, true))
 
 

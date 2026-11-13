@@ -18,7 +18,7 @@ These are public (they are in every installed package); they are not secrets.
 
 A Store copy is exported with the preset "Windows x64 Store", which adds the custom feature `store` (`Distribution.is_store()` in `app/windows/shell/distribution.gd`):
 
-- **Updates:** the Store updates the app, so it does not check GitHub for a newer app; the Updates window says "The Microsoft Store keeps agent-town up to date." It still checks town-link's version and tells the user about sessions that run an older one.
+- **Updates:** the Store updates the app, so it does not check GitHub for a newer app; the Updates window says "The Microsoft Store keeps agent-town up to date." It still checks town-link's version and tells the user about sessions that run an older one. Settings → Updates keeps Check for updates automatically and Check now for that, with a note saying so.
 - **Open at login:** the package declares a startup task (off until the user turns it on). Settings shows "Open at login…", which opens Windows Settings → Apps → Startup. A Store copy never touches the `Run` key: the Store puts each version in a new folder, and `LoginItem.repair()` would otherwise point the installer copy's entry at the package.
 - **The data folder:** Windows normally keeps a packaged app's writes under `%APPDATA%` inside the package, where town-link would not find `endpoint.json`. The manifest excludes `%APPDATA%\agent-town-claude-code` from that (`virtualization:ExcludedDirectories`), so the Store copy uses the same folder, endpoint file and settings as the installer copy. Checked 2026-11-13 with no restricted capability (only `runFullTrust`), on a profile with and without the folder, and with a real Claude Code session.
 
