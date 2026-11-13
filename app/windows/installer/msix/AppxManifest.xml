@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The Microsoft Store package of agent-town for Windows (docs/windows/store.md). release.ps1 -Store
+  fills in {VERSION} from project.godot. Identity Name and Publisher are the ones Partner Center
+  gives the product (Product identity); the Store re-signs the package, so they must match.
+
+  FileSystemWriteVirtualization: Windows normally keeps a packaged app's writes under %APPDATA%
+  inside the package. The app's folder there is excluded, so town-link finds endpoint.json where it
+  always looks, and settings carry over from the installer's copy. Checked 2026-11-13: without the
+  unvirtualizedResources capability, on a profile with and without the folder.
+
+  StartupTask: Open at login for a Store copy; the user turns it on in Settings → Apps → Startup.
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  xmlns:virtualization="http://schemas.microsoft.com/appx/manifest/virtualization/windows10"
+  IgnorableNamespaces="uap desktop rescap virtualization">
+
+  <Identity Name="SamsonChen.Agent-TownforClaudeCode"
+            Publisher="CN=4A4000D9-1902-48E3-A565-40AF7CF26EC2"
+            Version="{VERSION}.0"
+            ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>Agent-Town for Claude Code</DisplayName>
+    <PublisherDisplayName>Samson Chen</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <virtualization:FileSystemWriteVirtualization>
+      <virtualization:ExcludedDirectories>
+        <virtualization:ExcludedDirectory>$(KnownFolder:RoamingAppData)\agent-town-claude-code</virtualization:ExcludedDirectory>
+      </virtualization:ExcludedDirectories>
+    </virtualization:FileSystemWriteVirtualization>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+    <Resource Language="zh-hant" />
+  </Resources>
+
+  <Applications>
+    <Application Id="AgentTown" Executable="agent-town.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Agent-Town for Claude Code"
+        Description="Watch your Claude Code sessions as a small 3D office."
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png" />
+      <Extensions>
+        <desktop:Extension Category="windows.startupTask">
+          <desktop:StartupTask TaskId="AgentTownStartup" Enabled="false" DisplayName="Agent-Town for Claude Code" />
+        </desktop:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

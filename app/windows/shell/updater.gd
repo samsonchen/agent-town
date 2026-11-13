@@ -2,7 +2,8 @@ class_name Updater
 extends Node
 ## Tells the user about a newer agent-town for Windows or a newer town-link (docs/spec.md: Updates),
 ## with the tray icon and menu only: no Windows notifications. It installs nothing: the installer
-## and Claude Code's plugin commands do that. Port of `Updater` in
+## and Claude Code's plugin commands do that. A Microsoft Store copy updates through the Store, so it
+## checks only town-link (Distribution). Port of `Updater` in
 ## app/macos/Sources/AgentTown/Updates.swift.
 
 signal changed
@@ -21,6 +22,8 @@ var app_checked := false ## a check has read the releases (there may be no Windo
 var outdated: Array[Dictionary] = [] ## {"id", "project", "version"}: open sessions with an older town-link
 var checking := false
 var last_check_failed := false
+## A Microsoft Store copy: no check for a newer app, and app_update() is always null.
+var store_build := Distribution.is_store()
 
 
 func _init(p_settings: TownSettings, p_store: TownStore, p_version: String) -> void:
@@ -62,7 +65,7 @@ func _later_first_check() -> void:
 
 
 func app_update() -> Variant:
-	if newest_app == null or not UpdateFeed.is_older(app_version, newest_app["version"]):
+	if store_build or newest_app == null or not UpdateFeed.is_older(app_version, newest_app["version"]):
 		return null
 	return newest_app
 
@@ -80,13 +83,14 @@ func show_window() -> void:
 	window_requested.emit()
 
 
-## Reads the newest release and town-link's version from GitHub. Sends nothing about the user.
+## Reads the newest release (not in a Store copy) and town-link's version from GitHub. Sends
+## nothing about the user.
 func check() -> void:
 	if checking:
 		return
 	checking = true
 	changed.emit()
-	var releases := _request(UpdateFeed.RELEASES_URL)
+	var releases := {"done": true, "body": null} if store_build else _request(UpdateFeed.RELEASES_URL)
 	var manifest := _request(UpdateFeed.PLUGIN_MANIFEST_URL)
 	var r: Variant = await _answer(releases)
 	var m: Variant = await _answer(manifest)
@@ -99,7 +103,7 @@ func check() -> void:
 			newest_app = app
 	if plugin != "":
 		newest_plugin = plugin
-	last_check_failed = not releases_read or plugin == ""
+	last_check_failed = (not releases_read and not store_build) or plugin == ""
 	if releases_read or plugin != "":
 		settings.last_update_check = int(Time.get_unix_time_from_system())
 		settings.save()

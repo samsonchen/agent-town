@@ -2,14 +2,15 @@ class_name LoginItem
 extends RefCounted
 ## Opening agent-town when the user signs in to Windows: a value under the user's Run key, which
 ## also lists the app in Settings → Apps → Startup. Only the exported app can be one, not a run
-## from the Godot editor. Port of `LoginItem` in app/macos/Sources/AgentTown/Preferences.swift.
+## from the Godot editor, and not a Microsoft Store copy, whose startup task Windows Settings turns
+## on (Distribution). Port of `LoginItem` in app/macos/Sources/AgentTown/Preferences.swift.
 
 const KEY := "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 const VALUE := "agent-town-claude-code"
 
 
 static func is_available() -> bool:
-	return OS.has_feature("template")
+	return OS.has_feature("template") and not Distribution.is_store()
 
 
 static func is_on() -> bool:

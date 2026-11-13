@@ -5,6 +5,7 @@ What changed in each release of the Windows app. Each version is tagged `windows
 ## 1.0.6 (2026-11-13)
 
 - Fixed: the app could crash when a project block hid while a phone in it was ringing (Settings → Office → Hide idle project blocks). The phone now stops ringing when its block hides.
+- New: a Microsoft Store version can be built from the same source. It is updated by the Store, and Open at login for it is turned on in Windows Settings → Apps → Startup. The installer version works as before.
 
 ## 1.0.5 (2026-11-13)
 

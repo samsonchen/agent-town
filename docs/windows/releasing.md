@@ -38,7 +38,7 @@ The app icon for the exe and the installer is `app/windows/installer/agent-town.
 
 ## Not signed yet
 
-The installer and the app are not code-signed, so SmartScreen shows "Windows protected your PC" (More info → Run anyway) until enough people have run that file. Signing must be free (for example the SignPath Foundation's program for open-source projects); see [roadmap.md](roadmap.md).
+The installer and the app are not code-signed, so SmartScreen shows "Windows protected your PC" (More info → Run anyway) until enough people have run that file. Signing must be free. The SignPath Foundation turned the project down on 2026-11-13 (too new to show public adoption; it can apply again later), so the free route is the Microsoft Store, which signs its packages: see [store.md](store.md).
 
 ## Windows 10
 

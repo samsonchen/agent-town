@@ -10,6 +10,7 @@ The Windows version of the agent-town app, planned and in progress. It draws the
 | [architecture.md](architecture.md) | The Godot app: its modules and how it uses the shared files |
 | [roadmap.md](roadmap.md) | Phases W0 to W2 |
 | [releasing.md](releasing.md) | Building the installer and publishing a `windows-v` release |
+| [store.md](store.md) | The Microsoft Store package: how a Store copy differs, building and submitting it |
 | [verification.md](verification.md) | What was checked on Windows, and what is still to check |
 
 ## Trying a change

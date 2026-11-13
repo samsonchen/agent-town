@@ -49,7 +49,9 @@ func _rebuild() -> void:
 		c.queue_free()
 	_heading("agent-town")
 	var app: Variant = updater.app_update()
-	if app != null:
+	if updater.store_build:
+		_line(labels.t("You have %@.", [updater.app_version]) + " " + labels.t("The Microsoft Store keeps agent-town up to date."))
+	elif app != null:
 		_line(labels.t("agent-town %@ is available", [app["version"]]), true)
 		_line(labels.t("You have %@.", [updater.app_version]))
 		if str(app["notes"]) != "":

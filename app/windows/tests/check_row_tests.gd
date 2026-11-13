@@ -64,3 +64,18 @@ func test_the_updates_windows_own_check_opens_nothing() -> void:
 	u.next_app = _release("1.0.4")
 	check_eq(_press(u, false), 0, "the row in the Updates window leaves it as it is")
 	_free(u)
+
+
+func test_a_store_copy_never_offers_a_newer_app() -> void:
+	var u := _updater("1.0.3")
+	u.store_build = true
+	u.next_app = _release("1.0.4")
+	check_eq(_press(u, true), 0, "a newer release opens nothing in a Store copy")
+	check_eq(u.app_update(), null, "no app update: the Store updates it")
+	check(not u.has_update(), "no red dot for the app")
+	_free(u)
+
+
+func test_the_installer_copy_is_not_a_store_copy() -> void:
+	check(not Distribution.is_store(), "no store feature outside the Store export")
+	check_eq(LoginItem.is_available(), OS.has_feature("template"), "Open at login as before")

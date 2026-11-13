@@ -48,15 +48,26 @@ func _ready() -> void:
 	box.add_theme_constant_override("separation", 10)
 	margin.add_child(box)
 
-	# Open at login.
+	# Open at login. A Store copy's is the package's startup task, which Windows Settings turns on.
+	if Distribution.is_store():
+		var startup := Button.new()
+		startup.text = labels.t("Open at login…")
+		startup.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		startup.pressed.connect(func() -> void: OS.shell_open(Distribution.STARTUP_SETTINGS))
+		box.add_child(startup)
+		var startup_note := Label.new()
+		startup_note.add_theme_color_override("font_color", Color(0.45, 0.45, 0.45))
+		startup_note.text = labels.t("Turn agent-town on in Windows Settings → Apps → Startup.")
+		box.add_child(startup_note)
 	var login := CheckBox.new()
+	login.visible = not Distribution.is_store()
 	login.text = labels.t("Open at login")
 	login.disabled = not LoginItem.is_available()
 	login.button_pressed = LoginItem.is_on()
 	box.add_child(login)
 	_login_note = Label.new()
 	_login_note.add_theme_color_override("font_color", Color(0.45, 0.45, 0.45))
-	_login_note.text = "" if LoginItem.is_available() else labels.t("Available in the installed app only.")
+	_login_note.text = "" if LoginItem.is_available() or Distribution.is_store() else labels.t("Available in the installed app only.")
 	box.add_child(_login_note)
 	login.toggled.connect(func(on: bool) -> void:
 		var err := LoginItem.set_on(on)

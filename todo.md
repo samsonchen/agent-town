@@ -214,11 +214,21 @@ The repository is `samsonchen/agent-town-claude-code` (the product name is Agent
 
 The project's web page is live for the application: https://samsonchen.github.io/agent-town-claude-code/ (source in `site/`, published by `.github/workflows/pages.yml`), with a privacy policy (`privacy.html`) and the code signing policy (`code-signing-policy.html`: the SignPath attribution, team roles, the privacy statement). The SignPath Foundation's terms (https://signpath.org/terms) also ask for:
 
-- [ ] The user: apply at https://signpath.org/apply, with the web page and the repository. Use multi-factor authentication on GitHub and SignPath.
+- [x] The user: apply at https://signpath.org/apply. Declined on 2026-11-13: the Foundation wants public adoption first (stars, forks, contributors, outside articles or discussions). It can apply again once the project has those; the rest of this list is for that.
 - [ ] The privacy notice shown at install: the Windows installer (`agent-town.iss`) shows a short page saying the app checks GitHub once a day for updates (Settings → Updates turns it off) and that nothing else leaves the computer, linking to the privacy policy.
 - [ ] Builds that SignPath can trace to the source: build the installer in GitHub Actions from a tagged commit (SignPath's origin verification records the repository, commit and build job), and send it to SignPath for signing from there, with manual approval. `release.ps1` builds locally today.
 - [ ] The product name and version in each binary's metadata match the project (agent-town, the release's version).
 - [ ] Once approved: the README's and the web page's "not code-signed yet" notes change to say releases are signed.
+
+### Windows app: the Microsoft Store (2026-11-13)
+
+The free way to a signed Windows app for now: the Store signs MSIX packages, so there is no SmartScreen warning and Smart App Control lets it run. See `docs/windows/store.md`.
+
+- [x] The user: an individual Partner Center account, and the product "Agent-Town for Claude Code" reserved (Store ID `9N0G35LW0LNK`; identity in `store.md`).
+- [x] The package: `release.ps1 -Store` (preset "Windows x64 Store" with the feature `store`, manifest `app/windows/installer/msix/AppxManifest.xml`, `makeappx`). Tried with Developer Mode: the endpoint file lands in the real `%APPDATA%gent-town-claude-code` (with and without the folder already there), and a `claude -p` session reached the app.
+- [x] A Store copy: no check for a newer app (the Store updates it; town-link is still checked), Open at login through the package's startup task (Windows Settings → Apps → Startup), and it never writes the `Run` key.
+- [ ] The user: look at a Store copy's Settings (the "Open at login…" button) and Updates window, then submit in Partner Center as `store.md` says (listing, screenshots, age rating, certification notes).
+- [ ] Once it is live: the README's and the web page's Windows install sections point to the Store first, with the installer as the other way.
 
 ### Shared material a second app needs
 

@@ -21,3 +21,8 @@
 
 /* Updates */
 "Run the downloaded installer: it replaces the installed agent-town." = "執行下載的安裝程式，它會取代已安裝的 agent-town。";
+
+/* A Microsoft Store copy (Distribution) */
+"Open at login…" = "登入時開啟…";
+"Turn agent-town on in Windows Settings → Apps → Startup." = "請在 Windows 設定 → 應用程式 → 啟動 中開啟 agent-town。";
+"The Microsoft Store keeps agent-town up to date." = "Microsoft Store 會讓 agent-town 保持最新。";
