@@ -25,13 +25,13 @@
   Godot 4.7.2 is taken from $env:GODOT, else from "godot" (or a Godot_v4.7.2 exe) on PATH. For
   example, once per PowerShell window:  $env:GODOT = 'C:\path\to\Godot_v4.7.2-stable_win64_console.exe'
 
-  -Live: an installed agent-town and this run would both write %APPDATA%\agent-town\endpoint.json,
-  so a running installed copy is stopped first and started again when this run ends, also after
-  Ctrl+C. Sessions already open find this run within a few seconds. A demo starts no server, so an
+  -Live: an installed agent-town and this run would both write
+  %APPDATA%\agent-town-claude-code\endpoint.json, so a running installed copy is stopped first and
+  started again when this run ends, also after Ctrl+C. Sessions already open find this run within a few seconds. A demo starts no server, so an
   installed copy keeps working beside it.
 
-  This run keeps its own settings (%APPDATA%\agent-town\run-local\settings.cfg), apart from the
-  installed app's.
+  This run keeps its own settings (%APPDATA%\agent-town-claude-code\run-local\settings.cfg),
+  apart from the installed app's.
 
 .EXAMPLE
   From PowerShell, in the repo folder:
@@ -90,7 +90,7 @@ if (-not $godot -or -not (Test-Path $godot)) {
   Fail 'Godot 4.7.2 not found. Set $env:GODOT to the Godot exe, for example: $env:GODOT = ''C:\path\to\Godot_v4.7.2-stable_win64_console.exe'''
 }
 
-$settingsFile = Join-Path $env:APPDATA 'agent-town\run-local\settings.cfg'
+$settingsFile = Join-Path $env:APPDATA 'agent-town-claude-code\run-local\settings.cfg'
 $appArgs += @('--settings-file', $settingsFile)
 if ($open.Count -gt 0) { $appArgs += @('--open', ($open -join ',')) }
 

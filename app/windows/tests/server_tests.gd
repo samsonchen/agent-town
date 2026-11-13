@@ -39,8 +39,18 @@ func test_endpoint_statuses() -> void:
 	check(r["batch"] != null and (r["batch"]["events"] as Array).size() == 1, "a malformed event is skipped, the rest kept")
 
 
+func test_everything_on_disk_is_in_one_folder() -> void:
+	var appdata := OS.get_environment("APPDATA").replace("\\", "/")
+	check_eq(EndpointFile.data_dir().replace("\\", "/"), appdata + "/agent-town-claude-code", "the data folder")
+	check_eq(EndpointFile.default_path().replace("\\", "/"), appdata + "/agent-town-claude-code/endpoint.json",
+		"the endpoint, where town-link looks")
+	check_eq(OS.get_user_data_dir().replace("\\", "/"), appdata + "/agent-town-claude-code", "Godot's user://")
+	check_eq(TownSettings.new().path.replace("\\", "/"), appdata + "/agent-town-claude-code/settings.cfg", "settings")
+	check_eq(LoginItem.VALUE, "agent-town-claude-code", "the Run value")
+
+
 func test_endpoint_file_is_removed_only_by_its_owner() -> void:
-	var path := OS.get_temp_dir().path_join("agent-town-test-%d" % randi()).path_join("endpoint.json")
+	var path := OS.get_temp_dir().path_join("agent-town-claude-code-test-%d" % randi()).path_join("endpoint.json")
 	var token := EndpointFile.new_token()
 	check(token.length() == 43, "token is 43 characters")
 	check(EndpointFile.write(path, 4242, token, 1000, "test") == OK, "written")
@@ -83,7 +93,7 @@ func _round_trip(server: LoopbackServer, data: PackedByteArray, batches: Array[D
 
 
 func test_server_answers_over_loopback_and_hands_batches_over() -> void:
-	var path := OS.get_temp_dir().path_join("agent-town-test-%d" % randi()).path_join("endpoint.json")
+	var path := OS.get_temp_dir().path_join("agent-town-claude-code-test-%d" % randi()).path_join("endpoint.json")
 	var server := LoopbackServer.new()
 	check(server.start("test", path) == OK, "starts")
 	var f: Variant = EndpointFile.read(path)

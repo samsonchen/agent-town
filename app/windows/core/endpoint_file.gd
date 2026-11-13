@@ -1,14 +1,22 @@
 class_name EndpointFile
 extends RefCounted
 ## The endpoint file the app writes so town-link can find it (docs/protocol.md): on Windows
-## %APPDATA%\agent-town\endpoint.json. The file is protected by where it is, the user's own profile.
+## %APPDATA%\agent-town-claude-code\endpoint.json. The file is protected by where it is, the user's own
+## profile.
 ## Port of EndpointFile in app/macos/Sources/TownCore/Endpoint.swift.
 
 const PROTOCOL_VERSION := 1
+## The app's folder under %APPDATA%, for everything it keeps on disk: the endpoint file, settings.cfg,
+## run-local's settings, and Godot's user:// (logs, shader cache; project.godot names the same folder).
+const DATA_FOLDER := "agent-town-claude-code"
+
+
+static func data_dir() -> String:
+	return OS.get_environment("APPDATA").path_join(DATA_FOLDER)
 
 
 static func default_path() -> String:
-	return OS.get_environment("APPDATA").path_join("agent-town").path_join("endpoint.json")
+	return data_dir().path_join("endpoint.json")
 
 
 ## A fresh 32-byte random token, base64url without padding (43 characters).

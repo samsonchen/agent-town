@@ -6,7 +6,7 @@ The Windows app has its own version number, `config/version` in `app/windows/pro
 
 - Godot 4.7.2 and its export templates (Editor → Manage Export Templates, or the templates in `%APPDATA%\Godot\export_templates\4.7.2.stable`). Set `$env:GODOT` to the Godot exe unless `godot` is on `PATH`.
 - Inno Setup 6: `winget install JRSoftware.InnoSetup` (it installs for your user, in `%LOCALAPPDATA%\Programs\Inno Setup 6`). `release.ps1` finds it there, on `PATH`, or from `$env:ISCC`.
-- The GitHub CLI `gh`, signed in to an account that can publish releases on `samsonchen/agent-town`.
+- The GitHub CLI `gh`, signed in to an account that can publish releases on `samsonchen/agent-town-claude-code`.
 
 ## Making a release
 
@@ -26,9 +26,10 @@ The Windows app has its own version number, `config/version` in `app/windows/pro
 
 `app/windows/installer/agent-town.iss` (Inno Setup):
 
-- Installs for the current user only, with no administrator prompt, into `%LOCALAPPDATA%\Programs\agent-town`, with a Start menu shortcut and an uninstaller (Settings → Apps → Installed apps).
-- A newer installer replaces the installed app; settings in `%APPDATA%\agent-town` are kept. A running copy is stopped first (it hides in the tray rather than quitting when asked to close).
-- The uninstaller stops a running copy, removes the "Open at login" entry (`HKCU\...\Run`, value `agent-town`) and a leftover endpoint file. It keeps the settings.
+- Installs for the current user only, with no administrator prompt, into `%LOCALAPPDATA%\Programs\agent-town-claude-code`, with a Start menu shortcut and an uninstaller (Settings → Apps → Installed apps).
+- A newer installer replaces the installed app; settings in `%APPDATA%\agent-town-claude-code` are kept. A running copy is stopped first (it hides in the tray rather than quitting when asked to close).
+- It also removes what versions before 1.0.3 left in other folders: their install folder, their settings and endpoint file, Godot's logs and shader cache, and their "Open at login" value. Settings start afresh.
+- The uninstaller stops a running copy, removes the "Open at login" entry (`HKCU\...\Run`, value `agent-town-claude-code`), a leftover endpoint file and Godot's logs and shader cache. It keeps the settings.
 - The installer is in English (Inno Setup ships no Traditional Chinese translation); the app follows the Windows display language.
 - Its `AppId` identifies the app across versions: never change it.
 

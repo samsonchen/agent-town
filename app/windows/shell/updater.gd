@@ -7,7 +7,7 @@ extends Node
 
 signal changed
 
-const PLUGIN_COMMANDS: Array[String] = ["claude plugin marketplace update agent-town", "claude plugin update town-link@agent-town"]
+const PLUGIN_COMMANDS: Array[String] = ["claude plugin marketplace update agent-town-claude-code", "claude plugin update town-link@agent-town-claude-code"]
 const DAY := 24 * 3600
 
 var settings: TownSettings

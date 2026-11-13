@@ -3,7 +3,7 @@ extends Window
 ## About agent-town: the version, the author, the license with a link, the repository, and the
 ## third-party components with their licenses. Port of app/macos/Sources/AgentTown/About.swift.
 
-const REPOSITORY := "https://github.com/samsonchen/agent-town"
+const REPOSITORY := "https://github.com/samsonchen/agent-town-claude-code"
 const CC0 := "https://creativecommons.org/publicdomain/zero/1.0/"
 const OFL := "https://openfontlicense.org/open-font-license-official-text/"
 

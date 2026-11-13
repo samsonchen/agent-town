@@ -22,7 +22,7 @@ The Windows version of the agent-town app, planned and in progress. It draws the
 .\app\windows\scripts\run-local.ps1 -Live           # real Claude Code sessions
 ```
 
-Options, any number and in any order: `-Demo 01`…`05` (or a path), `-Live`, `-FakeUpdate`, `-CheckNow`, `-Updates`, `-Settings`, `-Compact`, `-Resize WxH`, `-Sound`, `-Zh`, `-En`, `-Speed N`, and `--` to pass the rest to the app. `-Help` lists them. A demo starts no server, so a running agent-town keeps working beside it. `-Live` stops a running agent-town (the installed `agent-town.exe`, or one started from Godot with this project) and starts it again when the run ends, also after Ctrl+C. The run keeps its own settings in `%APPDATA%\agent-town\run-local\settings.cfg`.
+Options, any number and in any order: `-Demo 01`…`05` (or a path), `-Live`, `-FakeUpdate`, `-CheckNow`, `-Updates`, `-Settings`, `-Compact`, `-Resize WxH`, `-Sound`, `-Zh`, `-En`, `-Speed N`, and `--` to pass the rest to the app. `-Help` lists them. A demo starts no server, so a running agent-town keeps working beside it. `-Live` stops a running agent-town (the installed `agent-town.exe`, or one started from Godot with this project) and starts it again when the run ends, also after Ctrl+C. The run keeps its own settings in `%APPDATA%\agent-town-claude-code\run-local\settings.cfg`.
 
 ## Status
 

@@ -85,7 +85,7 @@ if ($Publish) {
     git -C $repo fetch -q origin main
     if ((git -C $repo rev-parse HEAD) -ne (git -C $repo rev-parse origin/main)) { Fail 'main is not the same as origin/main: push or pull first' }
   }
-  gh release view $tag --repo samsonchen/agent-town *> $null
+  gh release view $tag --repo samsonchen/agent-town-claude-code *> $null
   if ($LASTEXITCODE -eq 0) { Fail "the release $tag already exists: raise config/version first" }
   gh auth status *> $null
   if ($LASTEXITCODE -ne 0) { Fail 'gh is not signed in: run gh auth login' }
@@ -143,13 +143,13 @@ $target = git -C $repo rev-parse HEAD
 # to a program, so gh would get the notes in pieces.
 $notesFile = Join-Path $build 'release-notes.md'
 [IO.File]::WriteAllText($notesFile, $notes, (New-Object Text.UTF8Encoding $false))
-gh release create $tag $setup --repo samsonchen/agent-town --target $target --title "agent-town for Windows $version" --notes-file $notesFile @flags
+gh release create $tag $setup --repo samsonchen/agent-town-claude-code --target $target --title "agent-town for Windows $version" --notes-file $notesFile @flags
 if ($LASTEXITCODE -ne 0) { Fail 'gh release create failed' }
 
 Step 'Checking the uploaded installer'
 $check = Join-Path $build 'check'
 New-Item -ItemType Directory -Force $check | Out-Null
-gh release download $tag --repo samsonchen/agent-town --pattern "agent-town-setup-$version.exe" --dir $check --clobber
+gh release download $tag --repo samsonchen/agent-town-claude-code --pattern "agent-town-setup-$version.exe" --dir $check --clobber
 if ($LASTEXITCODE -ne 0) { Fail 'could not download the uploaded installer' }
 $got = (Get-FileHash -Algorithm SHA256 (Join-Path $check "agent-town-setup-$version.exe")).Hash.ToLower()
 if ($got -ne $sha) { Fail "the uploaded installer's checksum is $got, not $sha" }

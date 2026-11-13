@@ -1,8 +1,9 @@
 ; The agent-town for Windows installer (Inno Setup 6). scripts/release.ps1 builds it:
 ;   ISCC.exe /DAppVersion=1.0.0 /DSourceDir=<export folder> /DOutputDir=<folder> installer\agent-town.iss
 ; It installs for the current user only (no administrator prompt), into
-; %LOCALAPPDATA%\Programs\agent-town, with a Start menu shortcut and an uninstaller. Running a newer
-; installer replaces the installed app; settings in %APPDATA%\agent-town are kept.
+; %LOCALAPPDATA%\Programs\agent-town-claude-code, with a Start menu shortcut and an uninstaller.
+; Running a newer installer replaces the installed app; settings in %APPDATA%\agent-town-claude-code
+; are kept.
 
 #ifndef AppVersion
   #error AppVersion is not set (pass /DAppVersion=x.y.z)
@@ -21,12 +22,14 @@ AppName=agent-town
 AppVersion={#AppVersion}
 AppVerName=agent-town {#AppVersion}
 AppPublisher=Samson Chen
-AppPublisherURL=https://github.com/samsonchen/agent-town
-AppSupportURL=https://github.com/samsonchen/agent-town/issues
-AppUpdatesURL=https://github.com/samsonchen/agent-town/releases
+AppPublisherURL=https://github.com/samsonchen/agent-town-claude-code
+AppSupportURL=https://github.com/samsonchen/agent-town-claude-code/issues
+AppUpdatesURL=https://github.com/samsonchen/agent-town-claude-code/releases
 AppCopyright=Copyright 2026 Samson Chen. Apache License 2.0.
 VersionInfoVersion={#AppVersion}.0
-DefaultDirName={localappdata}\Programs\agent-town
+DefaultDirName={localappdata}\Programs\agent-town-claude-code
+; Always this folder, also when upgrading a copy installed elsewhere ([InstallDelete] removes that one).
+UsePreviousAppDir=no
 DisableDirPage=yes
 DefaultGroupName=agent-town
 DisableProgramGroupPage=yes
@@ -57,6 +60,14 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Source: "{#SourceDir}\agent-town.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourceDir}\town_window.windows.template_release.x86_64.dll"; DestDir: "{app}"; Flags: ignoreversion
 
+[InstallDelete]
+; Folders of versions before 1.0.3, which kept the app and its data under "agent-town": the old
+; install (its exe, add-on and uninstaller), its settings and endpoint, and Godot's logs and shader
+; cache. Everything now lives in the agent-town-claude-code folders, and settings start afresh.
+Type: filesandordirs; Name: "{localappdata}\Programs\agent-town"
+Type: filesandordirs; Name: "{userappdata}\agent-town"
+Type: filesandordirs; Name: "{userappdata}\Godot\app_userdata\agent-town"
+
 [Icons]
 Name: "{autoprograms}\agent-town"; Filename: "{app}\agent-town.exe"
 
@@ -68,12 +79,17 @@ Filename: "{app}\agent-town.exe"; Description: "Open agent-town"; Flags: nowait 
 Filename: "{sys}\taskkill.exe"; Parameters: "/IM agent-town.exe /F"; Flags: runhidden; RunOnceId: "StopApp"
 
 [UninstallDelete]
-; The endpoint file of a copy that was stopped rather than quit.
-Type: files; Name: "{userappdata}\agent-town\endpoint.json"
+; The endpoint file of a copy that was stopped rather than quit, and Godot's logs and shader cache.
+; settings.cfg is kept.
+Type: files; Name: "{userappdata}\agent-town-claude-code\endpoint.json"
+Type: filesandordirs; Name: "{userappdata}\agent-town-claude-code\logs"
+Type: filesandordirs; Name: "{userappdata}\agent-town-claude-code\shader_cache"
 
 [Registry]
 ; Settings → Open at login writes this value; the uninstaller removes it.
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: none; ValueName: "agent-town"; Flags: uninsdeletevalue dontcreatekey
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: none; ValueName: "agent-town-claude-code"; Flags: uninsdeletevalue dontcreatekey
+; The Open at login value of versions before 1.0.3, which pointed at the old install folder.
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: none; ValueName: "agent-town"; Flags: deletevalue dontcreatekey
 
 [Code]
 // Before the files are replaced: stop a running agent-town (the installed one; a copy run from

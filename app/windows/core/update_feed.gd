@@ -4,9 +4,9 @@ extends RefCounted
 ## app/macos/Sources/TownCore/Updates.swift.
 
 ## The releases of the repository, newest first by GitHub's order.
-const RELEASES_URL := "https://api.github.com/repos/samsonchen/agent-town/releases?per_page=50"
+const RELEASES_URL := "https://api.github.com/repos/samsonchen/agent-town-claude-code/releases?per_page=50"
 ## town-link's manifest on `main`: what `claude plugin update` installs.
-const PLUGIN_MANIFEST_URL := "https://raw.githubusercontent.com/samsonchen/agent-town/main/plugin/.claude-plugin/plugin.json"
+const PLUGIN_MANIFEST_URL := "https://raw.githubusercontent.com/samsonchen/agent-town-claude-code/main/plugin/.claude-plugin/plugin.json"
 ## The Windows app's tags are windows-v<version>; the macOS app's are v<version>.
 const TAG_PREFIX := "windows-v"
 const DOWNLOAD_SUFFIX := ".exe"

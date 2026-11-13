@@ -5,7 +5,7 @@ extends RefCounted
 ## from the Godot editor. Port of `LoginItem` in app/macos/Sources/AgentTown/Preferences.swift.
 
 const KEY := "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
-const VALUE := "agent-town"
+const VALUE := "agent-town-claude-code"
 
 
 static func is_available() -> bool:

@@ -1,7 +1,7 @@
 class_name TownSettings
 extends RefCounted
-## The user's choices from the tray menu and Settings, kept in %APPDATA%\agent-town\settings.cfg so
-## they survive a restart. Port of `Prefs` in app/macos/Sources/AgentTown/Preferences.swift.
+## The user's choices from the tray menu and Settings, kept in %APPDATA%\agent-town-claude-code\settings.cfg
+## so they survive a restart. Port of `Prefs` in app/macos/Sources/AgentTown/Preferences.swift.
 
 const OPACITY_MIN := 0.1
 const OPACITY_MAX := 1.0
@@ -38,7 +38,7 @@ var _cfg := ConfigFile.new()
 
 
 func _init(p_path: String = "") -> void:
-	path = p_path if p_path != "" else OS.get_environment("APPDATA").path_join("agent-town").path_join("settings.cfg")
+	path = p_path if p_path != "" else EndpointFile.data_dir().path_join("settings.cfg")
 	if _cfg.load(path) != OK:
 		return
 	language = _cfg.get_value("app", "language", language)

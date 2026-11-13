@@ -10,7 +10,7 @@ func test_opacity_is_brought_into_range() -> void:
 
 
 func test_settings_survive_a_restart() -> void:
-	var path := OS.get_temp_dir().path_join("agent-town-test-%d" % randi()).path_join("settings.cfg")
+	var path := OS.get_temp_dir().path_join("agent-town-claude-code-test-%d" % randi()).path_join("settings.cfg")
 	var a := TownSettings.new(path)
 	check_eq([a.language, a.stay_on_top, a.sound, a.show_window, a.opacity], ["", false, true, true, 1.0], "defaults")
 	a.language = "zh-Hant"
@@ -29,7 +29,7 @@ func test_settings_survive_a_restart() -> void:
 
 
 func test_sound_settings_survive_a_restart_and_stay_in_range() -> void:
-	var path := OS.get_temp_dir().path_join("agent-town-test-%d" % randi()).path_join("settings.cfg")
+	var path := OS.get_temp_dir().path_join("agent-town-claude-code-test-%d" % randi()).path_join("settings.cfg")
 	var a := TownSettings.new(path)
 	check_eq([a.volume, a.completion_threshold, a.sound_on, a.sound_choice],
 		[1.0, 0, {"dispatch": true, "completion": true, "approval": true}, {"dispatch": "", "completion": "", "approval": ""}], "defaults")
@@ -49,7 +49,7 @@ func test_sound_settings_survive_a_restart_and_stay_in_range() -> void:
 
 
 func test_office_settings_survive_a_restart_and_stay_in_range() -> void:
-	var path := OS.get_temp_dir().path_join("agent-town-test-%d" % randi()).path_join("settings.cfg")
+	var path := OS.get_temp_dir().path_join("agent-town-claude-code-test-%d" % randi()).path_join("settings.cfg")
 	var a := TownSettings.new(path)
 	check_eq([a.hide_idle_blocks, a.idle_hide_seconds, a.show_tips], [false, 5, true], "defaults")
 	a.hide_idle_blocks = true
@@ -65,7 +65,7 @@ func test_office_settings_survive_a_restart_and_stay_in_range() -> void:
 
 
 func test_compact_view_keeps_its_own_window_size() -> void:
-	var path := OS.get_temp_dir().path_join("agent-town-test-%d" % randi()).path_join("settings.cfg")
+	var path := OS.get_temp_dir().path_join("agent-town-claude-code-test-%d" % randi()).path_join("settings.cfg")
 	var a := TownSettings.new(path)
 	check_eq(a.compact_view, false, "off by default")
 	a.window_position = Vector2i(100, 50)

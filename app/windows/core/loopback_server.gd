@@ -16,7 +16,7 @@ var _server := TCPServer.new()
 var _conns: Array[Dictionary] = [] ## {"peer": StreamPeerTCP, "buf": PackedByteArray, "since": int}
 
 
-## Listens and writes the endpoint file. `path` defaults to %APPDATA%\agent-town\endpoint.json.
+## Listens and writes the endpoint file. `path` defaults to %APPDATA%\agent-town-claude-code\endpoint.json.
 func start(app_version: String, path: String = "") -> Error:
 	var err := _server.listen(0, "127.0.0.1")
 	if err != OK:
