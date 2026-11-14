@@ -106,7 +106,7 @@ The app checks GitHub once a day for a newer app and a newer town-link (Settings
 
 Requires Windows 11 (x64). Windows 10 is allowed by the installer, but the app has not been tested on it. Download `agent-town-setup-<version>.exe` from the newest **agent-town for Windows** release on [Releases](https://github.com/samsonchen/agent-town-claude-code/releases) (tags `windows-v<version>`) and run it. It installs for your user only, with no administrator prompt, and adds agent-town to the Start menu.
 
-The installer is not code-signed yet, so Windows shows "Windows protected your PC" the first time: click **More info**, then **Run anyway**. See the [code signing policy](https://samsonchen.github.io/agent-town-claude-code/code-signing-policy.html).
+The installer is not code-signed, so Windows shows "Windows protected your PC" the first time: click **More info**, then **Run anyway**. A Microsoft Store version, which installs without that step, is on its way.
 
 The app lives in the tray (the notification area), with no taskbar button; closing the office window hides it. Windows 11 first puts a new tray icon among the hidden icons (the **^** arrow); drag it out to keep it in view. To have it start when you sign in, turn on Settings → Open at login.
 

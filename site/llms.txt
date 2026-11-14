@@ -24,7 +24,6 @@ Requirements: macOS 15 or later, or Windows 11; Claude Code 2.1.287 or later run
 - [Source code and documentation](https://github.com/samsonchen/agent-town-claude-code)
 - [Releases](https://github.com/samsonchen/agent-town-claude-code/releases): the Mac .dmg and the Windows installer
 - [Privacy policy](https://samsonchen.github.io/agent-town-claude-code/privacy.html)
-- [Code signing policy](https://samsonchen.github.io/agent-town-claude-code/code-signing-policy.html)
 
 ## Install
 

@@ -36,9 +36,9 @@ The Windows app has its own version number, `config/version` in `app/windows/pro
 
 The app icon for the exe and the installer is `app/windows/installer/agent-town.ico`, made from the shared app icon by `godot --headless --path app/windows --script res://dev/make_icon.gd`. Run that again after the app icon changes.
 
-## Not signed yet
+## Not signed
 
-The installer and the app are not code-signed, so SmartScreen shows "Windows protected your PC" (More info → Run anyway) until enough people have run that file. Signing must be free. The SignPath Foundation turned the project down on 2026-11-13 (too new to show public adoption; it can apply again later), so the free route is the Microsoft Store, which signs its packages: see [store.md](store.md).
+The installer and the app are not code-signed, so SmartScreen shows "Windows protected your PC" (More info → Run anyway) until enough people have run that file. Signing must be free: the signed Windows app is the Microsoft Store package, which the Store signs. See [store.md](store.md).
 
 ## Windows 10
 

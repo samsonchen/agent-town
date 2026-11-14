@@ -20,7 +20,7 @@ How the repository is laid out, how to run the plugin and the apps from source, 
 | `protocol/` | The JSON schema (`schema/v1.schema.json`), recorded event streams in `fixtures/`, and in `fixtures/expected/` the building state each fixture must produce, which both apps are tested against. |
 | `catalog/` | Roles, departments, task types and models, shared by the plugin and both apps. |
 | `tools/` | `debug-receiver.py` (a stand-in for the app), `sync-windows-assets.py`, `build-plugin-catalog.py`, `convert-assets.py`. |
-| `site/` | The project's web page (home, privacy policy, code signing policy; English, and Traditional Chinese in `site/zh-TW/`), published to GitHub Pages by `.github/workflows/pages.yml` whenever `site/` changes on `main`. Plain HTML and CSS; preview it with `python3 -m http.server` in `site/`. |
+| `site/` | The project's web page (home and privacy policy; English, and Traditional Chinese in `site/zh-TW/`), published to GitHub Pages by `.github/workflows/pages.yml` whenever `site/` changes on `main`. Plain HTML and CSS; preview it with `python3 -m http.server` in `site/`. |
 | `Casks/agent-town.rb` | The Homebrew cask: the repository is also a Homebrew tap. |
 | `.claude-plugin/marketplace.json` | Makes the repository a plugin marketplace (`agent-town-claude-code`). |
 
@@ -169,7 +169,7 @@ app/macos/scripts/release.sh --publish --draft   # a draft release to review fir
 
 `--publish` refuses to run with uncommitted changes, off `main`, or when `main` differs from `origin/main`. It publishes the release titled "agent-town for macOS <version>" with the `.dmg` and its SHA-256, checks the uploaded file, and commits and pushes the cask, which is what `brew upgrade` reads. Signing secrets stay in the releasing Mac's keychain; never commit a credential.
 
-**Windows** (the installer isn't code-signed yet):
+**Windows** (the installer isn't code-signed; the Microsoft Store package is in [docs/windows/store.md](windows/store.md)):
 
 ```powershell
 .\app\windows\scripts\release.ps1            # run the tests, export the app, build the installer

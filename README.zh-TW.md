@@ -106,7 +106,7 @@ App 每天會到 GitHub 檢查一次有沒有新版的 app 和 town-link（「�
 
 需要 Windows 11（x64）。安裝程式也允許 Windows 10，但 app 沒有在 Windows 10 上測試過。從 [Releases](https://github.com/samsonchen/agent-town-claude-code/releases) 找最新的 **agent-town for Windows**（標籤 `windows-v<版本>`），下載 `agent-town-setup-<版本>.exe` 並執行。它只安裝給你自己的帳號，不需要系統管理員權限，並會加到「開始」選單。
 
-安裝程式還沒有程式碼簽章，所以第一次執行時 Windows 會顯示「Windows 已保護您的電腦」：按 **其他資訊**，再按 **仍要執行**。見[程式碼簽章政策（Code signing policy，英文）](https://samsonchen.github.io/agent-town-claude-code/code-signing-policy.html)。
+安裝程式沒有程式碼簽章，所以第一次執行時 Windows 會顯示「Windows 已保護您的電腦」：按 **其他資訊**，再按 **仍要執行**。Microsoft Store 版本正在準備中，從那裡安裝就不會出現這個畫面。
 
 App 在系統匣（通知區域）裡，工作列上沒有按鈕；關掉辦公室視窗只是把它藏起來。Windows 11 一開始會把新的系統匣圖示放在隱藏的圖示裡（**^** 箭頭）；把它拖出來就會一直看得到。要讓它登入時自動啟動，打開「設定」→「登入時開啟」。
 

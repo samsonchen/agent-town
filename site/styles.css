@@ -190,7 +190,7 @@ footer { padding: 8px 0 48px; color: var(--ink-soft); font-size: 0.95rem; }
 footer nav { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 10px; }
 footer a { font-weight: 700; }
 
-/* Plain pages (privacy, code signing policy) */
+/* Plain pages (privacy) */
 .page { max-width: 760px; }
 .page h1 { font-size: clamp(2rem, 4.5vw, 2.8rem); }
 .page h2 { font-size: 1.5rem; margin-top: 1.6em; }

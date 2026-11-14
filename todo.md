@@ -104,7 +104,7 @@ A Windows version of the app is planned: Windows 11 on x64, with ARM64 as a nice
 - **Chinese:** Traditional Chinese is required from the first version. Bundle the Cubic 11 font (OFL). Pick the language from the Windows locale by explicit rule (`zh_TW`, `zh_HK`, `zh_MO` and any `zh_Hant` → Traditional Chinese; every other `zh`, including `zh_CN`, → English), not by Godot's own nearest-locale match, which could show Traditional Chinese for Simplified.
 - **Tray only:** a tray icon, no taskbar button; closing the office window hides it, as on the Mac.
 - **Tray only, with native code:** Godot cannot hide its main window or its taskbar button, so the small native add-on TownWindow (`app/windows/native/`, C++, built with Visual Studio Build Tools 2026) does it. Works, checked 2026-11-11 (`docs/windows/verification.md`).
-- **Signing: free only.** Start unsigned (SmartScreen shows "Windows protected your PC" → More info → Run anyway; the release notes say so). Deal with signing later; whatever is chosen must be free (for example the SignPath Foundation, which signs open-source projects for free).
+- **Signing: free only.** Start unsigned (SmartScreen shows "Windows protected your PC" → More info → Run anyway; the release notes say so). Signing must be free: the signed version is the Microsoft Store package (see "Windows app: the Microsoft Store" below).
 - **Installer:** an Inno Setup `.exe` on GitHub Releases; a `winget` package later.
 - **Release tooling (2026-11-13):** `app/windows/scripts/release.ps1` builds the installer (tests, Godot export, Inno Setup) and with `-Publish` publishes `windows-v<version>`; see `docs/windows/releasing.md`. Inno Setup 6.7.3 is installed for the user (winget, approved). `windows-v1.0.0` was published 2026-11-13 (the first Windows version is 1.0.0, by the user's choice). 1.0.1 (published) lets the installer run on Windows 10 (untested). 1.0.2: Setup stops a running agent-town itself instead of asking Windows' Restart Manager, which can't close an app that hides in the tray (Setup said it could not close it); the user tries it and publishes.
 - **Releases in the same repo:** Windows tags are `windows-v<version>` (for example `windows-v1.0.0`), titled "agent-town for Windows <version>", and published with `--latest=false`, so the macOS `v<version>` release stays GitHub's "Latest" and the Homebrew cask is untouched. macOS releases are titled "agent-town for macOS <version>" (from 1.0.9, 2026-11-13), so the two are told apart.
@@ -235,16 +235,6 @@ The repository is `samsonchen/agent-town-claude-code` (the product name is Agent
 - [x] `docs/windows/` to match. Raise the Windows app's version, run the Windows tests, try a demo and `-Live` with `run-local.ps1` against town-link from `main`, commit and push. Tick these boxes. Done (2026-11-13): Windows app 1.0.3, 52 tests pass; a demo, and `-Live` with town-link 1.0.4 from `main` (the endpoint at the new path, a `claude -p` session drawn as the block "agent-town-claude-code").
 
 **The user:** release the macOS app (1.0.10) and the Windows app once both sessions have pushed, then install them fresh, with town-link from the marketplace (`claude plugin marketplace add samsonchen/agent-town-claude-code`, then `claude plugin install town-link@agent-town-claude-code`).
-
-### Windows app: code signing through the SignPath Foundation (2026-11-13)
-
-The project's web page is live for the application: https://samsonchen.github.io/agent-town-claude-code/ (source in `site/`, published by `.github/workflows/pages.yml`), with a privacy policy (`privacy.html`) and the code signing policy (`code-signing-policy.html`: the SignPath attribution, team roles, the privacy statement). The SignPath Foundation's terms (https://signpath.org/terms) also ask for:
-
-- [x] The user: apply at https://signpath.org/apply. Declined on 2026-11-13: the Foundation wants public adoption first (stars, forks, contributors, outside articles or discussions). It can apply again once the project has those; the rest of this list is for that.
-- [ ] The privacy notice shown at install: the Windows installer (`agent-town.iss`) shows a short page saying the app checks GitHub once a day for updates (Settings → Updates turns it off) and that nothing else leaves the computer, linking to the privacy policy.
-- [ ] Builds that SignPath can trace to the source: build the installer in GitHub Actions from a tagged commit (SignPath's origin verification records the repository, commit and build job), and send it to SignPath for signing from there, with manual approval. `release.ps1` builds locally today.
-- [ ] The product name and version in each binary's metadata match the project (agent-town, the release's version).
-- [ ] Once approved: the README's and the web page's "not code-signed yet" notes change to say releases are signed.
 
 ### Windows app: the Microsoft Store (2026-11-13)
 
