@@ -635,10 +635,15 @@ func move(a: TownActor, p: Vector2, speed: float = Layout.WALK_SPEED) -> void:
 	await wait(seconds) # a timer, not the tween, so a body freed on the way cannot leave the queue waiting
 
 
-## Walks inside the block along the walkways.
+## Walks inside the block along the walkways. A body freed on the way (its block went when the
+## last session closed) stops the walk.
 func walk(a: TownActor, dest: Vector2) -> void:
 	a.sitting = false
+	if not is_instance_valid(a.root):
+		return
 	for p in Layout.route(a.spot(), dest):
+		if not is_instance_valid(a.root):
+			return
 		await move(a, p)
 	a.play("idle")
 
@@ -653,7 +658,8 @@ func go_home(a: TownActor) -> void:
 ## Out along the path below the block's left entrance, then gone.
 func leave(a: TownActor) -> void:
 	await walk(a, Layout.WORKER_ENTRANCE)
-	await move(a, Vector2(Layout.WORKER_ENTRANCE.x, Layout.BLOCK_DEPTH + Layout.GAP / 2.0))
+	if is_instance_valid(a.root):
+		await move(a, Vector2(Layout.WORKER_ENTRANCE.x, Layout.BLOCK_DEPTH + Layout.GAP / 2.0))
 	_remove_body(a)
 	if actors.get(a.id) == a:
 		actors.erase(a.id)

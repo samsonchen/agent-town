@@ -59,6 +59,12 @@ func test_sofa_seats_are_reached_around_the_sofa() -> void:
 		"from the left seat: out to the front, around the left side, then the walkway")
 
 
+func test_leaving_from_another_walkway_crosses_at_the_left_side_lane() -> void:
+	# A Chief of Staff carrying a desk out: from the back walkway to the path on the left.
+	check_eq(Layout.route(Vector2(2.3, 0.55), Layout.WORKER_ENTRANCE),
+		[Vector2(0.3, 0.55), Vector2(0.3, 2.95), Layout.WORKER_ENTRANCE], "down the left side lane, then out")
+
+
 func test_clip_width_counts_cjk_as_two() -> void:
 	check_eq(TownLabels.clip_width("short", 40), "short", "fits")
 	check_eq(TownLabels.clip_width("abcdefghij", 5), "abcd…", "cut")

@@ -156,7 +156,11 @@ static func walkways(a: Vector2, b: Vector2) -> Array[Vector2]:
 	var pts: Array[Vector2] = [Vector2(a.x, la)]
 	if la != lb:
 		# Cross between walkways at a side lane or a gap between desks, whichever is shortest.
-		var cols: Array[float] = [SIDE_LANES[0]] if (a.x < 0 or b.x < 0) else crossings()
+		# From or to the path outside the block: the left side lane only. (A typed array, built
+		# without the conditional expression, which would give an untyped one.)
+		var cols: Array[float] = crossings()
+		if a.x < 0 or b.x < 0:
+			cols = [SIDE_LANES[0]]
 		var best := cols[0]
 		for x in cols:
 			if absf(a.x - x) + absf(b.x - x) < absf(a.x - best) + absf(b.x - best):

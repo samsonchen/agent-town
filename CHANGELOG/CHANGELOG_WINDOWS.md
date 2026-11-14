@@ -8,6 +8,7 @@ What changed in each release of the Windows app. Each version is tagged `windows
 - When a project has had no work for a while, the characters waiting on the bench pass the time. Any new work, or the CEO coming over to talk, ends it.
 - The bench has a straight sofa. The two characters on it sit on its cushions, no longer sunk into the seat, and walk around it to sit down and to leave.
 - The update check at launch tries again after 1, 2, 5 and 10 minutes when it fails, for example when the network is not up yet at sign-in.
+- Fixed: a Chief of Staff carrying a desk out could stop with a script error, and one whose project closed on the way out raised another.
 - Hide after now sits indented under Hide idle project blocks, and is dimmed while that is off.
 
 ## 1.0.6 (2026-11-13)
