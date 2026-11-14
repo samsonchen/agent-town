@@ -338,6 +338,7 @@ extension TownScene {
         await walk(w, to: spot)
         face(w, toward: w.homeFacing)
         w.sitting = sitting
+        if sitting { w.root.position.y = Layout.floorThickness + Layout.benchSeatLift }
         w.waitingSince = Date()
         node.bench.append(w)
         w.settle()
@@ -403,6 +404,7 @@ extension TownScene {
             w.homeFacing = sitting ? [0, 1] : Layout.benchCenter - spot
             face(w, toward: w.homeFacing)
             w.sitting = sitting
+            if sitting { w.root.position.y = Layout.floorThickness + Layout.benchSeatLift }
             w.waitingSince = Date().addingTimeInterval(-Double(i))
             node.benchSpots[w.id] = i
             node.bench.append(w)

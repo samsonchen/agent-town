@@ -101,10 +101,13 @@ enum Layout {
     static let benchCenter = SIMD2<Float>(5.4, 4.2)
     static let benchSpots: [(SIMD2<Float>, sitting: Bool)] = [
         // On the sofa's two cushions, between its arms.
-        ([5.2, 3.68], true), ([5.6, 3.68], true),
+        ([5.2, 3.72], true), ([5.6, 3.72], true),
         ([4.4, 4.45], false), ([6.4, 4.45], false), ([4.9, 4.95], false), ([5.9, 4.95], false),
         ([4.2, 5.1], false), ([6.6, 5.1], false),
     ]
+    /// How far a seated character is lifted onto the sofa cushion: the sit pose puts the hips at
+    /// floor height, behind the feet, which left the body inside the seat.
+    static let benchSeatLift: Float = 0.1
     /// Where the caller stands to call characters from the bench.
     static let benchCaller = SIMD2<Float>(5.4, lanes[2])
     /// The bench's speaker, on a side table left of the sofa: the Chief of Staff pages through it.
