@@ -5,6 +5,8 @@ import RealityKit
 /// the characters waiting on its bench start passing the time, one now and then, each for a short
 /// while: juggling, a puzzle cube, tossing a ball, looking at a phone, chatting ("• • •") or dozing
 /// off ("zZZ"). As soon as the block has work again, everyone stops and is ready to be called.
+/// The CEO coming to talk to someone on a break ends that break: they turn to the CEO (a dozer
+/// wakes with a "!"), and turn back when the CEO leaves.
 extension TownScene {
     enum Pastime: String, CaseIterable { case juggle, cube, toss, phone, chat, doze }
 
@@ -15,13 +17,14 @@ extension TownScene {
         return d.object(forKey: "breakIdleSeconds") == nil ? 180 : max(1, d.double(forKey: "breakIdleSeconds"))
     }
 
-    /// Twice a second: in each block idle long enough, now and then one more bench
+    /// Four times a second: the CEO's visit first, then in each block idle long enough, now and then one more bench
     /// character takes a break, up to about half the bench. A block with work stops every break.
     func startBreaks() {
         Task { @MainActor [weak self] in
             while true {
-                try? await Task.sleep(for: .milliseconds(500))
+                try? await Task.sleep(for: .milliseconds(250))
                 guard let self else { return }
+                self.greetCeo()
                 let now = Date()
                 for (p, node) in self.blocks where p != Self.executive {
                     guard node.placed, self.settled(p) else {
@@ -31,7 +34,7 @@ extension TownScene {
                     }
                     let since = self.breakIdleSince[p] ?? now
                     self.breakIdleSince[p] = since
-                    guard now.timeIntervalSince(since) >= Self.breakIdleSeconds, Double.random(in: 0..<1) < 0.1 else { continue }
+                    guard now.timeIntervalSince(since) >= Self.breakIdleSeconds, Double.random(in: 0..<1) < 0.05 else { continue }
                     self.startBreak(in: node)
                 }
             }
@@ -43,8 +46,49 @@ extension TownScene {
         for a in node.bench where a.onBreak { a.breakEnds = .distantPast }
     }
 
+    /// The character the CEO is next to stops its break (a chat stops for both) and faces the CEO;
+    /// whoever was turned to the CEO turns back once the CEO has left.
+    private func greetCeo() {
+        let touched = touchedByCeo()
+        if let a = touched, a.kind == .worker, let node = blocks[a.block], node.bench.contains(where: { $0 === a }) {
+            if a.onBreak {
+                a.greetingCeo = true
+                a.breakEnds = .distantPast
+                if let partner = a.chatPartner, partner.onBreak {
+                    partner.greetingCeo = true
+                    partner.greetsAlong = a
+                    partner.breakEnds = .distantPast
+                }
+            } else if a.greetingCeo, let ceo {
+                // Both of a chat follow the CEO while they talk.
+                for g in actors.values where (g === a || g.greetsAlong === a) && g.greetingCeo && !g.isBusy {
+                    face(g, toward: ceo.worldSpot - g.worldSpot)
+                }
+            }
+        }
+        for a in actors.values where a.greetingCeo && a !== touched && !a.isBusy
+            && (touched == nil || a.greetsAlong !== touched)
+            && blocks[a.block]?.bench.contains(where: { $0 === a }) == true {
+            a.greetingCeo = false
+            a.greetsAlong = nil
+            face(a, toward: a.homeFacing)
+            a.settle()
+        }
+    }
+
+    /// At the end of a break: turned to the CEO when the CEO came to talk, else back to the bench.
+    private func endBreak(_ a: Actor) {
+        if a.greetingCeo, let ceo, !a.sitting {
+            face(a, toward: ceo.worldSpot - a.worldSpot)
+        } else {
+            face(a, toward: a.homeFacing)
+        }
+        a.settle()
+    }
+
     private func startBreak(in node: BlockNode) {
-        let free = node.bench.filter { !$0.isBusy && !$0.onBreak }
+        let touched = touchedByCeo()
+        let free = node.bench.filter { !$0.isBusy && !$0.onBreak && !$0.greetingCeo && $0 !== touched }
         let busy = node.bench.count - free.count
         // Up to all but one on break; standing characters first, so dozing seats don't use every turn.
         let standing = free.filter { !$0.sitting }
@@ -144,13 +188,21 @@ extension TownScene {
             for e in props { e.removeFromParent() }
             a.idleBubble = nil
             a.onBreak = false
-            a.settle()
+            self.endBreak(a)
+            if pastime == .doze, a.greetingCeo {
+                // Woken by the CEO: a start, shown for a moment.
+                a.idleBubble = "!"
+                try? await Task.sleep(for: .seconds(1.2))
+                a.idleBubble = nil
+            }
         }
     }
 
     /// Two characters turn to each other and take turns saying "• • •".
     private func chat(_ a: Actor, _ b: Actor, for length: Double) {
         let ends = Date().addingTimeInterval(length)
+        a.chatPartner = b
+        b.chatPartner = a
         for (me, other, first) in [(a, b, true), (b, a, false)] {
             me.onBreak = true
             me.breakEnds = ends
@@ -159,7 +211,7 @@ extension TownScene {
                 self.face(me, toward: other.spot - me.spot)
                 me.body.play("idle")
                 let start = Date()
-                // The partner's break ending (called to work) ends the chat for both.
+                // The partner's break ending (called to work, or the CEO) ends the chat for both.
                 while Date() < me.breakEnds, other.onBreak {
                     let turn = Int(Date().timeIntervalSince(start) / 1.6) % 2 == 0
                     me.speaking = turn == first
@@ -167,8 +219,9 @@ extension TownScene {
                 }
                 me.speaking = false
                 me.onBreak = false
-                self.face(me, toward: me.homeFacing)
-                me.settle()
+                me.chatPartner = nil
+                if other.greetingCeo { me.greetingCeo = true } // both turn to the CEO
+                self.endBreak(me)
             }
         }
     }

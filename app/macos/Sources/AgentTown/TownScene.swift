@@ -783,6 +783,7 @@ final class TownScene: ObservableObject {
             if a === touched {
                 // Touched by the CEO: the character says how its work is going.
                 lines = [(statement(for: a), .statement)] + lines.filter { $0.1 == .name || $0.1 == .faint }
+                if let z = a.idleBubble { lines.insert((z, .speech), at: 0) } // "!" when woken
             }
             if !lines.isEmpty { items.append(LabelItem(id: a.id, anchor: a.head(above: 0.04), lines: lines)) }
             if let phone = a.phone, phone.ringing {

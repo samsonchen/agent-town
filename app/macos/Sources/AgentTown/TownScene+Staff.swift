@@ -164,6 +164,8 @@ extension TownScene {
                 node.bench.removeAll { $0 === w }
                 node.benchSpots[w.id] = nil
                 w.sitting = false
+                w.greetingCeo = false
+                w.greetsAlong = nil
                 return w
             }
         }

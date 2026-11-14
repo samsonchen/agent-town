@@ -64,8 +64,14 @@ final class Actor {
     /// On a break on the bench (spec: break time), until `breakEnds`.
     var onBreak = false
     var breakEnds = Date.distantPast
-    /// A bubble for a break, such as "zZZ" while dozing.
+    /// A bubble for a break, such as "zZZ" while dozing, or "!" when woken by the CEO.
     var idleBubble: String?
+    /// Turned to the CEO, who came to talk during a break; turns back when the CEO leaves.
+    var greetingCeo = false
+    /// Turned to the CEO along with this chat partner, whom the CEO came to talk to.
+    weak var greetsAlong: Actor?
+    /// The other character in a chat during a break.
+    weak var chatPartner: Actor?
 
     private var queue: [() async -> Void] = []
     private var running = false

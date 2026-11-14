@@ -120,6 +120,38 @@ enum Layout {
 
     /// A walking path from `a` to `b` inside a block, along the walkways.
     static func route(_ a: SIMD2<Float>, _ b: SIMD2<Float>) -> [SIMD2<Float>] {
+        // The sofa seats are reached from the front: down beside the sofa, across in front of it,
+        // and back onto the seat; leaving a seat is the same the other way. Otherwise the walk
+        // from the walkway went straight through the sofa.
+        if isSeat(b) && !isSeat(a) {
+            let side = sofaSideX(b)
+            return clean(route(a, [side, sofaFrontZ]) + [[b.x, sofaFrontZ], b], from: a)
+        }
+        if isSeat(a) && !isSeat(b) {
+            let side = sofaSideX(a)
+            let out: [SIMD2<Float>] = [[a.x, sofaFrontZ], [side, sofaFrontZ]]
+            return clean(out + route([side, sofaFrontZ], b), from: a)
+        }
+        return walkways(a, b)
+    }
+
+    /// A sofa seat on the bench (block-local).
+    static func isSeat(_ p: SIMD2<Float>) -> Bool {
+        benchSpots.contains { $0.sitting && simd_distance($0.0, p) < 0.05 }
+    }
+    /// In front of the sofa, between it and the coffee table.
+    static let sofaFrontZ: Float = 3.95
+    /// Beside the sofa, on the seat's side.
+    static func sofaSideX(_ seat: SIMD2<Float>) -> Float { seat.x < benchCenter.x ? 4.82 : 5.98 }
+
+    private static func clean(_ pts: [SIMD2<Float>], from a: SIMD2<Float>) -> [SIMD2<Float>] {
+        var out: [SIMD2<Float>] = []
+        var last = a
+        for p in pts where simd_distance(p, last) > 0.02 { out.append(p); last = p }
+        return out
+    }
+
+    private static func walkways(_ a: SIMD2<Float>, _ b: SIMD2<Float>) -> [SIMD2<Float>] {
         func lane(_ z: Float) -> Float { lanes.min { abs($0 - z) < abs($1 - z) }! }
         let la = lane(a.y), lb = lane(b.y)
         var pts: [SIMD2<Float>] = [[a.x, la]]
