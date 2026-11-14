@@ -54,3 +54,5 @@ In Partner Center, Apps and games → Agent-Town for Claude Code → Start submi
 6. **Submission options, notes for certification:** that the app shows Claude Code sessions and needs Claude Code with town-link to show anything beyond an empty office; that `runFullTrust` is needed because it is a desktop app with a tray icon and a local loopback server for the plugin.
 
 A later version: raise the version as [releasing.md](releasing.md) says, build with `-Store`, and upload the new package in a new submission. The version in the package must be higher than the published one.
+
+A product has one submission at a time. When a new version is ready while the last one is still in certification, either let that one finish and then submit the new package (the usual way), or cancel it in Partner Center and submit the new package instead, which starts certification over. In a new submission, Packages: remove the old `.msix` and upload the new one; the listing and the other pages carry over.
