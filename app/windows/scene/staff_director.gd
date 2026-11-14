@@ -379,7 +379,8 @@ func _return_to_bench(w: TownActor, b: BlockNode) -> void:
 	w.home_facing = Vector2(0, 1) if sitting else Layout.BENCH_CENTER - spot
 	await scene.walk(w, spot)
 	scene.face(w, w.home_facing)
-	w.sitting = sitting
+	if sitting:
+		w.sit()
 	w.waiting_since = Time.get_ticks_msec()
 	b.bench.append(w)
 	w.settle()
@@ -451,7 +452,8 @@ func fill_bench(b: BlockNode) -> void:
 		w.home = spot
 		w.home_facing = Vector2(0, 1) if sitting else Layout.BENCH_CENTER - spot
 		scene.face(w, w.home_facing)
-		w.sitting = sitting
+		if sitting:
+			w.sit()
 		w.waiting_since = Time.get_ticks_msec() - i * 1000
 		b.bench_spots[w.id] = i
 		b.bench.append(w)

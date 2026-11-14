@@ -48,6 +48,17 @@ func test_layout_matches_the_mac() -> void:
 		[Vector2(1.7, 0.55), Vector2(1.7, 1.6), Vector2(2.3, 1.6), Vector2(2.3, 1.95)], "walks along the walkways, crossing between desks")
 
 
+func test_sofa_seats_are_reached_around_the_sofa() -> void:
+	check(Layout.is_seat(Vector2(5.2, 3.72)) and Layout.is_seat(Vector2(5.6, 3.72)), "both cushions are seats")
+	check(not Layout.is_seat(Vector2(4.4, 4.45)), "a standing spot is not")
+	check_eq(Layout.route(Vector2(4.0, 2.95), Vector2(5.6, 3.72)),
+		[Vector2(5.98, 2.95), Vector2(5.98, 3.95), Vector2(5.6, 3.95), Vector2(5.6, 3.72)],
+		"to the right seat: down beside the sofa, across in front of it, onto the seat")
+	check_eq(Layout.route(Vector2(5.2, 3.72), Vector2(1.0, 2.95)),
+		[Vector2(5.2, 3.95), Vector2(4.82, 3.95), Vector2(4.82, 2.95), Vector2(1.0, 2.95)],
+		"from the left seat: out to the front, around the left side, then the walkway")
+
+
 func test_clip_width_counts_cjk_as_two() -> void:
 	check_eq(TownLabels.clip_width("short", 40), "short", "fits")
 	check_eq(TownLabels.clip_width("abcdefghij", 5), "abcd…", "cut")

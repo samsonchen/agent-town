@@ -47,6 +47,10 @@ const SERVER_ROOM_LABEL := Vector2(1.8, 5.1)
 # Resource bench: a sofa, a coffee table and standing spots around it.
 const BENCH_CENTER := Vector2(5.4, 4.2)
 const SPEAKER_SPOT := Vector2(4.05, 3.45) ## the bench speaker, on a side table left of the sofa
+## How far a seated character is lifted onto the sofa cushion: the sit pose puts the hips at floor
+## height, behind the feet, which left the body inside the seat.
+const BENCH_SEAT_LIFT := 0.1
+const SOFA_FRONT_Z := 3.95 ## in front of the sofa, between it and the coffee table
 
 ## Chiefs of Staff come in from the path on the block's left, along the back walkway; bench
 ## characters along the front walkway.
@@ -89,7 +93,8 @@ static func operator_spot(slot: int) -> Vector2:
 
 ## The bench: [spot, sitting].
 static func bench_spots() -> Array:
-	return [[Vector2(5.0, 3.68), true], [Vector2(5.8, 3.68), true],
+	# On the sofa's two cushions, between its arms.
+	return [[Vector2(5.2, 3.72), true], [Vector2(5.6, 3.72), true],
 		[Vector2(4.4, 4.45), false], [Vector2(6.4, 4.45), false], [Vector2(4.9, 4.95), false], [Vector2(5.9, 4.95), false],
 		[Vector2(4.2, 5.1), false], [Vector2(6.6, 5.1), false]]
 
@@ -102,8 +107,50 @@ static func crossings() -> Array[float]:
 	return out
 
 
-## A walking path from `a` to `b` inside a block, along the walkways.
+## A walking path from `a` to `b` inside a block, along the walkways. The sofa seats are reached
+## from the front: down beside the sofa, across in front of it, and back onto the seat; leaving a
+## seat is the same the other way. Otherwise the walk from the walkway went straight through the sofa.
 static func route(a: Vector2, b: Vector2) -> Array[Vector2]:
+	if is_seat(b) and not is_seat(a):
+		var side := Vector2(sofa_side_x(b), SOFA_FRONT_Z)
+		var pts: Array[Vector2] = walkways(a, side)
+		pts.append_array([Vector2(b.x, SOFA_FRONT_Z), b] as Array[Vector2])
+		return _clean(pts, a)
+	if is_seat(a) and not is_seat(b):
+		var side := Vector2(sofa_side_x(a), SOFA_FRONT_Z)
+		var pts: Array[Vector2] = [Vector2(a.x, SOFA_FRONT_Z), side]
+		pts.append_array(walkways(side, b))
+		return _clean(pts, a)
+	return walkways(a, b)
+
+
+## A sofa seat on the bench (block-local).
+static func is_seat(p: Vector2) -> bool:
+	for s: Array in bench_spots():
+		if s[1] and (s[0] as Vector2).distance_to(p) < 0.05:
+			return true
+	return false
+
+
+## Beside the sofa, on the seat's side.
+static func sofa_side_x(seat: Vector2) -> float:
+	return 4.82 if seat.x < BENCH_CENTER.x else 5.98
+
+
+## Drops points closer than 2 cm to the one before (starting from `a`).
+static func _clean(pts: Array[Vector2], a: Vector2) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	var last := a
+	for p in pts:
+		if p.distance_to(last) > 0.02:
+			out.append(p)
+			last = p
+	return out
+
+
+## Along the walkways: across the block on the nearest walkway, crossing between walkways at a
+## side lane or a gap between desks.
+static func walkways(a: Vector2, b: Vector2) -> Array[Vector2]:
 	var la := _lane(a.y)
 	var lb := _lane(b.y)
 	var pts: Array[Vector2] = [Vector2(a.x, la)]
@@ -118,13 +165,7 @@ static func route(a: Vector2, b: Vector2) -> Array[Vector2]:
 		pts.append(Vector2(best, lb))
 	pts.append(Vector2(b.x, lb))
 	pts.append(b)
-	var out: Array[Vector2] = []
-	var last := a
-	for p in pts:
-		if p.distance_to(last) > 0.02:
-			out.append(p)
-			last = p
-	return out
+	return _clean(pts, a)
 
 
 static func _lane(z: float) -> float:

@@ -5,6 +5,7 @@ What changed in each release of the Windows app. Each version is tagged `windows
 ## 1.0.7 (not yet released)
 
 - New: Settings → Office → Hide the window when no Claude Code session is open (off by default). The office window hides 5 seconds after the last session closes and comes back, without taking the focus, when a session opens. Show agent-town in the tray menu shows it anyway.
+- The bench has a straight sofa. The two characters on it sit on its cushions, no longer sunk into the seat, and walk around it to sit down and to leave.
 - The update check at launch tries again after 1, 2, 5 and 10 minutes when it fails, for example when the network is not up yet at sign-in.
 - Hide after now sits indented under Hide idle project blocks, and is dimmed while that is off.
 

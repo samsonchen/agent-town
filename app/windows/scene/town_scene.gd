@@ -960,7 +960,9 @@ func _build_project_block(b: BlockNode, colors: Array) -> void:
 		place("speaker", f, Vector2(Layout.rack_x(i) + 0.15, Layout.RACK_Z), 0.0, 1.4)
 	# Resource bench (front right): a lounge.
 	place("rugRound", f, Layout.BENCH_CENTER, 0.0, 1.3)
-	place("loungeSofaLong", f, Vector2(Layout.BENCH_CENTER.x, 3.5))
+	# A straight sofa: two sit side by side on its cushions (the long one is L-shaped, and its corner
+	# piece covered whoever sat on the right, with both seats on its arms).
+	place("loungeSofa", f, Vector2(Layout.BENCH_CENTER.x, 3.5))
 	place("tableCoffee", f, Vector2(Layout.BENCH_CENTER.x, 4.3))
 	var table := place("sideTable", f, Layout.SPEAKER_SPOT)
 	b.speaker = place("speaker", f, Layout.SPEAKER_SPOT, 0.0, 0.8, table)

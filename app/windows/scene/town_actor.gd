@@ -104,6 +104,14 @@ func play(clip: String, loop: bool = true, blend: float = 0.15) -> void:
 		player.play(clip, blend)
 
 
+## Sits down on the bench sofa, lifted onto the cushion (Layout.BENCH_SEAT_LIFT); walking puts it
+## back on the floor.
+func sit() -> void:
+	sitting = true
+	if is_instance_valid(root):
+		root.position.y = Layout.FLOOR_THICKNESS + Layout.BENCH_SEAT_LIFT
+
+
 ## The looping clip for where the character is now (spec: activities).
 func settle() -> void:
 	if on_call or steering:
