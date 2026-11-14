@@ -5,8 +5,10 @@ extends Window
 
 signal opacity_changed(value: float)
 signal sounds_changed
-signal office_changed ## Hide idle project blocks, Hide after, or Show tips
+signal office_changed ## Hide the window when no session is open, Hide idle project blocks, Hide after, or Show tips
 
+const INDENT := 26 ## a check box's text starts about here: a row indented this much sits under it
+const DIMMED := 0.5 ## a row that is off for now
 const SOUND_TITLES := {"dispatch": "Ticket dispatched", "completion": "Work done", "approval": "Approval needed"}
 
 var settings: TownSettings
@@ -144,7 +146,8 @@ func _ready() -> void:
 
 # --- Office -------------------------------------------------------------------------------
 
-## Hide idle project blocks, with Hide after N seconds beside it, and Show tips (spec: settings).
+## Compact view, Hide the window when no session is open, Hide idle project blocks with Hide after
+## N seconds under it, and Show tips (spec: settings).
 func _build_office(box: VBoxContainer) -> void:
 	box.add_child(HSeparator.new())
 	var heading := Label.new()
@@ -171,12 +174,24 @@ func _build_office(box: VBoxContainer) -> void:
 		settings.compact_view = on
 		settings.save()
 		restart_row.visible = on != ViewScale.compact)
+	var no_sessions := CheckBox.new()
+	no_sessions.text = labels.t("Hide the window when no Claude Code session is open")
+	no_sessions.button_pressed = settings.hide_without_sessions
+	no_sessions.toggled.connect(func(on: bool) -> void:
+		settings.hide_without_sessions = on
+		settings.save()
+		office_changed.emit())
+	box.add_child(no_sessions)
 	var hide_idle := CheckBox.new()
 	hide_idle.text = labels.t("Hide idle project blocks")
 	hide_idle.button_pressed = settings.hide_idle_blocks
 	box.add_child(hide_idle)
+	# Hide after belongs to Hide idle project blocks: indented under it, and dimmed while it is off.
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
+	var indent := Control.new()
+	indent.custom_minimum_size = Vector2(INDENT - 6, 0) # the row's separation makes up the rest
+	row.add_child(indent)
 	var before := Label.new()
 	before.text = labels.t("Hide after")
 	row.add_child(before)
@@ -191,9 +206,11 @@ func _build_office(box: VBoxContainer) -> void:
 	after.text = labels.t("seconds")
 	row.add_child(after)
 	box.add_child(row)
+	row.modulate.a = 1.0 if settings.hide_idle_blocks else DIMMED
 	hide_idle.toggled.connect(func(on: bool) -> void:
 		settings.hide_idle_blocks = on
 		secs.editable = on
+		row.modulate.a = 1.0 if on else DIMMED
 		settings.save()
 		office_changed.emit())
 	secs.value_changed.connect(func(v: float) -> void:

@@ -9,11 +9,13 @@ extends Node
 ##         [--snapshot out.png --at SECONDS[,SECONDS…]] [--language en|zh-Hant] [--open settings|about]
 ##         [--keys "down:1.5,right:1,h"] [--clicks "95:270@2,300:500@6"] [--hide-idle SECONDS]
 ##         [--compact yes] [--resize WxH] [--fake-update yes] [--check-now yes] [--open updates]
+##         [--hide-without-sessions yes]
 ## [--sound no] keeps this run quiet; [--settings-file PATH] uses its own settings; --open takes
 ## several windows, comma-separated (settings,updates).
 ## --fake-update makes up a newer app and town-link (99.0.0) without the network; --check-now makes a
 ## real update check, even in a demo (a demo or a snapshot makes no automatic check).
-## --compact yes shows compact view for this run; --resize shrinks the window 8 s in, as a drag would.
+## --hide-without-sessions yes turns Hide the window when no Claude Code session is open on for this
+## run, without saving. --compact yes shows compact view for this run; --resize shrinks the window 8 s in, as a drag would.
 ## A run with --snapshot never starts the server, so it cannot take the endpoint from the running app.
 ## Gaps between events keep their timing, each capped at 4 s and divided by `--speed`.
 
@@ -34,6 +36,7 @@ var scene: TownScene
 var camera := Camera3D.new()
 var overlay: LabelOverlay
 var audio := TownAudio.new()
+var presence := WindowPresence.new()
 var pan := Vector2.ZERO
 
 var _office := Control.new() ## the 3D view and its labels; its alpha is the window's opacity
@@ -106,6 +109,17 @@ func _ready() -> void:
 	scene.ceo_driver.moved.connect(_follow)
 	scene.ceo_driver.away_changed.connect(func(_away: bool) -> void: _update_tip())
 
+	# Hide the window when no session is open; a snapshot run always shows it.
+	presence.user_wants_window = func() -> bool: return settings.show_window
+	presence.hide_window.connect(func() -> void:
+		_remember_window()
+		_call_window("set_shown", [_hwnd(), false])
+		_sync_menu())
+	presence.show_window.connect(_show_without_focus)
+	add_child(presence)
+	store.changed.connect(func(_c: Dictionary) -> void:
+		presence.sessions_changed(WindowPresence.sessions_open(store.building)))
+
 	_restore_window()
 	w.always_on_top = settings.stay_on_top
 	_apply_opacity(settings.opacity)
@@ -146,6 +160,8 @@ func _ready() -> void:
 		_resize_later(_args["resize"])
 	if not settings.show_window and not _args.has("snapshot"):
 		_set_shown(false)
+	_apply_presence()
+	presence.sessions_changed(WindowPresence.sessions_open(store.building)) # none open: hides in 5 s
 
 	# --open settings|about pops that window up at start (for checking screens).
 	for name: String in str(_args.get("open", "")).split(",", false):
@@ -354,7 +370,7 @@ static func with_dot(icon: Image) -> Image:
 
 
 func _sync_menu() -> void:
-	_menu.set_item_checked(_menu.get_item_index(Menu.SHOW), settings.show_window)
+	_menu.set_item_checked(_menu.get_item_index(Menu.SHOW), settings.show_window and not presence.auto_hidden)
 	_menu.set_item_checked(_menu.get_item_index(Menu.ON_TOP), settings.stay_on_top)
 	_menu.set_item_checked(_menu.get_item_index(Menu.SOUND), settings.sound)
 
@@ -374,7 +390,11 @@ func _on_menu(id: int) -> void:
 		Menu.ABOUT:
 			_about_window.popup_centered()
 		Menu.SHOW:
-			_set_shown(not settings.show_window)
+			if settings.show_window and not presence.auto_hidden:
+				_set_shown(false)
+			else: # also while hidden for want of a session: show it anyway
+				presence.show_now()
+				_set_shown(true)
 		Menu.ON_TOP:
 			settings.stay_on_top = not settings.stay_on_top
 			get_window().always_on_top = settings.stay_on_top
@@ -427,10 +447,30 @@ func _set_shown(on: bool) -> void:
 	_sync_menu()
 
 
+## Comes back when a session opens, without taking the focus from what the user is typing in. An
+## add-on built before `show_without_focus` shows it the usual way.
+func _show_without_focus() -> void:
+	if ClassDB.class_exists("TownWindow") and ClassDB.class_has_method("TownWindow", "show_without_focus"):
+		_call_window("show_without_focus", [_hwnd()])
+	else:
+		_call_window("set_shown", [_hwnd(), true])
+	_sync_menu()
+
+
+## Hide the window when no Claude Code session is open; `--hide-without-sessions yes` turns it on for
+## this run without saving. Never in a snapshot run, which must show the window. Turning it off
+## brings a hidden window back.
+func _apply_presence() -> void:
+	var on: bool = settings.hide_without_sessions or _args.get("hide-without-sessions", "") == "yes"
+	presence.set_enabled(on and not _args.has("snapshot"))
+
+
 ## Settings → Office: the tips, and whether idle project blocks hide. `--hide-idle N` turns hiding
 ## on for this run with N seconds, without saving (for checking it with a demo).
 func _apply_office() -> void:
 	_update_tip()
+	if presence.is_inside_tree():
+		_apply_presence()
 	scene.hide_idle = settings.hide_idle_blocks
 	scene.idle_seconds = settings.idle_hide_seconds
 	if _args.has("hide-idle"):

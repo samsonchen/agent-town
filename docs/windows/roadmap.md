@@ -49,6 +49,7 @@ Each feature is confirmed by the user in the running app before the release.
 
 - [x] `app/windows/scripts/run-local.ps1` (and `run-local.sh` for Git Bash), like the Mac's `app/macos/scripts/run-local.sh`: runs the project from the checkout with Godot (no export, no installer), so the user can try a change before a release; a demo by default, `-Live` for real sessions (quits and later restarts an installed copy), and the options listed in `todo.md` section 9 ("a script to try a build before releasing")
 
+- [x] Hide the window when no Claude Code session is open (Settings → Office, off by default), as in the macOS app 1.0.14 (`docs/spec.md` → Settings (app); `todo.md` section 9): the window hides 5 s after the last session closes and comes back without the focus when one opens; a session within the 5 s cancels the hide; Show agent-town is unchecked while it is hidden this way and shows it anyway; a window the user closed stays closed. Hide after is indented under Hide idle project blocks and dimmed while it is off. `shell/window_presence.gd`, tested in `tests/presence_tests.gd`; checked with fixture 01 played twice at `--speed 0.5` and `--hide-without-sessions yes` (hid at 5 s, back with the next session, hid again); to confirm by hand
 - [x] Compact view, small windows (down to 320 × 240) and auto-scroll (checked with `--compact yes` and `--resize 400x300` demos; to confirm by hand), as in the macOS app 1.0.8 (`docs/spec.md` → The office; `todo.md` section 9)
 
 ## W3: release (last, once every feature is confirmed)

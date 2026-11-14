@@ -35,6 +35,7 @@ void TownWindow::_bind_methods() {
 	ClassDB::bind_static_method("TownWindow", D_METHOD("is_hidden_from_taskbar", "hwnd"), &TownWindow::is_hidden_from_taskbar);
 	ClassDB::bind_static_method("TownWindow", D_METHOD("set_shown", "hwnd", "shown"), &TownWindow::set_shown);
 	ClassDB::bind_static_method("TownWindow", D_METHOD("is_shown", "hwnd"), &TownWindow::is_shown);
+	ClassDB::bind_static_method("TownWindow", D_METHOD("show_without_focus", "hwnd"), &TownWindow::show_without_focus);
 	ClassDB::bind_static_method("TownWindow", D_METHOD("set_owner", "hwnd", "owner_hwnd"), &TownWindow::set_owner);
 	ClassDB::bind_static_method("TownWindow", D_METHOD("get_owner", "hwnd"), &TownWindow::get_owner);
 }
@@ -85,6 +86,15 @@ void TownWindow::set_shown(int64_t hwnd, bool shown) {
 bool TownWindow::is_shown(int64_t hwnd) {
 	HWND h = reinterpret_cast<HWND>(hwnd);
 	return IsWindow(h) && IsWindowVisible(h) != FALSE;
+}
+
+// Shows a hidden window where it was, without activating it, so whatever the user is typing in
+// keeps the focus (the office coming back when a session opens).
+void TownWindow::show_without_focus(int64_t hwnd) {
+	HWND h = reinterpret_cast<HWND>(hwnd);
+	if (IsWindow(h)) {
+		ShowWindow(h, SW_SHOWNA);
+	}
 }
 
 // Makes `owner_hwnd` the owner of `hwnd`: Windows then keeps the window above its owner, also when

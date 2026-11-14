@@ -2,6 +2,11 @@
 
 What changed in each release of the Windows app. Each version is tagged `windows-v<version>` in this repository, and `git log windows-v<previous>..windows-v<version>` lists its commits. The macOS app and the town-link plugin have their own changelogs and version numbers. Whether an app and a town-link work together depends only on the protocol version.
 
+## 1.0.7 (not yet released)
+
+- New: Settings → Office → Hide the window when no Claude Code session is open (off by default). The office window hides 5 seconds after the last session closes and comes back, without taking the focus, when a session opens. Show agent-town in the tray menu shows it anyway.
+- Hide after now sits indented under Hide idle project blocks, and is dimmed while that is off.
+
 ## 1.0.6 (2026-11-13)
 
 - Fixed: the app could crash when a project block hid while a phone in it was ringing (Settings → Office → Hide idle project blocks). The phone now stops ringing when its block hides.

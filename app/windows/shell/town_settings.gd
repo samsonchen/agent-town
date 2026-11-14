@@ -15,6 +15,7 @@ var language := "" ## "", "en" or "zh-Hant"; "" follows Windows
 var stay_on_top := false
 var sound := true
 var show_tips := true ## the closable tips in the window
+var hide_without_sessions := false ## the office window hides while no Claude Code session is open
 var hide_idle_blocks := false ## project blocks show only while they have work
 var idle_hide_seconds := 5 ## how long a block's work must have settled before it hides
 var compact_view := false ## the office at half size; applies after a restart
@@ -47,6 +48,7 @@ func _init(p_path: String = "") -> void:
 	stay_on_top = bool(_cfg.get_value("app", "stay_on_top", stay_on_top))
 	sound = bool(_cfg.get_value("app", "sound", sound))
 	show_tips = bool(_cfg.get_value("app", "show_tips", show_tips))
+	hide_without_sessions = bool(_cfg.get_value("app", "hide_without_sessions", false))
 	hide_idle_blocks = bool(_cfg.get_value("app", "hide_idle_blocks", hide_idle_blocks))
 	idle_hide_seconds = clamp_idle_hide(_cfg.get_value("app", "idle_hide_seconds", 5))
 	compact_view = bool(_cfg.get_value("app", "compact_view", false))
@@ -123,6 +125,7 @@ func save() -> void:
 	_cfg.set_value("app", "stay_on_top", stay_on_top)
 	_cfg.set_value("app", "sound", sound)
 	_cfg.set_value("app", "show_tips", show_tips)
+	_cfg.set_value("app", "hide_without_sessions", hide_without_sessions)
 	_cfg.set_value("app", "hide_idle_blocks", hide_idle_blocks)
 	_cfg.set_value("app", "idle_hide_seconds", idle_hide_seconds)
 	_cfg.set_value("app", "compact_view", compact_view)

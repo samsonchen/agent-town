@@ -8,7 +8,7 @@ It has its own version number, separate from the macOS app and from town-link. T
 
 Included: the office and its blocks, the CEO's and the Chief of Staff's calls, staff and the resource bench, desk workers, operators, approvals, the context bar, the sounds, and the tray menu. That is about scenes 1 to 12 of the main spec.
 
-Since W2 ([roadmap.md](roadmap.md)) the Windows app has every scene of the main spec: the Dispatcher's board (13 and 14), the Inspector (15), messages (16) and compaction (17), and walking the CEO, with the tips, Hide idle project blocks (with the hidden blocks' context bars), compact view, small windows, auto-scroll and the update notices. Each is to be confirmed by hand before the release. The installer and signing come last, once every feature is confirmed.
+Since W2 ([roadmap.md](roadmap.md)) the Windows app has every scene of the main spec: the Dispatcher's board (13 and 14), the Inspector (15), messages (16) and compaction (17), and walking the CEO, with the tips, Hide the window when no session is open, Hide idle project blocks (with the hidden blocks' context bars), compact view, small windows, auto-scroll and the update notices. Each is to be confirmed by hand before the release. The installer and signing come last, once every feature is confirmed.
 
 ## Differences from the macOS app
 
