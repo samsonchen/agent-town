@@ -9,11 +9,13 @@ extends Node
 ##         [--snapshot out.png --at SECONDS[,SECONDS…]] [--language en|zh-Hant] [--open settings|about]
 ##         [--keys "down:1.5,right:1,h"] [--clicks "95:270@2,300:500@6"] [--hide-idle SECONDS]
 ##         [--compact yes] [--resize WxH] [--fake-update yes] [--check-now yes] [--open updates]
-##         [--hide-without-sessions yes]
+##         [--hide-without-sessions yes] [--break-idle SECONDS] [--break-pastime NAME]
 ## [--sound no] keeps this run quiet; [--settings-file PATH] uses its own settings; --open takes
 ## several windows, comma-separated (settings,updates).
 ## --fake-update makes up a newer app and town-link (99.0.0) without the network; --check-now makes a
 ## real update check, even in a demo (a demo or a snapshot makes no automatic check).
+## --break-idle N starts break time on the bench after N idle seconds instead of 180; --break-pastime
+## NAME (juggle, cube, toss, phone, chat, doze) gives standing characters only that one.
 ## --hide-without-sessions yes turns Hide the window when no Claude Code session is open on for this
 ## run, without saving. --compact yes shows compact view for this run; --resize shrinks the window 8 s in, as a drag would.
 ## A run with --snapshot never starts the server, so it cannot take the endpoint from the running app.
@@ -89,6 +91,10 @@ func _ready() -> void:
 	var sub := SubViewport.new()
 	_view.add_child(sub)
 	scene = TownScene.new(labels, store.building)
+	if _args.has("break-idle"):
+		scene.breaks.idle_seconds = maxf(1.0, float(_args["break-idle"]))
+	if BenchBreaks.PASTIMES.has(_args.get("break-pastime", "")):
+		scene.breaks.only_pastime = _args["break-pastime"]
 	sub.add_child(scene)
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	camera.keep_aspect = Camera3D.KEEP_HEIGHT

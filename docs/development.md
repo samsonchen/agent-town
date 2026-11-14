@@ -119,7 +119,7 @@ Any setting can be given the same way (`-hideIdleBlocks YES -idleHideSeconds 1`)
 .\app\windows\scripts\run-local.ps1 -Live           # real Claude Code sessions
 ```
 
-Its options match the macOS script's (`-Demo`, `-Live`, `-FakeUpdate`, `-CheckNow`, `-Updates`, `-Settings`, `-Compact`, `-Resize WxH`, `-Sound`, `-Zh`, `-En`, `-Speed N`); `-Help` lists them.
+Its options match the macOS script's (`-Demo`, `-Live`, `-FakeUpdate`, `-CheckNow`, `-Updates`, `-Settings`, `-Compact`, `-Resize WxH`, `-Breaks`, `-Pastime NAME`, `-Sound`, `-Zh`, `-En`, `-Speed N`); `-Help` lists them.
 
 Checks:
 

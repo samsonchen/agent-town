@@ -20,6 +20,7 @@ var assets := TownAssets.new()
 var building: Building ## the store's building, read for names, roles and context
 var staff: StaffDirector
 var notes: BoardAndNotes ## the Dispatcher's board and the compaction notes
+var breaks: BenchBreaks ## break time on the bench
 var ceo_driver: CeoDriver ## the CEO under the user's control
 var office_size := Layout.office_size(1)
 var blocks: Dictionary = {} ## id -> BlockNode
@@ -46,6 +47,7 @@ func _init(p_labels: TownLabels, p_building: Building) -> void:
 	building = p_building
 	staff = StaffDirector.new(self)
 	notes = BoardAndNotes.new(self)
+	breaks = BenchBreaks.new(self)
 
 
 func _ready() -> void:
@@ -70,6 +72,7 @@ func _ready() -> void:
 	_typing_loop()
 	_idle_watch()
 	staff.bench_life_loop()
+	breaks.loop()
 
 
 ## Hidden blocks are out of the tree, so they are not freed with it.
@@ -1043,6 +1046,8 @@ func label_items() -> Array[Dictionary]:
 			lines.append([labels.t("Needs approval"), "ring"])
 		if a.bubble != null:
 			lines.append([a.bubble, "bubble"])
+		if a.idle_bubble != null:
+			lines.append([a.idle_bubble, "speech"])
 		if a.note != null:
 			lines.append([a.note, "ticket"])
 		# The hat shows only while no staff are working (spec: hats).
@@ -1063,6 +1068,8 @@ func label_items() -> Array[Dictionary]:
 			var kept := lines.filter(func(l: Array) -> bool: return l[1] == "name" or l[1] == "faint")
 			lines = [[Statements.for_actor(self, a), "statement"]]
 			lines.append_array(kept)
+			if a.idle_bubble != null:
+				lines.insert(0, [a.idle_bubble, "speech"]) # "!" when woken
 		if not lines.is_empty():
 			items.append({"anchor": a.head(0.04), "lines": lines})
 		if a.phone != null and a.phone.ringing and is_instance_valid(a.phone.device) and a.phone.device.is_inside_tree():

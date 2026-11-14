@@ -47,6 +47,13 @@ var compacting := false ## a Chief of Staff going through the notes (scene 17)
 var papers: Node3D = null ## the stack of notes on the desk while compacting
 var note: Variant = null
 var since := -1 ## when the current ticket or job started (Time.get_ticks_msec), -1 when none
+# Break time on the bench (BenchBreaks).
+var on_break := false ## on a break, until break_ends
+var break_ends := 0 ## Time.get_ticks_msec() when the break ends; 0 stops it at the next frame
+var idle_bubble: Variant = null ## a bubble for a break, such as "zZZ" while dozing, or "!" when woken by the CEO
+var greeting_ceo := false ## turned to the CEO, who came to talk during a break; turns back when the CEO leaves
+var greets_along: TownActor = null ## turned to the CEO along with this chat partner, whom the CEO came to talk to
+var chat_partner: TownActor = null ## the other character in a chat during a break
 
 var _queue: Array[Callable] = []
 var _running := false

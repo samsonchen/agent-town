@@ -180,6 +180,8 @@ func _pick(b: BlockNode, role: Variant, is_operator: bool) -> TownActor:
 			b.bench.erase(best)
 			b.bench_spots.erase(best.id)
 			best.sitting = false
+			best.greeting_ceo = false
+			best.greets_along = null
 			return best
 	return null
 

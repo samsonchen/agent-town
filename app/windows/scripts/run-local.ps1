@@ -17,6 +17,8 @@
     -Settings     open the Settings window
     -Compact      compact view (the office at half size), without changing the saved setting
     -Resize WxH   8 seconds in, shrink the window to W by H pixels, as a drag would (auto-scroll)
+    -Breaks       break time on the bench after 10 idle seconds instead of 3 minutes
+    -Pastime NAME standing bench characters take only this break (juggle, cube, toss, phone, chat, doze)
     -Sound        play the demo's sounds
     -Zh, -En      run in Traditional Chinese or English
     -Speed N      play the demo N times as fast
@@ -64,6 +66,8 @@ while ($i -lt $args.Count) {
     '^-(Settings)$' { $open += 'settings' }
     '^-(Compact)$' { $appArgs += @('--compact', 'yes') }
     '^-(Resize)$' { if ($i + 1 -ge $args.Count) { Fail '-Resize needs WIDTHxHEIGHT' }; $i++; $appArgs += @('--resize', [string]$args[$i]) }
+    '^-(Breaks)$' { $appArgs += @('--break-idle', '10') }
+    '^-(Pastime)$' { if ($i + 1 -ge $args.Count) { Fail '-Pastime needs a name' }; $i++; $appArgs += @('--break-pastime', [string]$args[$i]) }
     '^-(Sound)$' { $sound = $true }
     '^-(Zh)$' { $appArgs += @('--language', 'zh-Hant') }
     '^-(En)$' { $appArgs += @('--language', 'en') }
