@@ -4,7 +4,7 @@ What changed in each release of the macOS app. Each version is tagged `v<version
 
 ## 1.0.15 (2026-11-14)
 
-- Break time: when a project has had no work for 3 minutes, the people on its bench pass the time, one now and then: juggling, a puzzle cube, tossing a ball, looking at a phone, chatting, or dozing off. They stop as soon as work comes in. When the CEO comes to talk to one of them, that one stops and turns to the CEO (a dozer wakes with a "!"; a chat stops for both), and turns back when the CEO leaves.
+- Break time: when a project has been idle for a while, the people on its bench find ways to pass the time. See for yourself. They stop as soon as work comes in, or when the CEO comes over to talk.
 - The update check at launch tries again after 1, 2, 5 and 10 minutes when it fails, as it can at login before the network is up.
 - Fixed: the two seated characters on the bench sat on the sofa's arms, and the corner of the L-shaped sofa covered the one on the right. The bench now has a straight sofa, with both seated on top of its cushions instead of sunk into the seat, and characters walk around the sofa to sit down instead of through it.
 

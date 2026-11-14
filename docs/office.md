@@ -18,7 +18,7 @@ A strip across the top, with three people at their desks:
 - **On a laptop screen.** Turn on Settings → Compact view (it applies after a restart) to draw the office at half size, with smaller text. You can also make the window as small as 320 × 240: when the office doesn't fit, the view scrolls by itself to where characters are walking. Your own scrolling, or walking the CEO, pauses that for 10 seconds.
 - **The sign** shows the project's name and a short title for the running task. A bar under the block shows the session's context use.
 - **Desks**: one Chief of Staff desk with a telephone, and five staff desks. A second session in the same project brings a second Chief of Staff.
-- **The resource bench** is where staff wait between jobs. The Chief of Staff pages them over the bench speaker. When a project has had no work for 3 minutes, the people on its bench take breaks: juggling, a puzzle cube, tossing a ball, looking at a phone, chatting ("• • •"), or dozing off ("zZZ"). The moment work comes in, they stop.
+- **The resource bench** is where staff wait between jobs. The Chief of Staff pages them over the bench speaker. When a project has been idle for a while, the people on its bench find ways to pass the time. The moment work comes in, they stop.
 - **The server room** has racks where operators run background tasks.
 
 ## The people in a block
