@@ -2,7 +2,7 @@
 
 What changed in each release of the Windows app. Each version is tagged `windows-v<version>` in this repository, and `git log windows-v<previous>..windows-v<version>` lists its commits. The macOS app and the town-link plugin have their own changelogs and version numbers. Whether an app and a town-link work together depends only on the protocol version.
 
-## 1.0.7 (not yet released)
+## 1.0.7 (2026-11-14)
 
 - New: Settings → Office → Hide the window when no Claude Code session is open (off by default). The office window hides 5 seconds after the last session closes and comes back, without taking the focus, when a session opens. Show agent-town in the tray menu shows it anyway.
 - When a project has had no work for a while, the characters waiting on the bench pass the time. Any new work, or the CEO coming over to talk, ends it.
