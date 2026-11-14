@@ -12,6 +12,9 @@ signal window_requested
 
 const PLUGIN_COMMANDS: Array[String] = ["claude plugin marketplace update agent-town-claude-code", "claude plugin update town-link@agent-town-claude-code"]
 const DAY := 24 * 3600
+## After a failed check at launch, it tries again after these many seconds (at login the network
+## may not be up yet).
+const LAUNCH_RETRIES: Array[int] = [60, 120, 300, 600]
 
 var settings: TownSettings
 var store: TownStore
@@ -32,8 +35,8 @@ func _init(p_settings: TownSettings, p_store: TownStore, p_version: String) -> v
 	app_version = p_version
 
 
-## Starts watching the sessions' versions and, when `automatic`, checks 10 s after launch and then
-## once a day while Check for updates automatically is on. `fake` makes up a newer app and town-link
+## Starts watching the sessions' versions and, when `automatic`, checks 10 s after launch (again
+## after 1, 2, 5 and 10 minutes while it fails) and then once a day while Check for updates automatically is on. `fake` makes up a newer app and town-link
 ## (99.0.0) without the network, to look at the notices; `check_now` checks at once, even in a demo.
 func start(automatic: bool, fake: bool, check_now: bool) -> void:
 	store.plugin_versions_changed.connect(_refresh_sessions)
@@ -59,9 +62,24 @@ func start(automatic: bool, fake: bool, check_now: bool) -> void:
 
 
 func _later_first_check() -> void:
-	await get_tree().create_timer(10.0).timeout
-	if settings.check_updates:
-		check()
+	await _wait(10.0)
+	await launch_checks()
+
+
+## The check at launch: tried again after each of LAUNCH_RETRIES while it fails; stops once one
+## works or Check for updates automatically is turned off.
+func launch_checks() -> void:
+	for retry: int in LAUNCH_RETRIES + [0]:
+		if not settings.check_updates:
+			return
+		await check()
+		if not last_check_failed or retry == 0:
+			return
+		await _wait(retry)
+
+
+func _wait(seconds: float) -> void:
+	await get_tree().create_timer(seconds).timeout
 
 
 func app_update() -> Variant:
