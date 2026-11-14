@@ -34,6 +34,8 @@ final class TownScene: ObservableObject {
     var hidden: Set<String> = []
     /// When each shown block's work settled, for the idle delay.
     var idleSince: [String: Date] = [:]
+    /// When each project block last became idle, for break time (spec: break time).
+    var breakIdleSince: [String: Date] = [:]
     /// The Dispatcher's board: scheduleId → card, and the cards in the order they were pinned.
     var boardCards: [String: Entity] = [:]
     var boardOrder: [String] = []
@@ -95,6 +97,7 @@ final class TownScene: ObservableObject {
         startBenchLife()
         startIdleWatch()
         startTyping()
+        startBreaks()
     }
 
     // MARK: Changes
@@ -670,7 +673,9 @@ final class TownScene: ObservableObject {
         }
         // Resource bench (front right): a lounge.
         place("rugRound", in: f, at: Layout.benchCenter, scale: 1.3)
-        place("loungeSofaLong", in: f, at: [Layout.benchCenter.x, 3.5])
+        // A straight sofa: two sit side by side on its cushions (the long one is L-shaped, and its
+        // corner piece covered whoever sat on the right).
+        place("loungeSofa", in: f, at: [Layout.benchCenter.x, 3.5])
         place("tableCoffee", in: f, at: [Layout.benchCenter.x, 4.3])
         if let table = place("sideTable", in: f, at: Layout.speakerSpot) {
             node.speaker = place("speaker", in: f, at: Layout.speakerSpot, scale: 0.8, onTopOf: table)
@@ -758,6 +763,7 @@ final class TownScene: ObservableObject {
             if a.speaking { lines.append(("• • •", .speech)) }
             if a.awaitingApproval { lines.append((labels.needsApproval, .ring)) }
             if let b = a.bubble { lines.append((b, .bubble)) }
+            if let z = a.idleBubble { lines.append((z, .speech)) }
             if let n = a.note { lines.append((n, .ticket)) }
             // The hat shows only while no staff are working (spec: hats).
             if let h = a.hat, !hasWorkingStaff(a) { lines.append((h, .hat)) }

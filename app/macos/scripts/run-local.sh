@@ -13,6 +13,9 @@
 #   --settings      open the Settings window
 #   --compact       compact view (the office at half size), without changing the saved setting
 #   --resize WxH    8 seconds in, shrink the window to W by H points, as a drag would (auto-scroll)
+#   --breaks        break time after 10 idle seconds instead of 3 minutes (the bench's pastimes)
+#   --pastime NAME  with --breaks, standing characters do only NAME: juggle, cube, toss, phone,
+#                   chat or doze (seated ones still doze)
 #   --sound         play the demo's sounds
 #   --zh, --en      run in Traditional Chinese or English
 #   --speed N       play the demo N times as fast
@@ -42,11 +45,15 @@ while [ $# -gt 0 ]; do
     --sound) SOUND=YES ;;
     --compact) ARGS+=(-compactView YES) ;;
     --resize) [ $# -ge 2 ] || fail "--resize needs WIDTHxHEIGHT"; ARGS+=(--resize "$2"); shift ;;
+    --breaks) ARGS+=(-breakIdleSeconds 10) ;;
+    --pastime) [ $# -ge 2 ] || fail "--pastime needs juggle, cube, toss, phone, chat or doze"
+      case "$2" in juggle|cube|toss|phone|chat|doze) ;; *) fail "--pastime: juggle, cube, toss, phone, chat or doze" ;; esac
+      ARGS+=(-breakIdleSeconds 10 -breakPastime "$2"); shift ;;
     --zh) ARGS+=(-language zh-Hant) ;;
     --en) ARGS+=(-language en) ;;
     --speed) [ $# -ge 2 ] || fail "--speed needs a number"; ARGS+=(--speed "$2"); shift ;;
     --) shift; ARGS+=("$@"); break ;;
-    -h|--help) sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,29p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) fail "unknown option $1 (see --help)" ;;
   esac
   shift

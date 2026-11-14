@@ -32,7 +32,7 @@ extension TownScene {
     }
 
     /// No work, and no one in the block still on a call, on the way somewhere, or waiting to be called.
-    private func settled(_ p: String) -> Bool {
+    func settled(_ p: String) -> Bool {
         guard let node = blocks[p], !hasWork(p), node.jobs.isEmpty else { return false }
         if pendingCalls.values.contains(where: { $0.node === node }) { return false }
         // Bench characters play idle animations through their queues; those do not count.

@@ -68,9 +68,17 @@ import TownCore
         }
         if CommandLine.arguments.contains("--check-now") { Task { await check() } } // a real check, also in a demo
         guard automatic else { return }
+        // Each launch (login, a restart, an update) checks once, as the daily check does, so the
+        // dot shows from the start. At login the network may not be up yet: a failed check tries
+        // again after 1, 2, 5 and 10 minutes.
         Task {
             try? await Task.sleep(for: .seconds(10))
-            if Prefs.checkForUpdates { await check() }
+            for retry in [60, 120, 300, 600, 0] {
+                guard Prefs.checkForUpdates else { return }
+                await check()
+                guard lastCheckFailed, retry > 0 else { return }
+                try? await Task.sleep(for: .seconds(retry))
+            }
         }
         timer = Timer.scheduledTimer(withTimeInterval: 3600, repeats: true) { _ in
             Task { @MainActor in

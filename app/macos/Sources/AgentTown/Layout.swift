@@ -100,7 +100,8 @@ enum Layout {
     // Resource bench: a sofa, a coffee table and standing spots around it.
     static let benchCenter = SIMD2<Float>(5.4, 4.2)
     static let benchSpots: [(SIMD2<Float>, sitting: Bool)] = [
-        ([5.0, 3.68], true), ([5.8, 3.68], true),
+        // On the sofa's two cushions, between its arms.
+        ([5.2, 3.68], true), ([5.6, 3.68], true),
         ([4.4, 4.45], false), ([6.4, 4.45], false), ([4.9, 4.95], false), ([5.9, 4.95], false),
         ([4.2, 5.1], false), ([6.6, 5.1], false),
     ]

@@ -6,6 +6,9 @@ What changed in each release of the macOS app. Each version is tagged `v<version
 
 - Settings → Office → Hide the window when no Claude Code session is open (off by default). With it on, the office window hides a few seconds after the last session closes, and comes back when a session opens. Show agent-town in the menu shows it anyway.
 - Settings: Hide after is indented under Hide idle project blocks, which it belongs to.
+- Break time: when a project has had no work for 3 minutes, the people on its bench pass the time, one now and then: juggling, a puzzle cube, tossing a ball, looking at a phone, chatting, or dozing off. They stop as soon as work comes in.
+- The update check at launch tries again after 1, 2, 5 and 10 minutes when it fails, as it can at login before the network is up.
+- Fixed: the two seated characters on the bench sat on the sofa's arms, and the corner of the L-shaped sofa covered the one on the right. The bench now has a straight sofa, with both seated on its cushions.
 
 ## 1.0.13 (2026-11-13)
 

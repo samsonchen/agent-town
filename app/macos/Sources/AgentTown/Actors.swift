@@ -61,6 +61,11 @@ final class Actor {
     var papers: Entity?
     /// The CEO is walking under the user's control; scenes leave its animation alone.
     var steering = false
+    /// On a break on the bench (spec: break time), until `breakEnds`.
+    var onBreak = false
+    var breakEnds = Date.distantPast
+    /// A bubble for a break, such as "zZZ" while dozing.
+    var idleBubble: String?
 
     private var queue: [() async -> Void] = []
     private var running = false

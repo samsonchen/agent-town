@@ -117,6 +117,12 @@ The bench has a speaker on a side table beside the sofa. The caller does not wal
 
 An operator can be called back from the bench as staff, and the other way around. They change outfit on the way.
 
+**Break time** (macOS app 1.0.14)
+
+When a project block has had no work for 3 minutes (nobody working, on a call or walking; the same test as Hide idle project blocks uses), the characters on its bench start passing the time. Every so often (about every 5 seconds on average) one more of them takes a break, for 10 to 25 seconds, picked at random; at most all but one are on a break at once. Standing characters do one of: juggling three balls (red, yellow, blue), turning a puzzle cube (a cube with six colored faces, held in both hands, a quarter turn now and then), tossing a white ball up and down, looking at a phone held up in front of the face, chatting with the nearest other standing character (they turn to each other and take turns showing "• • •", no words), or dozing off. Seated characters on the sofa only doze: a bubble cycles "z", "zZ", "zZZ". Everyone except the cube player keeps the standing pose with the arms down (the arms-out holding poses with something in the hands read as aiming). As soon as the block has work again (a prompt, a new session, a subagent, anything that ends the idle state), every break ends at once: props go, bubbles clear, everyone turns back and settles, ready to be called. The 3 minutes start over each time.
+
+The sofa is the straight two-seat lounge sofa (`loungeSofa`), with the two seats on its cushions at x 5.2 and 5.6 (macOS app 1.0.14). The L-shaped long sofa used before had its corner piece over the right-hand seat, and both seats sat on the sofa's arms.
+
 ### Model badge
 
 Each Chief of Staff and staff member can show a small badge with the model it is running on, such as Haiku, Sonnet, Opus, or Fable. The CEO has no badge.
@@ -234,7 +240,7 @@ These choices, and the settings below, are kept when the app or the Mac restarts
 
 The app tells the user when a newer agent-town or a newer town-link is available. It does not install anything itself: Homebrew, the `.dmg` (or the Windows installer) and Claude Code's plugin commands do the upgrade.
 
-**What is checked.** Once shortly after launch and then once a day, while **Check for updates automatically** (Settings → Updates, on by default) is on; **Check now** in Settings checks at any time and opens the Updates window if it finds an update (nothing if not). Two public GitHub addresses are read, with nothing about the user sent:
+**What is checked.** Once 10 seconds after each launch (at login, after a restart or an update), as the daily check does, so the dot shows from the start; if that check fails (at login the network may not be up yet), it tries again after 1, 2, 5 and 10 minutes (macOS app 1.0.14). Then once a day, while **Check for updates automatically** (Settings → Updates, on by default) is on; **Check now** in Settings checks at any time and opens the Updates window if it finds an update (nothing if not). Two public GitHub addresses are read, with nothing about the user sent:
 
 - The app: the releases of `samsonchen/agent-town-claude-code` (`https://api.github.com/repos/samsonchen/agent-town-claude-code/releases`). Drafts and pre-releases are skipped. The macOS app takes the highest version among tags `v<version>`; the Windows app the highest among tags `windows-v<version>`. Each matches tags, never GitHub's "Latest" flag (the macOS release keeps it; Windows releases are published with `--latest=false`).
 - town-link: `plugin/.claude-plugin/plugin.json` on `main` (`https://raw.githubusercontent.com/samsonchen/agent-town-claude-code/main/plugin/.claude-plugin/plugin.json`), which is what `claude plugin update` installs.

@@ -83,9 +83,10 @@ app/macos/scripts/run-local.sh                         # a demo: fixture 05 (two
 app/macos/scripts/run-local.sh --demo 02 --zh          # another fixture, in Traditional Chinese
 app/macos/scripts/run-local.sh --live                  # real Claude Code sessions
 app/macos/scripts/run-local.sh --fake-update --updates # the update notices, with a made-up newer version
+app/macos/scripts/run-local.sh --demo 02 --pastime juggle  # break time on the bench, juggling only
 ```
 
-Options, any number and in any order: `--demo 01`…`05` (or a path to a fixture), `--live`, `--fake-update`, `--check-now`, `--updates`, `--settings`, `--compact`, `--resize WxH`, `--sound`, `--zh`, `--en`, `--speed N`, and `--` to pass the rest to the app. `--help` lists them.
+Options, any number and in any order: `--demo 01`…`05` (or a path to a fixture), `--live`, `--fake-update`, `--check-now`, `--updates`, `--settings`, `--compact`, `--resize WxH`, `--breaks` (break time after 10 idle seconds), `--pastime NAME` (only that pastime), `--sound`, `--zh`, `--en`, `--speed N`, and `--` to pass the rest to the app. `--help` lists them.
 
 A demo starts no server, so an installed agent-town keeps working beside it. `--live` quits an installed agent-town first (both would write the same endpoint file) and opens it again when the run ends.
 
@@ -102,6 +103,8 @@ These work on the built app, `app/macos/.build/debug/AgentTown`, and through `ru
 | `--check-now` | Makes a real update check (a demo makes no automatic one) |
 | `-compactView YES` | Compact view, without changing the saved setting |
 | `--resize WxH` | Eight seconds in, shrinks the window as a drag would, to see auto-scroll |
+| `-breakIdleSeconds N` | Break time on the bench after N idle seconds instead of 180 |
+| `-breakPastime NAME` | Standing characters on a break do only NAME (`juggle`, `cube`, `toss`, `phone`, `chat`, `doze`) |
 | `-language zh-Hant` | Runs in Traditional Chinese |
 
 Any setting can be given the same way (`-hideIdleBlocks YES -idleHideSeconds 1`). To look at a scene without noise: run a demo with `-showWindow YES -sound NO`, then `screencapture -x -l <window id>`.
